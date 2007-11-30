@@ -1,0 +1,18 @@
+#!/bin/sh -e
+
+basedir=/@basedir@
+basediralias=/@basediralias@
+jre_tools='@jre_tools@'
+
+rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
+
+for i in $jre_tools; do
+    update-alternatives --remove $i $basediralias/bin/$i
+done
+
+if [ remove = "$1" ] && [ -x /usr/sbin/update-binfmts ]; then
+    /usr/sbin/update-binfmts --package @basename@ \
+      --remove @basename@ $basedir/jre/lib/jexec
+fi
+
+#DEBHELPER#

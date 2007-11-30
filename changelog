@@ -1,0 +1,148 @@
+icedtea-java7 (7~b23-1.5~20071124-3) hardy; urgency=low
+
+  * Lower optimization to -O2 for building the jdk on amd64.
+  * Reenable parallel build.
+  * Link using -Bsymbolic-functions.
+  * debian/patches/arguments.patch, debian/patches/const_strings.patch:
+    New patches (Arnaud Vandyck).
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 29 Nov 2007 18:50:41 +0100
+
+icedtea-java7 (7~b23-1.5~20071124-2) hardy; urgency=low
+
+  * Bootstrap using ecj/gcj.
+  * Build using g++-4.1 on i386, lpia, powerpc.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 28 Nov 2007 14:46:48 +0000
+
+icedtea-java7 (7~b23-1.5~20071124-1) hardy; urgency=low
+
+  * New upstream snapshot (b23).
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 27 Nov 2007 15:48:08 +0100
+
+icedtea-java7 (7~b22-1.5~20071018-0ubuntu3) hardy; urgency=low
+
+  * Revert the previous change, require 7~b22 versions again. 
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 20 Oct 2007 14:33:26 +0000
+
+icedtea-java7 (7~b22-1.5~20071018-0ubuntu2) hardy; urgency=low
+
+  * Loosen dependencies to 7~b21, until package is built on all archs.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 20 Oct 2007 07:48:36 +0000
+
+icedtea-java7 (7~b22-1.5~20071018-0ubuntu1) hardy; urgency=low
+
+  * New upstream snapshot (b22).
+  * Don't use parallel builds to make the build log better comparable.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 19 Oct 2007 19:49:51 +0200
+
+icedtea-java7 (7~b21-1.4+20071007-0ubuntu5) gutsy; urgency=low
+
+  * Update icedtea to vcs 20071012 (1.4 release), checked that the plugin
+    works on amd64.
+  * debian/copyright: Update "License Headers" section.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 14 Oct 2007 19:55:12 +0200
+
+icedtea-java7 (7~b21-1.4+20071007-0ubuntu4) gutsy; urgency=low
+
+  * Bootstrapping trigger upload for final step of bootstrapping i386, amd64,
+    lpia.
+
+ -- LaMont Jones <lamont@ubuntu.com>  Wed, 10 Oct 2007 22:04:25 -0600
+
+icedtea-java7 (7~b21-1.4+20071007-0ubuntu3) gutsy; urgency=low
+
+  * Add build dependency on bzip2.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 10 Oct 2007 09:00:40 +0000
+
+icedtea-java7 (7~b21-1.4+20071007-0ubuntu2) gutsy; urgency=low
+
+  * Add build dependency on ant.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 10 Oct 2007 06:33:14 +0000
+
+icedtea-java7 (7~b21-1.4+20071007-0ubuntu1) gutsy; urgency=low
+
+  * Update icedtea to vcs 20071007.
+  * Update java-access-bridge to 1.20.0.
+  * Add build-dependency on libxinerama-dev.
+  * Add Xb-Npp-xxx tags for the -plugin package.
+  * Name the plugin "GCJ Web Browser Plugin (using IcedTea)", GCJ now
+    "Great Cool Java" (according to Michael Koch).
+  * Compress binary-indep packages using bzip2.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun,  7 Oct 2007 23:43:28 +0200
+
+icedtea-java7 (7~b21-1.4+20071002-0ubuntu2) gutsy; urgency=low
+
+  * Rebuild using icedtea 7~b21.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Oct 2007 19:45:21 +0200
+
+icedtea-java7 (7~b21-1.4+20071002-0ubuntu1) gutsy; urgency=low
+
+  * New upstream snapshot (b21).
+  * Correctly unregister the executable binary format in the -bin package.
+  * Assemble the debian/copyright file.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue,  2 Oct 2007 09:59:37 +0200
+
+icedtea-java7 (7~b19-1.3+20070905-0ubuntu1) gutsy; urgency=low
+
+  * New upstream snapshot (b19).
+  * Build using g++-4.2 on amd64, using g++-4.1 on i386 and lpia.
+  * Build without -Werror, upstream source is not yet warning clean.
+  * Support DEB_BUILD_OPTIONS=parallel=<n>.
+  * Add build dependency on wget.
+  * Add font suggestions.
+  * Changed font configuration to fix CJK font support (Arne Goetje).
+  * Fix location of the plugin, when registering the plugin alternatives.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu,  6 Sep 2007 00:46:40 +0200
+
+icedtea-java7 (7~b18-1.2+20070822-0ubuntu2) gutsy; urgency=low
+
+  * Create browser plugin directories.
+  * Build-depend on liblcms1-dev.
+  * Recommend packages with dlopened libraries: liblcms1, lesstif2, libcupsys2,
+    libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, libxrandr2,
+    libgl1-mesa-glx.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 21 Aug 2007 17:21:00 +0200
+
+icedtea-java7 (7~b18-1.2+20070822-0ubuntu1) gutsy; urgency=low
+
+  * New upstream version.
+  * Include java-access-bridge.
+  * Build -doc, -plugin packages.
+  * Register alternatives, priority 1060.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 21 Aug 2007 17:21:00 +0200
+
+icedtea-java7 (7~b17-1.2+20070808-1) gutsy; urgency=low
+
+  * Initial release, discard the initial packaging based on cdbs.
+  * Base the packaging on the sun-javaX packages.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 08 Aug 2007 15:55:39 +0200
+
+icedtea (7~b16-20070724-1) UNRELEASED; urgency=low
+
+  * Update upstream tarball to 7~b16, update icedtea to 20070724.
+  * debian/control: Build-depend on libfreetype6-dev.
+  * debian/rules: Configure --with-jar=/usr/bin/fastjar.
+  * Build using gcj-4.2.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 24 Jul 2007 11:24:55 +0200
+
+icedtea (7~b14-20070704-1) unstable; urgency=low
+
+  * Initial version.
+
+ -- Michael Koch <konqueror@gmx.de>  Wed, 04 Jul 2007 08:25:31 -0100

@@ -1,0 +1,73 @@
+--- openjdk/hotspot/src/share/vm/adlc/adlc.hpp~	2007-10-30 09:46:24.000000000 +0100
++++ openjdk/hotspot/src/share/vm/adlc/adlc.hpp	2007-11-29 16:51:43.067635169 +0100
+@@ -29,7 +29,7 @@
+ // standard library constants
+ #include "stdio.h"
+ #include "stdlib.h"
+-#if _MSC_VER >= 1300  // Visual C++ 7.0 or later
++#if _MSC_VER >= 1300 || (__GNUC__ * 10 + __GNUC_MINOR__ >= 43) // Visual C++ 7.0 or later, GCC-4.3 or later
+ #include <iostream>
+ #else
+ #include <iostream.h>
+--- openjdk/hotspot/src/share/vm/adlc/filebuff.hpp~	2007-10-30 09:46:25.000000000 +0100
++++ openjdk/hotspot/src/share/vm/adlc/filebuff.hpp	2007-11-29 17:03:31.668324249 +0100
+@@ -24,7 +24,7 @@
+ 
+ // FILEBUFF.HPP - Definitions for parser file buffering routines
+ 
+-#if _MSC_VER >= 1300  // Visual C++ 7.0 or later
++#if _MSC_VER >= 1300 || (__GNUC__ * 10 + __GNUC_MINOR__ >= 43) // Visual C++ 7.0 or later, GCC-4.3 or later
+ #include <iostream>
+ #else
+ #include <iostream.h>
+@@ -98,6 +98,6 @@
+ 
+ //  void print(std::ostream&);
+ //  friend std::ostream& operator<< (std::ostream&, FileBuffRegion&);
+-  void print(ostream&);
+-  friend ostream& operator<< (ostream&, FileBuffRegion&);
++  void print(std::ostream&);
++  friend std::ostream& operator<< (std::ostream&, FileBuffRegion&);
+ };
+--- openjdk/hotspot/src/share/vm/adlc/filebuff.cpp~	2007-10-30 09:46:24.000000000 +0100
++++ openjdk/hotspot/src/share/vm/adlc/filebuff.cpp	2007-11-29 17:36:28.248140506 +0100
+@@ -155,7 +155,7 @@
+ }
+ 
+ //------------------------------expandtab--------------------------------------
+-static int expandtab( ostream &os, int off, char c, char fill1, char fill2 ) {
++static int expandtab( std::ostream &os, int off, char c, char fill1, char fill2 ) {
+   if( c == '\t' ) {             // Tab?
+     do os << fill1;             // Expand the tab; Output space
+     while( (++off) & 7 );       // Expand to tab stop
+@@ -169,7 +169,7 @@
+ //------------------------------printline--------------------------------------
+ // Print and highlite a region of a line.  Return the amount of highliting left
+ // to do (i.e. highlite length minus length of line).
+-static int printline( ostream& os, const char *fname, int line,
++static int printline( std::ostream& os, const char *fname, int line,
+                         const char *_sol, int skip, int len ) {
+ 
+   // Display the entire tab-expanded line
+@@ -219,8 +219,8 @@
+ }
+ 
+ //------------------------------print------------------------------------------
+-//std::ostream& operator<< ( std::ostream& os, FileBuffRegion &br ) {
+-ostream& operator<< ( ostream& os, FileBuffRegion &br ) {
++std::ostream& operator<< ( std::ostream& os, FileBuffRegion &br ) {
++//ostream& operator<< ( ostream& os, FileBuffRegion &br ) {
+   if( &br == NULL ) return os;  // The empty buffer region
+   FileBuffRegion *brp = &br;    // Pointer to region
+   while( brp ) {                // While have chained regions
+@@ -235,8 +235,8 @@
+ // filename and line number to the left, and complete text lines to the right.
+ // Selected portions (portions of a line actually in the FileBuffRegion are
+ // underlined.  Ellipses are used for long multi-line regions.
+-//void FileBuffRegion::print( std::ostream& os ) {
+-void FileBuffRegion::print( ostream& os ) {
++void FileBuffRegion::print( std::ostream& os ) {
++//void FileBuffRegion::print( ostream& os ) {
+   if( !this ) return;           // Nothing to print
+   char *s = _bfr->get_line();
+   int skip = (int)(_offset - _sol);     // Amount to skip to start of data

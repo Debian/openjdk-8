@@ -1,0 +1,9 @@
+[Desktop Entry]
+Encoding=UTF-8
+Name=@vendor@ Java @RELEASE@ Console
+Comment=@vendor@ Java @RELEASE@ Monitoring & Management Console
+Exec=/@basedir@/bin/jconsole
+Terminal=false
+Type=Application
+Icon=/usr/share/icons/@basename@.xpm
+Categories=Application;System;

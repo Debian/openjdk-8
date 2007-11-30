@@ -1,0 +1,7 @@
+?package(@basename@-bin):\
+	needs="x11"\
+	section="Apps/System"\
+	title="@vendor@ Java @RELEASE@ Policy Tool"\
+	command="/@basedir@/bin/policytool"\
+	icon="/usr/share/icons/@basename@.xpm"\
+	hints="Java2"

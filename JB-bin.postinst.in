@@ -1,0 +1,78 @@
+#!/bin/sh
+
+set -e
+
+priority=@priority@
+basedir=/@basedir@
+basediralias=/@basediralias@
+jdiralias=@jdiralias@
+mandir=/@basediralias@/jre/man
+srcext=1.gz
+dstext=1.gz
+jre_tools='@jre_tools@'
+
+case "$1" in
+configure)
+    [ -d /etc/.java ] || mkdir -m 755 /etc/.java
+    [ -d /etc/.java/.systemPrefs ] || mkdir -m 755 /etc/.java/.systemPrefs
+    if [ ! -f /etc/.java/.systemPrefs/.system.lock ]; then
+	touch /etc/.java/.systemPrefs/.system.lock
+	chmod 644 /etc/.java/.systemPrefs/.system.lock
+    fi
+    if [ ! -f /etc/.java/.systemPrefs/.systemRootModFile ]; then
+	touch /etc/.java/.systemPrefs/.systemRootModFile
+	chmod 644 /etc/.java/.systemPrefs/.systemRootModFile
+    fi
+
+    for i in $jre_tools; do
+	unset slave1 slave2 || true
+        if [ -e $mandir/man1/$i.$srcext ]; then
+	    slave1="--slave \
+		/usr/share/man/man1/$i.$dstext \
+                $i.$dstext \
+                $mandir/man1/$i.$srcext"
+	fi
+	# disabled
+        if false && [ -e $mandir/ja/man1/$i.$srcext ]; then
+	    slave2="--slave \
+		/usr/share/man/ja/man1/$i.$dstext \
+                ${i}_ja.$dstext \
+                $mandir/ja/man1/$i.$srcext"
+	fi
+        update-alternatives \
+            --install \
+            /usr/bin/$i \
+            $i \
+            $basediralias/jre/bin/$i \
+            $priority \
+	    $slave1 $slave2
+    done
+
+    # fix slave links for man page alternatives
+    if [ -n "$2" ] && dpkg --compare-versions "$2" lt 6-00-2ubuntu2; then
+	for i in $jre_tools; do
+	    current=$(LANG=C update-alternatives --display $i 2>&1 \
+		| awk '/link currently points to/ { print $NF}')
+	    case "$current" in /@basediralias@*)
+	        update-alternatives --quiet --set $i $basediralias/jre/bin/$i
+	    esac
+	done
+    fi
+
+    # activate class data sharing
+    case @archdir@ in i386|sparc)
+	rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
+	$basedir/bin/java -client -Xshare:dump > /dev/null
+    esac
+
+    if [ -x /usr/sbin/update-binfmts ]; then
+	/usr/sbin/update-binfmts --import @basename@
+    fi
+
+    ;;
+
+esac
+
+#DEBHELPER#
+
+exit 0

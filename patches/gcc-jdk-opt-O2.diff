@@ -1,0 +1,13 @@
+--- openjdk/jdk/make/common/Defs-linux.gmk~	2007-11-29 12:38:22.578339247 +0100
++++ openjdk/jdk/make/common/Defs-linux.gmk	2007-11-29 12:43:13.992735167 +0100
+@@ -86,8 +86,8 @@
+ #
+ # Default optimization
+ #
+-CC_HIGHEST_OPT = -O3
+-CC_HIGHER_OPT  = -O3
++CC_HIGHEST_OPT = -O2
++CC_HIGHER_OPT  = -O2
+ CC_LOWER_OPT   = -O2
+ CC_NO_OPT      =
+ 

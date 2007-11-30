@@ -1,0 +1,23 @@
+--- openjdk.orig/hotspot/src/share/vm/runtime/arguments.hpp	2007-10-30 08:46:34.000000000 +0000
++++ openjdk/hotspot/src/share/vm/runtime/arguments.hpp	2007-11-16 15:36:00.000000000 +0000
+@@ -471,7 +471,7 @@
+ 
+   // Proptery List manipulation
+   static void PropertyList_add(SystemProperty** plist, SystemProperty *element);
+-  static void PropertyList_add(SystemProperty** plist, const char* k, char* v);
++  static void PropertyList_add(SystemProperty** plist, const char* k, const char* v);
+   static void PropertyList_unique_add(SystemProperty** plist, const char* k, char* v);
+   static const char* PropertyList_get_value(SystemProperty* plist, const char* key);
+   static int  PropertyList_count(SystemProperty* pl);
+
+--- openjdk.orig/hotspot/src/share/vm/runtime/arguments.cpp	2007-10-30 08:46:34.000000000 +0000
++++ openjdk/hotspot/src/share/vm/runtime/arguments.cpp	2007-11-16 15:36:17.000000000 +0000
+@@ -2544,7 +2544,7 @@
+   }
+ }
+ 
+-void Arguments::PropertyList_add(SystemProperty** plist, const char* k, char* v) {
++void Arguments::PropertyList_add(SystemProperty** plist, const char* k, const char* v) {
+   if (plist == NULL)
+     return;
+ 

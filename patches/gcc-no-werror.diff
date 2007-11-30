@@ -1,0 +1,22 @@
+--- openjdk/jdk/make/java/nio/Makefile.orig	2007-09-05 19:51:57.260466422 +0200
++++ openjdk/jdk/make/java/nio/Makefile	2007-09-05 19:53:42.142048537 +0200
+@@ -134,7 +134,7 @@
+      $(OBJDIR)/../../../java.lang/java/$(OBJDIRNAME)/FileDescriptor_md.obj
+ endif
+ ifeq ($(PLATFORM), linux)
+-COMPILER_WARNINGS_FATAL=true
++#COMPILER_WARNINGS_FATAL=true # commented out for gcc-4.2
+ OTHER_LDLIBS += -L$(LIBDIR)/$(LIBARCH) -ljava -lnet -lpthread -ldl
+ endif
+ ifeq ($(PLATFORM), solaris)
+--- openjdk/hotspot/build/linux/makefiles/gcc.make~	2007-09-05 19:56:46.634831568 +0200
++++ openjdk/hotspot/build/linux/makefiles/gcc.make	2007-09-05 20:31:35.956348508 +0200
+@@ -88,7 +88,7 @@
+ endif
+ 
+ # Compiler warnings are treated as errors
+-WARNINGS_ARE_ERRORS = -Werror
++WARNINGS_ARE_ERRORS = # -Werror # not with gcc-4.2
+ # Except for a few acceptable ones
+ ACCEPTABLE_WARNINGS = -Wpointer-arith -Wconversion -Wsign-compare
+ CFLAGS_WARN/DEFAULT = $(WARNINGS_ARE_ERRORS) $(ACCEPTABLE_WARNINGS)

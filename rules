@@ -1,0 +1,642 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+unexport LANG LC_ALL
+
+SHELL = /bin/bash
+
+DEB_HOST_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+DEB_HOST_ARCH		?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+
+# Support parallel=<n> in DEB_BUILD_OPTIONS (see #209008)
+COMMA=,
+ifneq (,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
+  PARALLEL_COMPILE_JOBS = $(subst parallel=,,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
+  export PARALLEL_COMPILE_JOBS
+endif
+
+arch_map	:= amd64=amd64 i386=i586 lpia=i586 powerpc=ppc sparc=sparc ia64=ia64
+archdir_map	:= amd64=amd64 i386=i386 lpia=i386 powerpc=ppc sparc=sparc ia64=ia64
+
+jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
+			$(filter $(DEB_HOST_ARCH)=%, $(arch_map))))
+archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
+			$(filter $(DEB_HOST_ARCH)=%, $(archdir_map))))
+
+# STAGE1_JAVA is either gcj or icedtea, the latter not yet supported
+STAGE1_JAVA = gcj
+#STAGE1_JAVA = icedtea
+
+CFLAGS = -Wall -g
+
+ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+	CFLAGS += -O0
+else
+	CFLAGS += -O2
+endif
+
+ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
+  export GCC_SUFFIX = -4.1
+  GCJ_SUFFIX = -4.2
+endif
+ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc))
+  export GCC_SUFFIX = -4.2
+endif
+#ifneq (,$(filter $(DEB_HOST_ARCH), amd64))
+#  export GCC_SUFFIX = -4.3
+#endif
+
+DISTRIBUTION_PATCHES = \
+	debian/patches/gcc-no-werror.diff \
+	debian/patches/gcc-no-stack-protector.diff \
+	debian/patches/gcc-mtune-generic.diff \
+	debian/patches/gcc-4.3.diff \
+	debian/patches/ld-symbolic-functions.diff \
+	$(if $(filter $(DEB_HOST_ARCH), amd64), debian/patches/gcc-jdk-opt-O2.diff) \
+	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
+	debian/patches/arguments.patch \
+	debian/patches/const_strings.patch \
+
+export DISTRIBUTION_PATCHES
+
+ifeq ($(STAGE1_JAVA),gcj)
+  CONFIGURE_ARGS = \
+	--with-gcj-home=/usr/lib/jvm/java-gcj \
+	--with-ecj=/usr/bin/ecj \
+	--with-java=/usr/lib/jvm/java-gcj/bin/java \
+	--with-javah=/usr/bin/gjavah$(GCJ_SUFFIX) \
+	--with-rmic=/usr/bin/grmic$(GCJ_SUFFIX) \
+	--with-jar=/usr/bin/gjar$(GCJ_SUFFIX) \
+	--with-libgcj-jar=/usr/share/java/libgcj$(GCJ_SUFFIX).jar \
+	--with-xalan2-jar=/usr/share/java/xalan2.jar \
+	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar
+else ifeq ($(STAGE1_JAVA),icedtea)
+  CONFIGURE_ARGS = \
+	--with-icedtea \
+	--with-icedtea-home=/usr/lib/jvm/java-7-icedtea \
+	--with-java=/usr/lib/jvm/java-7-icedtea/bin/java \
+	--with-javah=/usr/lib/jvm/java-7-icedtea/bin/javah \
+	--with-rmic=/usr/lib/jvm/java-7-icedtea/binrmic \
+	--with-jar=/usr/lib/jvm/java-7-icedtea/bin/jar \
+	--with-xalan2-jar=/usr/share/java/xalan2.jar \
+	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar
+endif
+
+#	--with-ecj=$(CURDIR)/ecj/ecj \
+#	--with-ecj-jar=$(CURDIR)/ecj/eclipse-ecj.jar \
+
+#	--with-ecj=/usr/bin/ecj \
+#	--with-javac=/usr/lib/jvm/java-gcj/bin/javac \
+
+
+# make the build log comparable
+#export HOTSPOT_BUILD_JOBS = 1
+#export ALT_PARALLEL_COMPILE_JOBS = 1
+
+build_target = icedtea-against-icedtea
+#build_target = icedtea-against-ecj.stamp
+
+VENDOR		:= icedtea
+Vendor		:= IcedTea
+
+TOP		= usr/lib/jvm
+basedir		= usr/lib/jvm/$(jdirname)
+origin		= icedtea
+basename	= icedtea-java$(shortver)
+jvmver		= 1.7.0
+shortver	= 7
+# priority is higher than java-gcj-compat
+priority	= 1060
+jdiralias	= java-$(shortver)-$(origin)
+basedir		= usr/lib/jvm/$(jdiralias)
+jreimg		= openjdk/control/build/linux-$(jvmarch)/j2re-image
+sdkimg		= openjdk/control/build/linux-$(jvmarch)/j2sdk-image
+security	= etc/$(jdiralias)/security
+browser_plugin_dirs = firefox iceape iceweasel mozilla midbrowser xulrunner
+
+# (most) jre and jdk tools handled by the alternatives system.
+# dups in heimdal-clients, krb5-user: kinit, klist, ktab, no alternatives
+all_jre_tools	= $(notdir $(wildcard $(jreimg)/bin/*))
+corba_tools	= orbd servertool tnameserv
+jre_tools	= $(filter-out $(corba_tools), $(all_jre_tools))
+jre_tools_alt	= $(filter-out kinit klist ktab, $(jre_tools)) $(corba_tools)
+
+all_jdk_tools	= $(notdir $(wildcard $(sdkimg)/bin/*))
+jdk_tools	= $(filter-out $(all_jre_tools), $(all_jdk_tools))
+jdk_tools_alt	= $(jdk_tools)
+
+jre_manpages_re:= $(shell echo $(jre_tools) $(corba_tools) | tr -s ' ' '|')
+
+# build dependencies
+ifeq ($(STAGE1_JAVA),gcj)
+bd_bootstrap = \
+	gcj (>= 4:4.2.1), ecj, java-gcj-compat-dev (>= 1.0.76-2ubuntu3),
+else
+bd_bootstrap = \
+	icedtea-java7-jdk,
+endif
+
+bd_gcc = \
+	g++-4.2 [amd64 powerpc], g++-4.1 [i386 lpia],
+#bd_gcc =
+bd_syslibs = \
+	libjpeg62-dev, libpng12-dev, libgif-dev, zlib1g-dev,
+bd_openjdk = \
+	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, \
+	libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, \
+	libxalan2-java, liblcms1-dev, libxinerama-dev,
+bd_accessbridge = \
+	gawk, pkg-config, libbonobo2-dev, libatspi-dev, at-spi, \
+	x11-utils | $(if $(filter $(distribution),Debian),xbase-clients,xprop),
+bd_plugin = \
+	libgtk2.0-dev, \
+	$(if $(filter $(distribution),Debian),libxul-dev,firefox-dev),
+bd_certificates = openssl, ca-certificates,
+
+dlopen_depends =
+dlopen_recommends = \
+	liblcms1, \
+	lesstif2, \
+	libcupsys2, \
+	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
+	libxrandr2, libgl1-mesa-glx
+
+p_bin	= $(basename)-bin
+p_jre	= $(basename)-jre
+p_jdk	= $(basename)-jdk
+p_demo	= $(basename)-demo
+p_src	= $(basename)-source
+p_doc	= $(basename)-doc
+p_plug	= $(basename)-plugin
+
+d	= debian/tmp
+d_bin	= debian/$(p_bin)
+d_jre	= debian/$(p_jre)
+d_jdk	= debian/$(p_jdk)
+d_demo	= debian/$(p_demo)
+d_src	= debian/$(p_src)
+d_doc	= debian/$(p_doc)
+d_plug	= debian/$(p_plug)
+
+bd_options = -- -Zbzip2
+control_vars = \
+	'-Vbase:Version=7~b21' \
+	'-Vdlopen:Depends=$(dlopen_depends)' \
+	'-Vdlopen:Recommends=$(dlopen_recommends)' \
+
+debian/control: debian/control.in debian/rules
+	@cp -p debian/control debian/control.old
+	sed \
+	      -e 's/@bd_bootstrap@/$(bd_bootstrap)/g' \
+	      -e 's/@bd_openjdk@/$(bd_openjdk)/g' \
+	      -e 's/@bd_gcc@/$(bd_gcc)/g' \
+	      -e 's/@bd_syslibs@/$(bd_syslibs)/g' \
+	      -e 's/@bd_accessbridge@/$(bd_accessbridge)/g' \
+	      -e 's/@bd_plugin@/$(bd_plugin)/g' \
+	      -e 's/@bd_certificates@/$(bd_certificates)/g' \
+	    debian/control.in > debian/control
+	@if cmp -s debian/control debian/control.old; then \
+	  rm -f debian/control.old; \
+	else \
+	  diff -u debian/control.old debian/control; \
+	  echo "debian/control did change, please restart the build"; \
+	  rm -f debian/control.old; \
+          exit 1; \
+	fi
+
+packaging-files:
+	for f in debian/*.in; do \
+	  case "$$f" in debian/control.in) continue; esac; \
+	  f2=$$(echo $$f | sed 's/JB/$(basename)/;s/\.in$$//'); \
+	  sed -e 's/@JRE@/$(p_jre)/g' \
+	      -e 's/@JDK@/$(p_jdk)/g' \
+	      -e 's/@vendor@/$(Vendor)/g' \
+	      -e 's/@RELEASE@/$(relstring)/g' \
+	      -e 's/@basename@/$(basename)/g' \
+	      -e 's,@TOP@,$(TOP),g' \
+	      -e 's,@basedir@,$(basedir),g' \
+	      -e 's,@basediralias@,$(TOP)/$(jdiralias),g' \
+	      -e 's,@jdiralias@,$(jdiralias),g' \
+	      -e 's,@jdirname@,$(jdirname),g' \
+	      -e 's/@srcname@/$(srcname)/g' \
+	      -e 's/@jvmarch@/$(jvmarch)/g' \
+	      -e 's/@archdir@/$(archdir)/g' \
+	      -e 's/@tag@/$(tag)/g' \
+	      -e 's/@priority@/$(priority)/g' \
+	      -e 's/@mantag@/$(mantag)/g' \
+	      -e 's/@jre_tools@/$(jre_tools_alt)/g' \
+	      -e 's/@jdk_tools@/$(jdk_tools_alt)/g' \
+	      -e 's/@corba_tools@/$(corba_tools)/g' \
+	      -e 's,@j2se_lib@,$(j2se_lib),g' \
+	      -e 's,@j2se_share@,$(j2se_share),g' \
+	      -e 's,@browser_dirs@,$(browser_plugin_dirs),g' \
+	    $$f > $$f2; \
+	done
+ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
+	cat debian/$(p_bin)-i586.menu >> $(d_bin).menu
+	rm -f debian/$(p_bin)-i586.menu
+endif
+
+icedtea-configure: stamps/icedtea-configure
+stamps/icedtea-configure:
+	mkdir -p stamps
+	./configure $(CONFIGURE_ARGS)
+	touch $@
+
+unpack: stamps/unpack
+stamps/unpack: stamps/icedtea-configure
+ifeq ($(STAGE1_JAVA),gcj)
+	$(MAKE) stamps/extract-ecj.stamp
+endif
+	$(MAKE) stamps/extract.stamp
+	touch $@
+
+patch: stamps/patch
+stamps/patch: stamps/unpack
+ifeq ($(STAGE1_JAVA),gcj)
+	$(MAKE) stamps/patch-ecj.stamp
+endif
+	$(MAKE) stamps/patch.stamp
+	touch $@
+
+build: stamps/build stamps/build-bridge stamps/cacerts
+stamps/build: stamps/patch
+	$(MAKE) $(build_target)
+	touch $@
+
+bridge_dir = java-access-bridge-1.20.0
+
+stamps/build-bridge: stamps/build stamps/configure-bridge
+	JAVA_HOME=$(CURDIR)/$(sdkimg) \
+	PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
+	    $(MAKE) -C $(bridge_dir)
+	touch $@
+
+stamps/configure-bridge:
+	rm -rf $(bridge_dir)
+	tar xf $(bridge_dir).tar.bz2
+	cd $(bridge_dir) && \
+	    JAVA_HOME=$(CURDIR)/$(sdkimg) \
+	    PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
+		$(CURDIR)/$(bridge_dir)/configure 
+	touch $@
+
+stamps/cacerts: stamps/build
+	rm -rf build-cacerts
+	mkdir build-cacerts
+	cat /etc/ssl/certs/ca-certificates.crt > build-cacerts/cert.pem
+	perl debian/generate-cacerts.pl $(sdkimg)/bin/keytool
+	touch $@
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -rf stamps
+	-$(MAKE) distclean
+	rm -rf openjdk openjdk-ecj
+
+	for f in debian/*.in; do \
+	  f2=$$(echo $$f | sed 's/JB/$(basename)/;s/\.in$$//'); \
+	  case "$$f2" in debian/control) continue; esac; \
+	  rm -f $$f2; \
+	done
+	rm -f debian/*.install debian/*.links
+	rm -rf $(bridge_dir)
+	rm -rf cacerts build-cacerts
+	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
+	dh_clean 
+
+install: packaging-files
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	rm -f debian/*.install debian/*.links
+	dh_installdirs
+
+	: # install into temporary location
+	mkdir -p $(d)/$(basedir)
+	cp -a $(sdkimg)/* $(d)/$(basedir)/
+	cp -a $(jreimg)/man $(d)/$(basedir)/jre/
+	chmod -R u+w $(d)
+
+	cp -a $(bridge_dir)/bridge/accessibility.properties \
+		$(d)/$(basedir)/jre/lib/
+	cp -a $(bridge_dir)/gnome-java-bridge.jar $(d)/$(basedir)/jre/lib/ext/
+	cp -a cacerts $(d)/$(basedir)/jre/lib/security/
+
+	: # remove files, which are not installed at all
+	rm -f  $(d)/$(basedir)/bin/java-rmi.cgi
+ifneq ($(with_javaws),yes)
+	rm -f $(d)/$(basedir)/man/man1/javaws.1
+endif
+
+	: # replace common files in jdk and jre by symlinks
+	@cd $(d)/$(basedir); \
+	  for i in `find jre -type f`; do \
+	    i2=$${i#jre/*}; \
+	    [ -f $$i2 ] && cmp -s $$i $$i2 || continue; \
+	    d=$$(echo ./$$i2 | sed -r 's,[^/]+/,../,g;s,/[^/]+$$,,;s,\.\.$$,,'); \
+	    echo "    symlink $$i2 -> $$d$$i"; \
+	    ln -sf $$d$$i $$i2; \
+	  done
+
+	mkdir -p $(d)/etc/$(jdiralias)/security
+	mkdir -p $(d)/etc/$(jdiralias)/management
+
+	: # rename templates (comments only) to config files,
+	: # and move to /etc/$(jdiralias)
+	for i in \
+	  management/jmxremote.password \
+	  management/snmp.acl; \
+	do \
+	  mv $(d)/$(basedir)/jre/lib/$$i.template $(d)/etc/$(jdiralias)/$$i; \
+	done
+
+	: # move config files to etc/$(jdiralias) and symlink them.
+	for i in \
+	  accessibility.properties \
+	  calendars.properties \
+	  content-types.properties \
+	  logging.properties \
+	  sound.properties \
+	  flavormap.properties \
+	  net.properties \
+	  psfontj2d.properties \
+	  psfont.properties.ja \
+	  management/jmxremote.access \
+	  management/management.properties \
+	  security/cacerts \
+	  security/java.policy \
+	  security/java.security; \
+	do \
+	  mv $(d)/$(basedir)/jre/lib/$$i $(d)/etc/$(jdiralias)/$$i; \
+	done
+	mv $(d)/$(basedir)/jre/lib/$(archdir)/jvm.cfg \
+		$(d)/etc/$(jdiralias)/
+
+	cp debian/fontconfig.properties.src \
+		$(d)/etc/$(jdiralias)/fontconfig.properties
+
+	: # FIXME: generate fontconfig.bfc
+	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.bfc \
+		$(d)/etc/$(jdiralias)/fontconfig.bfc
+
+	: # remove files which we do not want to distribute
+	rm -f $(d)/$(basedir)/jre/lib/fontconfig*.properties.src
+	rm -f $(d)/$(basedir)/jre/lib/fontconfig*.bfc
+
+	: # TODO: why do we provide a custom font.properties.ja?
+	: # cp -p debian/font.properties.ja $(d_jbin)/etc/$(jdiralias)/.
+
+	: # now move things to the packages. it is so ****** to create
+	: # .install files first. dh_movefiles did do job perfectly
+
+	: # $(p_bin).install
+	( \
+	  echo 'etc'; \
+	  echo '$(basedir)/jre/lib/jexec'; \
+	  echo '$(basedir)/jre/bin'; \
+	  echo '$(basedir)/jre/man'; \
+	  echo '$(basedir)/man/ja'; \
+	  cd $(CURDIR)/$(d); \
+	  for i in $(basedir)/jre/lib/$(archdir)/*; do \
+	    case "$$i" in */gcjwebplugin.so) continue; esac; \
+	    echo $$i; \
+	  done; \
+	  cd $(CURDIR)/$(d); \
+	  for i in $(basedir)/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
+	    [ -h $$i ] || continue; \
+	    echo $$i; \
+	  done; \
+	) > debian/$(p_bin).install
+
+	: # $(p_jre).install
+	( \
+	  echo '$(basedir)/jre/LICENSE'; \
+	  echo '$(basedir)/jre/ASSEMBLY_EXCEPTION'; \
+	  echo '$(basedir)/jre/README.html'; \
+	  echo '$(basedir)/jre/THIRD_PARTY_README'; \
+	  cd $(d); \
+	  for i in $(basedir)/jre/lib/*; do \
+	    case "$$i" in */$(archdir)|*/jexec) continue; esac; \
+	    echo $$i; \
+	  done; \
+	) > debian/$(p_jre).install
+
+	: # $(p_jdk).install
+	( \
+	  echo '$(basedir)/include'; \
+	  echo '$(basedir)/lib'; \
+	  echo '$(basedir)/LICENSE'; \
+	  echo '$(basedir)/ASSEMBLY_EXCEPTION'; \
+	  echo '$(basedir)/README.html'; \
+	  echo '$(basedir)/THIRD_PARTY_README'; \
+	  cd $(d); \
+	  for i in $(basedir)/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
+	    [ -h $$i -o "$$i" = jexec ] && continue; \
+	    echo $$i; \
+	  done; \
+	) > debian/$(p_jdk).install
+
+	dh_installdirs -p$(p_plug) \
+		$(foreach d, $(browser_plugin_dirs), usr/lib/$(d)/plugins)
+
+	: # $(p_plug).install
+	( \
+	  echo '$(basedir)/jre/lib/$(archdir)/gcjwebplugin.so'; \
+	) > debian/$(p_plug).install
+
+	: # $(p_src).install
+	( \
+	  echo '$(basedir)/src.zip'; \
+	) > debian/$(p_src).install
+
+	: # move demos and samples, create symlinks for $(p_demo)
+	mkdir -p $(d)/usr/share/doc/$(p_jre)/demo
+	for i in $(d)/$(basedir)/demo/*; do \
+	  b=$$(basename $$i); \
+	  case "$$i" in \
+	    */jvmti) \
+	      echo $(basedir)/demo/$$b usr/share/doc/$(p_jre)/demo/$$b >> $(d_demo).links;; \
+	    *) \
+	      mv $$i $(d)/usr/share/doc/$(p_jre)/demo/$$b; \
+	      echo usr/share/doc/$(p_jre)/demo/$$b $(basedir)/demo/$$b >> $(d_demo).links;; \
+	  esac; \
+	done
+	mv $(d)/$(basedir)/sample $(d)/usr/share/doc/$(p_jre)/examples
+	echo usr/share/doc/$(p_jre)/examples $(basedir)/sample >> $(d_demo).links
+	echo usr/share/doc/$(p_jre) usr/share/doc/$(p_demo) >> debian/$(p_demo).links
+
+	: # $(p_demo).install
+	( \
+	  echo '$(basedir)/demo'; \
+	  echo 'usr/share/doc/$(p_jre)/examples'; \
+	  echo 'usr/share/doc/$(p_jre)/demo'; \
+	) > debian/$(p_demo).install
+
+	dh_install --sourcedir=debian/tmp --fail-missing
+
+	: # give all permissions to cross-VM extension directory
+	sed -i \
+	    -e '/permission java\.security\.AllPermission;/,/};/c\' \
+	    -e '        permission java.security.AllPermission;\' \
+	    -e '};\' \
+	    -e '\' \
+	    -e 'grant codeBase "file:/$(basedir)/ext/*" {\' \
+	    -e '        permission java.security.AllPermission;\' \
+	    -e '};\' \
+	    -e '\' \
+	    -e '// Comment this out if you want to give all permissions to the\' \
+	    -e '// Debian Java repository too:\' \
+	    -e '//grant codeBase "file:/usr/share/java/repository/-" {\' \
+	    -e '//        permission java.security.AllPermission;\' \
+	    -e '//};\' \
+	    -e '' \
+	    $(d_bin)/$(security)/java.policy
+# 'make Emacs Makefile mode happy
+
+	dh_installdirs -p$(p_bin) \
+		usr/share/applications \
+		usr/share/control-center-2.0/capplets \
+		usr/share/application-registry \
+		usr/share/mime-info \
+		usr/share/icons \
+		usr/share/binfmts
+
+	: # add GNOME stuff
+	cp -p debian/$(basename)-java.desktop \
+	      $(d_bin)/usr/share/applications/
+	cp -p debian/$(basename)-policytool.desktop \
+	      $(d_bin)/usr/share/control-center-2.0/capplets/
+ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
+  ifneq ($(with_javaws),yes)
+	cp -p debian/$(basename)-{java,javaws}.desktop \
+	      $(d_bin)/usr/share/applications/
+  endif
+	cp -p debian/$(basename)-{controlpanel,policytool}.desktop \
+	      $(d_bin)/usr/share/control-center-2.0/capplets/
+endif
+
+	for i in archive web-start; do \
+	  cp debian/$(basename)-$$i.applications \
+	    $(d_bin)/usr/share/application-registry/; \
+	  cp debian/$(basename)-$$i.keys $(d_bin)/usr/share/mime-info/; \
+	  cp debian/$(basename)-$$i.mime $(d_bin)/usr/share/mime-info/; \
+	done
+
+	cp -p debian/sun_java.xpm \
+		$(d_bin)/usr/share/icons/$(basename).xpm
+
+	mkdir -p $(d_demo)/usr/share/icons
+	cp -p debian/sun_java_app.xpm \
+		$(d_demo)/usr/share/icons/$(basename)-app.xpm
+
+	: # create docdir symlinks for $(p_src)
+	( \
+	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_src); \
+	) > debian/$(p_src).links
+
+	: # create docdir symlinks for $(p_jdk)
+	( \
+	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jdk); \
+	) > debian/$(p_jdk).links
+
+	: # create docdir symlinks for $(p_plug)
+	( \
+	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_plug); \
+	) > debian/$(p_plug).links
+
+	: # create docdir symlinks for $(p_bin)
+	( \
+	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_bin); \
+	) > debian/$(p_bin).links
+
+	: # create links for the config files
+	find $(d_bin)/etc/$(jdiralias) -type f ! -name jvm.cfg \
+	    -printf "etc/$(jdiralias)/%P $(basedir)/jre/lib/%P\n" >> $(d_bin).links
+	echo "etc/$(jdiralias)/jvm.cfg $(basedir)/jre/lib/$(archdir)/jvm.cfg" \
+	    >> $(d_bin).links
+
+	@echo JRE_TOOLS: $(jre_tools_alt)
+	@echo JDK_TOOLS: $(jdk_tools_alt)
+	( \
+	  echo 'name=$(jdirname)'; \
+	  echo 'alias=$(jdiralias)'; \
+	  echo 'priority=$(priority)'; \
+	  echo 'section=non-free'; \
+	  echo ''; \
+	  for i in $(jre_tools_alt); do \
+	    echo "jre $$i /$(TOP)/$(jdiralias)/jre/bin/$$i"; \
+	  done; \
+	  for i in $(jdk_tools_alt); do \
+	    echo "jdk $$i /$(TOP)/$(jdiralias)/bin/$$i"; \
+	  done; \
+	  for i in $(browser_plugin_dirs); do \
+	    echo "plugin $$i-javaplugin.so /$(TOP)/$(jdiralias)/jre/lib/$(archdir)/gcjwebplugin.so"; \
+	  done; \
+	) > $(d_bin)/$(TOP)/.$(jdiralias).jinfo
+
+	( \
+	  echo 'package $(basename)'; \
+	  echo 'interpreter /$(basedir)/jre/lib/jexec'; \
+	  echo 'magic PK\x03\x04'; \
+	) > $(d_bin)/usr/share/binfmts/$(basename)
+
+
+# Build architecture independant packages
+binary-indep: build install
+	dh_testdir
+	dh_testroot
+	dh_installchangelogs -p$(p_jre) -p$(p_doc)
+	dh_installdocs -p$(p_jre) \
+		debian/JAVA_HOME \
+		debian/README.alternatives
+	for i in AUTHORS NEWS README; do \
+	  cp -p $$i $(d_jre)/usr/share/doc/$(p_jre)/$$i.icedtea; \
+	done
+
+	dh_installdocs -p$(p_doc) 
+	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
+	for i in openjdk/control/build/linux-$(jvmarch)/docs/*; do \
+	  [ -e $$i ] || continue; \
+	  b=$$(basename $$i); \
+	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jre)/; \
+	  ln -sf ../$(p_jre)/$$b $(d_doc)/usr/share/doc/$(p_doc)/$$b; \
+	done
+#	dh_installmenu -i
+#	dh_installdebconf -i
+	dh_link -i
+	dh_compress -i
+	dh_fixperms -i
+	dh_installdeb -i
+	dh_gencontrol -i -- $(control_vars)
+	dh_md5sums -i
+	dh_builddeb -i $(bd_options)
+
+# Build architecture dependant packages
+binary-arch: build install
+	dh_testdir
+	dh_testroot
+#	dh_installchangelogs -s ChangeLog
+#	dh_installdocs -s
+#	dh_installmenu -s
+#	dh_installdebconf -s
+	dh_link -s
+	dh_strip -s
+	dh_compress -s
+	dh_fixperms -s
+	dh_makeshlibs -p$(p_bin)
+	ld_path=$(CURDIR)/$(d_bin)/$(basedir)/jre/lib/$(archdir) \
+	    dh_shlibdeps -L $(p_bin) \
+		-l$$ld_path:$$ld_path/client:$$ld_path/native_threads
+	dh_installdeb -s
+	dh_gencontrol -s -- $(control_vars)
+	dh_md5sums -s
+	dh_builddeb -s #$(bd_options)
+
+binary: binary-arch binary-indep
+.PHONY: build clean binary-indep binary-arch binary install

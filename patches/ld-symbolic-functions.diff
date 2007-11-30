@@ -1,0 +1,43 @@
+--- openjdk/hotspot/agent/src/os/linux/Makefile~	2007-11-29 17:26:06.408760201 +0100
++++ openjdk/hotspot/agent/src/os/linux/Makefile	2007-11-29 18:20:39.358131897 +0100
+@@ -62,7 +62,7 @@
+ 
+ $(LIBSA): $(OBJS) mapfile
+ 	if [ ! -d $(ARCH) ] ; then mkdir $(ARCH) ; fi
+-	$(GCC) -shared $(LFLAGS_LIBSA) -o $(LIBSA) $(OBJS) $(LIBS)
++	$(GCC) -shared -Wl,-Bsymbolic-functions $(LFLAGS_LIBSA) -o $(LIBSA) $(OBJS) $(LIBS)
+ 
+ test.o: test.c
+ 	$(GCC) -c -o test.o -g -D_GNU_SOURCE -D$(ARCH) $(INCLUDES) test.c
+--- openjdk/hotspot/build/linux/makefiles/gcc.make~	2007-11-29 17:26:06.698764575 +0100
++++ openjdk/hotspot/build/linux/makefiles/gcc.make	2007-11-29 18:19:24.176997807 +0100
+@@ -133,6 +133,7 @@
+ 
+ # Enable linker optimization
+ LFLAGS += -Xlinker -O1
++LFLAGS += -Wl,-Bsymbolic-functions
+ 
+ # Use $(MAPFLAG:FILENAME=real_file_name) to specify a map file.
+ MAPFLAG = -Xlinker --version-script=FILENAME
+--- openjdk/corba/make/common/Defs-linux.gmk~	2007-11-29 17:26:06.698764575 +0100
++++ openjdk/corba/make/common/Defs-linux.gmk	2007-11-29 18:18:49.746478430 +0100
+@@ -202,7 +202,7 @@
+ 
+ EXTRA_LIBS += -lc
+ 
+-LDFLAGS_DEFS_OPTION  = -Xlinker -z -Xlinker defs
++LDFLAGS_DEFS_OPTION  = -Xlinker -z -Xlinker defs -Wl,-Bsymbolic-functions
+ LDFLAGS_COMMON  += $(LDFLAGS_DEFS_OPTION)
+ 
+ #
+--- openjdk/jdk/make/common/Defs-linux.gmk~	2007-11-29 17:26:06.708764726 +0100
++++ openjdk/jdk/make/common/Defs-linux.gmk	2007-11-29 18:18:59.276622190 +0100
+@@ -210,7 +210,7 @@
+ 
+ EXTRA_LIBS += -lc
+ 
+-LDFLAGS_DEFS_OPTION  = -Xlinker -z -Xlinker defs
++LDFLAGS_DEFS_OPTION  = -Xlinker -z -Xlinker defs -Wl,-Bsymbolic-functions
+ LDFLAGS_COMMON  += $(LDFLAGS_DEFS_OPTION)
+ 
+ #

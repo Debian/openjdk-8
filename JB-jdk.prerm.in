@@ -1,0 +1,12 @@
+#!/bin/sh -e
+
+jdk_tools='@jdk_tools@'
+basedir=/@basedir@
+basediralias=/@basediralias@
+
+
+for i in $jdk_tools; do
+    update-alternatives --remove $i $basediralias/bin/$i
+done
+
+#DEBHELPER#
