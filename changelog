@@ -1,3 +1,9 @@
+icedtea-java7 (7~b23-1.5~20071124-4) UNRELEASED; urgency=low
+
+  * 
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 30 Nov 2007 15:15:43 +0100
+
 icedtea-java7 (7~b23-1.5~20071124-3) hardy; urgency=low
 
   * Lower optimization to -O2 for building the jdk on amd64.
