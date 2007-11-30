@@ -2,8 +2,10 @@ Source: icedtea-java7
 Section: universe/devel
 Priority: extra
 Maintainer: Matthias Klose <doko@ubuntu.com>
+Uploaders: Michael Koch <konqueror@gmx.de>
 Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, procps, automake, autoconf, ant, @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_syslibs@ @bd_accessbridge@ @bd_plugin@ @bd_certificates@
 Standards-Version: 3.7.2
+Homepage: http://icedtea.classpath.org/
 XS-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~ubuntu-java/uj/icedtea7
 XS-Vcs-Browser: https://code.launchpad.net/~ubuntu-java/uj/icedtea7
 
