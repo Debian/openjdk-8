@@ -131,6 +131,8 @@ jdk_tools_alt	= $(jdk_tools)
 
 jre_manpages_re:= $(shell echo $(jre_tools) $(corba_tools) | tr -s ' ' '|')
 
+distribution = $(shell lsb_release --id --short)
+
 # build dependencies
 ifeq ($(STAGE1_JAVA),gcj)
 bd_bootstrap = \
