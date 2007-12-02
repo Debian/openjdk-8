@@ -80,7 +80,7 @@ else ifeq ($(STAGE1_JAVA),icedtea)
 	--with-icedtea-home=/usr/lib/jvm/java-7-icedtea \
 	--with-java=/usr/lib/jvm/java-7-icedtea/bin/java \
 	--with-javah=/usr/lib/jvm/java-7-icedtea/bin/javah \
-	--with-rmic=/usr/lib/jvm/java-7-icedtea/binrmic \
+	--with-rmic=/usr/lib/jvm/java-7-icedtea/bin/rmic \
 	--with-jar=/usr/lib/jvm/java-7-icedtea/bin/jar \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar
