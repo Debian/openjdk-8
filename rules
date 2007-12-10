@@ -267,6 +267,9 @@ endif
 
 build: stamps/build stamps/build-bridge stamps/cacerts
 stamps/build: stamps/patch
+ifneq (,$(filter $(DEB_HOST_ARCH), powerpc))
+	sh -c 'sh debian/buildwatch.sh &'
+endif
 	$(MAKE) $(build_target)
 	touch $@
 

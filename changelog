@@ -1,6 +1,7 @@
 icedtea-java7 (7~b23-1.5~20071124-4) UNRELEASED; urgency=low
 
   * Allow libungif4-dev as alternative build dependency.
+  * On powerpc keep the build alive using buildwatch script.
 
  -- Matthias Klose <doko@ubuntu.com>  Fri, 30 Nov 2007 15:15:43 +0100
 
