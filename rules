@@ -155,8 +155,7 @@ bd_accessbridge = \
 	gawk, pkg-config, libbonobo2-dev, libatspi-dev, at-spi, \
 	x11-utils | $(if $(filter $(distribution),Debian),xbase-clients,xprop),
 bd_plugin = \
-	libgtk2.0-dev, \
-	$(if $(filter $(distribution),Debian),libxul-dev,firefox-dev),
+	libgtk2.0-dev, libxul-dev,
 bd_certificates = openssl, ca-certificates,
 
 dlopen_depends =
