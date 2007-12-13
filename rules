@@ -30,6 +30,8 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 # STAGE1_JAVA is either gcj or icedtea, the latter not yet supported
 STAGE1_JAVA = gcj
 #STAGE1_JAVA = icedtea
+OPENJDK_VERSION = b24
+OPENJDK_SRC_ZIP = openjdk-$(OPENJDK_VERSION).zip
 
 CFLAGS = -Wall -g
 
@@ -73,7 +75,8 @@ ifeq ($(STAGE1_JAVA),gcj)
 	--with-jar=/usr/bin/gjar$(GCJ_SUFFIX) \
 	--with-libgcj-jar=/usr/share/java/libgcj$(GCJ_SUFFIX).jar \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
-	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar
+	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
+	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
 else ifeq ($(STAGE1_JAVA),icedtea)
   CONFIGURE_ARGS = \
 	--with-icedtea \
@@ -83,7 +86,8 @@ else ifeq ($(STAGE1_JAVA),icedtea)
 	--with-rmic=/usr/lib/jvm/java-7-icedtea/bin/rmic \
 	--with-jar=/usr/lib/jvm/java-7-icedtea/bin/jar \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
-	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar
+	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
+	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
 endif
 
 #	--with-ecj=$(CURDIR)/ecj/ecj \
@@ -248,13 +252,19 @@ stamps/icedtea-configure:
 	./configure $(CONFIGURE_ARGS)
 	touch $@
 
-unpack: stamps/unpack
+unpack: dist-openjdk dist-bridge stamps/unpack
 stamps/unpack: stamps/icedtea-configure
 ifeq ($(STAGE1_JAVA),gcj)
 	$(MAKE) stamps/extract-ecj.stamp
 endif
 	$(MAKE) stamps/extract.stamp
 	touch $@
+
+dist-openjdk: $(OPENJDK_SRC_ZIP)
+	@echo "downloading openjdk source from hg to create zipfile: $(OPENJDK_SRC_ZIP)"
+	$(MAKE) $@
+
+dist-bridge: $(bridge_src)
 
 patch: stamps/patch
 stamps/patch: stamps/unpack
@@ -273,6 +283,7 @@ endif
 	touch $@
 
 bridge_dir = java-access-bridge-1.20.0
+bridge_src = $(bridge_dir).tar.bz2
 
 stamps/build-bridge: stamps/build stamps/configure-bridge
 	JAVA_HOME=$(CURDIR)/$(sdkimg) \
@@ -282,7 +293,7 @@ stamps/build-bridge: stamps/build stamps/configure-bridge
 
 stamps/configure-bridge:
 	rm -rf $(bridge_dir)
-	tar xf $(bridge_dir).tar.bz2
+	tar jxf $(bridge_src)
 	cd $(bridge_dir) && \
 	    JAVA_HOME=$(CURDIR)/$(sdkimg) \
 	    PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
