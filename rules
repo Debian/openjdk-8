@@ -117,8 +117,8 @@ shortver	= 7
 priority	= 1060
 jdiralias	= java-$(shortver)-$(origin)
 basedir		= usr/lib/jvm/$(jdiralias)
-jreimg		= openjdk/control/build/linux-$(jvmarch)/j2re-image
-sdkimg		= openjdk/control/build/linux-$(jvmarch)/j2sdk-image
+jreimg		= openjdk/build/linux-$(jvmarch)/j2re-image
+sdkimg		= openjdk/build/linux-$(jvmarch)/j2sdk-image
 security	= etc/$(jdiralias)/security
 browser_plugin_dirs = firefox iceape iceweasel mozilla midbrowser xulrunner
 
@@ -159,7 +159,7 @@ bd_accessbridge = \
 	gawk, pkg-config, libbonobo2-dev, libatspi-dev, at-spi, \
 	x11-utils | $(if $(filter $(distribution),Debian),xbase-clients,xprop),
 bd_plugin = \
-	libgtk2.0-dev, libxul-dev,
+	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,xulrunner-1.9-dev),
 bd_certificates = openssl, ca-certificates,
 
 dlopen_depends =
@@ -242,7 +242,8 @@ packaging-files:
 	    $$f > $$f2; \
 	done
 ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
-	cat debian/$(p_bin)-i586.menu >> $(d_bin).menu
+# not yet in OpenJDK
+#	cat debian/$(p_bin)-i586.menu >> $(d_bin).menu
 	rm -f debian/$(p_bin)-i586.menu
 endif
 
@@ -255,9 +256,9 @@ stamps/icedtea-configure:
 unpack: dist-openjdk dist-bridge stamps/unpack
 stamps/unpack: stamps/icedtea-configure
 ifeq ($(STAGE1_JAVA),gcj)
-	$(MAKE) stamps/extract-ecj.stamp
+	$(MAKE) stamps/clone-ecj.stamp
 endif
-	$(MAKE) stamps/extract.stamp
+	$(MAKE) stamps/clone.stamp
 	touch $@
 
 dist-openjdk: $(OPENJDK_SRC_ZIP)
@@ -282,7 +283,7 @@ endif
 	$(MAKE) $(build_target)
 	touch $@
 
-bridge_dir = java-access-bridge-1.20.0
+bridge_dir = java-access-bridge-1.21.1
 bridge_src = $(bridge_dir).tar.bz2
 
 stamps/build-bridge: stamps/build stamps/configure-bridge
@@ -323,6 +324,7 @@ clean:
 	rm -rf $(bridge_dir)
 	rm -rf cacerts build-cacerts
 	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
+	rm -rf autom4te.cache
 	dh_clean 
 
 install: packaging-files
@@ -532,7 +534,10 @@ ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
 	cp -p debian/$(basename)-{java,javaws}.desktop \
 	      $(d_bin)/usr/share/applications/
   endif
-	cp -p debian/$(basename)-{controlpanel,policytool}.desktop \
+# not yet in OpenJDK
+#	cp -p debian/$(basename)-controlpanel.desktop \
+#	      $(d_bin)/usr/share/control-center-2.0/capplets/
+	cp -p debian/$(basename)-policytool.desktop \
 	      $(d_bin)/usr/share/control-center-2.0/capplets/
 endif
 

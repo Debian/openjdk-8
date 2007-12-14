@@ -1,10 +1,20 @@
-icedtea-java7 (7~b23-1.5~20071124-4) UNRELEASED; urgency=low
+icedtea-java7 (7~b24-1.5~20071214-1) hardy; urgency=low
+
+  * New upstream snapshot (b24).
+  * Update java-access-bridge to 1.21.1.
+  * On powerpc keep the build alive using buildwatch script.
+  * Do not install menu entries for javaws, ControlPanel. LP: #155553, #156673.
+  * README.alternatives: Fix example. LP: #157063.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 14 Dec 2007 11:09:22 +0100
+
+icedtea-java7 (7~b23-1.5~20071124-4) hardy; urgency=low
 
   * Allow libungif4-dev as alternative build dependency.
   * On powerpc keep the build alive using buildwatch script.
   * Always build the plugin using libxul-dev.
 
- -- Matthias Klose <doko@ubuntu.com>  Fri, 30 Nov 2007 15:15:43 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 10 Dec 2007 15:20:16 +0100
 
 icedtea-java7 (7~b23-1.5~20071124-3) hardy; urgency=low
 

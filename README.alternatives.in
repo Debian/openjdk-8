@@ -9,7 +9,7 @@ script can be used to set a bunch of jre/jdk alternatives:
 
 - Set all runtime tools to point to the @basename@ alternatives:
 
-  update-java-alternatives --set --jre icedtea
+  update-java-alternatives --set --jre icedtea-java7
 
 
 - Set all runtime and development tools to point to the @basename@
