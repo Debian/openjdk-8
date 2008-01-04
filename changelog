@@ -1,3 +1,11 @@
+icedtea-java7 (7~b24-1.5-1) hardy; urgency=low
+
+  * Update to IcedTea-1.5.
+  * debian/patches/ssp-interpreter.diff: Use bash to call the ssp script,
+    backslash handling differs betweend dash and bash.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 04 Jan 2008 09:58:27 +0100
+
 icedtea-java7 (7~b24-1.5~20071214-1) hardy; urgency=low
 
   * New upstream snapshot (b24).

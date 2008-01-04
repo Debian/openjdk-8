@@ -42,7 +42,7 @@ else
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
-  export GCC_SUFFIX = -4.1
+  export GCC_SUFFIX = -4.2
   GCJ_SUFFIX = -4.2
 endif
 ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc))
@@ -62,6 +62,7 @@ DISTRIBUTION_PATCHES = \
 	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
 	debian/patches/arguments.patch \
 	debian/patches/const_strings.patch \
+	debian/patches/spp-interpreter.diff \
 
 export DISTRIBUTION_PATCHES
 
@@ -160,6 +161,8 @@ bd_accessbridge = \
 	x11-utils | $(if $(filter $(distribution),Debian),xbase-clients,xprop),
 bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,xulrunner-1.9-dev),
+bd_plugin = \
+	libgtk2.0-dev, libxul-dev,
 bd_certificates = openssl, ca-certificates,
 
 dlopen_depends =
