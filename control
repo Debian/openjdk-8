@@ -1,10 +1,10 @@
 Source: icedtea-java7
-Section: universe/devel
+Section: devel
 Priority: extra
 Maintainer: Matthias Klose <doko@ubuntu.com>
 Uploaders: Michael Koch <konqueror@gmx.de>
-Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, procps, automake, autoconf, ant, g++-4.2 [amd64 powerpc], g++-4.1 [i386 lpia], gcj (>= 4:4.2.1), ecj, java-gcj-compat-dev (>= 1.0.76-2ubuntu3), libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, libxalan2-java, liblcms1-dev, libxinerama-dev, libjpeg62-dev, libpng12-dev, libgif-dev | libungif4-dev, zlib1g-dev, gawk, pkg-config, libbonobo2-dev, libatspi-dev, at-spi, x11-utils | xprop, libgtk2.0-dev, libxul-dev, openssl, ca-certificates,
-Standards-Version: 3.7.2
+Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, procps, automake, autoconf, ant, g++-4.2 [amd64 powerpc], g++-4.1 [i386 lpia], gcj (>= 4:4.2.1), ecj, java-gcj-compat-dev (>= 1.0.76-2ubuntu3), libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, libxalan2-java, liblcms1-dev, libxinerama-dev, libjpeg62-dev, libpng12-dev, libgif-dev | libungif4-dev, zlib1g-dev, gawk, pkg-config, libbonobo2-dev, libatspi-dev, at-spi, x11-utils | xbase-clients, libgtk2.0-dev, libxul-dev, openssl, ca-certificates,
+Standards-Version: 3.7.3
 Homepage: http://icedtea.classpath.org/
 XS-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~ubuntu-java/uj/icedtea7
 XS-Vcs-Browser: https://code.launchpad.net/~ubuntu-java/uj/icedtea7
@@ -16,8 +16,6 @@ Suggests: icedtea-java7-demo, icedtea-java7-source
 Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk, java7-sdk
 Description: Java runtime based on OpenJDK
  Icedtea is a temporary fork of OpenJDK
- .
-  Homepage: http://icedtea.classpath.org/
 
 Package: icedtea-java7-jre
 Architecture: all
@@ -27,8 +25,6 @@ Suggests: icedtea-java7-plugin, sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime, java7-runtime
 Description: Java runtime based on OpenJDK
  Icedtea is a temporary fork of OpenJDK
- .
-  Homepage: http://icedtea.classpath.org/
 
 Package: icedtea-java7-bin
 Architecture: any
@@ -39,27 +35,21 @@ Recommends: ${dlopen:Recommends}
 Suggests: binfmt-support
 Description: Java runtime based on OpenJDK
  Icedtea is a temporary fork of OpenJDK
- .
-  Homepage: http://icedtea.classpath.org/
 
 Package: icedtea-java7-demo
 Architecture: any
-Depends: icedtea-java7-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: icedtea-java7-jre (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Java runtime based on OpenJDK
  Icedtea is a temporary fork of OpenJDK
- .
-  Homepage: http://icedtea.classpath.org/
 
 Package: icedtea-java7-plugin
 Architecture: any
-Depends: icedtea-java7-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: icedtea-java7-jre (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
 Xb-Npp-Applications: ec8030f7-c20a-464f-9b0e-13a3a9e97384, 92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a, aa5ca914-c309-495d-91cf-3141bbb04115
 Xb-Npp-Name: The GCJ Web Browser Plugin (using IcedTea)
 Xb-Npp-MimeType: application/x-java-vm, application/x-java-applet, application/x-java-applet;version=1.1, application/x-java-applet;version=1.1.1, application/x-java-applet;version=1.1.2, application/x-java-applet;version=1.1.3, application/x-java-applet;version=1.2, application/x-java-applet;version=1.2.1, application/x-java-applet;version=1.2.2, application/x-java-applet;version=1.3, application/x-java-applet;version=1.3.1, application/x-java-applet;version=1.4, application/x-java-applet;version=1.4.1, application/x-java-applet;version=1.4.2, application/x-java-applet;version=1.5, application/x-java-applet;version=1.6, application/x-java-applet;version=1.7, application/x-java-applet;jpi-version=1.7.0_00, application/x-java-bean, application/x-java-bean;version=1.1, application/x-java-bean;version=1.1.1, application/x-java-bean;version=1.1.2, application/x-java-bean;version=1.1.3, application/x-java-bean;version=1.2, application/x-java-bean;version=1.2.1, application/x-java-bean;version=1.2.2, application/x-java-bean;version=1.3, application/x-java-bean;version=1.3.1, application/x-java-bean;version=1.4, application/x-java-bean;version=1.4.1, application/x-java-bean;version=1.4.2, application/x-java-bean;version=1.5, application/x-java-bean;version=1.6, application/x-java-bean;version=1.7, application/x-java-bean;jpi-version=1.7.0_00
 Description: Java plugin based on OpenJDK and gcjwebplugin
  Icedtea is a temporary fork of OpenJDK
- .
-  Homepage: http://icedtea.classpath.org/
 
 Package: icedtea-java7-source
 Architecture: all
@@ -70,10 +60,9 @@ Description: Icedtea Development Kit (JDK) source files
  .
  This package contains the Java programming language source files
  (src.zip) for all classes that make up the Java core API.
- .
-  Homepage: http://icedtea.classpath.org/
 
 Package: icedtea-java7-doc
+Section: doc
 Architecture: all
 Suggests: icedtea-java7-jdk
 Description: Icedtea Development Kit (JDK) documentation

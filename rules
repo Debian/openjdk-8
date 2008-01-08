@@ -315,7 +315,7 @@ clean:
 	dh_testdir
 	dh_testroot
 	rm -rf stamps
-	-$(MAKE) distclean
+	[ ! -f Makefile ] || $(MAKE) distclean
 	rm -rf openjdk openjdk-ecj
 
 	for f in debian/*.in; do \
