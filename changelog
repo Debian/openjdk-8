@@ -1,5 +1,6 @@
 icedtea-java7 (7~b24-1.5-2) UNRELEASED; urgency=low
 
+  * First upload to Debian. Closes: #452750.
   * debian/control.in:
     - Moved package from universe/devel section to devel.
     - Put icedtea-java7-doc into doc section.
