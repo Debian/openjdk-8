@@ -7,7 +7,12 @@ browser_dirs="@browser_dirs@"
 PLUGIN=gcjwebplugin.so
 PLUGINPTH=/@basediralias@/jre/lib/@archdir@/$PLUGIN
 
-for browser in $browser_dirs; do
+for browser_dir in $browser_dirs; do
+    if [ $browser_dir = firefox-plugins ]; then
+        browser=firefox-3.0
+    else
+        browser=$browser_dir
+    fi
     update-alternatives --quiet --install \
 	/usr/lib/$browser/plugins/libjavaplugin.so \
 	$browser-javaplugin.so \

@@ -127,7 +127,7 @@ basedir		= usr/lib/jvm/$(jdiralias)
 jreimg		= openjdk/build/linux-$(jvmarch)/j2re-image
 sdkimg		= openjdk/build/linux-$(jvmarch)/j2sdk-image
 security	= etc/$(jdiralias)/security
-browser_plugin_dirs = firefox iceape iceweasel mozilla midbrowser xulrunner
+browser_plugin_dirs = firefox iceape iceweasel mozilla midbrowser xulrunner firefox-plugins
 
 # (most) jre and jdk tools handled by the alternatives system.
 # dups in heimdal-clients, krb5-user: kinit, klist, ktab, no alternatives
