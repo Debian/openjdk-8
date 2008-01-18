@@ -1,6 +1,6 @@
-icedtea-java7 (7~b24-1.5+20080114-1) hardy; urgency=low
+icedtea-java7 (7~b24-1.5+20080118-1) hardy; urgency=low
 
-  * Update IcedTea to 20080114.
+  * Update IcedTea to 20080118.
   * Fix another build failure when gcc version != gcj version.
   * Use the versioned compiler to build the corba parts.
 

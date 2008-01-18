@@ -19,6 +19,9 @@ ifneq (,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
   export PARALLEL_COMPILE_JOBS
 endif
 
+distribution := $(shell lsb_release --id --short)
+distrel := $(shell lsb_release --codename --short)
+
 arch_map	:= amd64=amd64 i386=i586 lpia=i586 powerpc=ppc sparc=sparc ia64=ia64
 archdir_map	:= amd64=amd64 i386=i386 lpia=i386 powerpc=ppc sparc=sparc ia64=ia64
 
@@ -51,6 +54,10 @@ endif
 #ifneq (,$(filter $(DEB_HOST_ARCH), amd64))
 #  export GCC_SUFFIX = -4.3
 #endif
+ifeq ($(distribution),Debian)
+  export GCC_SUFFIX = -4.3
+  export GCJ_SUFFIX = -4.3
+endif
 
 DISTRIBUTION_PATCHES = \
 	debian/patches/gcc-no-werror.diff \
@@ -62,7 +69,6 @@ DISTRIBUTION_PATCHES = \
 	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
 	debian/patches/arguments.patch \
 	debian/patches/const_strings.patch \
-	debian/patches/spp-interpreter.diff \
 
 export DISTRIBUTION_PATCHES
 
@@ -136,9 +142,6 @@ jdk_tools_alt	= $(jdk_tools)
 
 jre_manpages_re:= $(shell echo $(jre_tools) $(corba_tools) | tr -s ' ' '|')
 
-distribution = $(shell lsb_release --id --short)
-distrel = $(shell lsb_release --codename --short)
-
 # build dependencies
 ifeq ($(STAGE1_JAVA),gcj)
 bd_bootstrap = \
@@ -150,6 +153,10 @@ endif
 
 bd_gcc = \
 	g++-4.2 [amd64 powerpc], g++-4.1 [i386 lpia],
+ifeq ($(distribution),Debian)
+  bd_gcc = \
+	g++-4.3, gcj-4.3,
+endif
 #bd_gcc =
 bd_syslibs = \
 	libjpeg62-dev, libpng12-dev, libgif-dev | libungif4-dev, zlib1g-dev,
