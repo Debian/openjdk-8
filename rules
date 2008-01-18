@@ -51,10 +51,10 @@ endif
 ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc))
   export GCC_SUFFIX = -4.2
 endif
-ifeq ($(distribution),Debian)
+#ifeq ($(distribution),Debian)
   export GCC_SUFFIX = -4.3
   export GCJ_SUFFIX = -4.3
-endif
+#endif
 
 DISTRIBUTION_PATCHES = \
 	debian/patches/gcc-no-werror.diff \
@@ -150,11 +150,10 @@ endif
 
 bd_gcc = \
 	g++-4.2 [amd64 powerpc], g++-4.1 [i386 lpia],
-ifeq ($(distribution),Debian)
+#ifeq ($(distribution),Debian)
   bd_gcc = \
 	g++-4.3, gcj-4.3, java-gcj-compat-dev (>= 1.0.76-3),
-endif
-#bd_gcc =
+#endif
 bd_syslibs = \
 	libjpeg62-dev, libpng12-dev, libgif-dev | libungif4-dev, zlib1g-dev,
 bd_openjdk = \

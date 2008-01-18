@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Matthias Klose <doko@ubuntu.com>
 Uploaders: Michael Koch <konqueror@gmx.de>
-Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, procps, automake, autoconf, ant, g++-4.2 [amd64 powerpc], g++-4.1 [i386 lpia], gcj (>= 4:4.2.1), ecj, java-gcj-compat-dev (>= 1.0.76-2ubuntu3), libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, libxalan2-java, liblcms1-dev, libxinerama-dev, libjpeg62-dev, libpng12-dev, libgif-dev | libungif4-dev, zlib1g-dev, gawk, pkg-config, libbonobo2-dev, libatspi-dev, at-spi, x11-utils | xprop, libgtk2.0-dev, libxul-dev, fastjar, openssl, ca-certificates,
+Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, procps, automake, autoconf, ant, g++-4.3, gcj-4.3, java-gcj-compat-dev (>= 1.0.76-3), gcj (>= 4:4.2.1), ecj, java-gcj-compat-dev (>= 1.0.76-2ubuntu3), libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, libxalan2-java, liblcms1-dev, libxinerama-dev, libjpeg62-dev, libpng12-dev, libgif-dev | libungif4-dev, zlib1g-dev, gawk, pkg-config, libbonobo2-dev, libatspi-dev, at-spi, x11-utils | xprop, libgtk2.0-dev, libxul-dev, fastjar, openssl, ca-certificates,
 Standards-Version: 3.7.3
 Homepage: http://icedtea.classpath.org/
 XS-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~ubuntu-java/uj/icedtea7
