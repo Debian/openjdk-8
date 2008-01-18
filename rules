@@ -137,6 +137,7 @@ jdk_tools_alt	= $(jdk_tools)
 jre_manpages_re:= $(shell echo $(jre_tools) $(corba_tools) | tr -s ' ' '|')
 
 distribution = $(shell lsb_release --id --short)
+distrel = $(shell lsb_release --codename --short)
 
 # build dependencies
 ifeq ($(STAGE1_JAVA),gcj)
@@ -160,10 +161,9 @@ bd_accessbridge = \
 	gawk, pkg-config, libbonobo2-dev, libatspi-dev, at-spi, \
 	x11-utils | $(if $(filter $(distribution),Debian),xbase-clients,xprop),
 bd_plugin = \
-	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,xulrunner-1.9-dev),
-bd_plugin = \
-	libgtk2.0-dev, libxul-dev,
+	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),libxul-dev,firefox-dev)),
 bd_certificates = openssl, ca-certificates,
+bd_netx = fastjar,
 
 dlopen_depends =
 dlopen_recommends = \
@@ -205,6 +205,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_syslibs@/$(bd_syslibs)/g' \
 	      -e 's/@bd_accessbridge@/$(bd_accessbridge)/g' \
 	      -e 's/@bd_plugin@/$(bd_plugin)/g' \
+	      -e 's/@bd_netx@/$(bd_netx)/g' \
 	      -e 's/@bd_certificates@/$(bd_certificates)/g' \
 	    debian/control.in > debian/control
 	@if cmp -s debian/control debian/control.old; then \
