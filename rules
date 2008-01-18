@@ -45,15 +45,12 @@ else
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
-  export GCC_SUFFIX = -4.2
+  export GCC_SUFFIX = -4.1
   GCJ_SUFFIX = -4.2
 endif
 ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc))
   export GCC_SUFFIX = -4.2
 endif
-#ifneq (,$(filter $(DEB_HOST_ARCH), amd64))
-#  export GCC_SUFFIX = -4.3
-#endif
 ifeq ($(distribution),Debian)
   export GCC_SUFFIX = -4.3
   export GCJ_SUFFIX = -4.3
@@ -155,7 +152,7 @@ bd_gcc = \
 	g++-4.2 [amd64 powerpc], g++-4.1 [i386 lpia],
 ifeq ($(distribution),Debian)
   bd_gcc = \
-	g++-4.3, gcj-4.3,
+	g++-4.3, gcj-4.3, java-gcj-compat-dev (>= 1.0.76-3),
 endif
 #bd_gcc =
 bd_syslibs = \
