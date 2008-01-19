@@ -1,4 +1,4 @@
-icedtea-java7 (7~b24-1.5+20080118-1~ppa2) hardy; urgency=low
+icedtea-java7 (7~b24-1.5+20080118-1) hardy; urgency=low
 
   * Fix installation of the plugin for firefox-3.0.
 
