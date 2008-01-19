@@ -66,6 +66,7 @@ DISTRIBUTION_PATCHES = \
 	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
 	debian/patches/arguments.patch \
 	debian/patches/const_strings.patch \
+	debian/patches/print-lsb-release.diff \
 
 export DISTRIBUTION_PATCHES
 
