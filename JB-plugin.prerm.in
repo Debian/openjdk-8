@@ -5,7 +5,7 @@ PLUGIN=gcjwebplugin.so
 PLUGINPTH=/@basediralias@/jre/lib/@archdir@/$PLUGIN
 
 for browser_dir in $browser_dirs; do
-    if [ $browser_dir = firefox-plugins ]; then
+    if [ $browser_dir = firefox-addons ]; then
         browser=firefox-3.0
     else
         browser=$browser_dir
