@@ -7,7 +7,7 @@ jre_tools='@jre_tools@'
 rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
 
 for i in $jre_tools; do
-    update-alternatives --remove $i $basediralias/bin/$i
+    update-alternatives --remove $i $basediralias/jre/bin/$i
 done
 
 if [ remove = "$1" ] && [ -x /usr/sbin/update-binfmts ]; then
