@@ -1,6 +1,7 @@
 openjdk-6 (6b05-0ubuntu1) hardy; urgency=low
 
   * First public OpenJDK upstream code drop (b05).
+  * Depend on tzdata-java.
 
  -- Matthias Klose <doko@ubuntu.com>  Thu, 28 Feb 2008 18:46:42 +0100
 

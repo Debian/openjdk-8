@@ -5,7 +5,7 @@ Maintainer: Matthias Klose <doko@ubuntu.com>
 Uploaders: Michael Koch <konqueror@gmx.de>
 Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, procps, automake, autoconf, ant, g++-4.2 [amd64 powerpc], g++-4.1 [i386 lpia], gcj (>= 4:4.2.1), ecj, java-gcj-compat-dev (>= 1.0.76-2ubuntu3), libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, libxalan2-java, liblcms1-dev, libxinerama-dev, libjpeg62-dev, libpng12-dev, libgif-dev | libungif4-dev, zlib1g-dev, gawk, pkg-config, libbonobo2-dev, libatspi-dev, at-spi, x11-utils | xprop, libgtk2.0-dev, xulrunner-1.9-dev, fastjar, openssl, ca-certificates,
 Standards-Version: 3.7.3
-Homepage: http://icedtea.classpath.org/
+Homepage: http://openjdk.java.net/
 XS-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~ubuntu-java/uj/openjdk6
 XS-Vcs-Browser: https://code.launchpad.net/~ubuntu-java/uj/openjdk6
 
@@ -21,10 +21,10 @@ Description: OpenJDK Development Kit (JDK)
 Package: openjdk-6-jre
 Architecture: all
 Section: interpreters
-Depends: openjdk-6-bin (>= ${base:Version}), java-common, ${shlibs:Depends}, ${misc:Depends}
+Depends: openjdk-6-bin (>= ${base:Version}), tzdata-java, java-common, ${shlibs:Depends}, ${misc:Depends}
 Suggests: icedtea-gcjwebplugin, sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
-Description: OpenJDK Java runtime
+Description: OpenJDK Java runtime (shared runtime files)
  OpenJDK Java runtime
 
 Package: openjdk-6-bin
@@ -34,14 +34,14 @@ Depends: openjdk-6-jre (>= ${binary:Version}), ${shlibs:Depends}, ${dlopen:Depen
 Conflicts: binfmt-support (<< 1.1.2)
 Recommends: ${dlopen:Recommends}
 Suggests: binfmt-support
-Description: OpenJDK Java runtime
+Description: OpenJDK Java runtime (runtime binaries)
  OpenJDK Java runtime
 
 Package: openjdk-6-demo
 Architecture: any
 Depends: openjdk-6-jre (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
-Description: Java runtime based on OpenJDK
- Icedtea is a temporary fork of OpenJDK
+Description: Java runtime based on OpenJDK (demos and examples)
+ OpenJDK Java runtime
 
 Package: icedtea-gcjwebplugin
 Architecture: any
@@ -54,7 +54,7 @@ Description: Java plugin based on OpenJDK and gcjwebplugin
 
 Package: openjdk-6-source
 Architecture: all
-Depends: openjdk-6-jdk (>= ${binary:Version})
+Depends: openjre-6-jre (= ${binary:Version}), openjdk-6-jdk (>= ${binary:Version})
 Description: OpenJDK Development Kit (JDK) source files
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
