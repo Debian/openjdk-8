@@ -161,9 +161,6 @@ bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, \
 	libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, \
 	libxalan2-java, liblcms1-dev, libxinerama-dev,
-bd_accessbridge = \
-	gawk, pkg-config, libbonobo2-dev, libatspi-dev, at-spi, \
-	x11-utils | $(if $(filter $(distribution),Debian),xbase-clients,xprop),
 bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),xulrunner-1.9-dev,firefox-dev)),
 bd_certificates = openssl, ca-certificates,
@@ -214,7 +211,6 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_openjdk@/$(bd_openjdk)/g' \
 	      -e 's/@bd_gcc@/$(bd_gcc)/g' \
 	      -e 's/@bd_syslibs@/$(bd_syslibs)/g' \
-	      -e 's/@bd_accessbridge@/$(bd_accessbridge)/g' \
 	      -e 's/@bd_plugin@/$(bd_plugin)/g' \
 	      -e 's/@bd_netx@/$(bd_netx)/g' \
 	      -e 's/@bd_certificates@/$(bd_certificates)/g' \
@@ -268,7 +264,7 @@ stamps/icedtea-configure:
 	./configure $(CONFIGURE_ARGS)
 	touch $@
 
-unpack: dist-openjdk dist-bridge stamps/unpack
+unpack: dist-openjdk stamps/unpack
 stamps/unpack: stamps/icedtea-configure
 	$(MAKE) stamps/extract.stamp
 ifeq ($(STAGE1_JAVA),gcj)
@@ -280,8 +276,6 @@ dist-openjdk: $(OPENJDK_SRC_ZIP)
 	@echo "downloading openjdk source from hg to create zipfile: $(OPENJDK_SRC_ZIP)"
 	$(MAKE) $@
 
-dist-bridge: $(bridge_src)
-
 patch: stamps/patch
 stamps/patch: stamps/unpack
 ifeq ($(STAGE1_JAVA),gcj)
@@ -290,30 +284,12 @@ endif
 	$(MAKE) stamps/patch.stamp
 	touch $@
 
-build: stamps/build stamps/build-bridge stamps/cacerts
+build: stamps/build stamps/cacerts
 stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), powerpc))
 	sh -c 'sh debian/buildwatch.sh &'
 endif
 	$(MAKE) $(build_target)
-	touch $@
-
-bridge_dir = java-access-bridge-1.21.1
-bridge_src = $(bridge_dir).tar.bz2
-
-stamps/build-bridge: stamps/build stamps/configure-bridge
-	JAVA_HOME=$(CURDIR)/$(sdkimg) \
-	PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
-	    $(MAKE) -C $(bridge_dir)
-	touch $@
-
-stamps/configure-bridge:
-	rm -rf $(bridge_dir)
-	tar jxf $(bridge_src)
-	cd $(bridge_dir) && \
-	    JAVA_HOME=$(CURDIR)/$(sdkimg) \
-	    PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
-		$(CURDIR)/$(bridge_dir)/configure 
 	touch $@
 
 stamps/cacerts: stamps/build
@@ -336,7 +312,6 @@ clean:
 	  rm -f $$f2; \
 	done
 	rm -f debian/*.install debian/*.links
-	rm -rf $(bridge_dir)
 	rm -rf cacerts build-cacerts
 	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
 	rm -rf autom4te.cache
@@ -355,9 +330,6 @@ install: packaging-files
 	cp -a $(jreimg)/man $(d)/$(basedir)/jre/
 	chmod -R u+w $(d)
 
-	cp -a $(bridge_dir)/bridge/accessibility.properties \
-		$(d)/$(basedir)/jre/lib/
-	cp -a $(bridge_dir)/gnome-java-bridge.jar $(d)/$(basedir)/jre/lib/ext/
 	cp -a cacerts $(d)/$(basedir)/jre/lib/security/
 
 	: # remove files, which are not installed at all
@@ -387,6 +359,8 @@ endif
 	do \
 	  mv $(d)/$(basedir)/jre/lib/$$i.template $(d)/etc/$(jdiralias)/$$i; \
 	done
+
+	cp -p debian/accessibility.properties $(d)/$(basedir)/jre/lib/
 
 	: # move config files to etc/$(jdiralias) and symlink them.
 	for i in \
@@ -569,6 +543,10 @@ endif
 	mkdir -p $(d_demo)/usr/share/icons
 	cp -p debian/sun_java_app.xpm \
 		$(d_demo)/usr/share/icons/$(basename)-app.xpm
+
+	: # create links for the gnome accessibility bridge
+	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
+	    > debian/$(p_jre).links
 
 	: # create docdir symlinks for $(p_src)
 	( \

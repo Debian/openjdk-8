@@ -1,6 +1,7 @@
 openjdk-6 (6b06-0ubuntu1) UNRELEASED; urgency=low
 
   * New code drop (b06).
+  * Remove java-access-bridge tarball, use an externally built package.
 
  -- Matthias Klose <doko@ubuntu.com>  Fri, 29 Feb 2008 19:18:25 +0100
 

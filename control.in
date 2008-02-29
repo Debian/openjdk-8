@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Matthias Klose <doko@ubuntu.com>
 Uploaders: Michael Koch <konqueror@gmx.de>
-Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, procps, automake, autoconf, ant, @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_syslibs@ @bd_accessbridge@ @bd_plugin@ @bd_netx@ @bd_certificates@
+Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, procps, automake, autoconf, ant, @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_certificates@
 Standards-Version: 3.7.3
 Homepage: http://openjdk.java.net/
 XS-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~ubuntu-java/uj/openjdk6
@@ -21,7 +21,7 @@ Description: OpenJDK Development Kit (JDK)
 Package: openjdk-6-jre
 Architecture: all
 Section: interpreters
-Depends: openjdk-6-bin (>= ${base:Version}), tzdata-java, java-common, ${shlibs:Depends}, ${misc:Depends}
+Depends: openjdk-6-bin (>= ${base:Version}), tzdata-java, libaccess-bridge-java (>= 1.22), java-common, ${shlibs:Depends}, ${misc:Depends}
 Suggests: icedtea-gcjwebplugin, sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
 Description: OpenJDK Java runtime (shared runtime files)
