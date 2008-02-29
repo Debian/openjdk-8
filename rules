@@ -33,8 +33,8 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 # STAGE1_JAVA is either gcj or icedtea, the latter not yet supported
 STAGE1_JAVA = gcj
 #STAGE1_JAVA = icedtea
-OPENJDK_VERSION = b05
-OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-12_feb_2008.tar.gz
+OPENJDK_VERSION = b06
+OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-28_feb_2008.tar.gz
 
 CFLAGS = -Wall -g
 
