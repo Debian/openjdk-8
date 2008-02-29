@@ -33,8 +33,8 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 # STAGE1_JAVA is either gcj or icedtea, the latter not yet supported
 STAGE1_JAVA = gcj
 #STAGE1_JAVA = icedtea
-OPENJDK_VERSION = b24
-OPENJDK_SRC_ZIP = openjdk-$(OPENJDK_VERSION).zip
+OPENJDK_VERSION = b05
+OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-12_feb_2008.tar.gz
 
 CFLAGS = -Wall -g
 
@@ -57,14 +57,11 @@ ifeq ($(distribution),Debian)
 endif
 
 DISTRIBUTION_PATCHES = \
-	debian/patches/gcc-no-werror.diff \
 	debian/patches/gcc-no-stack-protector.diff \
 	debian/patches/gcc-mtune-generic.diff \
-	debian/patches/gcc-4.3.diff \
 	debian/patches/ld-symbolic-functions.diff \
 	$(if $(filter $(DEB_HOST_ARCH), amd64), debian/patches/gcc-jdk-opt-O2.diff) \
 	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
-	debian/patches/arguments.patch \
 	debian/patches/const_strings.patch \
 	debian/patches/print-lsb-release.diff \
 
@@ -79,6 +76,17 @@ ifeq ($(STAGE1_JAVA),gcj)
 	--with-rmic=/usr/bin/grmic$(GCJ_SUFFIX) \
 	--with-jar=/usr/bin/gjar$(GCJ_SUFFIX) \
 	--with-libgcj-jar=/usr/share/java/libgcj$(GCJ_SUFFIX).jar \
+	--with-xalan2-jar=/usr/share/java/xalan2.jar \
+	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
+	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
+else ifeq ($(STAGE1_JAVA),openjdk)
+  CONFIGURE_ARGS = \
+	--with-icedtea \
+	--with-icedtea-home=/usr/lib/jvm/openjdk-6 \
+	--with-java=/usr/lib/jvm/openjdk-6/bin/java \
+	--with-javah=/usr/lib/jvm/openjdk-6/bin/javah \
+	--with-rmic=/usr/lib/jvm/openjdk-6/bin/rmic \
+	--with-jar=/usr/lib/jvm/openjdk-6/bin/jar \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
@@ -102,23 +110,22 @@ endif
 build_target = icedtea-against-icedtea
 #build_target = icedtea-against-ecj.stamp
 
-VENDOR		:= icedtea
-Vendor		:= IcedTea
+VENDOR		:= openjdk
+Vendor		:= OpenJDK
 
 TOP		= usr/lib/jvm
 basedir		= usr/lib/jvm/$(jdirname)
-origin		= icedtea
-basename	= icedtea-java$(shortver)
-jvmver		= 1.7.0
-shortver	= 7
+origin		= openjdk
+basename	= openjdk-$(shortver)
+jvmver		= 1.6.0
+shortver	= 6
 # priority is higher than java-gcj-compat
-priority	= 1060
+priority	= 1061
 jdiralias	= java-$(shortver)-$(origin)
 basedir		= usr/lib/jvm/$(jdiralias)
-jreimg		= openjdk/build/linux-$(jvmarch)/j2re-image
-sdkimg		= openjdk/build/linux-$(jvmarch)/j2sdk-image
+jreimg		= openjdk/control/build/linux-$(jvmarch)/j2re-image
+sdkimg		= openjdk/control/build/linux-$(jvmarch)/j2sdk-image
 security	= etc/$(jdiralias)/security
-browser_plugin_dirs = firefox iceape iceweasel mozilla midbrowser xulrunner firefox-addons
 
 # (most) jre and jdk tools handled by the alternatives system.
 # dups in heimdal-clients, krb5-user: kinit, klist, ktab, no alternatives
@@ -139,7 +146,7 @@ bd_bootstrap = \
 	gcj (>= 4:4.2.1), ecj, java-gcj-compat-dev (>= 1.0.76-2ubuntu3),
 else
 bd_bootstrap = \
-	icedtea-java7-jdk,
+	openjdk-6-jdk,
 endif
 
 bd_gcc = \
@@ -158,7 +165,7 @@ bd_accessbridge = \
 	gawk, pkg-config, libbonobo2-dev, libatspi-dev, at-spi, \
 	x11-utils | $(if $(filter $(distribution),Debian),xbase-clients,xprop),
 bd_plugin = \
-	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),libxul-dev,firefox-dev)),
+	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),xulrunner-1.9-dev,firefox-dev)),
 bd_certificates = openssl, ca-certificates,
 bd_netx = fastjar,
 
@@ -170,6 +177,12 @@ dlopen_recommends = \
 	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
 	libxrandr2, libgl1-mesa-glx
 
+ifneq (,$(findstring xulrunner-1.9, $(bd_plugin)))
+  browser_plugin_dirs = xulrunner-addons
+else
+  browser_plugin_dirs = firefox iceape iceweasel mozilla midbrowser xulrunner
+endif
+
 p_bin	= $(basename)-bin
 p_jre	= $(basename)-jre
 p_jdk	= $(basename)-jdk
@@ -177,6 +190,7 @@ p_demo	= $(basename)-demo
 p_src	= $(basename)-source
 p_doc	= $(basename)-doc
 p_plug	= $(basename)-plugin
+p_plug	= icedtea-gcjwebplugin
 
 d	= debian/tmp
 d_bin	= debian/$(p_bin)
@@ -189,7 +203,7 @@ d_plug	= debian/$(p_plug)
 
 bd_options = -- -Zbzip2
 control_vars = \
-	'-Vbase:Version=7~b21' \
+	'-Vbase:Version=6b05' \
 	'-Vdlopen:Depends=$(dlopen_depends)' \
 	'-Vdlopen:Recommends=$(dlopen_recommends)' \
 
@@ -256,10 +270,10 @@ stamps/icedtea-configure:
 
 unpack: dist-openjdk dist-bridge stamps/unpack
 stamps/unpack: stamps/icedtea-configure
+	$(MAKE) stamps/extract.stamp
 ifeq ($(STAGE1_JAVA),gcj)
-	$(MAKE) stamps/clone-ecj.stamp
+	$(MAKE) stamps/extract-ecj.stamp
 endif
-	$(MAKE) stamps/clone.stamp
 	touch $@
 
 dist-openjdk: $(OPENJDK_SRC_ZIP)

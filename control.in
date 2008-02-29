@@ -1,72 +1,73 @@
-Source: icedtea-java7
+Source: openjdk-6
 Section: devel
 Priority: extra
 Maintainer: Matthias Klose <doko@ubuntu.com>
 Uploaders: Michael Koch <konqueror@gmx.de>
 Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, procps, automake, autoconf, ant, @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_syslibs@ @bd_accessbridge@ @bd_plugin@ @bd_netx@ @bd_certificates@
 Standards-Version: 3.7.3
-Homepage: http://icedtea.classpath.org/
-XS-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~ubuntu-java/uj/icedtea7
-XS-Vcs-Browser: https://code.launchpad.net/~ubuntu-java/uj/icedtea7
+Homepage: http://openjdk.java.net/
+XS-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~ubuntu-java/uj/openjdk6
+XS-Vcs-Browser: https://code.launchpad.net/~ubuntu-java/uj/openjdk6
 
-Package: icedtea-java7-jdk
+Package: openjdk-6-jdk
 Architecture: any
-Depends: icedtea-java7-jre (>= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
-Suggests: icedtea-java7-demo, icedtea-java7-source
-Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk, java7-sdk
-Description: Java runtime based on OpenJDK
- Icedtea is a temporary fork of OpenJDK
+Depends: openjdk-6-jre (>= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Suggests: openjdk-6-demo, openjdk-6-source
+Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk
+Description: OpenJDK Development Kit (JDK)
+ OpenJDK is a development environment for building applications,
+ applets, and components using the Java programming language.
 
-Package: icedtea-java7-jre
+Package: openjdk-6-jre
 Architecture: all
 Section: interpreters
-Depends: icedtea-java7-bin (>= ${base:Version}), java-common, ${shlibs:Depends}, ${misc:Depends}
-Suggests: icedtea-java7-plugin, sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
-Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime, java7-runtime
-Description: Java runtime based on OpenJDK
- Icedtea is a temporary fork of OpenJDK
+Depends: openjdk-6-bin (>= ${base:Version}), java-common, ${shlibs:Depends}, ${misc:Depends}
+Suggests: icedtea-gcjwebplugin, sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
+Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
+Description: OpenJDK Java runtime (shared runtime files)
+ OpenJDK Java runtime
 
-Package: icedtea-java7-bin
+Package: openjdk-6-bin
 Architecture: any
 Section: interpreters
-Depends: icedtea-java7-jre (>= ${binary:Version}), ${shlibs:Depends}, ${dlopen:Depends}, ${misc:Depends}
+Depends: openjdk-6-jre (>= ${binary:Version}), ${shlibs:Depends}, ${dlopen:Depends}, ${misc:Depends}
 Conflicts: binfmt-support (<< 1.1.2)
 Recommends: ${dlopen:Recommends}
 Suggests: binfmt-support
-Description: Java runtime based on OpenJDK
- Icedtea is a temporary fork of OpenJDK
+Description: OpenJDK Java runtime (runtime binaries)
+ OpenJDK Java runtime
 
-Package: icedtea-java7-demo
+Package: openjdk-6-demo
 Architecture: any
-Depends: icedtea-java7-jre (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
-Description: Java runtime based on OpenJDK
- Icedtea is a temporary fork of OpenJDK
+Depends: openjdk-6-jre (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Java runtime based on OpenJDK (demos and examples)
+ OpenJDK Java runtime
 
-Package: icedtea-java7-plugin
+Package: icedtea-gcjwebplugin
 Architecture: any
-Depends: icedtea-java7-jre (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: openjdk-6-jre (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
 Xb-Npp-Applications: ec8030f7-c20a-464f-9b0e-13a3a9e97384, 92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a, aa5ca914-c309-495d-91cf-3141bbb04115
-Xb-Npp-Name: The GCJ Web Browser Plugin (using IcedTea)
-Xb-Npp-MimeType: application/x-java-vm, application/x-java-applet, application/x-java-applet;version=1.1, application/x-java-applet;version=1.1.1, application/x-java-applet;version=1.1.2, application/x-java-applet;version=1.1.3, application/x-java-applet;version=1.2, application/x-java-applet;version=1.2.1, application/x-java-applet;version=1.2.2, application/x-java-applet;version=1.3, application/x-java-applet;version=1.3.1, application/x-java-applet;version=1.4, application/x-java-applet;version=1.4.1, application/x-java-applet;version=1.4.2, application/x-java-applet;version=1.5, application/x-java-applet;version=1.6, application/x-java-applet;version=1.7, application/x-java-applet;jpi-version=1.7.0_00, application/x-java-bean, application/x-java-bean;version=1.1, application/x-java-bean;version=1.1.1, application/x-java-bean;version=1.1.2, application/x-java-bean;version=1.1.3, application/x-java-bean;version=1.2, application/x-java-bean;version=1.2.1, application/x-java-bean;version=1.2.2, application/x-java-bean;version=1.3, application/x-java-bean;version=1.3.1, application/x-java-bean;version=1.4, application/x-java-bean;version=1.4.1, application/x-java-bean;version=1.4.2, application/x-java-bean;version=1.5, application/x-java-bean;version=1.6, application/x-java-bean;version=1.7, application/x-java-bean;jpi-version=1.7.0_00
+Xb-Npp-Name: The GCJ Web Browser Plugin (using OpenJDK)
+Xb-Npp-MimeType: application/x-java-vm, application/x-java-applet, application/x-java-applet;version=1.1, application/x-java-applet;version=1.1.1, application/x-java-applet;version=1.1.2, application/x-java-applet;version=1.1.3, application/x-java-applet;version=1.2, application/x-java-applet;version=1.2.1, application/x-java-applet;version=1.2.2, application/x-java-applet;version=1.3, application/x-java-applet;version=1.3.1, application/x-java-applet;version=1.4, application/x-java-applet;version=1.4.1, application/x-java-applet;version=1.4.2, application/x-java-applet;version=1.5, application/x-java-applet;version=1.6, application/x-java-applet;jpi-version=1.6.0_00, application/x-java-bean, application/x-java-bean;version=1.1, application/x-java-bean;version=1.1.1, application/x-java-bean;version=1.1.2, application/x-java-bean;version=1.1.3, application/x-java-bean;version=1.2, application/x-java-bean;version=1.2.1, application/x-java-bean;version=1.2.2, application/x-java-bean;version=1.3, application/x-java-bean;version=1.3.1, application/x-java-bean;version=1.4, application/x-java-bean;version=1.4.1, application/x-java-bean;version=1.4.2, application/x-java-bean;version=1.5, application/x-java-bean;version=1.6, application/x-java-bean;jpi-version=1.6.0_00
 Description: Java plugin based on OpenJDK and gcjwebplugin
  Icedtea is a temporary fork of OpenJDK
 
-Package: icedtea-java7-source
+Package: openjdk-6-source
 Architecture: all
-Depends: icedtea-java7-jdk (>= ${binary:Version})
-Description: Icedtea Development Kit (JDK) source files
- Icedtea is a development environment for building applications,
+Depends: openjre-6-jre (= ${binary:Version}), openjdk-6-jdk (>= ${binary:Version})
+Description: OpenJDK Development Kit (JDK) source files
+ OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
  .
  This package contains the Java programming language source files
  (src.zip) for all classes that make up the Java core API.
 
-Package: icedtea-java7-doc
+Package: openjdk-6-doc
 Section: doc
 Architecture: all
-Suggests: icedtea-java7-jdk
-Description: Icedtea Development Kit (JDK) documentation
- Icedtea is a development environment for building applications,
+Suggests: openjdk-6-jdk
+Description: OpenJDK Development Kit (JDK) documentation
+ OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
  .
  This package contains the API documentation.

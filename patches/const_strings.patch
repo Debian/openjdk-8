@@ -38,12 +38,3 @@ diff -r 629529e53455 src/os/linux/vm/os_linux.cpp
    }
  
    if (strstr(libpthread_version(), "NPTL")) {
-@@ -4526,7 +4526,7 @@ extern char** environ;
- // Unlike system(), this function can be called from signal handler. It
- // doesn't block SIGINT et al.
- int os::fork_and_exec(char* cmd) {
--  char * argv[4];
-+  const char * argv[4];
-   argv[0] = "sh";
-   argv[1] = "-c";
-   argv[2] = cmd;
