@@ -36,13 +36,7 @@ STAGE1_JAVA = gcj
 OPENJDK_VERSION = b06
 OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-28_feb_2008.tar.gz
 
-CFLAGS = -Wall -g
-
-ifneq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
-	CFLAGS += -O0
-else
-	CFLAGS += -O2
-endif
+unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
 ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
   export GCC_SUFFIX = -4.1

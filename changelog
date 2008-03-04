@@ -1,9 +1,11 @@
-openjdk-6 (6b06-0ubuntu1) UNRELEASED; urgency=low
+openjdk-6 (6b06-0ubuntu1) hardy; urgency=low
 
   * New code drop (b06).
   * Remove java-access-bridge tarball, use an externally built package.
+  * Update IcedTea to 20080304.
+  * Don't use any compiler flags from the environment.
 
- -- Matthias Klose <doko@ubuntu.com>  Fri, 29 Feb 2008 19:18:25 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 04 Mar 2008 09:16:59 +0100
 
 openjdk-6 (6b05-0ubuntu1) hardy; urgency=low
 
