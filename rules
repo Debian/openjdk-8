@@ -59,6 +59,10 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/const_strings.patch \
 	debian/patches/print-lsb-release.diff \
 
+ifeq ($(distribution),Ubuntu)
+  DISTRIBUTION_PATCHES += patches/openjdk-ubuntu-branding.patch
+endif
+
 export DISTRIBUTION_PATCHES
 
 ifeq ($(STAGE1_JAVA),gcj)

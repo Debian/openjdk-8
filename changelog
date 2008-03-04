@@ -1,3 +1,9 @@
+openjdk-6 (6b06-0ubuntu3) hardy; urgency=low
+
+  * debian/patches/openjdk-ubuntu-branding.patch: New patch.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 04 Mar 2008 14:12:16 +0100
+
 openjdk-6 (6b06-0ubuntu2) hardy; urgency=low
 
   * Re-add gawk and pkg-config as build dependencies.

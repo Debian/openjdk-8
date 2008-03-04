@@ -1,0 +1,51 @@
+--- openjdk/hotspot/build/linux/makefiles/vm.make~	2008-03-04 11:25:13.355608754 +0000
++++ openjdk/hotspot/build/linux/makefiles/vm.make	2008-03-04 13:08:06.568730269 +0000
+@@ -98,7 +98,7 @@
+   ifeq ($(CLOSED_DIR_EXISTS), true)
+     VM_DISTRO = -DHOTSPOT_VM_DISTRO="\"Java HotSpot(TM)\""
+   else
+-    VM_DISTRO = -DHOTSPOT_VM_DISTRO="\"IcedTea\""
++    VM_DISTRO = -DHOTSPOT_VM_DISTRO="\"OpenJDK\""
+   endif
+ endif
+ 
+--- openjdk/hotspot/build/windows/projectfiles/common/Makefile~	2008-03-04 11:25:12.915602117 +0000
++++ openjdk/hotspot/build/windows/projectfiles/common/Makefile	2008-03-04 13:05:00.685926270 +0000
+@@ -123,7 +123,7 @@
+ !if exists($(HOTSPOTWORKSPACE)\src\closed)
+ HOTSPOT_VM_DISTRO="Java HotSpot(TM)"
+ !else
+-HOTSPOT_VM_DISTRO="IcedTea"
++HOTSPOT_VM_DISTRO="OpenJDK"
+ !endif
+ !endif
+ 
+--- openjdk/hotspot/src/share/vm/runtime/arguments.cpp~	2008-03-04 11:25:12.915602117 +0000
++++ openjdk/hotspot/src/share/vm/runtime/arguments.cpp	2008-03-04 13:07:20.618037114 +0000
+@@ -28,7 +28,7 @@
+ #include "incls/_precompiled.incl"
+ #include "incls/_arguments.cpp.incl"
+ 
+-#define DEFAULT_VENDOR_URL_BUG "http://icedtea.classpath.org/bugzilla"
++#define DEFAULT_VENDOR_URL_BUG "https://bugs.launchpad.net/ubuntu/+source/openjdk-6/"
+ #define DEFAULT_JAVA_LAUNCHER  "generic"
+ 
+ char**  Arguments::_jvm_flags_array             = NULL;
+--- openjdk/jdk/make/common/shared/Defs.gmk~	2008-03-04 11:25:12.915602117 +0000
++++ openjdk/jdk/make/common/shared/Defs.gmk	2008-03-04 13:04:31.665488503 +0000
+@@ -194,13 +194,13 @@
+ 
+ # Default names
+ LAUNCHER_NAME = java
+-PRODUCT_NAME = IcedTea
++PRODUCT_NAME = OpenJDK
+ PRODUCT_SUFFIX = SE Runtime Environment
+ COMPANY_NAME = Sun Microsystems, Inc.
+ 
+ ifdef OPENJDK
+   LAUNCHER_NAME = java
+-  PRODUCT_NAME = IcedTea
++  PRODUCT_NAME = OpenJDK
+   PRODUCT_SUFFIX = Runtime Environment
+   COMPANY_NAME =
+ endif
