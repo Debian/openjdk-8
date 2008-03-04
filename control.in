@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Matthias Klose <doko@ubuntu.com>
 Uploaders: Michael Koch <konqueror@gmx.de>
-Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, procps, automake, autoconf, ant, @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_certificates@
+Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, gawk, pkg-config, procps, automake, autoconf, ant, @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_certificates@
 Standards-Version: 3.7.3
 Homepage: http://openjdk.java.net/
 XS-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~ubuntu-java/uj/openjdk6
