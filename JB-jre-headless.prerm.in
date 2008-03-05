@@ -2,7 +2,7 @@
 
 basedir=/@basedir@
 basediralias=/@basediralias@
-jre_tools='@jre_tools@'
+jre_tools='@jre_hl_tools@'
 
 rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
 

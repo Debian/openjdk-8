@@ -9,7 +9,7 @@ jdiralias=@jdiralias@
 mandir=/@basediralias@/jre/man
 srcext=1.gz
 dstext=1.gz
-jre_tools='@jre_tools@'
+jre_tools='@jre_hl_tools@'
 
 case "$1" in
 configure)

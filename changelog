@@ -1,8 +1,17 @@
 openjdk-6 (6b06-0ubuntu3) hardy; urgency=low
 
+  * Split out a openjdk-6-jre-headless package, depend on java-common,
+    supporting update-java-alternatives --jre-headless.
+  * Make openjdk-6-jre-headless and openjdk-6-jre architecture any.
+  * New package openjdk-6-jre-lib (arch all).
+  * Remove openjdk-6-bin package.
   * debian/patches/openjdk-ubuntu-branding.patch: New patch.
-
- -- Matthias Klose <doko@ubuntu.com>  Tue, 04 Mar 2008 14:12:16 +0100
+  * Install images/cursors/cursors.properties as a config file.
+  * Do not compress demos and examples in the -demo package.
+  * openjdk-6-jre: Add dependency on libxinerama1.
+  * Update IcedTea to 20080305.
+	
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 05 Mar 2008 10:32:43 +0100
 
 openjdk-6 (6b06-0ubuntu2) hardy; urgency=low
 

@@ -11,30 +11,40 @@ XS-Vcs-Browser: https://code.launchpad.net/~ubuntu-java/uj/openjdk6
 
 Package: openjdk-6-jdk
 Architecture: any
-Depends: openjdk-6-jre (>= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: openjdk-6-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Suggests: openjdk-6-demo, openjdk-6-source
 Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk
 Description: OpenJDK Development Kit (JDK)
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
 
-Package: openjdk-6-jre
-Architecture: all
-Section: interpreters
-Depends: openjdk-6-bin (>= ${base:Version}), tzdata-java, libaccess-bridge-java (>= 1.22), java-common, ${shlibs:Depends}, ${misc:Depends}
-Suggests: icedtea-gcjwebplugin, sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
-Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
-Description: OpenJDK Java runtime (shared runtime files)
- OpenJDK Java runtime
-
-Package: openjdk-6-bin
+Package: openjdk-6-jre-headless
 Architecture: any
 Section: interpreters
-Depends: openjdk-6-jre (>= ${binary:Version}), ${shlibs:Depends}, ${dlopen:Depends}, ${misc:Depends}
+Depends: openjdk-6-jre-lib (>= ${base:Version}), tzdata-java, libaccess-bridge-java (>= 1.22), java-common (>= 0.27ubuntu2), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Recommends: ${dlopenjl:Recommends}
+Suggests: sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
+Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
+Description: OpenJDK Java runtime (headless)
+ OpenJDK Java runtime, headless.
+
+Package: openjdk-6-jre
+Architecture: any
+Section: interpreters
+Depends: openjdk-6-jre-headless (= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}
 Conflicts: binfmt-support (<< 1.1.2)
+Recommends: ${dlopenjre:Recommends}
+Suggests: binfmt-support, icedtea-gcjwebplugin
+Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
+Description: OpenJDK Java runtime
+ OpenJDK Java runtime
+
+Package: openjdk-6-jre-lib
+Architecture: all
+Section: interpreters
+Depends: openjdk-6-jre-headless (>= ${binary:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
-Suggests: binfmt-support
-Description: OpenJDK Java runtime (runtime binaries)
+Description: OpenJDK Java runtime (architecture independent libraries)
  OpenJDK Java runtime
 
 Package: openjdk-6-demo
@@ -54,7 +64,7 @@ Description: Java plugin based on OpenJDK and gcjwebplugin
 
 Package: openjdk-6-source
 Architecture: all
-Depends: openjre-6-jre (= ${binary:Version}), openjdk-6-jdk (>= ${binary:Version})
+Depends: openjdk-6-jre (= ${binary:Version}), openjdk-6-jdk (>= ${binary:Version})
 Description: OpenJDK Development Kit (JDK) source files
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.

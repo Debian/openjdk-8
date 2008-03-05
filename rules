@@ -60,7 +60,7 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/print-lsb-release.diff \
 
 ifeq ($(distribution),Ubuntu)
-  DISTRIBUTION_PATCHES += patches/openjdk-ubuntu-branding.patch
+  DISTRIBUTION_PATCHES += debian/patches/openjdk-ubuntu-branding.patch
 endif
 
 export DISTRIBUTION_PATCHES
@@ -128,15 +128,16 @@ security	= etc/$(jdiralias)/security
 # (most) jre and jdk tools handled by the alternatives system.
 # dups in heimdal-clients, krb5-user: kinit, klist, ktab, no alternatives
 all_jre_tools	= $(notdir $(wildcard $(jreimg)/bin/*))
+jre_tools	= $(filter javaws pluginappletviewer policytool, $(all_jre_tools))
+jre_hl_tools	:= $(filter-out $(jre_tools), $(all_jre_tools))
+
 corba_tools	= orbd servertool tnameserv
-jre_tools	= $(filter-out $(corba_tools), $(all_jre_tools))
-jre_tools_alt	= $(filter-out kinit klist ktab, $(jre_tools)) $(corba_tools)
+jre_hl_tools_alt= $(filter-out $(corba_tools), $(jre_hl_tools)) $(corba_tools)
+jre_tools_alt	= $(filter-out kinit klist ktab, $(jre_tools))
 
 all_jdk_tools	= $(notdir $(wildcard $(sdkimg)/bin/*))
 jdk_tools	= $(filter-out $(all_jre_tools), $(all_jdk_tools))
 jdk_tools_alt	= $(jdk_tools)
-
-jre_manpages_re:= $(shell echo $(jre_tools) $(corba_tools) | tr -s ' ' '|')
 
 # build dependencies
 ifeq ($(STAGE1_JAVA),gcj)
@@ -164,13 +165,15 @@ bd_plugin = \
 bd_certificates = openssl, ca-certificates,
 bd_netx = fastjar,
 
-dlopen_depends =
-dlopen_recommends = \
-	liblcms1, \
-	lesstif2, \
+dlopen_hl_depends = \
 	libcupsys2, \
+	liblcms1
+dlopen_hl_recommends = \
+dlopen_jre_depends = \
 	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
-	libxrandr2, libgl1-mesa-glx
+	libxrandr2, libxinerama1, libgl1-mesa-glx
+dlopen_jre_recommends = \
+	lesstif2
 
 ifneq (,$(findstring xulrunner-1.9, $(bd_plugin)))
   browser_plugin_dirs = xulrunner-addons
@@ -178,8 +181,9 @@ else
   browser_plugin_dirs = firefox iceape iceweasel mozilla midbrowser xulrunner
 endif
 
-p_bin	= $(basename)-bin
 p_jre	= $(basename)-jre
+p_jrehl	= $(basename)-jre-headless
+p_lib	= $(basename)-jre-lib
 p_jdk	= $(basename)-jdk
 p_demo	= $(basename)-demo
 p_src	= $(basename)-source
@@ -188,8 +192,9 @@ p_plug	= $(basename)-plugin
 p_plug	= icedtea-gcjwebplugin
 
 d	= debian/tmp
-d_bin	= debian/$(p_bin)
 d_jre	= debian/$(p_jre)
+d_jrehl	= debian/$(p_jrehl)
+d_lib	= debian/$(p_lib)
 d_jdk	= debian/$(p_jdk)
 d_demo	= debian/$(p_demo)
 d_src	= debian/$(p_src)
@@ -198,9 +203,11 @@ d_plug	= debian/$(p_plug)
 
 bd_options = -- -Zbzip2
 control_vars = \
-	'-Vbase:Version=6b05' \
-	'-Vdlopen:Depends=$(dlopen_depends)' \
-	'-Vdlopen:Recommends=$(dlopen_recommends)' \
+	'-Vbase:Version=6b06' \
+	'-Vdlopenhl:Depends=$(dlopen_hl_depends)' \
+	'-Vdlopenhl:Recommends=$(dlopen_hl_recommends)' \
+	'-Vdlopenjre:Depends=$(dlopen_jre_depends)' \
+	'-Vdlopenjre:Recommends=$(dlopen_jre_recommends)' \
 
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
@@ -242,6 +249,7 @@ packaging-files:
 	      -e 's/@tag@/$(tag)/g' \
 	      -e 's/@priority@/$(priority)/g' \
 	      -e 's/@mantag@/$(mantag)/g' \
+	      -e 's/@jre_hl_tools@/$(jre_hl_tools_alt)/g' \
 	      -e 's/@jre_tools@/$(jre_tools_alt)/g' \
 	      -e 's/@jdk_tools@/$(jdk_tools_alt)/g' \
 	      -e 's/@corba_tools@/$(corba_tools)/g' \
@@ -297,23 +305,27 @@ stamps/cacerts: stamps/build
 	perl debian/generate-cacerts.pl $(sdkimg)/bin/keytool
 	touch $@
 
-clean:
+clean: debian-clean
 	dh_testdir
 	dh_testroot
 	rm -rf stamps
 	[ ! -f Makefile ] || $(MAKE) distclean
 	rm -rf openjdk openjdk-ecj
+	rm -rf cacerts build-cacerts
+	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
+	rm -rf autom4te.cache
+	dh_clean
 
+debian-clean:
+	dh_testdir
+	dh_testroot
+	dh_clean -k
 	for f in debian/*.in; do \
 	  f2=$$(echo $$f | sed 's/JB/$(basename)/;s/\.in$$//'); \
 	  case "$$f2" in debian/control) continue; esac; \
 	  rm -f $$f2; \
 	done
 	rm -f debian/*.install debian/*.links
-	rm -rf cacerts build-cacerts
-	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
-	rm -rf autom4te.cache
-	dh_clean 
 
 install: packaging-files
 	dh_testdir
@@ -348,6 +360,7 @@ endif
 
 	mkdir -p $(d)/etc/$(jdiralias)/security
 	mkdir -p $(d)/etc/$(jdiralias)/management
+	mkdir -p $(d)/etc/$(jdiralias)/images/cursors
 
 	: # rename templates (comments only) to config files,
 	: # and move to /etc/$(jdiralias)
@@ -365,6 +378,7 @@ endif
 	  accessibility.properties \
 	  calendars.properties \
 	  content-types.properties \
+	  images/cursors/cursors.properties \
 	  logging.properties \
 	  sound.properties \
 	  flavormap.properties \
@@ -397,28 +411,44 @@ endif
 	: # cp -p debian/font.properties.ja $(d_jbin)/etc/$(jdiralias)/.
 
 	: # now move things to the packages. it is so ****** to create
-	: # .install files first. dh_movefiles did do job perfectly
+	: # .install files first. dh_movefiles did do the job perfectly
 
-	: # $(p_bin).install
+	: # $(p_jrehl).install / $(p_jre).install
 	( \
 	  echo 'etc'; \
 	  echo '$(basedir)/jre/lib/jexec'; \
-	  echo '$(basedir)/jre/bin'; \
-	  echo '$(basedir)/jre/man'; \
+	  echo '$(basedir)/jre/man/ja'; \
 	  echo '$(basedir)/man/ja'; \
-	  cd $(CURDIR)/$(d); \
-	  for i in $(basedir)/jre/lib/$(archdir)/*; do \
-	    case "$$i" in */gcjwebplugin.so) continue; esac; \
-	    echo $$i; \
-	  done; \
-	  cd $(CURDIR)/$(d); \
-	  for i in $(basedir)/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
-	    [ -h $$i ] || continue; \
-	    echo $$i; \
-	  done; \
-	) > debian/$(p_bin).install
+	) > debian/$(p_jrehl).install
+	rm -f debian/$(p_jre).install
 
-	: # $(p_jre).install
+	cd $(CURDIR)/$(d); \
+	for i in $(basedir)/jre/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
+	  case "$$i" in \
+	    */javaws*|*/pluginappletviewer*|*/policytool*) echo $$i >> ../$(p_jre).install;; \
+	    *) echo $$i >> ../$(p_jrehl).install; \
+	  esac; \
+	done
+
+	cd $(CURDIR)/$(d); \
+	for i in $(basedir)/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
+	  [ -h $$i ] || continue; \
+	  case "$$i" in \
+	    */javaws*|*/pluginappletviewer*|*/policytool*) echo $$i >> ../$(p_jre).install;; \
+	    *) echo $$i >> ../$(p_jrehl).install; \
+	  esac; \
+	done; \
+
+	cd $(CURDIR)/$(d); \
+	for i in $(basedir)/jre/lib/$(archdir)/*; do \
+	  case "$$i" in \
+	    */gcjwebplugin.so) continue;; \
+	    */libsplashscreen.so|*/libjsoundalsa.so|*/xawt) echo $$i >> ../$(p_jre).install;; \
+	    *) echo $$i >> ../$(p_jrehl).install; \
+	  esac; \
+	done
+
+	: # $(p_lib).install
 	( \
 	  echo '$(basedir)/jre/LICENSE'; \
 	  echo '$(basedir)/jre/ASSEMBLY_EXCEPTION'; \
@@ -429,7 +459,7 @@ endif
 	    case "$$i" in */$(archdir)|*/jexec) continue; esac; \
 	    echo $$i; \
 	  done; \
-	) > debian/$(p_jre).install
+	) > debian/$(p_lib).install
 
 	: # $(p_jdk).install
 	( \
@@ -500,86 +530,97 @@ endif
 	    -e '//        permission java.security.AllPermission;\' \
 	    -e '//};\' \
 	    -e '' \
-	    $(d_bin)/$(security)/java.policy
+	    $(d_jrehl)/$(security)/java.policy
 # 'make Emacs Makefile mode happy
 
-	dh_installdirs -p$(p_bin) \
+	dh_installdirs -p$(p_jrehl) \
+		usr/share/binfmts
+
+	dh_installdirs -p$(p_jre) \
 		usr/share/applications \
 		usr/share/control-center-2.0/capplets \
 		usr/share/application-registry \
 		usr/share/mime-info \
-		usr/share/icons \
-		usr/share/binfmts
+		usr/share/icons
 
 	: # add GNOME stuff
 	cp -p debian/$(basename)-java.desktop \
-	      $(d_bin)/usr/share/applications/
+	      $(d_jre)/usr/share/applications/
 	cp -p debian/$(basename)-policytool.desktop \
-	      $(d_bin)/usr/share/control-center-2.0/capplets/
+	      $(d_jre)/usr/share/control-center-2.0/capplets/
 ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
   ifneq ($(with_javaws),yes)
 	cp -p debian/$(basename)-{java,javaws}.desktop \
-	      $(d_bin)/usr/share/applications/
+	      $(d_jre)/usr/share/applications/
   endif
 # not yet in OpenJDK
 #	cp -p debian/$(basename)-controlpanel.desktop \
-#	      $(d_bin)/usr/share/control-center-2.0/capplets/
+#	      $(d_jre)/usr/share/control-center-2.0/capplets/
 	cp -p debian/$(basename)-policytool.desktop \
-	      $(d_bin)/usr/share/control-center-2.0/capplets/
+	      $(d_jre)/usr/share/control-center-2.0/capplets/
 endif
 
 	for i in archive web-start; do \
 	  cp debian/$(basename)-$$i.applications \
-	    $(d_bin)/usr/share/application-registry/; \
-	  cp debian/$(basename)-$$i.keys $(d_bin)/usr/share/mime-info/; \
-	  cp debian/$(basename)-$$i.mime $(d_bin)/usr/share/mime-info/; \
+	    $(d_jre)/usr/share/application-registry/; \
+	  cp debian/$(basename)-$$i.keys $(d_jre)/usr/share/mime-info/; \
+	  cp debian/$(basename)-$$i.mime $(d_jre)/usr/share/mime-info/; \
 	done
 
 	cp -p debian/sun_java.xpm \
-		$(d_bin)/usr/share/icons/$(basename).xpm
+		$(d_jre)/usr/share/icons/$(basename).xpm
 
 	mkdir -p $(d_demo)/usr/share/icons
 	cp -p debian/sun_java_app.xpm \
 		$(d_demo)/usr/share/icons/$(basename)-app.xpm
 
-	: # create links for the gnome accessibility bridge
-	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
-	    > debian/$(p_jre).links
+	: # create docdir symlinks for $(p_jrehl)
+	( \
+	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jrehl); \
+	) > $(d_jrehl).links
 
 	: # create docdir symlinks for $(p_src)
 	( \
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_src); \
-	) > debian/$(p_src).links
+	) > $(d_src).links
 
 	: # create docdir symlinks for $(p_jdk)
 	( \
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jdk); \
-	) > debian/$(p_jdk).links
+	) > $(d_jdk).links
 
 	: # create docdir symlinks for $(p_plug)
 	( \
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_plug); \
-	) > debian/$(p_plug).links
+	) > $(d_plug).links
 
-	: # create docdir symlinks for $(p_bin)
+	: # create docdir symlinks for $(p_lib)
 	( \
-	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_bin); \
-	) > debian/$(p_bin).links
+	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_lib); \
+	) > $(d_lib).links
+
+	: # create links for the gnome accessibility bridge
+	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
+	    >> $(d_jrehl).links
 
 	: # create links for the config files
-	find $(d_bin)/etc/$(jdiralias) -type f ! -name jvm.cfg \
-	    -printf "etc/$(jdiralias)/%P $(basedir)/jre/lib/%P\n" >> $(d_bin).links
+	find $(d_jrehl)/etc/$(jdiralias) -type f ! -name jvm.cfg \
+	    -printf "etc/$(jdiralias)/%P $(basedir)/jre/lib/%P\n" >> $(d_jrehl).links
 	echo "etc/$(jdiralias)/jvm.cfg $(basedir)/jre/lib/$(archdir)/jvm.cfg" \
-	    >> $(d_bin).links
+	    >> $(d_jrehl).links
 
+	@echo JRE_HL_TOOLS: $(jre_hl_tools_alt)
 	@echo JRE_TOOLS: $(jre_tools_alt)
 	@echo JDK_TOOLS: $(jdk_tools_alt)
 	( \
 	  echo 'name=$(jdirname)'; \
 	  echo 'alias=$(jdiralias)'; \
 	  echo 'priority=$(priority)'; \
-	  echo 'section=non-free'; \
+	  echo 'section=main'; \
 	  echo ''; \
+	  for i in $(jre_hl_tools_alt); do \
+	    echo "hl $$i /$(TOP)/$(jdiralias)/jre/bin/$$i"; \
+	  done; \
 	  for i in $(jre_tools_alt); do \
 	    echo "jre $$i /$(TOP)/$(jdiralias)/jre/bin/$$i"; \
 	  done; \
@@ -589,27 +630,20 @@ endif
 	  for i in $(browser_plugin_dirs); do \
 	    echo "plugin $$i-javaplugin.so /$(TOP)/$(jdiralias)/jre/lib/$(archdir)/gcjwebplugin.so"; \
 	  done; \
-	) > $(d_bin)/$(TOP)/.$(jdiralias).jinfo
+	) > $(d_jrehl)/$(TOP)/.$(jdiralias).jinfo
 
 	( \
 	  echo 'package $(basename)'; \
 	  echo 'interpreter /$(basedir)/jre/lib/jexec'; \
 	  echo 'magic PK\x03\x04'; \
-	) > $(d_bin)/usr/share/binfmts/$(basename)
+	) > $(d_jrehl)/usr/share/binfmts/$(basename)
 
 
 # Build architecture independant packages
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs -p$(p_jre) -p$(p_doc)
-	dh_installdocs -p$(p_jre) \
-		debian/JAVA_HOME \
-		debian/README.alternatives
-	for i in AUTHORS NEWS README; do \
-	  cp -p $$i $(d_jre)/usr/share/doc/$(p_jre)/$$i.icedtea; \
-	done
-
+	dh_installchangelogs -p$(p_doc)
 	dh_installdocs -p$(p_doc) 
 	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
 	for i in openjdk/control/build/linux-$(jvmarch)/docs/*; do \
@@ -621,17 +655,28 @@ binary-indep: build install
 #	dh_installmenu -i
 #	dh_installdebconf -i
 	dh_link -i
-	dh_compress -i
+	dh_compress -i -Xexamples -Xdemos
 	dh_fixperms -i
 	dh_installdeb -i
 	dh_gencontrol -i -- $(control_vars)
 	dh_md5sums -i
 	dh_builddeb -i $(bd_options)
 
+absarchdir = $(CURDIR)/$(d_jrehl)/$(basedir)/jre/lib/$(archdir)
+shlibdeps_ld_path =$(absarchdir):$(absarchdir)/client:$(absarchdir)/native_threads
+
 # Build architecture dependant packages
 binary-arch: build install
 	dh_testdir
 	dh_testroot
+	dh_installchangelogs -p$(p_jrehl)
+	dh_installdocs -p$(p_jrehl) \
+		debian/JAVA_HOME \
+		debian/README.alternatives
+	mv $(d_jrehl)/usr/share/doc/$(p_jrehl) $(d_jrehl)/usr/share/doc/$(p_jre)
+	for i in AUTHORS NEWS README; do \
+	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
+	done
 #	dh_installchangelogs -s ChangeLog
 #	dh_installdocs -s
 #	dh_installmenu -s
@@ -640,10 +685,10 @@ binary-arch: build install
 	dh_strip -s
 	dh_compress -s
 	dh_fixperms -s
-	dh_makeshlibs -p$(p_bin)
-	ld_path=$(CURDIR)/$(d_bin)/$(basedir)/jre/lib/$(archdir) \
-	    dh_shlibdeps -L $(p_bin) \
-		-l$$ld_path:$$ld_path/client:$$ld_path/native_threads
+	dh_makeshlibs -p$(p_jrehl) -p$(p_jre)
+	dh_shlibdeps -s -L $(p_jrehl) \
+		-l$(shlibdeps_ld_path) \
+		--
 	dh_installdeb -s
 	dh_gencontrol -s -- $(control_vars)
 	dh_md5sums -s
