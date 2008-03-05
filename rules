@@ -18,6 +18,7 @@ ifneq (,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
   PARALLEL_COMPILE_JOBS = $(subst parallel=,,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
   export PARALLEL_COMPILE_JOBS
 endif
+with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
 
 distribution := $(shell lsb_release --id --short)
 distrel := $(shell lsb_release --codename --short)
@@ -164,6 +165,7 @@ bd_openjdk = \
 bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),xulrunner-1.9-dev,firefox-dev)),
 bd_netx = fastjar,
+bd_mauve = mauve, xvfb, autoconf, automake
 
 dlopen_hl_depends = \
 	libcupsys2, \
@@ -218,6 +220,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_syslibs@/$(bd_syslibs)/g' \
 	      -e 's/@bd_plugin@/$(bd_plugin)/g' \
 	      -e 's/@bd_netx@/$(bd_netx)/g' \
+	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	    debian/control.in > debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
@@ -289,12 +292,36 @@ endif
 	$(MAKE) stamps/patch.stamp
 	touch $@
 
-build: stamps/build
+build: stamps/build $(if $(with_check),stamps/mauve-check)
 stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), powerpc))
 	sh -c 'sh debian/buildwatch.sh &'
 endif
 	$(MAKE) $(build_target)
+	touch $@
+
+stamps/mauve-build: stamps/build
+	rm -rf mauve
+	tar xf /usr/src/mauve.tar.gz
+	cd mauve \
+	    && aclocal \
+	    && automake \
+	    && autoconf \
+	    && PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH ./configure 
+	PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH $(MAKE) -C mauve
+	touch $@
+
+stamps/mauve-check: stamps/build stamps/mauve-build
+ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
+	cd mauve && \
+	    JAVA_HOME=$(CURDIR)/$(sdkimg) \
+	    PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
+		xvfb-run java Harness \
+		    -vm $(CURDIR)/$(sdkimg)/bin/java \
+		    -file $(CURDIR)/debian/mauve_tests \
+		    -timeout 30000 2>&1 \
+		| tee mauve_output
+endif
 	touch $@
 
 clean: debian-clean
@@ -305,6 +332,7 @@ clean: debian-clean
 	rm -rf openjdk openjdk-ecj
 	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
 	rm -rf autom4te.cache
+	rm -rf mauve
 	dh_clean
 
 debian-clean:
@@ -666,6 +694,11 @@ binary-arch: build install
 	for i in AUTHORS NEWS README; do \
 	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
 	done
+ifeq ($(with_check),yes)
+	mkdir -p $(d_jdk)/usr/share/doc/$(p_jre)
+	cp mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
+endif
+
 #	dh_installchangelogs -s ChangeLog
 #	dh_installdocs -s
 #	dh_installmenu -s

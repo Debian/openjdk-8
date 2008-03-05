@@ -12,6 +12,8 @@ openjdk-6 (6b06-0ubuntu3) hardy; urgency=low
   * Update IcedTea to 20080305.
   * Don't generate cacerts ourself, but depend on ca-certificates,
     fix location of javax.net.ssl.trustStore property.
+  * Build-depend on mauve and xvfb; run some mauve tests (the list of
+    tests taken from the Fedora package).
 	
  -- Matthias Klose <doko@ubuntu.com>  Wed, 05 Mar 2008 10:32:43 +0100
 
