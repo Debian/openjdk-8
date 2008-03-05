@@ -58,6 +58,7 @@ DISTRIBUTION_PATCHES = \
 	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
 	debian/patches/const_strings.patch \
 	debian/patches/print-lsb-release.diff \
+	debian/patches/javax.net.ssl.trustStore.diff \
 
 ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += debian/patches/openjdk-ubuntu-branding.patch
@@ -162,7 +163,6 @@ bd_openjdk = \
 	libxalan2-java, liblcms1-dev, libxinerama-dev,
 bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),xulrunner-1.9-dev,firefox-dev)),
-bd_certificates = openssl, ca-certificates,
 bd_netx = fastjar,
 
 dlopen_hl_depends = \
@@ -218,7 +218,6 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_syslibs@/$(bd_syslibs)/g' \
 	      -e 's/@bd_plugin@/$(bd_plugin)/g' \
 	      -e 's/@bd_netx@/$(bd_netx)/g' \
-	      -e 's/@bd_certificates@/$(bd_certificates)/g' \
 	    debian/control.in > debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
@@ -290,19 +289,12 @@ endif
 	$(MAKE) stamps/patch.stamp
 	touch $@
 
-build: stamps/build stamps/cacerts
+build: stamps/build
 stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), powerpc))
 	sh -c 'sh debian/buildwatch.sh &'
 endif
 	$(MAKE) $(build_target)
-	touch $@
-
-stamps/cacerts: stamps/build
-	rm -rf build-cacerts
-	mkdir build-cacerts
-	cat /etc/ssl/certs/ca-certificates.crt > build-cacerts/cert.pem
-	perl debian/generate-cacerts.pl $(sdkimg)/bin/keytool
 	touch $@
 
 clean: debian-clean
@@ -311,7 +303,6 @@ clean: debian-clean
 	rm -rf stamps
 	[ ! -f Makefile ] || $(MAKE) distclean
 	rm -rf openjdk openjdk-ecj
-	rm -rf cacerts build-cacerts
 	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
 	rm -rf autom4te.cache
 	dh_clean
@@ -339,8 +330,6 @@ install: packaging-files
 	cp -a $(sdkimg)/* $(d)/$(basedir)/
 	cp -a $(jreimg)/man $(d)/$(basedir)/jre/
 	chmod -R u+w $(d)
-
-	cp -a cacerts $(d)/$(basedir)/jre/lib/security/
 
 	: # remove files, which are not installed at all
 	rm -f  $(d)/$(basedir)/bin/java-rmi.cgi

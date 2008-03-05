@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Matthias Klose <doko@ubuntu.com>
 Uploaders: Michael Koch <konqueror@gmx.de>
-Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, gawk, pkg-config, procps, automake, autoconf, ant, @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_certificates@
+Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, gawk, pkg-config, procps, automake, autoconf, ant, @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_syslibs@ @bd_plugin@ @bd_netx@
 Standards-Version: 3.7.3
 Homepage: http://openjdk.java.net/
 XS-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~ubuntu-java/uj/openjdk6
@@ -21,7 +21,7 @@ Description: OpenJDK Development Kit (JDK)
 Package: openjdk-6-jre-headless
 Architecture: any
 Section: interpreters
-Depends: openjdk-6-jre-lib (>= ${base:Version}), tzdata-java, libaccess-bridge-java (>= 1.22), java-common (>= 0.27ubuntu2), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: openjdk-6-jre-lib (>= ${base:Version}), tzdata-java, libaccess-bridge-java (>= 1.22), ca-certificates, java-common (>= 0.27ubuntu2), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}
 Suggests: sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless

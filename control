@@ -3,7 +3,7 @@ Section: devel
 Priority: extra
 Maintainer: Matthias Klose <doko@ubuntu.com>
 Uploaders: Michael Koch <konqueror@gmx.de>
-Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, gawk, pkg-config, procps, automake, autoconf, ant, g++-4.2 [amd64 powerpc], g++-4.1 [i386 lpia], gcj (>= 4:4.2.1), ecj, java-gcj-compat-dev (>= 1.0.76-2ubuntu3), libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, libxalan2-java, liblcms1-dev, libxinerama-dev, libjpeg62-dev, libpng12-dev, libgif-dev | libungif4-dev, zlib1g-dev, libgtk2.0-dev, xulrunner-1.9-dev, fastjar, openssl, ca-certificates,
+Build-Depends: debhelper (>= 5), autotools-dev, unzip, zip, bzip2, m4, lsb-release, wget, gawk, pkg-config, procps, automake, autoconf, ant, g++-4.2 [amd64 powerpc], g++-4.1 [i386 lpia], gcj (>= 4:4.2.1), ecj, java-gcj-compat-dev (>= 1.0.76-2ubuntu3), libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, libxalan2-java, liblcms1-dev, libxinerama-dev, libjpeg62-dev, libpng12-dev, libgif-dev | libungif4-dev, zlib1g-dev, libgtk2.0-dev, xulrunner-1.9-dev, fastjar,
 Standards-Version: 3.7.3
 Homepage: http://openjdk.java.net/
 XS-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~ubuntu-java/uj/openjdk6
@@ -21,7 +21,7 @@ Description: OpenJDK Development Kit (JDK)
 Package: openjdk-6-jre-headless
 Architecture: any
 Section: interpreters
-Depends: openjdk-6-jre-lib (>= ${base:Version}), tzdata-java, libaccess-bridge-java (>= 1.22), java-common (>= 0.27ubuntu2), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: openjdk-6-jre-lib (>= ${base:Version}), tzdata-java, libaccess-bridge-java (>= 1.22), ca-certificates, java-common (>= 0.27ubuntu2), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}
 Suggests: sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless

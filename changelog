@@ -10,6 +10,8 @@ openjdk-6 (6b06-0ubuntu3) hardy; urgency=low
   * Do not compress demos and examples in the -demo package.
   * openjdk-6-jre: Add dependency on libxinerama1.
   * Update IcedTea to 20080305.
+  * Don't generate cacerts ourself, but depend on ca-certificates,
+    fix location of javax.net.ssl.trustStore property.
 	
  -- Matthias Klose <doko@ubuntu.com>  Wed, 05 Mar 2008 10:32:43 +0100
 

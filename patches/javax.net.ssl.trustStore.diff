@@ -1,0 +1,11 @@
+--- openjdk/hotspot/src/os/linux/vm/os_linux.cpp~	2008-03-04 15:32:41.695287399 +0100
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2008-03-04 16:34:33.301276130 +0100
+@@ -390,7 +390,7 @@
+   SystemProperty* sp = Arguments::system_properties();
+   Arguments::PropertyList_add (&sp,
+ 			       "javax.net.ssl.trustStore",
+-			       "/etc/pki/tls/certs/ca-bundle.crt");
++			       "/etc/ssl/certs/ca-certificates.crt");
+   Arguments::PropertyList_add (&sp,
+ 			       "javax.net.ssl.trustStoreType",
+ 			       "CertBundle");
