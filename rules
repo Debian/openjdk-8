@@ -141,6 +141,8 @@ all_jdk_tools	= $(notdir $(wildcard $(sdkimg)/bin/*))
 jdk_tools	= $(filter-out $(all_jre_tools), $(all_jdk_tools))
 jdk_tools_alt	= $(jdk_tools)
 
+pkg_compress	= lzma
+
 # build dependencies
 ifeq ($(STAGE1_JAVA),gcj)
 bd_bootstrap = \
@@ -166,6 +168,7 @@ bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),xulrunner-1.9-dev,firefox-dev)),
 bd_netx = fastjar,
 bd_mauve = mauve, xvfb, autoconf, automake
+bd_compress = $(pkg_compress),
 
 dlopen_hl_depends = \
 	libcupsys2, \
@@ -203,13 +206,20 @@ d_src	= debian/$(p_src)
 d_doc	= debian/$(p_doc)
 d_plug	= debian/$(p_plug)
 
-bd_options = -- -Zbzip2
 control_vars = \
 	'-Vbase:Version=6b06' \
 	'-Vdlopenhl:Depends=$(dlopen_hl_depends)' \
 	'-Vdlopenhl:Recommends=$(dlopen_hl_recommends)' \
 	'-Vdlopenjre:Depends=$(dlopen_jre_depends)' \
 	'-Vdlopenjre:Recommends=$(dlopen_jre_recommends)' \
+
+ifeq ($(pkg_compress),lzma)
+  bd_options = -- -Zlzma
+  control_vars += '-Vdpkg:Depends=dpkg (>= 1.14.12ubuntu3)'
+else ifeq ($(pkg_compress),bzip2)
+  bd_options = -- -Zbzip2
+  control_vars += '-Vdpkg:Depends=dpkg (>= 1.10.24)'
+endif
 
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
@@ -221,6 +231,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_plugin@/$(bd_plugin)/g' \
 	      -e 's/@bd_netx@/$(bd_netx)/g' \
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
+	      -e 's/@bd_compress@/$(pkg_compress)/g' \
 	    debian/control.in > debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
