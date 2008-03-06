@@ -33,7 +33,7 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 
 # STAGE1_JAVA is either gcj or icedtea, the latter not yet supported
 STAGE1_JAVA = gcj
-#STAGE1_JAVA = icedtea
+#STAGE1_JAVA = openjdk
 OPENJDK_VERSION = b06
 OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-28_feb_2008.tar.gz
 
@@ -79,6 +79,8 @@ ifeq ($(STAGE1_JAVA),gcj)
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
+  build_target = icedtea-against-icedtea
+  req_openjdk_ver = $${binary:Version}
 else ifeq ($(STAGE1_JAVA),openjdk)
   CONFIGURE_ARGS = \
 	--with-icedtea \
@@ -90,6 +92,8 @@ else ifeq ($(STAGE1_JAVA),openjdk)
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
+  build_target = #icedtea-against-icedtea
+  req_openjdk_ver = 6b06
 else ifeq ($(STAGE1_JAVA),icedtea)
   CONFIGURE_ARGS = \
 	--with-icedtea \
@@ -101,14 +105,13 @@ else ifeq ($(STAGE1_JAVA),icedtea)
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
+  build_target = #icedtea-against-icedtea
+  req_openjdk_ver = 6b06
 endif
 
 # make the build log comparable
 #export HOTSPOT_BUILD_JOBS = 1
 #export ALT_PARALLEL_COMPILE_JOBS = 1
-
-build_target = icedtea-against-icedtea
-#build_target = icedtea-against-ecj.stamp
 
 VENDOR		:= openjdk
 Vendor		:= OpenJDK
@@ -147,9 +150,11 @@ pkg_compress	= lzma
 ifeq ($(STAGE1_JAVA),gcj)
 bd_bootstrap = \
 	gcj (>= 4:4.2.1), ecj, java-gcj-compat-dev (>= 1.0.76-2ubuntu3),
-else
+else ifeq ($(STAGE1_JAVA),openjdk)
 bd_bootstrap = \
-	openjdk-6-jdk,
+	openjdk-6-jdk (>= $(req_openjdk_ver)),
+else
+	icedtea-java7-jdk (>= $(req_openjdk_ver)),
 endif
 
 bd_gcc = \
@@ -207,7 +212,7 @@ d_doc	= debian/$(p_doc)
 d_plug	= debian/$(p_plug)
 
 control_vars = \
-	'-Vbase:Version=6b06' \
+	'-Vbase:Version=$(req_openjdk_ver)' \
 	'-Vdlopenhl:Depends=$(dlopen_hl_depends)' \
 	'-Vdlopenhl:Recommends=$(dlopen_hl_recommends)' \
 	'-Vdlopenjre:Depends=$(dlopen_jre_depends)' \
