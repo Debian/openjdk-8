@@ -5,6 +5,7 @@ openjdk-6 (6b06-0ubuntu4) UNRELEASED; urgency=low
   * debian/README.alternatives.in: Update for --jre-headless.
   * debian/rules: Fix paths for OpenJDK based bootstrap.
   * Compress packages using lzma.
+  * Drop build dependency on zip, unzip.
 
  -- Matthias Klose <doko@ubuntu.com>  Thu, 06 Mar 2008 12:47:15 +0100
 
