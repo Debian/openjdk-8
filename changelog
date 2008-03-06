@@ -14,8 +14,10 @@ openjdk-6 (6b06-0ubuntu3) hardy; urgency=low
     fix location of javax.net.ssl.trustStore property.
   * Build-depend on mauve and xvfb; run some mauve tests (the list of
     tests taken from the Fedora package).
+  * Keep a backup of the `generated' directory; some files are regenerated
+    differently, increasing the size of the diff.
 	
- -- Matthias Klose <doko@ubuntu.com>  Wed, 05 Mar 2008 10:32:43 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 06 Mar 2008 10:05:39 +0100
 
 openjdk-6 (6b06-0ubuntu2) hardy; urgency=low
 
