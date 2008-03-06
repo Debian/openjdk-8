@@ -139,7 +139,7 @@ jre_tools_alt	= $(filter-out kinit klist ktab, $(jre_tools))
 
 all_jdk_tools	= $(notdir $(wildcard $(sdkimg)/bin/*))
 jdk_tools	= $(filter-out $(all_jre_tools), $(all_jdk_tools))
-jdk_tools_alt	= $(jdk_tools)
+jdk_tools_alt	= $(filter-out java-rmi.cgi, $(jdk_tools))
 
 pkg_compress	= lzma
 
