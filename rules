@@ -82,11 +82,11 @@ ifeq ($(STAGE1_JAVA),gcj)
 else ifeq ($(STAGE1_JAVA),openjdk)
   CONFIGURE_ARGS = \
 	--with-icedtea \
-	--with-icedtea-home=/usr/lib/jvm/openjdk-6 \
-	--with-java=/usr/lib/jvm/openjdk-6/bin/java \
-	--with-javah=/usr/lib/jvm/openjdk-6/bin/javah \
-	--with-rmic=/usr/lib/jvm/openjdk-6/bin/rmic \
-	--with-jar=/usr/lib/jvm/openjdk-6/bin/jar \
+	--with-icedtea-home=/usr/lib/jvm/java-6-openjdk \
+	--with-java=/usr/lib/jvm/java-6-openjdk/bin/java \
+	--with-javah=/usr/lib/jvm/java-6-openjdk/bin/javah \
+	--with-rmic=/usr/lib/jvm/java-6-openjdk/bin/rmic \
+	--with-jar=/usr/lib/jvm/java-6-openjdk/bin/jar \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
