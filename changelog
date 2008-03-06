@@ -2,6 +2,7 @@ openjdk-6 (6b06-0ubuntu4) UNRELEASED; urgency=low
 
   * debian/mauve_tests: javax.swing.text.html.HTML.ElementTagAttributeTest,
     removed, tries to access the network.
+  * debian/README.alternatives.in: Update for --jre-headless.
 
  -- Matthias Klose <doko@ubuntu.com>  Thu, 06 Mar 2008 12:47:15 +0100
 

@@ -9,14 +9,17 @@ script can be used to set a bunch of jre/jdk alternatives:
 
 - Set all runtime tools to point to the @basename@ alternatives:
 
-  update-java-alternatives --set --jre openjdk-6
+  update-java-alternatives --jre --set @jdirname@
 
+- Set all runtime tools (headless only) to point to the @basename@
+  alternatives:
+
+  update-java-alternatives --jre-headless --set @jdirname@
 
 - Set all runtime and development tools to point to the @basename@
   alternatives:
 
-  update-java-alternatives --set openjdk-6
-
+  update-java-alternatives --set @jdirname@
 
 - Set all runtime and development tools to auto mode:
 
