@@ -146,7 +146,6 @@ javax.swing.text.TabSet.getTabIndex
 javax.swing.text.TabSet.getTabIndexAfter
 javax.swing.text.TabSet.equals
 javax.swing.text.TabSet.toString
-javax.swing.text.html.HTML.ElementTagAttributeTest
 javax.swing.text.html.HTML.HTML_Test
 javax.swing.text.html.HTMLDocument.FindById
 javax.swing.text.html.parser.Entity.Entity_Test
