@@ -19,6 +19,7 @@ ifneq (,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
   export PARALLEL_COMPILE_JOBS
 endif
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
+with_plugin =
 
 distribution := $(shell lsb_release --id --short)
 distrel := $(shell lsb_release --codename --short)
@@ -69,6 +70,7 @@ export DISTRIBUTION_PATCHES
 
 ifeq ($(STAGE1_JAVA),gcj)
   CONFIGURE_ARGS = \
+	$(if $(with_plugin),,--disable-gcjwebplugin) \
 	--with-gcj-home=/usr/lib/jvm/java-gcj \
 	--with-ecj=/usr/bin/ecj \
 	--with-java=/usr/lib/jvm/java-gcj/bin/java \
@@ -83,6 +85,7 @@ ifeq ($(STAGE1_JAVA),gcj)
   req_openjdk_ver = $${binary:Version}
 else ifeq ($(STAGE1_JAVA),openjdk)
   CONFIGURE_ARGS = \
+	$(if $(with_plugin),,--disable-gcjwebplugin) \
 	--with-icedtea \
 	--with-icedtea-home=/usr/lib/jvm/java-6-openjdk \
 	--with-java=/usr/lib/jvm/java-6-openjdk/bin/java \
@@ -96,6 +99,7 @@ else ifeq ($(STAGE1_JAVA),openjdk)
   req_openjdk_ver = 6b06
 else ifeq ($(STAGE1_JAVA),icedtea)
   CONFIGURE_ARGS = \
+	$(if $(with_plugin),,--disable-gcjwebplugin) \
 	--with-icedtea \
 	--with-icedtea-home=/usr/lib/jvm/java-7-icedtea \
 	--with-java=/usr/lib/jvm/java-7-icedtea/bin/java \
@@ -169,8 +173,10 @@ bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, \
 	libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, \
 	libxalan2-java, liblcms1-dev, libxinerama-dev,
-bd_plugin = \
+ifeq ($(with_plugin),yes)
+  bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),xulrunner-1.9-dev,firefox-dev)),
+endif
 bd_netx = fastjar,
 bd_mauve = mauve, xvfb, autoconf, automake
 bd_compress = $(pkg_compress),
@@ -237,7 +243,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_netx@/$(bd_netx)/g' \
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	      -e 's/@bd_compress@/$(pkg_compress)/g' \
-	    debian/control.in > debian/control
+	    debian/control.in $(if $(with_plugin),debian/control.plugin) > debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
 	else \
@@ -522,6 +528,7 @@ endif
 	  done; \
 	) > debian/$(p_jdk).install
 
+ifeq ($(with_plugin),yes)
 	dh_installdirs -p$(p_plug) \
 		$(foreach d, $(browser_plugin_dirs), usr/lib/$(d)/plugins)
 
@@ -529,6 +536,7 @@ endif
 	( \
 	  echo '$(basedir)/jre/lib/$(archdir)/gcjwebplugin.so'; \
 	) > debian/$(p_plug).install
+endif
 
 	: # $(p_src).install
 	( \
@@ -635,10 +643,12 @@ endif
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jdk); \
 	) > $(d_jdk).links
 
+ifeq ($(with_plugin),yes)
 	: # create docdir symlinks for $(p_plug)
 	( \
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_plug); \
 	) > $(d_plug).links
+endif
 
 	: # create docdir symlinks for $(p_lib)
 	( \

@@ -1,4 +1,4 @@
-openjdk-6 (6b06-0ubuntu5) UNRELEASED; urgency=low
+openjdk-6 (6b06-0ubuntu5) hardy; urgency=low
 
   * debian/mauve_tests: javax.swing.text.html.HTML.ElementTagAttributeTest,
     removed, tries to access the network.
@@ -7,8 +7,9 @@ openjdk-6 (6b06-0ubuntu5) UNRELEASED; urgency=low
   * Compress packages using lzma.
   * Drop build dependency on zip, unzip.
   * Fix build infrastructure to bootstrap with OpenJDK instead of ecj.
+  * Do not build the gcjwebplugin from the OpenJDK source.
 
- -- Matthias Klose <doko@ubuntu.com>  Thu, 06 Mar 2008 12:47:15 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 07 Mar 2008 13:53:15 +0100
 
 openjdk-6 (6b06-0ubuntu4) hardy; urgency=low
 
