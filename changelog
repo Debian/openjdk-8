@@ -3,8 +3,9 @@ openjdk-6 (6b06-0ubuntu8) hardy; urgency=low
   * Tighten dependency on java-common.
   * debian/copyright: Include trademark notice.
   * debian/control: Mention IcedTea in the package descriptions.
+  * Update IcedTea to 20080311.
 
- -- Matthias Klose <doko@ubuntu.com>  Tue, 11 Mar 2008 20:28:18 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 11 Mar 2008 21:39:27 +0100
 
 openjdk-6 (6b06-0ubuntu7) hardy; urgency=low
 
