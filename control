@@ -18,6 +18,9 @@ Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk
 Description: OpenJDK Development Kit (JDK)
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
+ .
+ The packages are built using the IcedTea build support and patches
+ from the IcedTea project.
 
 Package: openjdk-6-jre-headless
 Architecture: any
@@ -29,6 +32,9 @@ Suggests: sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-koc
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
 Description: OpenJDK Java runtime (headless)
  OpenJDK Java runtime, headless.
+ .
+ The packages are built using the IcedTea build support and patches
+ from the IcedTea project.
 
 Package: openjdk-6-jre
 Architecture: any
@@ -41,6 +47,9 @@ Suggests: binfmt-support, icedtea-gcjwebplugin
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
 Description: OpenJDK Java runtime
  OpenJDK Java runtime
+ .
+ The packages are built using the IcedTea build support and patches
+ from the IcedTea project.
 
 Package: openjdk-6-jre-lib
 Architecture: all
@@ -50,6 +59,9 @@ Depends: openjdk-6-jre-headless (>= ${binary:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
 Description: OpenJDK Java runtime (architecture independent libraries)
  OpenJDK Java runtime
+ .
+ The packages are built using the IcedTea build support and patches
+ from the IcedTea project.
 
 Package: openjdk-6-demo
 Architecture: any
@@ -57,6 +69,9 @@ Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-6-jre (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Java runtime based on OpenJDK (demos and examples)
  OpenJDK Java runtime
+ .
+ The packages are built using the IcedTea build support and patches
+ from the IcedTea project.
 
 Package: openjdk-6-source
 Architecture: all
@@ -68,6 +83,9 @@ Description: OpenJDK Development Kit (JDK) source files
  .
  This package contains the Java programming language source files
  (src.zip) for all classes that make up the Java core API.
+ .
+ The packages are built using the IcedTea build support and patches
+ from the IcedTea project.
 
 Package: openjdk-6-doc
 Section: doc
@@ -79,3 +97,6 @@ Description: OpenJDK Development Kit (JDK) documentation
  applets, and components using the Java programming language.
  .
  This package contains the API documentation.
+ .
+ The packages are built using the IcedTea build support and patches
+ from the IcedTea project.
