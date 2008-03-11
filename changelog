@@ -1,3 +1,15 @@
+openjdk-6 (6b06-0ubuntu7) hardy; urgency=low
+
+  * Build-depend on unzip.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 07 Mar 2008 16:47:43 +0100
+
+openjdk-6 (6b06-0ubuntu6) hardy; urgency=low
+
+  * Build-depend on zip.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 07 Mar 2008 16:16:52 +0100
+
 openjdk-6 (6b06-0ubuntu5) hardy; urgency=low
 
   * debian/mauve_tests: javax.swing.text.html.HTML.ElementTagAttributeTest,

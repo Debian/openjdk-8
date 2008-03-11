@@ -291,6 +291,7 @@ endif
 icedtea-configure: stamps/icedtea-configure
 stamps/icedtea-configure:
 	mkdir -p stamps
+	: > gcjwebplugin.cc
 	./configure $(CONFIGURE_ARGS)
 	touch $@
 
@@ -363,6 +364,7 @@ clean: debian-clean
 	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
 	rm -rf autom4te.cache
 	rm -rf mauve
+	rm -f gcjwebplugin.cc
 	if [ -f generated.tar ]; then \
 	  rm -rf generated; \
 	  tar xf generated.tar; \
