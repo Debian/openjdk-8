@@ -1,3 +1,9 @@
+openjdk-6 (6b06-0ubuntu8) hardy; urgency=low
+
+  * debian/copyright: Include trademark notice.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 11 Mar 2008 20:28:18 +0100
+
 openjdk-6 (6b06-0ubuntu7) hardy; urgency=low
 
   * Build-depend on unzip.
