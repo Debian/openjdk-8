@@ -2,6 +2,7 @@ openjdk-6 (6b06-0ubuntu9) hardy; urgency=low
 
   * Build-depend on libffi4-dev on architectures other than amd64, i386, lpia.
   * Install icons in /usr/share/pixmaps, not /usr/share/icons.
+  * debian/rules: Call dh_icons.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 12 Mar 2008 11:34:44 +0100
 
