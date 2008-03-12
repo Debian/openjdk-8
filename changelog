@@ -1,3 +1,10 @@
+openjdk-6 (6b06-0ubuntu10) hardy; urgency=low
+
+  * Remove print-lsb-release.patch, forwarded to IcedTea.
+  * Fix IcedTea configure to detect libffi without pkg-config.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 12 Mar 2008 20:28:55 +0100
+
 openjdk-6 (6b06-0ubuntu9) hardy; urgency=low
 
   * Build-depend on libffi4-dev on architectures other than amd64, i386, lpia.
