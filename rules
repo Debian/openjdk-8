@@ -59,7 +59,6 @@ DISTRIBUTION_PATCHES = \
 	$(if $(filter $(DEB_HOST_ARCH), amd64), debian/patches/gcc-jdk-opt-O2.diff) \
 	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
 	debian/patches/const_strings.patch \
-	debian/patches/print-lsb-release.diff \
 	debian/patches/javax.net.ssl.trustStore.diff \
 
 ifeq ($(distribution),Ubuntu)
