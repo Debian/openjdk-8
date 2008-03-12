@@ -600,7 +600,7 @@ endif
 		usr/share/control-center-2.0/capplets \
 		usr/share/application-registry \
 		usr/share/mime-info \
-		usr/share/icons
+		usr/share/pixmaps
 
 	: # add GNOME stuff
 	cp -p debian/$(basename)-java.desktop \
@@ -627,11 +627,11 @@ endif
 	done
 
 	cp -p debian/sun_java.xpm \
-		$(d_jre)/usr/share/icons/$(basename).xpm
+		$(d_jre)/usr/share/pixmaps/$(basename).xpm
 
-	mkdir -p $(d_demo)/usr/share/icons
+	mkdir -p $(d_demo)/usr/share/pixmaps
 	cp -p debian/sun_java_app.xpm \
-		$(d_demo)/usr/share/icons/$(basename)-app.xpm
+		$(d_demo)/usr/share/pixmaps/$(basename)-app.xpm
 
 	: # create docdir symlinks for $(p_jrehl)
 	( \
