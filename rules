@@ -173,6 +173,8 @@ bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, \
 	libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, \
 	libxalan2-java, liblcms1-dev, libxinerama-dev,
+bd_zero = \
+	libffi4-dev [!amd64 !i386 !lpia],
 ifeq ($(with_plugin),yes)
   bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),xulrunner-1.9-dev,firefox-dev)),
@@ -237,6 +239,7 @@ debian/control: debian/control.in debian/rules
 	sed \
 	      -e 's/@bd_bootstrap@/$(bd_bootstrap)/g' \
 	      -e 's/@bd_openjdk@/$(bd_openjdk)/g' \
+	      -e 's/@bd_zero@/$(bd_zero)/g' \
 	      -e 's/@bd_gcc@/$(bd_gcc)/g' \
 	      -e 's/@bd_syslibs@/$(bd_syslibs)/g' \
 	      -e 's/@bd_plugin@/$(bd_plugin)/g' \
