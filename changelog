@@ -1,3 +1,9 @@
+openjdk-6 (6b06-0ubuntu11) hardy; urgency=low
+
+  * Update IcedTea to 20080318.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 18 Mar 2008 15:03:19 +0100
+
 openjdk-6 (6b06-0ubuntu10) hardy; urgency=low
 
   * Remove print-lsb-release.patch, forwarded to IcedTea.
