@@ -597,7 +597,6 @@ endif
 
 	dh_installdirs -p$(p_jre) \
 		usr/share/applications \
-		usr/share/control-center-2.0/capplets \
 		usr/share/application-registry \
 		usr/share/mime-info \
 		usr/share/pixmaps
@@ -606,7 +605,7 @@ endif
 	cp -p debian/$(basename)-java.desktop \
 	      $(d_jre)/usr/share/applications/
 	cp -p debian/$(basename)-policytool.desktop \
-	      $(d_jre)/usr/share/control-center-2.0/capplets/
+	      $(d_jre)/usr/share/applications/
 ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
   ifneq ($(with_javaws),yes)
 	cp -p debian/$(basename)-{java,javaws}.desktop \
@@ -614,9 +613,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
   endif
 # not yet in OpenJDK
 #	cp -p debian/$(basename)-controlpanel.desktop \
-#	      $(d_jre)/usr/share/control-center-2.0/capplets/
-	cp -p debian/$(basename)-policytool.desktop \
-	      $(d_jre)/usr/share/control-center-2.0/capplets/
+#	      $(d_jre)/usr/share/applications/
 endif
 
 	for i in archive web-start; do \

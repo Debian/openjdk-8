@@ -5,6 +5,6 @@ Comment=@vendor@ Java @RELEASE@ Web Start
 Exec=/@basedir@/bin/javaws -viewer
 Terminal=false
 Type=Application
-Icon=/usr/share/icons/@basename@.xpm
+Icon=/usr/share/pixmaps/@basename@.xpm
 Categories=Application;Network;
 MimeType=application/x-java-jnlp-file;

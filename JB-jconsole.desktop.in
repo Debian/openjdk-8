@@ -5,5 +5,5 @@ Comment=@vendor@ Java @RELEASE@ Monitoring & Management Console
 Exec=/@basedir@/bin/jconsole
 Terminal=false
 Type=Application
-Icon=/usr/share/icons/@basename@.xpm
+Icon=/usr/share/pixmaps/@basename@.xpm
 Categories=Application;System;

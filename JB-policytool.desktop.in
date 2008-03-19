@@ -5,5 +5,5 @@ Comment=@vendor@ Java @RELEASE@ Policy Tool
 Exec=/@basedir@/bin/policytool
 Terminal=false
 Type=Application
-Icon=/usr/share/icons/@basename@.xpm
-Categories=Application;Settings;AdvancedSettings;
+Icon=/usr/share/pixmaps/@basename@.xpm
+Categories=Settings;
