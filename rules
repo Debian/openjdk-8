@@ -473,6 +473,7 @@ endif
 	( \
 	  echo 'etc'; \
 	  echo '$(basedir)/jre/lib/jexec'; \
+	  echo '$(basedir)/jre/lib/rt.jar'; \
 	  echo '$(basedir)/jre/man/ja'; \
 	  echo '$(basedir)/man/ja'; \
 	) > debian/$(p_jrehl).install
@@ -512,7 +513,7 @@ endif
 	  echo '$(basedir)/jre/THIRD_PARTY_README'; \
 	  cd $(d); \
 	  for i in $(basedir)/jre/lib/*; do \
-	    case "$$i" in */$(archdir)|*/jexec) continue; esac; \
+	    case "$$i" in */$(archdir)|*/jexec|*/rt.jar) continue; esac; \
 	    echo $$i; \
 	  done; \
 	) > debian/$(p_lib).install
