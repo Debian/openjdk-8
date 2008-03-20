@@ -3,5 +3,5 @@
 	section="Apps/System"\
 	title="@vendor@ Java @RELEASE@ Policy Tool"\
 	command="/@basedir@/bin/policytool"\
-	icon="/usr/share/icons/@basename@.xpm"\
+	icon="/usr/share/pixmaps/@basename@.xpm"\
 	hints="Java2"
