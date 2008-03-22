@@ -1,3 +1,9 @@
+openjdk-6 (6b06-0ubuntu13) UNRELEASED; urgency=low
+
+  * 
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 22 Mar 2008 20:20:12 +0100
+
 openjdk-6 (6b06-0ubuntu12) hardy; urgency=low
 
   * Update icon locations in menu files.
