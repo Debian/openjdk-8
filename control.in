@@ -31,6 +31,7 @@ Recommends: ${dlopenjl:Recommends}
 Suggests: sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
 Replaces: openjdk-6-jre-lib (<< 6b06-0ubuntu11)
+Conflicts: gcjwebplugin
 Description: OpenJDK Java runtime (headless)
  OpenJDK Java runtime, headless.
  .
