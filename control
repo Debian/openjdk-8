@@ -67,7 +67,7 @@ Description: OpenJDK Java runtime (architecture independent libraries)
 Package: openjdk-6-demo
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-6-jre (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: openjdk-6-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Java runtime based on OpenJDK (demos and examples)
  OpenJDK Java runtime
  .
@@ -77,7 +77,7 @@ Description: Java runtime based on OpenJDK (demos and examples)
 Package: openjdk-6-source
 Architecture: all
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-6-jre (= ${binary:Version}), openjdk-6-jdk (>= ${binary:Version})
+Depends: openjdk-6-jre (>= ${source:Version}), openjdk-6-jdk (>= ${binary:Version})
 Description: OpenJDK Development Kit (JDK) source files
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
