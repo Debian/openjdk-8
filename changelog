@@ -1,3 +1,10 @@
+openjdk-6 (6b08-1) UNRELEASED; urgency=low
+
+  * first upload to Debian (Closes: #xxxxxx)
+  * Regenerate debian/control.
+
+ -- Torsten Werner <twerner@debian.org>  Tue, 01 Apr 2008 15:43:54 +0200
+
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
   * New code drop (b08).
