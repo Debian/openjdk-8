@@ -56,7 +56,7 @@ Package: openjdk-6-jre-lib
 Architecture: all
 Pre-Depends: ${dpkg:Depends}
 Section: interpreters
-Depends: openjdk-6-jre-headless (>= ${binary:Version}), ${misc:Depends}
+Depends: openjdk-6-jre (>= ${source:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
 Description: OpenJDK Java runtime (architecture independent libraries)
  OpenJDK Java runtime
