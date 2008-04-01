@@ -10,8 +10,9 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Temporarily downgrade Depends: tzdata-java to Recommends until the package
     becomes available in Debian.
   * Add myself to Uploaders.
+  * Do not install extras license file in openjdk-6-jre-lib.
 
- -- Torsten Werner <twerner@debian.org>  Tue, 01 Apr 2008 22:59:14 +0200
+ -- Torsten Werner <twerner@debian.org>  Tue, 01 Apr 2008 23:40:10 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 

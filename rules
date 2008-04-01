@@ -508,7 +508,6 @@ install: packaging-files
 
 	: # $(p_lib).install
 	( \
-	  echo '$(basedir)/jre/LICENSE'; \
 	  echo '$(basedir)/jre/ASSEMBLY_EXCEPTION'; \
 	  echo '$(basedir)/jre/README.html'; \
 	  echo '$(basedir)/jre/THIRD_PARTY_README'; \
