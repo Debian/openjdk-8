@@ -147,7 +147,11 @@ all_jdk_tools	= $(notdir $(wildcard $(sdkimg)/bin/*))
 jdk_tools	= $(filter-out $(all_jre_tools), $(all_jdk_tools))
 jdk_tools_alt	= $(filter-out java-rmi.cgi, $(jdk_tools))
 
-pkg_compress	= lzma
+ifeq ($(distribution),Ubuntu)
+  pkg_compress	= lzma
+else
+  pkg_compress  = bzip2
+endif
 
 # build dependencies
 ifeq ($(STAGE1_JAVA),gcj)
