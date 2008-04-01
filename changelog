@@ -9,8 +9,9 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Make all binary packages binNMUable.
   * Temporarily downgrade Depends: tzdata-java to Recommends until the package
     becomes available in Debian.
+  * Add myself to Uploaders.
 
- -- Torsten Werner <twerner@debian.org>  Tue, 01 Apr 2008 22:02:27 +0200
+ -- Torsten Werner <twerner@debian.org>  Tue, 01 Apr 2008 22:59:14 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
