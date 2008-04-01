@@ -11,8 +11,12 @@ for i in $jre_tools; do
 done
 
 if [ remove = "$1" ] && [ -x /usr/sbin/update-binfmts ]; then
-    /usr/sbin/update-binfmts --package @basename@ \
-      --remove @basename@ $basedir/jre/lib/jexec
+    if [ -e /var/lib/binfmts/@basename@ ]; then
+	/usr/sbin/update-binfmts --package @basename@ \
+	    --remove @basename@ $basedir/jre/lib/jexec
+    else
+	echo >&2 "/var/lib/binfmts/@basename@ missing, not calling update-binfmts --remove"
+    fi
 fi
 
 #DEBHELPER#

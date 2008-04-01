@@ -1,5 +1,5 @@
 java-web-start
-        command="/@basedir@/bin/javaws -viewer"
+        command="/@basedir@/bin/javaws"
         name=java-web-start
         can_open_multiple_files=false
         requires_terminal=false

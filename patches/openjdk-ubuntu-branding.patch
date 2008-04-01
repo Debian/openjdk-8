@@ -9,3 +9,21 @@
  #define DEFAULT_JAVA_LAUNCHER  "generic"
  
  char**  Arguments::_jvm_flags_array             = NULL;
+--- openjdk/jdk/make/common/shared/Defs.gmk~	2008-03-22 20:49:41.239822027 +0100
++++ openjdk/jdk/make/common/shared/Defs.gmk	2008-03-22 20:51:20.331316799 +0100
+@@ -194,13 +194,13 @@
+ 
+ # Default names
+ LAUNCHER_NAME = java
+-PRODUCT_NAME = IcedTea
++PRODUCT_NAME = Java(TM)
+ PRODUCT_SUFFIX = SE Runtime Environment
+ COMPANY_NAME = Sun Microsystems, Inc.
+ 
+ ifdef OPENJDK
+   LAUNCHER_NAME = java
+-  PRODUCT_NAME = IcedTea
++  PRODUCT_NAME = OpenJDK
+   PRODUCT_SUFFIX = Runtime Environment
+   COMPANY_NAME =
+ endif

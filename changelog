@@ -1,8 +1,25 @@
-openjdk-6 (6b06-0ubuntu13) UNRELEASED; urgency=low
+openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
-  * 
+  * New code drop (b08).
+  * Update IcedTea build infrastructure.
+  * Move binfmt-support references from -jre to -jre-headless package.
+  * Don't fail on purge, if /var/lib/binfmts/openjdk-6 is missing. LP: #206721.
+  * Only use the basename for icons in desktop files. LP: #207413.
+  * Install javaws(1). LP: #191297.
+  * Install a wrapper script for javaws, which calls `javaws -viewer' if no
+    arguments are given (or else starting javaws from the desktop menu
+    would not do anything).
+  * debian/JB-web-start.applications.in: Remove the -viewer option from command.
 
- -- Matthias Klose <doko@ubuntu.com>  Sat, 22 Mar 2008 20:20:12 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 28 Mar 2008 16:10:32 +0000
+
+openjdk-6 (6b07-0ubuntu1) hardy; urgency=low
+
+  * New code drop (b07).
+  * Update IcedTea build infrastructure.
+  * debian/copyright: Update to OpenJDK Trademark Notice v1.1.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 22 Mar 2008 22:41:42 +0100
 
 openjdk-6 (6b06-0ubuntu12) hardy; urgency=low
 

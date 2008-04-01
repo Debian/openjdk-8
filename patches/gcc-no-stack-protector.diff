@@ -1,25 +1,3 @@
---- openjdk/corba/make/common/Defs-linux.gmk~	2007-11-24 14:24:21.833398179 +0100
-+++ openjdk/corba/make/common/Defs-linux.gmk	2007-11-24 14:33:01.911243435 +0100
-@@ -106,6 +106,8 @@
- CFLAGS_REQUIRED         =  $(CFLAGS_REQUIRED_$(ARCH))
- LDFLAGS_COMMON          += $(LDFLAGS_COMMON_$(ARCH))
- 
-+CFLAGS_REQUIRED         += -fno-stack-protector
-+
- # Add in platform specific optimizations for all opt levels
- CC_HIGHEST_OPT += $(_OPT_$(ARCH))
- CC_HIGHER_OPT  += $(_OPT_$(ARCH))
---- openjdk/jdk/make/common/Defs-linux.gmk~	2007-11-24 14:24:21.823398028 +0100
-+++ openjdk/jdk/make/common/Defs-linux.gmk	2007-11-24 14:33:54.452036001 +0100
-@@ -116,6 +116,8 @@
- CFLAGS_REQUIRED         =  $(CFLAGS_REQUIRED_$(ARCH))
- LDFLAGS_COMMON          += $(LDFLAGS_COMMON_$(ARCH))
- 
-+CFLAGS_REQUIRED         += -fno-stack-protector
-+
- # Add in platform specific optimizations for all opt levels
- CC_HIGHEST_OPT += $(_OPT_$(ARCH))
- CC_HIGHER_OPT  += $(_OPT_$(ARCH))
 --- openjdk/hotspot/build/linux/makefiles/gcc.make~	2007-11-24 14:49:38.366274732 +0100
 +++ openjdk/hotspot/build/linux/makefiles/gcc.make	2007-11-24 15:00:51.616430558 +0100
 @@ -62,6 +62,7 @@
@@ -30,3 +8,25 @@
  
  # Always generate full debuginfo on Linux.  It'll be in a separate
  # debuginfo package when building RPMs.
+--- openjdk/corba/make/common/Defs-linux.gmk~	2008-03-28 20:11:54.075568406 +0100
++++ openjdk/corba/make/common/Defs-linux.gmk	2008-03-28 20:13:51.537340290 +0100
+@@ -107,6 +107,8 @@
+   LDFLAGS_COMMON        += $(LDFLAGS_COMMON_$(ARCH))
+ endif
+ 
++CFLAGS_REQUIRED         += -fno-stack-protector
++
+ # Add in platform specific optimizations for all opt levels
+ CC_HIGHEST_OPT += $(_OPT_$(ARCH))
+ CC_HIGHER_OPT  += $(_OPT_$(ARCH))
+--- openjdk/jdk/make/common/Defs-linux.gmk~	2008-03-28 20:11:54.095568707 +0100
++++ openjdk/jdk/make/common/Defs-linux.gmk	2008-03-28 20:14:15.037694787 +0100
+@@ -117,6 +117,8 @@
+   LDFLAGS_COMMON        += $(LDFLAGS_COMMON_$(ARCH))
+ endif
+ 
++CFLAGS_REQUIRED         += -fno-stack-protector
++
+ # Add in platform specific optimizations for all opt levels
+ CC_HIGHEST_OPT += $(_OPT_$(ARCH))
+ CC_HIGHER_OPT  += $(_OPT_$(ARCH))

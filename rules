@@ -35,8 +35,8 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 # STAGE1_JAVA is either gcj or icedtea, the latter not yet supported
 STAGE1_JAVA = gcj
 #STAGE1_JAVA = openjdk
-OPENJDK_VERSION = b06
-OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-28_feb_2008.tar.gz
+OPENJDK_VERSION = b08
+OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-26_mar_2008.tar.gz
 
 unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
@@ -95,7 +95,7 @@ else ifeq ($(STAGE1_JAVA),openjdk)
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
   build_target = #icedtea-against-icedtea
-  req_openjdk_ver = 6b06
+  req_openjdk_ver = 6b08
 else ifeq ($(STAGE1_JAVA),icedtea)
   CONFIGURE_ARGS = \
 	$(if $(with_plugin),,--disable-gcjwebplugin) \
@@ -109,7 +109,7 @@ else ifeq ($(STAGE1_JAVA),icedtea)
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
   build_target = #icedtea-against-icedtea
-  req_openjdk_ver = 6b06
+  req_openjdk_ver = 6b08
 endif
 
 # make the build log comparable
@@ -120,7 +120,7 @@ VENDOR		:= openjdk
 Vendor		:= OpenJDK
 
 TOP		= usr/lib/jvm
-basedir		= usr/lib/jvm/$(jdirname)
+jdirname	= java-$(shortver)-$(origin)
 origin		= openjdk
 basename	= openjdk-$(shortver)
 jvmver		= 1.6.0
@@ -173,7 +173,7 @@ bd_openjdk = \
 	libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, \
 	libxalan2-java, liblcms1-dev, libxinerama-dev,
 bd_zero = \
-	libffi4-dev [!amd64 !i386 !lpia],
+	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [!amd64 !i386 !lpia],
 ifeq ($(with_plugin),yes)
   bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),xulrunner-1.9-dev,firefox-dev)),
@@ -400,9 +400,6 @@ install: packaging-files
 
 	: # remove files, which are not installed at all
 	rm -f  $(d)/$(basedir)/bin/java-rmi.cgi
-ifneq ($(with_javaws),yes)
-	rm -f $(d)/$(basedir)/man/man1/javaws.1
-endif
 
 	: # replace common files in jdk and jre by symlinks
 	@cd $(d)/$(basedir); \
@@ -602,19 +599,11 @@ endif
 		usr/share/pixmaps
 
 	: # add GNOME stuff
-	cp -p debian/$(basename)-java.desktop \
+	cp -p debian/$(basename)-{java,javaws,policytool}.desktop \
 	      $(d_jre)/usr/share/applications/
-	cp -p debian/$(basename)-policytool.desktop \
-	      $(d_jre)/usr/share/applications/
-ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
-  ifneq ($(with_javaws),yes)
-	cp -p debian/$(basename)-{java,javaws}.desktop \
-	      $(d_jre)/usr/share/applications/
-  endif
 # not yet in OpenJDK
 #	cp -p debian/$(basename)-controlpanel.desktop \
 #	      $(d_jre)/usr/share/applications/
-endif
 
 	for i in archive web-start; do \
 	  cp debian/$(basename)-$$i.applications \
@@ -696,6 +685,9 @@ endif
 	  echo 'magic PK\x03\x04'; \
 	) > $(d_jrehl)/usr/share/binfmts/$(basename)
 
+	: # install a wrapper for javaws
+	mv $(d_jre)/$(basedir)/jre/bin/javaws $(d_jre)/$(basedir)/jre/bin/javaws.real
+	install -m 755 debian/javaws-wrapper.sh $(d_jre)/$(basedir)/jre/bin/javaws
 
 # Build architecture independant packages
 binary-indep: build install

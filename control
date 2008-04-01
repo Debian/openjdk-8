@@ -28,10 +28,10 @@ Pre-Depends: ${dpkg:Depends}
 Section: interpreters
 Depends: openjdk-6-jre-lib (>= ${base:Version}), tzdata-java, libaccess-bridge-java (>= 1.22), ca-certificates, java-common (>= 0.28ubuntu2), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}
-Suggests: sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
+Suggests: binfmt-support, sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
 Replaces: openjdk-6-jre-lib (<< 6b06-0ubuntu11)
-Conflicts: gcjwebplugin
+Conflicts: gcjwebplugin, binfmt-support (<< 1.1.2)
 Description: OpenJDK Java runtime (headless)
  OpenJDK Java runtime, headless.
  .
@@ -43,9 +43,8 @@ Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Section: interpreters
 Depends: openjdk-6-jre-headless (= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}
-Conflicts: binfmt-support (<< 1.1.2)
 Recommends: ${dlopenjre:Recommends}
-Suggests: binfmt-support, icedtea-gcjwebplugin
+Suggests: icedtea-gcjwebplugin
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
 Description: OpenJDK Java runtime
  OpenJDK Java runtime
