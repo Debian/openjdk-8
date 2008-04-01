@@ -4,8 +4,10 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Regenerate debian/control.
   * Switch to bzip2 package compression in Debian but leave lzma compression
     in Ubuntu.
+  * Change Build-Depends: debhelper (>= 5.0.51~) because we are using
+    dh_icons.
 
- -- Torsten Werner <twerner@debian.org>  Tue, 01 Apr 2008 21:07:49 +0200
+ -- Torsten Werner <twerner@debian.org>  Tue, 01 Apr 2008 21:12:26 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
