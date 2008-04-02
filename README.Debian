@@ -1,6 +1,8 @@
-icedtea for Debian
-------------------
+openjdk-6 for Debian
+--------------------
 
-<possible notes regarding this package - if none, delete this file>
+Please look for further documentation in the directory
+/usr/share/doc/openjdk-6-jre/ .
 
- -- Matthias Klose <doko@ubuntu.com>  Wed, 08 Aug 2007 15:55:39 +0200
+
+ -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 11:46:53 +0200

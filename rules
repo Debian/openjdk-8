@@ -679,7 +679,7 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -i
-	dh_installdocs -i
+	dh_installdocs -i debian/README.Debian
 	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
 	for i in openjdk/control/build/linux-$(jvmarch)/docs/*; do \
 	  [ -e $$i ] || continue; \
@@ -706,7 +706,7 @@ binary-arch: build install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -s ChangeLog
-	dh_installdocs -s
+	dh_installdocs -s debian/README.Debian
 	mv $(d_jrehl)/usr/share/doc/$(p_jrehl) $(d_jrehl)/usr/share/doc/$(p_jre)
 	for i in AUTHORS NEWS README; do \
 	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
