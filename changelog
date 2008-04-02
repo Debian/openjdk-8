@@ -14,8 +14,9 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Add lintian override files for rpath usage.
   * Replace symlinks in /usr/share/doc/ by real directories.
   * Add patch shebang.diff to fix a lintian warning.
+  * Install openjdk-6-java.desktop into the correct binary package.
 
- -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 11:11:44 +0200
+ -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 11:23:51 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 

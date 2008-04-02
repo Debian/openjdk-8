@@ -605,8 +605,10 @@ endif
 		usr/share/pixmaps
 
 	: # add GNOME stuff
-	cp -p debian/$(basename)-{java,javaws,policytool}.desktop \
+	cp -p debian/$(basename)-{javaws,policytool}.desktop \
 	      $(d_jre)/usr/share/applications/
+	cp -p debian/$(basename)-java.desktop \
+	      $(d_jrehl)/usr/share/applications/
 # not yet in OpenJDK
 #	cp -p debian/$(basename)-controlpanel.desktop \
 #	      $(d_jre)/usr/share/applications/
