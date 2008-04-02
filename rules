@@ -569,7 +569,6 @@ endif
 	done
 	mv $(d)/$(basedir)/sample $(d)/usr/share/doc/$(p_jre)/examples
 	echo usr/share/doc/$(p_jre)/examples $(basedir)/sample >> $(d_demo).links
-	echo usr/share/doc/$(p_jre) usr/share/doc/$(p_demo) >> debian/$(p_demo).links
 
 	: # $(p_demo).install
 	( \
