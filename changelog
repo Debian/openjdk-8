@@ -20,8 +20,10 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Remove some empty directories from binary packages.
   * Install README.Debian in every binary package and give it some useful
     content.
+  * Install java-rmi.cgi in package openjdk-6-jre-headless and mention it in
+    README.Debian.
 
- -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 12:15:40 +0200
+ -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 12:55:32 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 

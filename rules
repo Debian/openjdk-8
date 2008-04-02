@@ -402,9 +402,6 @@ install: packaging-files
 	cp -a $(jreimg)/man $(d)/$(basedir)/jre/
 	chmod -R u+w $(d)
 
-	: # remove files, which are not installed at all
-	rm -f  $(d)/$(basedir)/bin/java-rmi.cgi
-
 	: # replace common files in jdk and jre by symlinks
 	@cd $(d)/$(basedir); \
 	  for i in `find jre -type f`; do \
