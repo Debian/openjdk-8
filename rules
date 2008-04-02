@@ -625,33 +625,6 @@ endif
 	cp -p debian/sun_java_app.xpm \
 		$(d_demo)/usr/share/pixmaps/$(basename)-app.xpm
 
-	: # create docdir symlinks for $(p_jrehl)
-	( \
-	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jrehl); \
-	) > $(d_jrehl).links
-
-	: # create docdir symlinks for $(p_src)
-	( \
-	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_src); \
-	) > $(d_src).links
-
-	: # create docdir symlinks for $(p_jdk)
-	( \
-	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jdk); \
-	) > $(d_jdk).links
-
-ifeq ($(with_plugin),yes)
-	: # create docdir symlinks for $(p_plug)
-	( \
-	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_plug); \
-	) > $(d_plug).links
-endif
-
-	: # create docdir symlinks for $(p_lib)
-	( \
-	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_lib); \
-	) > $(d_lib).links
-
 	: # create links for the gnome accessibility bridge
 	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
 	    >> $(d_jrehl).links
@@ -699,8 +672,8 @@ endif
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs -p$(p_doc)
-	dh_installdocs -p$(p_doc) 
+	dh_installchangelogs -i
+	dh_installdocs -i
 	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
 	for i in openjdk/control/build/linux-$(jvmarch)/docs/*; do \
 	  [ -e $$i ] || continue; \
@@ -726,10 +699,8 @@ shlibdeps_ld_path =$(absarchdir):$(absarchdir)/client:$(absarchdir)/native_threa
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs -p$(p_jrehl)
-	dh_installdocs -p$(p_jrehl) \
-		debian/JAVA_HOME \
-		debian/README.alternatives
+	dh_installchangelogs -s ChangeLog
+	dh_installdocs -s
 	mv $(d_jrehl)/usr/share/doc/$(p_jrehl) $(d_jrehl)/usr/share/doc/$(p_jre)
 	for i in AUTHORS NEWS README; do \
 	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
@@ -739,8 +710,6 @@ ifeq ($(with_check),yes)
 	cp mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
 endif
 
-#	dh_installchangelogs -s ChangeLog
-#	dh_installdocs -s
 #	dh_installmenu -s
 	dh_icons -s || dh_iconcache -s || true
 #	dh_installdebconf -s
