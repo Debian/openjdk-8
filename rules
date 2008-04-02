@@ -571,7 +571,7 @@ endif
 	  echo 'usr/share/doc/$(p_jre)/demo'; \
 	) > debian/$(p_demo).install
 
-	dh_install --sourcedir=debian/tmp --fail-missing
+	dh_install --sourcedir=debian/tmp --fail-missing -XLICENSE
 
 	: # give all permissions to cross-VM extension directory
 	sed -i \
