@@ -65,10 +65,6 @@ configure)
 	$basedir/bin/java -client -Xshare:dump > /dev/null
     esac
 
-    if [ -x /usr/sbin/update-binfmts ]; then
-	/usr/sbin/update-binfmts --import @basename@
-    fi
-
     ;;
 
 esac

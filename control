@@ -28,10 +28,10 @@ Pre-Depends: ${dpkg:Depends}
 Section: interpreters
 Depends: openjdk-6-jre-lib (>= ${base:Version}), libaccess-bridge-java (>= 1.22), ca-certificates, java-common (>= 0.28ubuntu2), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, tzdata-java
-Suggests: binfmt-support, sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
+Suggests: sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
 Replaces: openjdk-6-jre-lib (<< 6b06-0ubuntu11)
-Conflicts: gcjwebplugin, binfmt-support (<< 1.1.2)
+Conflicts: gcjwebplugin
 Description: OpenJDK Java runtime (headless)
  Minimal Java runtime - needed for executing non GUI Java programs.
  .
