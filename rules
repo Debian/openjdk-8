@@ -60,6 +60,7 @@ DISTRIBUTION_PATCHES = \
 	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
 	debian/patches/const_strings.patch \
 	debian/patches/javax.net.ssl.trustStore.diff \
+	debian/patches/shebang.diff \
 
 ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += debian/patches/openjdk-ubuntu-branding.patch
