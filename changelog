@@ -15,8 +15,9 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Replace symlinks in /usr/share/doc/ by real directories.
   * Add patch shebang.diff to fix a lintian warning.
   * Install openjdk-6-java.desktop into the correct binary package.
+  * Improve some package descriptions.
 
- -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 11:23:51 +0200
+ -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 11:29:17 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 

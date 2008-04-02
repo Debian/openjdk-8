@@ -33,7 +33,7 @@ Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, j
 Replaces: openjdk-6-jre-lib (<< 6b06-0ubuntu11)
 Conflicts: gcjwebplugin, binfmt-support (<< 1.1.2)
 Description: OpenJDK Java runtime (headless)
- OpenJDK Java runtime, headless.
+ Minimal Java runtime - needed for executing non GUI Java programs.
  .
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
@@ -47,7 +47,8 @@ Recommends: ${dlopenjre:Recommends}
 Suggests: icedtea-gcjwebplugin
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
 Description: OpenJDK Java runtime
- OpenJDK Java runtime
+ Full Java runtime environment - needed for executing Java GUI and Webstart
+ programs.
  .
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
