@@ -464,6 +464,10 @@ install: packaging-files
 	rm -f $(d)/$(basedir)/jre/lib/fontconfig*.properties.src
 	rm -f $(d)/$(basedir)/jre/lib/fontconfig*.bfc
 
+	: # remove empty directories
+	rmdir $(d)/$(basedir)/jre/lib/management
+	rmdir $(d)/$(basedir)/jre/lib/applet
+
 	: # TODO: why do we provide a custom font.properties.ja?
 	: # cp -p debian/font.properties.ja $(d_jbin)/etc/$(jdiralias)/.
 

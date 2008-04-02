@@ -2,3 +2,7 @@
 # jdk is doing it. Check http://wiki.debian.org/RpathIssue for more
 # information.
 openjdk-6-jre-headless binary: binary-or-shlib-defines-rpath
+
+# Allow executable stack in libjvm.so.
+openjdk-6-jre-headless binary: shlib-with-executable-stack
+
