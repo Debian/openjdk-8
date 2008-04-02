@@ -637,7 +637,7 @@ endif
 	echo "etc/$(jdiralias)/jvm.cfg $(basedir)/jre/lib/$(archdir)/jvm.cfg" \
 	    >> $(d_jrehl).links
 
-	@echo JRE_HL_TOOLS: $(jre_hl_tools_alt)
+	@echo JRE_HL_TOOLS: $(jre_hl_tools_alt) jexec
 	@echo JRE_TOOLS: $(jre_tools_alt)
 	@echo JDK_TOOLS: $(jdk_tools_alt)
 	( \
@@ -649,6 +649,7 @@ endif
 	  for i in $(jre_hl_tools_alt); do \
 	    echo "hl $$i /$(TOP)/$(jdiralias)/jre/bin/$$i"; \
 	  done; \
+	  echo "hl jexec /$(TOP)/$(jdiralias)/jre/lib/jexec"; \
 	  for i in $(jre_tools_alt); do \
 	    echo "jre $$i /$(TOP)/$(jdiralias)/jre/bin/$$i"; \
 	  done; \

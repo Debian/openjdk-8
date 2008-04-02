@@ -9,6 +9,7 @@ rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
 for i in $jre_tools; do
     update-alternatives --remove $i $basediralias/jre/bin/$i
 done
+update-alternatives --remove jexec $basediralias/jre/lib/jexec
 
 # Ubuntu has used update-binfmts directly but it is better done in
 # java-common. That is why we are removing any former registration.

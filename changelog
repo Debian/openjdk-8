@@ -23,8 +23,9 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Install java-rmi.cgi in package openjdk-6-jre-headless and mention it in
     README.Debian.
   * Remove binfmt support because it is better done in java-common.
+  * Install /usr/bin/jexec via update-alternatives.
 
- -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 16:13:00 +0200
+ -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 16:36:46 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
