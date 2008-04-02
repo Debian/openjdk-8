@@ -477,8 +477,10 @@ install: packaging-files
 	  echo '$(basedir)/jre/lib/rt.jar'; \
 	  echo '$(basedir)/jre/man/ja'; \
 	  echo '$(basedir)/man/ja'; \
+	  echo '../overrides/openjdk-6-jre-headless /usr/share/lintian/overrides/'; \
 	) > debian/$(p_jrehl).install
-	rm -f debian/$(p_jre).install
+	echo '../overrides/openjdk-6-jre /usr/share/lintian/overrides/' \
+	  > debian/$(p_jre).install
 
 	cd $(CURDIR)/$(d); \
 	for i in $(basedir)/jre/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
@@ -526,6 +528,7 @@ install: packaging-files
 	  echo '$(basedir)/ASSEMBLY_EXCEPTION'; \
 	  echo '$(basedir)/README.html'; \
 	  echo '$(basedir)/THIRD_PARTY_README'; \
+	  echo '../overrides/openjdk-6-jdk /usr/share/lintian/overrides/'; \
 	  cd $(d); \
 	  for i in $(basedir)/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
 	    [ -h $$i -o "$$i" = jexec ] && continue; \
