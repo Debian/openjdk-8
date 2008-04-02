@@ -13,8 +13,9 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Do not install extras license file in openjdk-6-jre-lib.
   * Add lintian override files for rpath usage.
   * Replace symlinks in /usr/share/doc/ by real directories.
+  * Add patch shebang.diff to fix a lintian warning.
 
- -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 09:48:50 +0200
+ -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 11:11:44 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
