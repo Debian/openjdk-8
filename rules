@@ -60,6 +60,7 @@ DISTRIBUTION_PATCHES = \
 	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
 	debian/patches/const_strings.patch \
 	debian/patches/javax.net.ssl.trustStore.diff \
+	debian/patches/shebang.diff \
 
 ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += debian/patches/openjdk-ubuntu-branding.patch
@@ -402,9 +403,6 @@ install: packaging-files
 	cp -a $(jreimg)/man $(d)/$(basedir)/jre/
 	chmod -R u+w $(d)
 
-	: # remove files, which are not installed at all
-	rm -f  $(d)/$(basedir)/bin/java-rmi.cgi
-
 	: # replace common files in jdk and jre by symlinks
 	@cd $(d)/$(basedir); \
 	  for i in `find jre -type f`; do \
@@ -599,8 +597,7 @@ endif
 # 'make Emacs Makefile mode happy
 
 	dh_installdirs -p$(p_jrehl) \
-		usr/share/applications \
-		usr/share/binfmts
+		usr/share/applications
 
 	dh_installdirs -p$(p_jre) \
 		usr/share/applications \
@@ -641,7 +638,7 @@ endif
 	echo "etc/$(jdiralias)/jvm.cfg $(basedir)/jre/lib/$(archdir)/jvm.cfg" \
 	    >> $(d_jrehl).links
 
-	@echo JRE_HL_TOOLS: $(jre_hl_tools_alt)
+	@echo JRE_HL_TOOLS: $(jre_hl_tools_alt) jexec
 	@echo JRE_TOOLS: $(jre_tools_alt)
 	@echo JDK_TOOLS: $(jdk_tools_alt)
 	( \
@@ -653,6 +650,7 @@ endif
 	  for i in $(jre_hl_tools_alt); do \
 	    echo "hl $$i /$(TOP)/$(jdiralias)/jre/bin/$$i"; \
 	  done; \
+	  echo "hl jexec /$(TOP)/$(jdiralias)/jre/lib/jexec"; \
 	  for i in $(jre_tools_alt); do \
 	    echo "jre $$i /$(TOP)/$(jdiralias)/jre/bin/$$i"; \
 	  done; \
@@ -664,12 +662,6 @@ endif
 	  done; \
 	) > $(d_jrehl)/$(TOP)/.$(jdiralias).jinfo
 
-	( \
-	  echo 'package $(basename)'; \
-	  echo 'interpreter /$(basedir)/jre/lib/jexec'; \
-	  echo 'magic PK\x03\x04'; \
-	) > $(d_jrehl)/usr/share/binfmts/$(basename)
-
 	: # install a wrapper for javaws
 	mv $(d_jre)/$(basedir)/jre/bin/javaws $(d_jre)/$(basedir)/jre/bin/javaws.real
 	install -m 755 debian/javaws-wrapper.sh $(d_jre)/$(basedir)/jre/bin/javaws
@@ -679,7 +671,7 @@ binary-indep: build install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -i
-	dh_installdocs -i
+	dh_installdocs -i debian/README.Debian
 	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
 	for i in openjdk/control/build/linux-$(jvmarch)/docs/*; do \
 	  [ -e $$i ] || continue; \
@@ -706,8 +698,7 @@ binary-arch: build install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -s ChangeLog
-	dh_installdocs -s
-	mv $(d_jrehl)/usr/share/doc/$(p_jrehl) $(d_jrehl)/usr/share/doc/$(p_jre)
+	dh_installdocs -s debian/README.Debian
 	for i in AUTHORS NEWS README; do \
 	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
 	done

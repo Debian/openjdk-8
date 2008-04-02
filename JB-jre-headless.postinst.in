@@ -47,6 +47,12 @@ configure)
             $priority \
 	    $slave1 $slave2
     done
+    update-alternatives \
+	--install \
+	/usr/bin/jexec \
+	jexec \
+	$basediralias/jre/bin/jexec \
+	$priority
 
     # fix slave links for man page alternatives
     if [ -n "$2" ] && dpkg --compare-versions "$2" lt 6-00-2ubuntu2; then
@@ -64,10 +70,6 @@ configure)
 	rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
 	$basedir/bin/java -client -Xshare:dump > /dev/null
     esac
-
-    if [ -x /usr/sbin/update-binfmts ]; then
-	/usr/sbin/update-binfmts --import @basename@
-    fi
 
     ;;
 

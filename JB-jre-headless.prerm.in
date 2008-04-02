@@ -9,14 +9,13 @@ rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
 for i in $jre_tools; do
     update-alternatives --remove $i $basediralias/jre/bin/$i
 done
+update-alternatives --remove jexec $basediralias/jre/lib/jexec
 
-if [ remove = "$1" ] && [ -x /usr/sbin/update-binfmts ]; then
-    if [ -e /var/lib/binfmts/@basename@ ]; then
-	/usr/sbin/update-binfmts --package @basename@ \
-	    --remove @basename@ $basedir/jre/lib/jexec
-    else
-	echo >&2 "/var/lib/binfmts/@basename@ missing, not calling update-binfmts --remove"
-    fi
+# Ubuntu has used update-binfmts directly but it is better done in
+# java-common. That is why we are removing any former registration.
+if [ -x /usr/sbin/update-binfmts -a -e /var/lib/binfmts/@basename@ ]; then
+    /usr/sbin/update-binfmts --package @basename@ \
+	--remove @basename@ $basedir/jre/lib/jexec
 fi
 
 #DEBHELPER#
