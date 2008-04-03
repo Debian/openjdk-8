@@ -26,8 +26,9 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Downgrade Depends: java-common (>= 0.28).
   * Add patch jexec.diff to make the jexec binary without specifying an
     absolute path.
+  * Add Build-Depends: xauth for mauve.
 
- -- Torsten Werner <twerner@debian.org>  Thu, 03 Apr 2008 17:17:44 +0200
+ -- Torsten Werner <twerner@debian.org>  Thu, 03 Apr 2008 17:38:15 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
