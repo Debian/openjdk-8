@@ -711,7 +711,7 @@ binary-indep: build install
 	  ln -sf ../$(p_jre)/$$b $(d_doc)/usr/share/doc/$(p_doc)/$$b; \
 	done
 #	dh_installmenu -i
-	dh_icons -i || dh_iconcache -i || true
+	-dh_icons -i || dh_iconcache -i
 #	dh_installdebconf -i
 	dh_link -i
 	dh_compress -i -Xexamples -Xdemos
@@ -743,7 +743,7 @@ endif
 #	dh_installchangelogs -s ChangeLog
 #	dh_installdocs -s
 #	dh_installmenu -s
-	dh_icons -s || dh_iconcache -s || true
+	-dh_icons -s || dh_iconcache -s
 #	dh_installdebconf -s
 	dh_link -s
 	dh_strip -s

@@ -4,8 +4,6 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Regenerate debian/control.
   * Switch to bzip2 package compression in Debian but leave lzma compression
     in Ubuntu.
-  * Change Build-Depends: debhelper (>= 5.0.51~) because we are using
-    dh_icons.
   * Make all binary packages binNMUable.
   * Temporarily downgrade Depends: tzdata-java to Recommends until the package
     becomes available in Debian.
