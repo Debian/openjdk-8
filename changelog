@@ -6,7 +6,6 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
     in Ubuntu.
   * Change Build-Depends: debhelper (>= 5.0.51~) because we are using
     dh_icons.
-  * Make all binary packages binNMUable.
   * Temporarily downgrade Depends: tzdata-java to Recommends until the package
     becomes available in Debian.
   * Add myself to Uploaders.
@@ -26,8 +25,10 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
     absolute path.
   * Add Build-Depends: xauth for mauve.
   * Update and install the lintian override files.
+  * Replace all occurences of binary:Version and source:Version by
+    Source-Version to be compatible with Ubuntu release 6.06.
 
- -- Torsten Werner <twerner@debian.org>  Thu, 03 Apr 2008 17:38:15 +0200
+ -- Torsten Werner <twerner@debian.org>  Thu, 03 Apr 2008 18:30:39 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
