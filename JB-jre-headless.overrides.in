@@ -1,6 +1,7 @@
-@basename@-bin: unstripped-binary-or-object
-@basename@-bin: binary-or-shlib-defines-rpath
-@basename@-bin: shlib-with-non-pic-code
-@basename@-bin: shlib-without-PT_GNU_STACK-section
-@basename@-bin: copyright-should-refer-to-common-license-file-for-gpl
-@basename@-bin: image-file-in-usr-lib
+# It seems to be acceptable to use rpath for private libraries like the
+# jdk is doing it. Check http://wiki.debian.org/RpathIssue for more
+# information.
+@basename@-jre-headless binary: binary-or-shlib-defines-rpath
+
+# Allow executable stack in libjvm.so.
+@basename@-jre-headless binary: shlib-with-executable-stack

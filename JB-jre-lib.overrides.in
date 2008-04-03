@@ -1,3 +1,0 @@
-@basename@-jre: postinst-does-not-load-confmodule
-@basename@-jre: extra-license-file
-@basename@-jre: copyright-should-refer-to-common-license-file-for-gpl

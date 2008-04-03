@@ -11,11 +11,9 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
     becomes available in Debian.
   * Add myself to Uploaders.
   * Do not install extras license file in openjdk-6-jre-lib.
-  * Add lintian override files for rpath usage.
   * Add patch shebang.diff to fix a lintian warning.
   * Install openjdk-6-java.desktop into the correct binary package.
   * Improve some package descriptions.
-  * Allow executable stack in libjvm.so in lintian override.
   * Remove some empty directories from binary packages.
   * Install README.Debian in every binary package and give it some useful
     content.
@@ -27,6 +25,7 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Add patch jexec.diff to make the jexec binary without specifying an
     absolute path.
   * Add Build-Depends: xauth for mauve.
+  * Update and install the lintian override files.
 
  -- Torsten Werner <twerner@debian.org>  Thu, 03 Apr 2008 17:38:15 +0200
 

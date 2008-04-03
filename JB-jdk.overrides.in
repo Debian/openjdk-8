@@ -1,5 +1,4 @@
-@basename@-jdk: copyright-should-refer-to-common-license-file-for-gpl
-@basename@-jdk: shlib-without-PT_GNU_STACK-section
-@basename@-jdk: unstripped-binary-or-object
-@basename@-jdk: binary-or-shlib-defines-rpath
-@basename@-jdk: menu-icon-missing /usr/share/icons/@basename@.xpm
+# It seems to be acceptable to use rpath for private libraries like the
+# jdk is doing it. Check http://wiki.debian.org/RpathIssue for more
+# information.
+@basename@-jdk binary: binary-or-shlib-defines-rpath
