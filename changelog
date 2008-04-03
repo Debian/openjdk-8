@@ -25,8 +25,10 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Remove binfmt support because it is better done in java-common.
   * Install /usr/bin/jexec via update-alternatives.
   * Downgrade Depends: java-common (>= 0.28).
+  * Add patch jexec.diff to make the jexec binary without specifying an
+    absolute path.
 
- -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 22:34:06 +0200
+ -- Torsten Werner <twerner@debian.org>  Thu, 03 Apr 2008 17:17:44 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 

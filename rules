@@ -61,6 +61,7 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/const_strings.patch \
 	debian/patches/javax.net.ssl.trustStore.diff \
 	debian/patches/shebang.diff \
+	debian/patches/jexec.diff \
 
 ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += debian/patches/openjdk-ubuntu-branding.patch
