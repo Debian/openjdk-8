@@ -51,7 +51,7 @@ configure)
 	--install \
 	/usr/bin/jexec \
 	jexec \
-	$basediralias/jre/bin/jexec \
+	$basediralias/jre/lib/jexec \
 	$priority
 
     # fix slave links for man page alternatives
