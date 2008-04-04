@@ -21,12 +21,12 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Downgrade Depends: java-common (>= 0.28).
   * Add patch jexec.diff to make the jexec binary without specifying an
     absolute path.
-  * Add Build-Depends: xauth for mauve.
+  * Add Build-Depends: xauth and xfonts-base for mauve.
   * Update and install the lintian override files.
   * Replace all occurences of binary:Version and source:Version by
     Source-Version to be compatible with Ubuntu release 6.06.
 
- -- Torsten Werner <twerner@debian.org>  Thu, 03 Apr 2008 18:30:39 +0200
+ -- Torsten Werner <twerner@debian.org>  Fri, 04 Apr 2008 14:00:41 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
