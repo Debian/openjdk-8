@@ -730,7 +730,7 @@ binary-arch: build install
 	dh_testdir
 	dh_testroot
 	dh_installchangelogs -p$(p_jrehl)
-	dh_installdocs -p$(p_jrehl) \
+	dh_installdocs -p$(p_jre) \
 		debian/JAVA_HOME \
 		debian/README.alternatives
 	for i in AUTHORS NEWS README; do \
