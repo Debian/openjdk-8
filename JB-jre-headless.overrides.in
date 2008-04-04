@@ -8,4 +8,4 @@
 
 # The package *-jre-headless depends on *-jre via libaccess-bridge-java.
 # Lintian is wrong here.
-@basename@-jre-headless: usr-share-doc-symlink-without-dependency @basename@-jre
+@basename@-jre-headless binary: usr-share-doc-symlink-without-dependency @basename@-jre
