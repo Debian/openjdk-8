@@ -20,18 +20,19 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Update binfmt support to use the /usr/bin/jexec alternative symlink.
   * Install /usr/bin/jexec via update-alternatives.
   * Downgrade Depends: java-common (>= 0.28).
-  * Add patch jexec.diff to make the jexec binary without specifying an
-    absolute path.
+  * Add patch jexec.diff to make the jexec binary executable without
+    specifying an absolute path.
   * Add Build-Depends: xauth and xfonts-base for mauve.
   * Update and install the lintian override files.
   * Replace all occurences of binary:Version and source:Version by
     Source-Version to be compatible with Ubuntu release 6.06.
+  * Remove Conflicts: gcjwebplugin.
 
   [ Michael Koch ]
   * Fixed Vcs-Bzr and Vcs-Browser fields.
   * Removed Encoding entry from all debian/*.desktop.in files.
 
- -- Torsten Werner <twerner@debian.org>  Sun, 06 Apr 2008 15:29:20 +0200
+ -- Torsten Werner <twerner@debian.org>  Sun, 06 Apr 2008 20:20:39 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
