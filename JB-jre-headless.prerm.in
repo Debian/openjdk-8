@@ -11,11 +11,19 @@ for i in $jre_tools; do
 done
 update-alternatives --remove jexec $basediralias/jre/lib/jexec
 
-# Ubuntu has used update-binfmts directly but it is better done in
-# java-common. That is why we are removing any former registration.
-if [ -x /usr/sbin/update-binfmts -a -e /var/lib/binfmts/@basename@ ]; then
-    /usr/sbin/update-binfmts --package @basename@ \
-	--remove @basename@ $basedir/jre/lib/jexec
+if [ -x /usr/sbin/update-binfmts ]; then
+    # Ubuntu has used update-binfmts directly but it is better done in
+    # java-common. That is why we are removing any former registration.
+    if [ -e /var/lib/binfmts/@basename@ ]; then
+        /usr/sbin/update-binfmts --package @basename@ \
+	    --remove @basename@ $basedir/jre/lib/jexec
+    fi
+    # Remove binfmt if no other jdk package has registered
+    # /usr/bin/jexec.
+    if [ -e /var/lib/binfmts/java-common -a ! -x /usr/bin/jexec ]; then
+        /usr/sbin/update-binfmts --package java-common \
+	    --remove java-common /usr/bin/jexec
+    fi
 fi
 
 #DEBHELPER#

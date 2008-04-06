@@ -54,6 +54,10 @@ configure)
 	$basediralias/jre/lib/jexec \
 	$priority
 
+    # register binfmt
+    if [ -x /usr/sbin/update-binfmts -a -e /usr/share/binfmts/java-common ]; then
+        /usr/sbin/update-binfmts --package java-common --import java-common
+    fi
     # fix slave links for man page alternatives
     if [ -n "$2" ] && dpkg --compare-versions "$2" lt 6-00-2ubuntu2; then
 	for i in $jre_tools; do

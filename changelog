@@ -17,7 +17,7 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
     content.
   * Install java-rmi.cgi in package openjdk-6-jre-headless and mention it in
     README.Debian.
-  * Remove binfmt support because it is better done in java-common.
+  * Update binfmt support to use the /usr/bin/jexec alternative symlink.
   * Install /usr/bin/jexec via update-alternatives.
   * Downgrade Depends: java-common (>= 0.28).
   * Add patch jexec.diff to make the jexec binary without specifying an
@@ -31,7 +31,7 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Fixed Vcs-Bzr and Vcs-Browser fields.
   * Removed Encoding entry from all debian/*.desktop.in files.
 
- -- Torsten Werner <twerner@debian.org>  Fri, 04 Apr 2008 14:00:41 +0200
+ -- Torsten Werner <twerner@debian.org>  Sun, 06 Apr 2008 15:29:20 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
