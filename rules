@@ -480,6 +480,7 @@ install: packaging-files
 	  echo '$(basedir)/jre/lib/rt.jar'; \
 	  echo '$(basedir)/jre/man/ja'; \
 	  echo '$(basedir)/man/ja'; \
+	  echo '$(basedir)/bin/java-rmi.cgi'; \
 	) > debian/$(p_jrehl).install
 	$(RM) debian/$(p_jre).install
 
@@ -733,7 +734,8 @@ binary-arch: build install
 	dh_installchangelogs -p$(p_jre)
 	dh_installdocs -p$(p_jre) \
 		debian/JAVA_HOME \
-		debian/README.alternatives
+		debian/README.alternatives \
+		debian/README.Debian
 	for i in AUTHORS NEWS README; do \
 	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
 	done
