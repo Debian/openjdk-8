@@ -1,5 +1,6 @@
 openjdk-6 (6b08-1) UNRELEASED; urgency=low
 
+  [ Torsten Werner ]
   * first upload to Debian (Closes: #452750)
   * Regenerate debian/control.
   * Switch to bzip2 package compression in Debian but leave lzma compression
@@ -25,6 +26,10 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Update and install the lintian override files.
   * Replace all occurences of binary:Version and source:Version by
     Source-Version to be compatible with Ubuntu release 6.06.
+
+  [ Michael Koch ]
+  * Fixed Vcs-Bzr and Vcs-Browser fields.
+  * Removed Encoding entry from all debian/*.desktop.in files.
 
  -- Torsten Werner <twerner@debian.org>  Fri, 04 Apr 2008 14:00:41 +0200
 

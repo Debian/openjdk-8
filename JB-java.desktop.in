@@ -1,5 +1,4 @@
 [Desktop Entry]
-Encoding=UTF-8
 Name=@vendor@ Java @RELEASE@ Runtime
 Comment=@vendor@ Java @RELEASE@ Runtime
 Exec=/@basedir@/bin/java -jar
