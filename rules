@@ -32,6 +32,8 @@ jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(archdir_map))))
 
+hotspot_archs	= amd64 i386 lpia
+
 # STAGE1_JAVA is either gcj or icedtea, the latter not yet supported
 STAGE1_JAVA = gcj
 #STAGE1_JAVA = openjdk
@@ -114,6 +116,9 @@ else ifeq ($(STAGE1_JAVA),icedtea)
   build_target = #icedtea-against-icedtea
   req_openjdk_ver = 6b08
 endif
+ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+  CONFIGURE_ARGS += --enable-zero
+endif
 
 # make the build log comparable
 #export HOTSPOT_BUILD_JOBS = 1
@@ -180,7 +185,7 @@ bd_openjdk = \
 	libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, \
 	libxalan2-java, liblcms1-dev, libxinerama-dev,
 bd_zero = \
-	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [!amd64 !i386 !lpia],
+	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [$(foreach a,$(hotspot_archs),!$(a))],
 ifeq ($(with_plugin),yes)
   bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),xulrunner-1.9-dev,firefox-dev)),

@@ -35,6 +35,7 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   [ Matthias Klose ]
   * Make Java Full Screen Exclusive Mode work again with Xorg Server 1.3
     and above (Dan Munckton). LP: #154613 (Java bug 6636469).
+  * Configure with --enable-zero on all archs except amd64, i386, lpia.
 
  -- Torsten Werner <twerner@debian.org>  Sun, 06 Apr 2008 20:20:39 +0200
 
