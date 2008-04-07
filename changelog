@@ -37,6 +37,7 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
     and above (Dan Munckton). LP: #154613 (Java bug 6636469).
   * Configure with --enable-zero on all archs except amd64, i386, lpia.
   * Update IcedTea build infrastructure.
+  * Handle binary files in updates of the build infrastructure.
 
  -- Torsten Werner <twerner@debian.org>  Sun, 06 Apr 2008 20:20:39 +0200
 

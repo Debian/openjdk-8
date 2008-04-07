@@ -304,6 +304,12 @@ endif
 
 icedtea-configure: stamps/icedtea-configure
 stamps/icedtea-configure:
+	for i in $$(find rt -name '*.uu'); do \
+	  [ -f $$i ] || continue; \
+	  d=$$(dirname $$i); i=$$(basename $$i .uu); \
+	  rm -f $$d/$$i; \
+	  (cd $$d && uudecode $$i.uu); \
+	done
 	mkdir -p stamps
 	: > gcjwebplugin.cc
 	./configure $(CONFIGURE_ARGS)
@@ -384,6 +390,16 @@ clean: debian-clean
 	  tar xf generated.tar; \
 	  rm -f generated.tar; \
 	fi
+	for i in $$(find rt -name '*.png'); do \
+	  [ -f $$i ] || continue; \
+	  if [ -f $$i.uu -a $$i.uu -nt $$i ]; then \
+	    rm -f $$i; \
+	  else \
+	   d=$$(dirname $$i); i=$$(basename $$i); \
+	   (cd $$d && uuencode -m $$i $$i > $$i.uu); \
+	   rm -f $$d/$$i; \
+	  fi; \
+	done
 	dh_clean
 
 debian-clean:
