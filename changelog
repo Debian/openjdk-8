@@ -39,6 +39,7 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Update IcedTea build infrastructure.
   * Handle binary files in updates of the build infrastructure.
   * Enable bootstrap/normal builds per architecture.
+  * javaws-wrapper.sh: Use readlink --canonicalize. LP: #211515.
 
  -- Torsten Werner <twerner@debian.org>  Sun, 06 Apr 2008 20:20:39 +0200
 
