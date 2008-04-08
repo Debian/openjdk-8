@@ -1,4 +1,4 @@
-openjdk-6 (6b08-1) UNRELEASED; urgency=low
+openjdk-6 (6b08-1) unstable; urgency=low
 
   [ Torsten Werner ]
   * first upload to Debian (Closes: #452750)
