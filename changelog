@@ -42,6 +42,7 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * binfmt-support: Handle /usr/share/binfmts/jar as a slave symlink of
     the jexec alternative, install the binfmt file in the jre libdir.
     Use the jexec alternative in the binfmt file.
+  * JB-jre-headless.postinst.in: Remove sun-java6 specific chunks.
 
  -- Torsten Werner <twerner@debian.org>  Sun, 06 Apr 2008 20:20:39 +0200
 

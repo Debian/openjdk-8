@@ -62,16 +62,6 @@ configure)
     if [ -x /usr/sbin/update-binfmts ] && [ -r /usr/share/binfmts/jar ]; then
         /usr/sbin/update-binfmts --package --import @basename@
     fi
-    # fix slave links for man page alternatives
-    if [ -n "$2" ] && dpkg --compare-versions "$2" lt 6-00-2ubuntu2; then
-	for i in $jre_tools; do
-	    current=$(LANG=C update-alternatives --display $i 2>&1 \
-		| awk '/link currently points to/ { print $NF}')
-	    case "$current" in /@basediralias@*)
-	        update-alternatives --quiet --set $i $basediralias/jre/bin/$i
-	    esac
-	done
-    fi
 
     # activate class data sharing
     case @archdir@ in i386|sparc)
