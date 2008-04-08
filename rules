@@ -554,7 +554,7 @@ install: packaging-files
 	  echo '$(basedir)/THIRD_PARTY_README'; \
 	  cd $(d); \
 	  for i in $(basedir)/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
-	    [ -h $$i -o "$$i" = jexec ] && continue; \
+	    [ -h $$i -o "$$i" = $(basedir)/bin/java-rmi.cgi ] && continue; \
 	    echo $$i; \
 	  done; \
 	) > debian/$(p_jdk).install
