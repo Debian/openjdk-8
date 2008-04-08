@@ -620,7 +620,8 @@ endif
 
 	dh_installdirs -p$(p_jrehl) \
 		usr/share/applications \
-		usr/share/doc/$(p_jre)
+		usr/share/doc/$(p_jre) \
+		usr/share/binfmts
 
 	dh_installdirs -p$(p_jre) \
 		usr/share/applications \
@@ -711,6 +712,12 @@ endif
 	    echo "plugin $$i-javaplugin.so /$(TOP)/$(jdiralias)/jre/lib/$(archdir)/gcjwebplugin.so"; \
 	  done; \
 	) > $(d_jrehl)/$(TOP)/.$(jdiralias).jinfo
+
+	( \
+	  echo 'package $(basename)'; \
+	  echo 'interpreter /usr/bin/jexec'; \
+	  echo 'magic PK\x03\x04'; \
+	) > $(d_jrehl)/$(basedir)/jre/lib/jar.binfmt
 
 	: # install a wrapper for javaws
 	mv $(d_jre)/$(basedir)/jre/bin/javaws $(d_jre)/$(basedir)/jre/bin/javaws.real

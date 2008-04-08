@@ -12,17 +12,10 @@ done
 update-alternatives --remove jexec $basediralias/jre/lib/jexec
 
 if [ -x /usr/sbin/update-binfmts ]; then
-    # Ubuntu has used update-binfmts directly but it is better done in
-    # java-common. That is why we are removing any former registration.
+    # try to remove and ignore the error
     if [ -e /var/lib/binfmts/@basename@ ]; then
         /usr/sbin/update-binfmts --package @basename@ \
-	    --remove @basename@ $basedir/jre/lib/jexec
-    fi
-    # Remove binfmt if no other jdk package has registered
-    # /usr/bin/jexec.
-    if [ -e /var/lib/binfmts/java-common -a ! -x /usr/bin/jexec ]; then
-        /usr/sbin/update-binfmts --package java-common \
-	    --remove java-common /usr/bin/jexec
+	    --remove @basename@ $basedir/jre/lib/jexec || true
     fi
 fi
 

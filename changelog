@@ -17,7 +17,6 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
     content.
   * Install java-rmi.cgi in package openjdk-6-jre-headless and mention it in
     README.Debian.
-  * Update binfmt support to use the /usr/bin/jexec alternative symlink.
   * Install /usr/bin/jexec via update-alternatives.
   * Downgrade Depends: java-common (>= 0.28).
   * Add patch jexec.diff to make the jexec binary executable without
@@ -40,6 +39,9 @@ openjdk-6 (6b08-1) UNRELEASED; urgency=low
   * Handle binary files in updates of the build infrastructure.
   * Enable bootstrap/normal builds per architecture.
   * javaws-wrapper.sh: Use readlink --canonicalize. LP: #211515.
+  * binfmt-support: Handle /usr/share/binfmts/jar as a slave symlink of
+    the jexec alternative, install the binfmt file in the jre libdir.
+    Use the jexec alternative in the binfmt file.
 
  -- Torsten Werner <twerner@debian.org>  Sun, 06 Apr 2008 20:20:39 +0200
 
