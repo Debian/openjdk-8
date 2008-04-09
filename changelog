@@ -1,3 +1,11 @@
+openjdk-6 (6b08-2) UNRELEASED; urgency=low
+
+  [ Matthias Klose ]
+  * Update IcedTea build infrastructure.
+  * 6636469_v4.diff: Remove, committed in IcedTea.
+
+ -- Matthias Klose <doko@debian.org>  Wed, 09 Apr 2008 22:47:38 +0200
+
 openjdk-6 (6b08-1) unstable; urgency=low
 
   [ Torsten Werner ]
