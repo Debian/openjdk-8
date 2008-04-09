@@ -43,8 +43,10 @@ openjdk-6 (6b08-1) unstable; urgency=low
     the jexec alternative, install the binfmt file in the jre libdir.
     Use the jexec alternative in the binfmt file.
   * JB-jre-headless.postinst.in: Remove sun-java6 specific chunks.
+  * Differentiate between the openjdk version required as dependency and
+    as build dependency.
 
- -- Torsten Werner <twerner@debian.org>  Sun, 06 Apr 2008 20:20:39 +0200
+ -- Torsten Werner <twerner@debian.org>  Wed, 09 Apr 2008 10:12:55 +0200
 
 openjdk-6 (6b08-0ubuntu1) hardy; urgency=low
 
