@@ -41,12 +41,12 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(no_bootstrap_archs)))
 else
   STAGE1_JAVA = gcj
 endif
-OPENJDK_VERSION = b08
-OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-26_mar_2008.tar.gz
+OPENJDK_VERSION = b09
+OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-11_apr_2008.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
-req_openjdk_bd_ver = 6b08-0
-req_openjdk_ver = 6b08-1
+req_openjdk_bd_ver = 6b09-0
+req_openjdk_ver = 6b09-1
 
 unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
@@ -304,12 +304,12 @@ endif
 
 icedtea-configure: stamps/icedtea-configure
 stamps/icedtea-configure:
-	for i in $$(find rt -name '*.uu'); do \
-	  [ -f $$i ] || continue; \
-	  d=$$(dirname $$i); i=$$(basename $$i .uu); \
-	  rm -f $$d/$$i; \
-	  (cd $$d && uudecode $$i.uu); \
-	done
+#	for i in $$(find rt -name '*.uu'); do \
+#	  [ -f $$i ] || continue; \
+#	  d=$$(dirname $$i); i=$$(basename $$i .uu); \
+#	  rm -f $$d/$$i; \
+#	  (cd $$d && uudecode $$i.uu); \
+#	done
 	mkdir -p stamps
 	: > gcjwebplugin.cc
 	./configure $(CONFIGURE_ARGS)
@@ -390,16 +390,16 @@ clean: debian-clean
 	  tar xf generated.tar; \
 	  rm -f generated.tar; \
 	fi
-	for i in $$(find rt -name '*.png'); do \
-	  [ -f $$i ] || continue; \
-	  if [ -f $$i.uu -a $$i.uu -nt $$i ]; then \
-	    rm -f $$i; \
-	  else \
-	   d=$$(dirname $$i); i=$$(basename $$i); \
-	   (cd $$d && uuencode -m $$i $$i > $$i.uu); \
-	   rm -f $$d/$$i; \
-	  fi; \
-	done
+#	for i in $$(find rt -name '*.png'); do \
+#	  [ -f $$i ] || continue; \
+#	  if [ -f $$i.uu -a $$i.uu -nt $$i ]; then \
+#	    rm -f $$i; \
+#	  else \
+#	   d=$$(dirname $$i); i=$$(basename $$i); \
+#	   (cd $$d && uuencode -m $$i $$i > $$i.uu); \
+#	   rm -f $$d/$$i; \
+#	  fi; \
+#	done
 	dh_clean
 
 debian-clean:
