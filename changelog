@@ -9,6 +9,7 @@ openjdk-6 (6b09-1) UNRELEASED; urgency=low
   * Compress the man pages, fixing the slave symlinks of the alternatives.
   * javaws.desktop: Add `%u' to the Exec key, remove -viewer option.
   * openjdk-6-jre-headless: Recommends libnss-mdns.
+  * openjdk-6-jre-headless: Warn about unmounted /proc file system.
 
  -- Matthias Klose <doko@debian.org>  Mon, 14 Apr 2008 21:48:27 +0200
 

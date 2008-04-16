@@ -63,6 +63,8 @@ configure)
         /usr/sbin/update-binfmts --package @basename@ --import jar
     fi
 
+    mount | grep -qs '^proc on /proc' || echo >&2 "/proc is not mounted; some java apps may fail"
+
     # activate class data sharing
     case @archdir@ in i386|sparc)
 	rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
