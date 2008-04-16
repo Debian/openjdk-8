@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=@vendor@ Java @RELEASE@ Web Start
 Comment=@vendor@ Java @RELEASE@ Web Start
-Exec=/@basedir@/bin/javaws -viewer
+Exec=/@basedir@/bin/javaws %u
 Terminal=false
 Type=Application
 Icon=@basename@

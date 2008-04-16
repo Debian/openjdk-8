@@ -7,6 +7,7 @@ openjdk-6 (6b09-1) UNRELEASED; urgency=low
   * debian/control: Update Vcs-* attributes.
   * debian/JB-jre-headless.p*.in: Fix update-binfmts calls.
   * Compress the man pages, fixing the slave symlinks of the alternatives.
+  * javaws.desktop: Add `%u' to the Exec key, remove -viewer option.
 
  -- Matthias Klose <doko@debian.org>  Mon, 14 Apr 2008 21:48:27 +0200
 
