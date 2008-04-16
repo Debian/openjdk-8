@@ -426,6 +426,10 @@ install: packaging-files
 	cp -a $(jreimg)/man $(d)/$(basedir)/jre/
 	chmod -R u+w $(d)
 
+	: # compress manpages
+	find $(d)/$(basedir)/man $(d)/$(basedir)/jre/man -type f ! -type l \
+	  | xargs gzip -9v
+
 	: # replace common files in jdk and jre by symlinks
 	@cd $(d)/$(basedir); \
 	  for i in `find jre -type f`; do \
