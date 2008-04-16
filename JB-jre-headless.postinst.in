@@ -60,7 +60,7 @@ configure)
 
     # register binfmt
     if [ -x /usr/sbin/update-binfmts ] && [ -r /usr/share/binfmts/jar ]; then
-        /usr/sbin/update-binfmts --package --import @basename@
+        /usr/sbin/update-binfmts --package @basename@ --import jar
     fi
 
     # activate class data sharing

@@ -9,14 +9,15 @@ rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
 for i in $jre_tools; do
     update-alternatives --remove $i $basediralias/jre/bin/$i
 done
-update-alternatives --remove jexec $basediralias/jre/lib/jexec
 
 if [ -x /usr/sbin/update-binfmts ]; then
     # try to remove and ignore the error
     if [ -e /var/lib/binfmts/@basename@ ]; then
         /usr/sbin/update-binfmts --package @basename@ \
-	    --remove @basename@ $basedir/jre/lib/jexec || true
+	    --remove jar /usr/bin/jexec || true
     fi
 fi
+
+update-alternatives --remove jexec $basediralias/jre/lib/jexec
 
 #DEBHELPER#
