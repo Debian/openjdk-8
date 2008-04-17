@@ -12,6 +12,7 @@ openjdk-6 (6b09-1) UNRELEASED; urgency=low
   * openjdk-6-jre-headless: Warn about unmounted /proc file system.
   * debian/JB-jre.mime.in: Remove the -viewer option from command (Tan Rui
     Boon).
+  * Add a `docs' symlink to point to /usr/share/doc/openjdk-6.
 
  -- Matthias Klose <doko@debian.org>  Mon, 14 Apr 2008 21:48:27 +0200
 

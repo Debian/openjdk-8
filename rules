@@ -659,6 +659,7 @@ endif
 	: # create docdir symlinks for $(p_jrehl)
 	( \
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jrehl); \
+	  echo usr/share/doc/$(p_jre) $(basedir)/docs; \
 	) > $(d_jrehl).links
 
 	: # create docdir symlinks for $(p_src)
