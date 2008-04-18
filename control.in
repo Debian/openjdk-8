@@ -1,8 +1,8 @@
 Source: openjdk-6
 Section: devel
 Priority: extra
-Maintainer: Matthias Klose <doko@ubuntu.com>
-Uploaders: Michael Koch <konqueror@gmx.de>, Torsten Werner <twerner@debian.org>
+Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
+Uploaders: Michael Koch <konqueror@gmx.de>, Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
 Build-Depends: debhelper (>= 5), autotools-dev, @bd_compress@, m4, lsb-release, wget, zip, unzip, sharutils, gawk, pkg-config, procps, automake, autoconf, ant, @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_mauve@
 Standards-Version: 3.7.3
 Homepage: http://openjdk.java.net/
