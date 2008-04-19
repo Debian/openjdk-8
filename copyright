@@ -57,9 +57,18 @@ IcedTea:
     Portions Copyright © 2007 Joshua Sumali <jsumali@redhat.com>
     Portions Copyright © 2007 Christian Thalinger <twisti@complang.tuwien.ac.at>
     Portions Copyright © 2007 Mark Wielaard <mark@klomp.org>
-
+    Portions Copyright © 2007, 2008 Red Hat, Inc.
+    Portions Copyright © 2001-2003 Jon A. Maxwell (JAM)
+    Portions Copyright © 1992, 1995-2007 Sun Microsystems, Inc.
+    Portions Copyright © 2007 Matthew Flaschen
+    Portions Copyright © 2000-2002 Marc De Scheemaecker
+    Portions Copyright © 1991-1998 Thomas G. Lane
+    Portions Copyright © 2007 Free Software Foundation, Inc.
+    
 OpenJDK:
-    Copyright © 2007 Sun Microsystems, Inc.
+    Copyright © 1996-2007 Sun Microsystems, Inc.
+    For third party copyrights see below (copies from the third party readme).
+    Portions Copyright © 1993-1999 IBM Corp.
 
 Java Access Bridge:
     Portions Copyright © 2002-2007 Bill Haneman <bill.haneman@sun.com>
@@ -72,7 +81,7 @@ Java Access Bridge:
     Portions Copyright © 2002-2007 Darren Kenny <darren.kenny@sun.com>
 
 Packaging:
-    Copyright © 2007 Canonical Ltd.
+    Copyright © 2007, 2008 Canonical Ltd.
 
 ------------------------------------------------------------------------------
 License:
