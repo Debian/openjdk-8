@@ -42,7 +42,7 @@ else
   STAGE1_JAVA = gcj
 endif
 OPENJDK_VERSION = b09
-OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-11_apr_2008.tar.gz
+OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-11_apr_2008-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
 req_openjdk_bd_ver = 6b09-0
