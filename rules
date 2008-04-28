@@ -205,11 +205,7 @@ dlopen_jre_depends = \
 dlopen_jre_recommends = \
 	lesstif2
 
-ifneq (,$(findstring xulrunner-1.9, $(bd_plugin)))
-  browser_plugin_dirs = xulrunner-addons
-else
-  browser_plugin_dirs = firefox iceape iceweasel mozilla midbrowser xulrunner
-endif
+browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
 
 p_jre	= $(basename)-jre
 p_jrehl	= $(basename)-jre-headless
@@ -714,8 +710,12 @@ endif
 	  for i in $(jdk_tools_alt); do \
 	    echo "jdk $$i /$(TOP)/$(jdiralias)/bin/$$i"; \
 	  done; \
-	  for i in $(browser_plugin_dirs); do \
-	    echo "plugin $$i-javaplugin.so /$(TOP)/$(jdiralias)/jre/lib/$(archdir)/gcjwebplugin.so"; \
+	  for d in $(browser_plugin_dirs); do \
+	    case "$$d" in \
+	      xulrunner-addons) b=xulrunner-1.9;; \
+	      *) b=$$d;; \
+	    esac; \
+	    echo "plugin $$b-javaplugin.so /$(TOP)/$(jdiralias)/jre/lib/$(archdir)/gcjwebplugin.so"; \
 	  done; \
 	) > $(d_jrehl)/$(TOP)/.$(jdiralias).jinfo
 
