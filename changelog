@@ -24,6 +24,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Recommend the ttf-wqy-zenhei font instead of ttf-arphic-uming, if the
     latter is available in Truetype Collection (TTC) format only, add the
     fontconfig changes as a patch.
+  * Use GCC-4.3 on all platforms where available.
 
  -- Matthias Klose <doko@ubuntu.com>  Mon, 28 Apr 2008 15:05:16 +0200
 

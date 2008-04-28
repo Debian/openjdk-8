@@ -52,14 +52,15 @@ req_openjdk_ver = 6b09-1
 
 unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
-ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
-  export GCC_SUFFIX = -4.1
-  GCJ_SUFFIX = -4.2
-endif
-ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc))
-  export GCC_SUFFIX = -4.2
-endif
-ifeq ($(distribution),Debian)
+ifneq (,$(filter $(distrelease),gutsy feisty edgy dapper))
+  ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
+    export GCC_SUFFIX = -4.1
+    GCJ_SUFFIX = -4.2
+  endif
+  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc))
+    export GCC_SUFFIX = -4.2
+  endif
+else
   export GCC_SUFFIX = -4.3
   export GCJ_SUFFIX = -4.3
 endif
@@ -68,13 +69,18 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/gcc-no-stack-protector.diff \
 	debian/patches/gcc-mtune-generic.diff \
 	debian/patches/ld-symbolic-functions.diff \
-	$(if $(filter $(DEB_HOST_ARCH), amd64), debian/patches/gcc-jdk-opt-O2.diff) \
-	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
 	debian/patches/const_strings.patch \
 	debian/patches/javax.net.ssl.trustStore.diff \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \
 	debian/patches/openjdk-no-jhat.patch \
+	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
+
+ifneq (,$(filter $(distrelease),gutsy feisty edgy dapper))
+  DISTRIBUTION_PATCHES += \
+	$(if $(filter $(DEB_HOST_ARCH), amd64), debian/patches/gcc-jdk-opt-O2.diff) \
+	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
+endif
 
 ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += debian/patches/openjdk-ubuntu-branding.patch
