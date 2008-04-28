@@ -1,0 +1,70 @@
+diff -ruN openjdkb21/openjdk/jdk/make/launchers/Makefile openjdk/jdk/make/launchers/Makefile
+--- openjdkb21/openjdk/jdk/make/launchers/Makefile	2007-09-27 03:52:09.000000000 -0400
++++ openjdk/jdk/make/launchers/Makefile	2007-10-15 10:18:32.000000000 -0400
+@@ -70,7 +70,6 @@
+ $(call make-launcher, jconsole, sun.tools.jconsole.JConsole, \
+   -J-Djconsole.showOutputViewer, )
+ $(call make-launcher, jdb, com.sun.tools.example.debug.tty.TTY, , )
+-$(call make-launcher, jhat, com.sun.tools.hat.Main, , )
+ $(call make-launcher, jinfo, sun.tools.jinfo.JInfo, \
+   -J-Dsun.jvm.hotspot.debugger.useProcDebugger \
+   -J-Dsun.jvm.hotspot.debugger.useWindbgDebugger, )
+diff -ruN openjdkb21/openjdk/jdk/make/sun/tools/Makefile openjdk/jdk/make/sun/tools/Makefile
+--- openjdkb21/openjdk/jdk/make/sun/tools/Makefile	2007-09-27 03:52:13.000000000 -0400
++++ openjdk/jdk/make/sun/tools/Makefile	2007-10-15 10:16:52.000000000 -0400
+@@ -42,7 +42,6 @@
+   sun/tools/jstack \
+   sun/tools/jstat \
+   sun/tools/jstatd \
+-  com/sun/tools/hat \
+   com/sun/tools/script/shell \
+   sun/jvmstat
+ 
+@@ -50,13 +49,6 @@
+ FILES_copy += \
+   $(CLASSDESTDIR)/sun/tools/jstat/resources/jstat_options
+ 
+-# Extra jhat files
+-JHAT_RESOURCEDIR = $(CLASSDESTDIR)/com/sun/tools/hat/resources
+-FILES_copy += \
+-  $(JHAT_RESOURCEDIR)/hat.js \
+-  $(JHAT_RESOURCEDIR)/oqlhelp.html \
+-  $(JHAT_RESOURCEDIR)/platform_names.txt
+-
+ # Extra jrunscript files
+ JRUNSCRIPT_RESOURCEDIR = $(CLASSDESTDIR)/com/sun/tools/script/shell
+ FILES_copy += \
+diff -ruN openjdkb21/openjdk/jdk/test/com/sun/management/HotSpotDiagnosticMXBean/DumpHeap.sh openjdk/jdk/test/com/sun/management/HotSpotDiagnosticMXBean/DumpHeap.sh
+--- openjdkb21/openjdk/jdk/test/com/sun/management/HotSpotDiagnosticMXBean/DumpHeap.sh	2007-09-27 04:20:15.000000000 -0400
++++ openjdk/jdk/test/com/sun/management/HotSpotDiagnosticMXBean/DumpHeap.sh	2007-10-15 10:19:33.000000000 -0400
+@@ -49,10 +49,6 @@
+ ${TESTJAVA}/bin/java ${TESTVMOPTS} -classpath $TESTCLASSES \
+     DumpHeap ${DUMPFILE} || exit 2
+ 
+-# check that heap dump is parsable
+-${TESTJAVA}/bin/jhat -parseonly true ${DUMPFILE}
+-if [ $? != 0 ]; then failed=1; fi
+-
+ # dump file is large so remove it
+ rm ${DUMPFILE}
+ 
+--- oldopenjdk/jdk/make/common/Release.gmk	2008-02-05 11:31:07.000000000 -0500
++++ openjdk/jdk/make/common/Release.gmk	2008-02-05 11:32:09.000000000 -0500
+@@ -371,7 +371,6 @@
+ 	com/sun/tools/example/debug/expr \
+ 	com/sun/tools/example/debug/tty  \
+ 	com/sun/tools/extcheck  \
+-	com/sun/tools/hat       \
+ 	com/sun/tools/javac     \
+ 	com/sun/tools/javadoc   \
+ 	com/sun/tools/apt       \
+@@ -468,8 +462,7 @@
+        wsgen$(EXE_SUFFIX) \
+        wsimport$(EXE_SUFFIX) \
+         schemagen$(EXE_SUFFIX) \
+-       jsadebugd$(EXE_SUFFIX) \
+-       jhat$(EXE_SUFFIX)
++       jsadebugd$(EXE_SUFFIX)
+ 
+ # The following get removed from the JRE after the bulk-copy of LIBDIR...
+ NOTJRELIBS = tools.jar \

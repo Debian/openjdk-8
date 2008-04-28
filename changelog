@@ -17,6 +17,8 @@ openjdk-6 (6b09-1) unstable; urgency=low
   * Add copyright notices for patches and generated files.
   * Add helper scripts to modify upstream tarball and generate the debian
     tarball.
+  * Add patches/openjdk-no-jhat.patch to build without jhat, removed from
+    the upstream source.
 
  -- Matthias Klose <doko@ubuntu.com>  Sun, 27 Apr 2008 22:36:03 +0200
 
