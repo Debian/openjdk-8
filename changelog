@@ -1,8 +1,8 @@
-openjdk-6 (6b09-1) unstable; urgency=low
+openjdk-6 (6b09-1~pre1) unstable; urgency=low
 
   [ Matthias Klose ]
   * New code drop (b09).
-  * Update IcedTea build infrastructure (20080427).
+  * Update IcedTea build infrastructure (20080428).
   * 6636469_v4.diff: Remove, committed in IcedTea.
   * debian/control: Update Vcs-* attributes.
   * debian/JB-jre-headless.p*.in: Fix update-binfmts calls.
@@ -24,7 +24,7 @@ openjdk-6 (6b09-1) unstable; urgency=low
   * Recommend the ttf-wqy-zenhei font instead of ttf-arphic-uming, if the
     latter is available in Truetype Collection (TTC) format only.
 
- -- Matthias Klose <doko@ubuntu.com>  Sun, 27 Apr 2008 22:36:03 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 28 Apr 2008 15:05:16 +0200
 
 openjdk-6 (6b08-1) unstable; urgency=low
 
