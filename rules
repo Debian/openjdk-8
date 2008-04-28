@@ -24,6 +24,8 @@ with_plugin =
 distribution := $(shell lsb_release --id --short)
 distrel := $(shell lsb_release --codename --short)
 
+with_wgy_zenhai = $(if $(filter $(distrelease),hardy intrepid),yes)
+
 arch_map	:= amd64=amd64 i386=i586 lpia=i586 powerpc=ppc sparc=sparc ia64=ia64
 archdir_map	:= amd64=amd64 i386=i386 lpia=i386 powerpc=ppc sparc=sparc ia64=ia64
 
@@ -207,6 +209,11 @@ dlopen_jre_recommends = \
 
 browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
 
+cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
+cjk_fonts += ttf-kochi-gothic | ttf-sazanami-gothic,
+cjk_fonts += ttf-kochi-mincho | ttf-sazanami-mincho,
+cjk_fonts += $(if $(with_wgy_zenhai),ttf-wqy-zenhei,ttf-arphic-uming),
+
 p_jre	= $(basename)-jre
 p_jrehl	= $(basename)-jre-headless
 p_lib	= $(basename)-jre-lib
@@ -291,6 +298,7 @@ packaging-files:
 	      -e 's,@j2se_lib@,$(j2se_lib),g' \
 	      -e 's,@j2se_share@,$(j2se_share),g' \
 	      -e 's,@browser_dirs@,$(browser_plugin_dirs),g' \
+	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	    $$f > $$f2; \
 	done
 ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))

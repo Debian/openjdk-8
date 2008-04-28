@@ -28,7 +28,7 @@ Pre-Depends: ${dpkg:Depends}
 Section: interpreters
 Depends: openjdk-6-jre-lib (>= ${Source-Version}), libaccess-bridge-java (>= 1.22), ca-certificates, java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, libnss-mdns, tzdata-java
-Suggests: sun-java6-fonts, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic , ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming
+Suggests: sun-java6-fonts, @cjk_fonts@
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
 Replaces: openjdk-6-jre-lib (<< 6b06-0ubuntu11)
 Description: OpenJDK Java runtime (headless)
@@ -42,7 +42,7 @@ Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Section: interpreters
 Depends: openjdk-6-jre-headless (>= ${Source-Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}
-Recommends: ${dlopenjre:Recommends}
+Recommends: ${dlopenjre:Recommends}, @cjk_fonts@
 Suggests: icedtea-gcjwebplugin
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
 Description: OpenJDK Java runtime
