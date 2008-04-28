@@ -73,11 +73,12 @@ rm -rf \
 
 # BEGIN Debian/Ubuntu additions
 
+# TODO: build fails without these
 # THIS PRODUCT CONTAINS RESTRICTED MATERIALS OF IBM
-rm -f \
-  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl.prp  \
-  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl_*.prp  \
-  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/toJavaPortable/toJavaPortable*.prp 
+#rm -f \
+#  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl.prp  \
+#  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl_*.prp  \
+#  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/toJavaPortable/toJavaPortable*.prp 
 
 # binary files, not distributed in source form
 rm -f \
@@ -119,13 +120,14 @@ rm -f \
 # TODO
 #$ find openjdk -name '*.jar' -o -name '*.class'|grep -v test
 
+#  openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib/jscheme.jar \
+#  openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib/jschemelogutil.jar \
+#  openjdk/hotspot/build/linux/Queens.class \
+#  openjdk/hotspot/build/solaris/Queens.class
+
 rm -f \
-  openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib/jscheme.jar \
-  openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib/jschemelogutil.jar \
   openjdk/hotspot/agent/kk/src/share/lib/maf-1_0.jar \
   openjdk/hotspot/agent/kk/src/share/lib/jlfgr-1_0.jar \
-  openjdk/hotspot/build/linux/Queens.class \
-  openjdk/hotspot/build/solaris/Queens.class
 
 # END Debian/Ubuntu additions
 
