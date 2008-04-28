@@ -122,8 +122,6 @@ rm -f \
 
 #  openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib/jscheme.jar \
 #  openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib/jschemelogutil.jar \
-#  openjdk/hotspot/build/linux/Queens.class \
-#  openjdk/hotspot/build/solaris/Queens.class
 
 rm -f \
   openjdk/hotspot/agent/kk/src/share/lib/maf-1_0.jar \
