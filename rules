@@ -483,10 +483,8 @@ install: packaging-files
 	mv $(d)/$(basedir)/jre/lib/$(archdir)/jvm.cfg \
 		$(d)/etc/$(jdiralias)/
 
-	cp debian/fontconfig.properties.src \
-		$(d)/etc/$(jdiralias)/fontconfig.properties
-
-	: # FIXME: generate fontconfig.bfc
+	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.properties.src \
+		$(d)/etc/$(jdiralias)/fontconfig.properties.src
 	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.bfc \
 		$(d)/etc/$(jdiralias)/fontconfig.bfc
 
@@ -500,6 +498,9 @@ install: packaging-files
 
 	: # TODO: why do we provide a custom font.properties.ja?
 	: # cp -p debian/font.properties.ja $(d_jbin)/etc/$(jdiralias)/.
+#	cp debian/font.properties.wgy_zenhai \
+#		$(d)/etc/$(jdiralias)/font.properties.ja
+
 
 	: # now move things to the packages. it is so ****** to create
 	: # .install files first. dh_movefiles did do the job perfectly

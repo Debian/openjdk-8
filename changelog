@@ -22,7 +22,8 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Fix names for browser alternatives in jinfo file, set browser_plugin_dirs
     unconditionally.
   * Recommend the ttf-wqy-zenhei font instead of ttf-arphic-uming, if the
-    latter is available in Truetype Collection (TTC) format only.
+    latter is available in Truetype Collection (TTC) format only, add the
+    fontconfig changes as a patch.
 
  -- Matthias Klose <doko@ubuntu.com>  Mon, 28 Apr 2008 15:05:16 +0200
 
