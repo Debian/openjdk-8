@@ -17,8 +17,6 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Add copyright notices for patches and generated files.
   * Add helper scripts to modify upstream tarball and generate the debian
     tarball.
-  * Add patches/openjdk-no-jhat.patch to build without jhat, removed from
-    the upstream source.
   * Fix names for browser alternatives in jinfo file, set browser_plugin_dirs
     unconditionally.
   * Recommend the ttf-wqy-zenhei font instead of ttf-arphic-uming, if the

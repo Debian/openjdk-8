@@ -61,11 +61,6 @@ rm -f \
    openjdk/jdk/test/java/util/Locale/Bug4184873Test.java \
    openjdk/jdk/test/sun/text/resources/LocaleDataTest.java
 
-# Remove jhat sources.  Most have questionable license headers.
-rm -rf \
-  openjdk/jdk/src/share/classes/com/sun/tools/hat \
-  openjdk/jdk/test/sun/tools/jhat
-
 # Remove J2DBench sources, some of which have questionable license
 # headers.
 rm -rf \
