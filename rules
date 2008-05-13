@@ -78,7 +78,7 @@ DISTRIBUTION_PATCHES = \
 ifneq (,$(filter $(distrelease),hardy gutsy feisty edgy dapper))
   DISTRIBUTION_PATCHES += \
 	$(if $(filter $(DEB_HOST_ARCH), amd64), debian/patches/gcc-jdk-opt-O2.diff) \
-	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
+	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff)
 endif
 
 ifeq ($(distribution),Ubuntu)
@@ -182,7 +182,7 @@ bd_bootstrap = \
 
 bd_gcc = \
 	g++-4.2 [amd64 powerpc], g++-4.1 [i386 lpia],
-ifeq ($(distribution),Debian)
+ifeq (,$(filter $(distrelease),hardy gutsy feisty edgy dapper))
   bd_gcc = \
 	g++-4.3, gcj-4.3 [$(strip $(foreach a,$(no_bootstrap_archs), !$(a)))],
 endif
