@@ -269,6 +269,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_netx@/$(bd_netx)/g' \
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	      -e 's/@bd_compress@/$(pkg_compress)/g' \
+	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	    debian/control.in $(if $(with_plugin),debian/control.plugin) > debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \

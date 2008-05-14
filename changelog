@@ -22,6 +22,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Recommend the ttf-wqy-zenhei font instead of ttf-arphic-uming, if the
     latter is available in Truetype Collection (TTC) format only, add the
     fontconfig changes as a patch.
+  * Make the cjk font packages configurable in the control file.
   * Use GCC-4.3 on all platforms where available.
   * Install a config file swing.properties, allowing a user to change
     the default look and feel. LP: #229112.
