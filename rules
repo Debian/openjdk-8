@@ -464,6 +464,7 @@ install: packaging-files
 	done
 
 	cp -p debian/accessibility.properties $(d)/$(basedir)/jre/lib/
+	cp -p debian/swing.properties $(d)/$(basedir)/jre/lib/
 
 	: # move config files to etc/$(jdiralias) and symlink them.
 	for i in \
