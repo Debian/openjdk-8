@@ -25,6 +25,8 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Use GCC-4.3 on all platforms where available.
   * Install a config file swing.properties, allowing a user to change
     the default look and feel. LP: #229112.
+  * When trying to determine the executable name reading /proc/self/exe,
+    discard known prefixes used for unionfs mounts. LP: #224110.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
 
