@@ -86,6 +86,7 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/issue-6659207.diff \
 	debian/patches/sparc.diff \
 	debian/patches/sparc2.diff \
+	debian/patches/no-compiler-path.diff \
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   DISTRIBUTION_PATCHES += \

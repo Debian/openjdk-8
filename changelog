@@ -35,6 +35,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
     independent packages on these architectures.
   * Explicitely configure --with-parallel-jobs, needed by the updated IcedTea.
   * Backport the linux-sparc patches, enable building on sparc.
+  * Don't use an absolute path calling the compiler.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
 
