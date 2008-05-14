@@ -42,8 +42,8 @@ jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(archdir_map))))
 
-hotspot_archs	= amd64 i386 lpia
-no_bootstrap_archs = lpia
+hotspot_archs	= amd64 i386 lpia sparc
+no_bootstrap_archs = none
 
 # STAGE1_JAVA is either gcj or icedtea, the latter not yet supported
 ifneq (,$(filter $(DEB_HOST_ARCH), $(no_bootstrap_archs)))
@@ -84,6 +84,8 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
 	debian/patches/set-exec-name.diff \
 	debian/patches/issue-6659207.diff \
+	debian/patches/sparc.diff \
+	debian/patches/sparc2.diff \
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   DISTRIBUTION_PATCHES += \
@@ -145,7 +147,7 @@ else
 endif
 
 # assume we don't build binary indep packages on these architectures
-ifeq (,$(filter $(DEB_HOST_ARCH), powerpc sparc))
+ifeq (,$(filter $(DEB_HOST_ARCH), ia64 powerpc sparc))
   CONFIGURE_ARGS += --disable-docs
 endif
 
