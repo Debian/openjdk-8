@@ -499,6 +499,7 @@ install: packaging-files
 	  net.properties \
 	  psfontj2d.properties \
 	  psfont.properties.ja \
+	  swing.properties \
 	  management/jmxremote.access \
 	  management/management.properties \
 	  security/cacerts \
