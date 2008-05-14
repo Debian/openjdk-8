@@ -131,6 +131,8 @@ else ifeq ($(STAGE1_JAVA),icedtea)
 endif
 ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
   CONFIGURE_ARGS += --enable-zero
+else
+  CONFIGURE_ARGS += --disable-zero
 endif
 
 # make the build log comparable
