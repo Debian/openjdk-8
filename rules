@@ -65,7 +65,7 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
     export GCC_SUFFIX = -4.1
     GCJ_SUFFIX = -4.2
   endif
-  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc))
+  ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc sparc))
     export GCC_SUFFIX = -4.2
   endif
 else
