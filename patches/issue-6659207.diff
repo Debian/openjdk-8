@@ -1,0 +1,88 @@
+
+# HG changeset patch
+# User never
+# Date 1205909657 25200
+# Node ID 8bb88f9877e5dc7324905db1e5ce3298bf8b364b
+# Parent daf38130e60d5038a3db4e5c58edd1c413ac88c3
+6659207: access violation in CompilerThread0
+Summary: split_thru_phi produces top on a non-dead path
+Reviewed-by: kvn, rasbold, sgoldman
+
+--- openjdk/hotspot/src/share/vm/opto/loopopts.cpp	Tue Mar 18 23:44:46 2008 -0700
++++ openjdk/hotspot/src/share/vm/opto/loopopts.cpp	Tue Mar 18 23:54:17 2008 -0700
+@@ -29,6 +29,11 @@
+ //------------------------------split_thru_phi---------------------------------
+ // Split Node 'n' through merge point if there is enough win.
+ Node *PhaseIdealLoop::split_thru_phi( Node *n, Node *region, int policy ) {
++  if (n->Opcode() == Op_ConvI2L && n->bottom_type() != TypeLong::LONG) {
++    // ConvI2L may have type information on it which is unsafe to push up
++    // so disable this for now
++    return NULL;
++  }
+   int wins = 0;
+   assert( !n->is_CFG(), "" );
+   assert( region->is_Region(), "" );
+--- /dev/null	Thu Jan 01 00:00:00 1970 +0000
++++ openjdk/hotspot/test/compiler/6659207/Test.java	Tue Mar 18 23:54:17 2008 -0700
+@@ -0,0 +1,60 @@
++/*
++ * Copyright 2008 Sun Microsystems, Inc.  All rights reserved.
++ * SUN PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ *
++ */
++
++/*
++ * @test
++ * @bug 6659207
++ * @summary access violation in CompilerThread0
++ */
++
++public class Test {
++    static int[] array = new int[12];
++
++    static int index(int i) {
++        if (i == 0) return 0;
++        for (int n = 0; n < array.length; n++)
++            if (i < array[n]) return n;
++        return -1;
++    }
++
++    static int test(int i) {
++        int result = 0;
++        i = index(i);
++        if (i >= 0)
++            if (array[i] != 0)
++                result++;
++
++        if (i != -1)
++            array[i]++;
++
++        return result;
++    }
++
++    public static void main(String[] args) {
++        int total = 0;
++        for (int i = 0; i < 100000; i++) {
++            total += test(10);
++        }
++        System.out.println(total);
++    }
++}
+

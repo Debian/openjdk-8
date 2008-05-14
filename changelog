@@ -29,6 +29,8 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * When trying to determine the executable name reading /proc/self/exe,
     discard known prefixes used for unionfs mounts. LP: #224110.
   * Explicitely configure with --disable-zero on hotspot architectures.
+  * Add fix for issue 6659207, access violation in CompilerThread0.
+    Addresses #478560. Needs checking: LP: #229207.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
 

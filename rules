@@ -75,6 +75,7 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/jexec.diff \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
 	debian/patches/set-exec-name.diff \
+	debian/patches/issue-6659207.diff \
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   DISTRIBUTION_PATCHES += \
