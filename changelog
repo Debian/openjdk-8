@@ -12,7 +12,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * openjdk-6-jre-headless: Warn about unmounted /proc file system.
   * debian/JB-jre.mime.in: Remove the -viewer option from command (Tan Rui
     Boon).
-  * Add a `docs' symlink pointing to /usr/share/doc/openjdk-6.
+  * Add a `docs' symlink pointing to /usr/share/doc/openjdk-6.  LP: #218405.
   * Set maintainer to the team list.
   * Add copyright notices for patches and generated files.
   * Add helper scripts to modify upstream tarball and generate the debian
@@ -31,10 +31,10 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Explicitely configure with --disable-zero on hotspot architectures.
   * Add fix for issue 6659207, access violation in CompilerThread0.
     Addresses #478560. Needs checking: LP: #229207.
-  * Disable building the docs on powerpc and sparc, we don't build architecture
-    independent packages on these architectures.
+  * Disable building the docs on ia64, powerpc and sparc, we don't build
+    architecture independent packages on these architectures.
   * Explicitely configure --with-parallel-jobs, needed by the updated IcedTea.
-  * Backport the linux-sparc patches, enable building on sparc.
+  * Backport the linux-sparc patches, enable building on sparc. LP: #154080.
   * Don't use an absolute path calling the compiler.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
