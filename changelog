@@ -31,6 +31,8 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Explicitely configure with --disable-zero on hotspot architectures.
   * Add fix for issue 6659207, access violation in CompilerThread0.
     Addresses #478560. Needs checking: LP: #229207.
+  * Disable building the docs on powerpc and sparc, we don't build architecture
+    independent packages on these architectures.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
 

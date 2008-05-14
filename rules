@@ -136,6 +136,11 @@ else
   CONFIGURE_ARGS += --disable-zero
 endif
 
+# assume we don't build binary indep packages on these architectures
+ifeq (,$(filter $(DEB_HOST_ARCH), powerpc sparc))
+  CONFIGURE_ARGS += --disable-docs
+endif
+
 # make the build log comparable
 #export HOTSPOT_BUILD_JOBS = 1
 #export ALT_PARALLEL_COMPILE_JOBS = 1
