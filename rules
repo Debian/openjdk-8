@@ -15,9 +15,17 @@ DEB_HOST_ARCH		?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
 # Support parallel=<n> in DEB_BUILD_OPTIONS (see #209008)
 COMMA=,
 ifneq (,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
-  PARALLEL_COMPILE_JOBS = $(subst parallel=,,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
-  export PARALLEL_COMPILE_JOBS
+  NJOBS = $(subst parallel=,,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
+  HOTSPOT_BUILD_JOBS = $(NJOBS)
+  ALT_PARALLEL_COMPILE_JOBS = $(NJOBS)
+  export HOTSPOT_BUILD_JOBS
+  export ALT_PARALLEL_COMPILE_JOBS
 endif
+
+# make the build log comparable
+#export HOTSPOT_BUILD_JOBS = 1
+#export ALT_PARALLEL_COMPILE_JOBS = 1
+
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
 with_plugin =
 
@@ -141,9 +149,9 @@ ifeq (,$(filter $(DEB_HOST_ARCH), powerpc sparc))
   CONFIGURE_ARGS += --disable-docs
 endif
 
-# make the build log comparable
-#export HOTSPOT_BUILD_JOBS = 1
-#export ALT_PARALLEL_COMPILE_JOBS = 1
+ifneq (,$(NJOBS))
+  CONFIGURE_ARGS += --with-parallel-jobs=$(NJOBS)
+endif
 
 VENDOR		:= openjdk
 Vendor		:= OpenJDK

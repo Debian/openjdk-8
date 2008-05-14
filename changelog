@@ -33,6 +33,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
     Addresses #478560. Needs checking: LP: #229207.
   * Disable building the docs on powerpc and sparc, we don't build architecture
     independent packages on these architectures.
+  * Explicitely configure --with-parallel-jobs, needed by the updated IcedTea.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
 
