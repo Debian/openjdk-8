@@ -2,7 +2,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
 
   [ Matthias Klose ]
   * New code drop (b09).
-  * Update IcedTea build infrastructure (20080428).
+  * Update IcedTea build infrastructure (20080514).
   * 6636469_v4.diff: Remove, committed in IcedTea.
   * debian/control: Update Vcs-* attributes.
   * debian/JB-jre-headless.p*.in: Fix update-binfmts calls.
@@ -24,7 +24,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
     fontconfig changes as a patch.
   * Use GCC-4.3 on all platforms where available.
 
- -- Matthias Klose <doko@ubuntu.com>  Mon, 28 Apr 2008 15:05:16 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
 
 openjdk-6 (6b08-1) unstable; urgency=low
 

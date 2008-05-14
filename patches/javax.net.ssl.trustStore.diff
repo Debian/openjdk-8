@@ -1,11 +1,11 @@
---- openjdk/hotspot/src/os/linux/vm/os_linux.cpp~	2008-03-04 15:32:41.695287399 +0100
-+++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2008-03-04 16:34:33.301276130 +0100
-@@ -390,7 +390,7 @@
-   SystemProperty* sp = Arguments::system_properties();
-   Arguments::PropertyList_add (&sp,
- 			       "javax.net.ssl.trustStore",
--			       "/etc/pki/tls/certs/ca-bundle.crt");
-+			       "/etc/ssl/certs/ca-certificates.crt");
-   Arguments::PropertyList_add (&sp,
- 			       "javax.net.ssl.trustStoreType",
- 			       "CertBundle");
+--- openjdk/jdk/src/share/classes/sun/security/ssl/TrustManagerFactoryImpl.java~	2008-05-13 09:21:12.770538504 +0200
++++ openjdk/jdk/src/share/classes/sun/security/ssl/TrustManagerFactoryImpl.java	2008-05-13 09:24:55.533898839 +0200
+@@ -146,7 +146,7 @@
+                                 "javax.net.ssl.trustStoreProvider", ""));
+                 props.put("trustStorePasswd", System.getProperty(
+                                 "javax.net.ssl.trustStorePassword", ""));
+-                props.put("/etc/pki/tls/certs/ca-bundle.crt", System.getProperty(
++                props.put("/etc/ssl/certs/ca-certificates.crt", System.getProperty(
+                                 "javax.net.ssl.trustStore"));
+ 		props.put("CertBundle", System.getProperty(
+                                 "javax.net.ssl.trustStoreType",
