@@ -670,7 +670,7 @@ endif
 	cp -p debian/$(basename)-{javaws,policytool}.desktop \
 	      $(d_jre)/usr/share/applications/
 	cp -p debian/$(basename)-java.desktop \
-	      $(d_jrehl)/usr/share/applications/
+	      $(d_jre)/usr/share/applications/
 # not yet in OpenJDK
 #	cp -p debian/$(basename)-controlpanel.desktop \
 #	      $(d_jre)/usr/share/applications/
@@ -802,11 +802,13 @@ shlibdeps_ld_path =$(absarchdir):$(absarchdir)/client:$(absarchdir)/native_threa
 binary-arch: build install
 	dh_testdir
 	dh_testroot
-	dh_installchangelogs -p$(p_jre)
-	dh_installdocs -p$(p_jre) \
+	dh_installchangelogs -p$(p_jrehl)
+	dh_installdocs -p$(p_jrehl) \
 		debian/JAVA_HOME \
 		debian/README.alternatives \
 		debian/README.Debian
+	mv $(d_jrehl)/usr/share/doc/$(p_jrehl)/* $(d_jrehl)/usr/share/doc/$(p_jre)
+	rm -rf $(d_jrehl)/usr/share/doc/$(p_jrehl)
 	for i in AUTHORS NEWS README; do \
 	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
 	done

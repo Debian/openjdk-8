@@ -30,7 +30,7 @@ Depends: openjdk-6-jre-lib (>= ${Source-Version}), libaccess-bridge-java (>= 1.2
 Recommends: ${dlopenjl:Recommends}, libnss-mdns, tzdata-java
 Suggests: sun-java6-fonts, @cjk_fonts@
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
-Replaces: openjdk-6-jre-lib (<< 6b06-0ubuntu11)
+Replaces: openjdk-6-jre-lib (<< 6b06-0ubuntu11), openjdk-6-jre (<< 6b09dfsg-0ubuntu2)
 Description: OpenJDK Java runtime (headless)
  Minimal Java runtime - needed for executing non GUI Java programs.
  .

@@ -38,6 +38,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Don't use an absolute path calling the compiler.
   * Replace the OpenJDK version in desktop and menu files.
   * Install menu files.
+  * Install openjdk-6-java.desktop in -jre, instead of -jre-headless.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
 
