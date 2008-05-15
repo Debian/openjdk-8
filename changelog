@@ -3,6 +3,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   [ Matthias Klose ]
   * New code drop (b09).
   * Update IcedTea build infrastructure (20080514).
+    - Add missing color profiles. LP: #225174.
   * 6636469_v4.diff: Remove, committed in IcedTea.
   * debian/control: Update Vcs-* attributes.
   * debian/JB-jre-headless.p*.in: Fix update-binfmts calls.
