@@ -657,7 +657,6 @@ endif
 # 'make Emacs Makefile mode happy
 
 	dh_installdirs -p$(p_jrehl) \
-		usr/share/applications \
 		usr/share/doc/$(p_jre) \
 		usr/share/binfmts
 
