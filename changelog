@@ -37,6 +37,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Backport the linux-sparc patches, enable building on sparc. LP: #154080.
   * Don't use an absolute path calling the compiler.
   * Replace the OpenJDK version in desktop and menu files.
+  * Install menu files.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
 

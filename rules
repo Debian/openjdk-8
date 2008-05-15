@@ -329,8 +329,8 @@ packaging-files:
 	done
 ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
 # not yet in OpenJDK
-#	cat debian/$(p_bin)-i586.menu >> $(d_bin).menu
-	rm -f debian/$(p_bin)-i586.menu
+#	cat debian/$(p_jre)-i586.menu >> $(d_jre).menu
+	rm -f debian/$(p_jre)-i586.menu
 endif
 
 icedtea-configure: stamps/icedtea-configure
@@ -784,7 +784,7 @@ binary-indep: build install
 	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jre)/; \
 	  ln -sf ../$(p_jre)/$$b $(d_doc)/usr/share/doc/$(p_doc)/$$b; \
 	done
-#	dh_installmenu -i
+	dh_installmenu -i
 	-dh_icons -i || dh_iconcache -i
 #	dh_installdebconf -i
 	dh_link -i
@@ -815,9 +815,7 @@ ifeq ($(with_check),yes)
 	cp mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
 endif
 
-#	dh_installchangelogs -s ChangeLog
-#	dh_installdocs -s
-#	dh_installmenu -s
+	dh_installmenu -s
 	-dh_icons -s || dh_iconcache -s
 #	dh_installdebconf -s
 	dh_link -s
