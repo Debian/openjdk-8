@@ -776,6 +776,11 @@ endif
 	mv $(d_jre)/$(basedir)/jre/bin/javaws $(d_jre)/$(basedir)/jre/bin/javaws.real
 	install -m 755 debian/javaws-wrapper.sh $(d_jre)/$(basedir)/jre/bin/javaws
 
+	: # Install stuff to generate font config files.
+	mkdir -p $(d_lib)/$(basedir)/jre/lib
+	cp -p openjdk/control/build/linux-i586/btjars/compilefontconfig.jar \
+		$(d_lib)/$(basedir)/jre/lib/
+
 	: # install lintian overrides
 	for FILE in debian/*.overrides; do \
 	  PKG=`basename $$FILE .overrides`; \

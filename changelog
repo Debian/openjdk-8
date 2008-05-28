@@ -44,6 +44,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Install openjdk-6-java.desktop in -jre, instead of -jre-headless.
   * In fontconfig.properties, fix Korean font names and add paths to the Luxi
     fonts for Motif. Add fonts for Indic languages.
+  * Install compilefontconfig.jar in openjdk-6-jre-lib package.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
 
