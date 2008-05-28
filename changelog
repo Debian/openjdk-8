@@ -2,7 +2,7 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
 
   [ Matthias Klose ]
   * New code drop (b09).
-  * Update IcedTea build infrastructure (20080514).
+  * Update IcedTea build infrastructure (20080528).
     - Add missing color profiles. LP: #225174.
     - Moved system properties defined in hotspot to TrustManagerFactoryImpl.
       LP: #224455.
