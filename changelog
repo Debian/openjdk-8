@@ -42,6 +42,8 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Replace the OpenJDK version in desktop and menu files.
   * Install menu files.
   * Install openjdk-6-java.desktop in -jre, instead of -jre-headless.
+  * In fontconfig.properties, fix Korean font names and add paths to the Luxi
+    fonts for Motif. Add fonts for Indic languages.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
 

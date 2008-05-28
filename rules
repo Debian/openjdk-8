@@ -237,6 +237,7 @@ cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
 cjk_fonts += ttf-kochi-gothic | ttf-sazanami-gothic,
 cjk_fonts += ttf-kochi-mincho | ttf-sazanami-mincho,
 cjk_fonts += $(if $(with_wgy_zenhai),ttf-wqy-zenhei,ttf-arphic-uming),
+cjk_fonts += ttf-indic-fonts-core, ttf-telugu-fonts, ttf-oriya-fonts, ttf-kannada-fonts, ttf-bengali-fonts,
 
 p_jre	= $(basename)-jre
 p_jrehl	= $(basename)-jre-headless
@@ -334,12 +335,12 @@ endif
 
 icedtea-configure: stamps/icedtea-configure
 stamps/icedtea-configure:
-#	for i in $$(find rt -name '*.uu'); do \
-#	  [ -f $$i ] || continue; \
-#	  d=$$(dirname $$i); i=$$(basename $$i .uu); \
-#	  rm -f $$d/$$i; \
-#	  (cd $$d && uudecode $$i.uu); \
-#	done
+	for i in $$(find test/jtreg -name '*.uu'); do \
+	  [ -f $$i ] || continue; \
+	  d=$$(dirname $$i); i=$$(basename $$i .uu); \
+	  rm -f $$d/$$i; \
+	  (cd $$d && uudecode $$i.uu); \
+	done
 	mkdir -p stamps
 	: > gcjwebplugin.cc
 	./configure $(CONFIGURE_ARGS)
@@ -373,7 +374,7 @@ endif
 	$(MAKE) stamps/patch.stamp
 	touch $@
 
-build: stamps/build $(if $(with_check),stamps/mauve-check)
+build: stamps/build $(if $(with_check),stamps/mauve-check stamps/jtreg-check)
 stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), powerpc))
 	sh -c 'sh debian/buildwatch.sh &'
@@ -405,6 +406,14 @@ ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
 endif
 	touch $@
 
+stamps/jtreg-check: stamps/build
+ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
+	@echo "BEGIN jtreg"
+	$(MAKE) -k jtregcheck 2>&1 | tee jtreg_output
+	@echo "END jtreg"
+endif
+	touch $@
+
 clean: debian-clean
 	dh_testdir
 	dh_testroot
@@ -414,22 +423,25 @@ clean: debian-clean
 	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
 	rm -rf autom4te.cache
 	rm -rf mauve
+	rm -f jtreg_output
 	rm -f gcjwebplugin.cc
 	if [ -f generated.tar ]; then \
 	  rm -rf generated; \
 	  tar xf generated.tar; \
 	  rm -f generated.tar; \
 	fi
-#	for i in $$(find rt -name '*.png'); do \
-#	  [ -f $$i ] || continue; \
-#	  if [ -f $$i.uu -a $$i.uu -nt $$i ]; then \
-#	    rm -f $$i; \
-#	  else \
-#	   d=$$(dirname $$i); i=$$(basename $$i); \
-#	   (cd $$d && uuencode -m $$i $$i > $$i.uu); \
-#	   rm -f $$d/$$i; \
-#	  fi; \
-#	done
+
+	for i in $$(find test/jtreg -name '*.gif') overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/expresso.mid overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/ding.sf2; do \
+	  [ -f $$i ] || continue; \
+	  if [ -f $$i.uu -a $$i.uu -nt $$i ]; then \
+	    rm -f $$i; \
+	  else \
+	   d=$$(dirname $$i); i=$$(basename $$i); \
+	   (cd $$d && uuencode -m $$i $$i > $$i.uu); \
+	   rm -f $$d/$$i; \
+	  fi; \
+	done
+
 	dh_clean
 
 debian-clean:
@@ -814,6 +826,7 @@ binary-arch: build install
 ifeq ($(with_check),yes)
 	mkdir -p $(d_jdk)/usr/share/doc/$(p_jre)
 	cp mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
+	cp jtreg_output $(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output.log
 endif
 
 	dh_installmenu -s
