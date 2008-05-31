@@ -778,7 +778,7 @@ endif
 
 	: # Install stuff to generate font config files.
 	mkdir -p $(d_lib)/$(basedir)/jre/lib
-	cp -p openjdk/control/build/linux-i586/btjars/compilefontconfig.jar \
+	cp -p openjdk/control/build/linux-$(jvmarch)/btjars/compilefontconfig.jar \
 		$(d_lib)/$(basedir)/jre/lib/
 
 	: # install lintian overrides
