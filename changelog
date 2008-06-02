@@ -1,3 +1,14 @@
+openjdk-6 (6b10-1~pre1) UNRELEASED; urgency=low
+
+  * New code drop (b10).
+  * Update IcedTea build infrastructure (20080531).
+  * In fontconfig.properties, fix Korean font names and add paths to the Luxi
+    fonts for Motif. Add fonts for Indic languages.
+  * Install compilefontconfig.jar in openjdk-6-jre-lib package.
+  * Run the testsuites of hotspot, langtools and jdk.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 31 May 2008 09:00:22 +0200
+
 openjdk-6 (6b09-1~pre1) unstable; urgency=low
 
   [ Matthias Klose ]
@@ -42,10 +53,6 @@ openjdk-6 (6b09-1~pre1) unstable; urgency=low
   * Replace the OpenJDK version in desktop and menu files.
   * Install menu files.
   * Install openjdk-6-java.desktop in -jre, instead of -jre-headless.
-  * In fontconfig.properties, fix Korean font names and add paths to the Luxi
-    fonts for Motif. Add fonts for Indic languages.
-  * Install compilefontconfig.jar in openjdk-6-jre-lib package.
-  * Run the testsuites of hotspot, langtools and jdk.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 May 2008 08:49:54 +0200
 
