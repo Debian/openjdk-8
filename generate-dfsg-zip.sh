@@ -5,6 +5,8 @@ if [ ! -f "$1" ]; then
   exit 1
 fi
 
+dist=$(lsb_release -is)
+
 # Untar openjdk source zip.
 rm -rf openjdk
 mkdir openjdk
@@ -70,20 +72,21 @@ rm -rf \
 
 # TODO: build fails without these
 # THIS PRODUCT CONTAINS RESTRICTED MATERIALS OF IBM
-#rm -f \
-#  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl.prp  \
-#  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl_*.prp  \
-#  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/toJavaPortable/toJavaPortable*.prp 
-
-# binary files, not distributed in source form
-rm -f \
-  openjdk/jaxws/src/share/classes/com/sun/xml/internal/bind/v2/doc-files/j2s_architecture.* \
-  openjdk/jaxws/src/share/classes/com/sun/xml/internal/bind/v2/doc-files/packages.*
+if [ "$dist" != Ubuntu ]; then
+  rm -f \
+    openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl.prp  \
+    openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl_*.prp  \
+    openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/toJavaPortable/toJavaPortable.prp \
+    openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/toJavaPortable/toJavaPortable_*.prp 
+  cp idl.prp openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/
+  cp toJavaPortable.prp openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/toJavaPortable/
+fi
 
 # binary files
 rm -f \
   openjdk/jdk/test/sun/net/idn/nfscis.spp
 
+if true; then
 rm -f \
   openjdk/jdk/test/java/nio/channels/spi/SelectorProvider/inheritedChannel/lib/linux-i586/libLauncher.so \
   openjdk/jdk/test/java/nio/channels/spi/SelectorProvider/inheritedChannel/lib/solaris-i586/libLauncher.so \
@@ -105,6 +108,7 @@ rm -f \
   openjdk/jdk/test/java/util/Locale/data/deflocale.sol10 \
   openjdk/jdk/test/java/util/Locale/data/deflocale.winvista \
   openjdk/jdk/test/java/util/Locale/data/deflocale.winxp \
+fi
 
 
 # has w3c copyright. license to be checked / needs checking after decoding
@@ -115,8 +119,8 @@ rm -f \
 # TODO
 #$ find openjdk -name '*.jar' -o -name '*.class'|grep -v test
 
+# no source
 #  openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib/jscheme.jar \
-#  openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib/jschemelogutil.jar \
 
 rm -f \
   openjdk/hotspot/agent/kk/src/share/lib/maf-1_0.jar \

@@ -1,6 +1,6 @@
 
-tarball=openjdk-6-src-b09-11_apr_2008-dfsg.tar.gz
-version=6b09
+tarball=openjdk-6-src-b10_30_may_2008-dfsg.tar.gz
+version=6b10
 base=openjdk-6
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
@@ -30,6 +30,7 @@ else
     rm -rf $pkgdir.orig
     mkdir -p $pkgdir.orig
     cp -p $tarball $pkgdir.orig/
+    cp -p jscheme-5.0.0repacked.tgz $pkgdir.orig/
     tar -c -f - -C $icedtea_checkout . | tar -x -f - -C $pkgdir.orig
     rm -f $pkgdir.orig/gcjwebplugin.cc
     cp -a $pkgdir.orig $pkgdir
