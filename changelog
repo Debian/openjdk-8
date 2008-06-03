@@ -6,6 +6,8 @@ openjdk-6 (6b10-1~pre1) UNRELEASED; urgency=low
     fonts for Motif. Add fonts for Indic languages.
   * Install compilefontconfig.jar in openjdk-6-jre-lib package.
   * Run the testsuites of hotspot, langtools and jdk.
+  * Include the jscheme-5.0 sources in the tarball, mention the jscheme
+    licenses in debian/copyright.
 
  -- Matthias Klose <doko@ubuntu.com>  Sat, 31 May 2008 09:00:22 +0200
 
