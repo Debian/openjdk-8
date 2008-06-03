@@ -108,6 +108,7 @@ rm -f \
   openjdk/jdk/test/java/util/Locale/data/deflocale.sol10 \
   openjdk/jdk/test/java/util/Locale/data/deflocale.winvista \
   openjdk/jdk/test/java/util/Locale/data/deflocale.winxp \
+
 fi
 
 
