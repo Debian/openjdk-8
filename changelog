@@ -1,6 +1,9 @@
 openjdk-6 (6b10-1~pre1) UNRELEASED; urgency=low
 
   * New code drop (b10).
+    - Still some non-compliant license headers found in
+      openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl.
+    - Upload to non-free.
   * Update IcedTea build infrastructure (20080603).
   * In fontconfig.properties, fix Korean font names and add paths to the Luxi
     fonts for Motif. Add fonts for Indic languages.

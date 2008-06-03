@@ -1,5 +1,5 @@
 Source: openjdk-6
-Section: devel
+Section: @archive@devel
 Priority: extra
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
 Uploaders: Michael Koch <konqueror@gmx.de>, Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
@@ -25,7 +25,7 @@ Description: OpenJDK Development Kit (JDK)
 Package: openjdk-6-jre-headless
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Section: interpreters
+Section: @archive@interpreters
 Depends: openjdk-6-jre-lib (>= ${Source-Version}), libaccess-bridge-java (>= 1.22), ca-certificates-java, java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, libnss-mdns, tzdata-java
 Suggests: sun-java6-fonts, @cjk_fonts@
@@ -40,7 +40,7 @@ Description: OpenJDK Java runtime (headless)
 Package: openjdk-6-jre
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Section: interpreters
+Section: @archive@interpreters
 Depends: openjdk-6-jre-headless (>= ${Source-Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}
 Recommends: ${dlopenjre:Recommends}, @cjk_fonts@
 Suggests: icedtea-gcjwebplugin
@@ -55,7 +55,7 @@ Description: OpenJDK Java runtime
 Package: openjdk-6-jre-lib
 Architecture: all
 Pre-Depends: ${dpkg:Depends}
-Section: interpreters
+Section: @archive@interpreters
 Depends: openjdk-6-jre-headless (>= ${Source-Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
 Description: OpenJDK Java runtime (architecture independent libraries)
@@ -89,7 +89,7 @@ Description: OpenJDK Development Kit (JDK) source files
  from the IcedTea project.
 
 Package: openjdk-6-doc
-Section: doc
+Section: @archive@doc
 Pre-Depends: ${dpkg:Depends}
 Architecture: all
 Suggests: openjdk-6-jdk

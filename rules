@@ -274,6 +274,10 @@ else ifeq ($(pkg_compress),bzip2)
   control_vars += '-Vdpkg:Depends=dpkg (>= 1.10.24)'
 endif
 
+ifneq (,$(filter $(distribution),Debian))
+  archive=non-free/
+endif
+
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
 	sed \
@@ -287,6 +291,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	      -e 's/@bd_compress@/$(pkg_compress)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
+	      -e 's,@archive@,$(archive),g' \
 	    debian/control.in $(if $(with_plugin),debian/control.plugin) > debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
