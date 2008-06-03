@@ -8,6 +8,7 @@ openjdk-6 (6b10-1~pre1) UNRELEASED; urgency=low
   * Run the testsuites of hotspot, langtools and jdk.
   * Include the jscheme-5.0 sources in the tarball, mention the jscheme
     licenses in debian/copyright.
+  * Use the certificates provided by the ca-certificates-java package.
 
  -- Matthias Klose <doko@ubuntu.com>  Sat, 31 May 2008 09:00:22 +0200
 

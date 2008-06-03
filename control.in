@@ -26,7 +26,7 @@ Package: openjdk-6-jre-headless
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Section: interpreters
-Depends: openjdk-6-jre-lib (>= ${Source-Version}), libaccess-bridge-java (>= 1.22), ca-certificates, java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: openjdk-6-jre-lib (>= ${Source-Version}), libaccess-bridge-java (>= 1.22), ca-certificates-java, java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, libnss-mdns, tzdata-java
 Suggests: sun-java6-fonts, @cjk_fonts@
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless

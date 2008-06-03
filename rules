@@ -741,6 +741,9 @@ endif
 	    -printf "etc/$(jdiralias)/%P $(basedir)/jre/lib/%P\n" >> $(d_jrehl).links
 	echo "etc/$(jdiralias)/jvm.cfg $(basedir)/jre/lib/$(archdir)/jvm.cfg" \
 	    >> $(d_jrehl).links
+	rm -f $(d_jrehl)/etc/$(jdiralias)/security/cacerts
+	echo "/etc/ssl/certs/java/cacerts $(d_jrehl)/etc/$(jdiralias)/security/cacerts" \
+	    >> $(d_jrehl).links
 
 	@echo JRE_HL_TOOLS: $(jre_hl_tools_alt) jexec
 	@echo JRE_TOOLS: $(jre_tools_alt)
