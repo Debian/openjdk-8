@@ -1,3 +1,6 @@
 # The package *-jre-lib depends on *-jre via *-jre-headless and
 # libaccess-bridge-java.  Lintian is wrong here.
 @basename@-jre-lib binary: usr-share-doc-symlink-without-dependency @basename@-jre
+
+# no separate directory for image files
+@basename@-jre-lib binary: image-file-in-usr-lib

@@ -1,0 +1,2 @@
+# /bin/sh is a known, and available interpreter
+@basename@-jdk binary: menu-command-not-in-package

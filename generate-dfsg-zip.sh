@@ -72,7 +72,7 @@ rm -rf \
 
 # TODO: build fails without these
 # THIS PRODUCT CONTAINS RESTRICTED MATERIALS OF IBM
-if [ "$dist" != Ubuntu ]; then
+if false; then
   rm -f \
     openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl.prp  \
     openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl_*.prp  \

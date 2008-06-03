@@ -1,6 +1,6 @@
 ?package(@basename@-demo):\
 	needs="x11"\
-	section="Apps/Programming"\
+	section="Applications/Programming"\
 	title="@vendor@ Java @RELEASE@ FileChooser Demo"\
 	command="/bin/sh -c 'cd /@basedir@/demo/jfc/FileChooserDemo; /@basedir@/bin/java -jar FileChooserDemo.jar'"\
 	icon="/usr/share/pixmaps/@basename@-app.xpm"\
@@ -8,7 +8,7 @@
 
 ?package(@basename@-demo):\
 	needs="x11"\
-	section="Apps/Programming"\
+	section="Applications/Programming"\
 	title="@vendor@ Java @RELEASE@ Font2DTest Demo"\
 	command="/bin/sh -c 'cd /@basedir@/demo/jfc/Font2DTest; /@basedir@/bin/java -jar Font2DTest.jar'"\
 	icon="/usr/share/pixmaps/@basename@-app.xpm"\
@@ -16,7 +16,7 @@
 
 ?package(@basename@-demo):\
 	needs="x11"\
-	section="Apps/Programming"\
+	section="Applications/Programming"\
 	title="@vendor@ Java @RELEASE@ Java 2D Demo"\
 	command="/bin/sh -c 'cd /@basedir@/demo/jfc/Java2D; /@basedir@/bin/java -jar Java2Demo.jar'"\
 	icon="/usr/share/pixmaps/@basename@-app.xpm"\
@@ -24,7 +24,7 @@
 
 ?package(@basename@-demo):\
 	needs="x11"\
-	section="Apps/Programming"\
+	section="Applications/Programming"\
 	title="@vendor@ Java @RELEASE@ SampleTree Demo"\
 	command="/bin/sh -c 'cd /@basedir@/demo/jfc/SampleTree; /@basedir@/bin/java -jar SampleTree.jar'"\
 	icon="/usr/share/pixmaps/@basename@-app.xpm"\
@@ -32,7 +32,7 @@
 
 ?package(@basename@-demo):\
 	needs="x11"\
-	section="Apps/Programming"\
+	section="Applications/Programming"\
 	title="@vendor@ Java @RELEASE@ Stylepad Demo"\
 	command="/bin/sh -c 'cd /@basedir@/demo/jfc/Stylepad; /@basedir@/bin/java -jar Stylepad.jar'"\
 	icon="/usr/share/pixmaps/@basename@-app.xpm"\
@@ -40,7 +40,7 @@
 
 ?package(@basename@-demo):\
 	needs="x11"\
-	section="Apps/Programming"\
+	section="Applications/Programming"\
 	title="@vendor@ Java @RELEASE@ SwingSet2 Demo"\
 	command="/bin/sh -c 'cd /@basedir@/demo/jfc/SwingSet2; /@basedir@/bin/java -jar SwingSet2.jar'"\
 	icon="/usr/share/pixmaps/@basename@-app.xpm"\
@@ -48,7 +48,7 @@
 
 ?package(@basename@-demo):\
 	needs="x11"\
-	section="Apps/Programming"\
+	section="Applications/Programming"\
 	title="@vendor@ Java @RELEASE@ TableExample Demo"\
 	command="/bin/sh -c 'cd /@basedir@/demo/jfc/TableExample; /@basedir@/bin/java -jar TableExample.jar'"\
 	icon="/usr/share/pixmaps/@basename@-app.xpm"\

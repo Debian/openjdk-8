@@ -1,6 +1,6 @@
 ?package(@basename@-jdk):\
 	needs="x11"\
-	section="Apps/System"\
+	section="Applications/System"\
 	title="@vendor@ Java @RELEASE@ Console"\
 	command="/@basedir@/bin/jconsole"\
 	icon="/usr/share/pixmaps/@basename@.xpm"\

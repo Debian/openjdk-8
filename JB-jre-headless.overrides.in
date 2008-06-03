@@ -9,3 +9,6 @@
 # The package *-jre-headless depends on *-jre via libaccess-bridge-java.
 # Lintian is wrong here.
 @basename@-jre-headless binary: usr-share-doc-symlink-without-dependency @basename@-jre
+
+# empty directory by intent
+@basename@-jre-headless binary: package-contains-empty-directory usr/share/binfmts/
