@@ -1,7 +1,7 @@
 openjdk-6 (6b10-1~pre1) UNRELEASED; urgency=low
 
   * New code drop (b10).
-  * Update IcedTea build infrastructure (20080531).
+  * Update IcedTea build infrastructure (20080603).
   * In fontconfig.properties, fix Korean font names and add paths to the Luxi
     fonts for Motif. Add fonts for Indic languages.
   * Install compilefontconfig.jar in openjdk-6-jre-lib package.
@@ -9,6 +9,7 @@ openjdk-6 (6b10-1~pre1) UNRELEASED; urgency=low
   * Include the jscheme-5.0 sources in the tarball, mention the jscheme
     licenses in debian/copyright.
   * Use the certificates provided by the ca-certificates-java package.
+  * More fontconfig updates (Arne Goetje).
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 03 Jun 2008 07:04:07 +0200
 
