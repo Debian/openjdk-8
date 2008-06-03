@@ -196,13 +196,14 @@ endif
 ifneq (,$(no_bootstrap_archs))
   bs_archs = $(EMPTY) [$(strip $(foreach a,$(no_bootstrap_archs), $(a)))]
   bs_no_archs = $(EMPTY) [$(strip $(foreach a,$(no_bootstrap_archs), !$(a)))]
+  bd_bs_openjdk = openjdk-6-jdk (>= $(req_openjdk_bd_ver))$(bs_archs),
 endif
 
 bd_bootstrap = \
 	gcj (>= 4:4.2.1)$(bs_no_archs), \
 	ecj$(bs_no_archs), \
 	java-gcj-compat-dev (>= 1.0.76-2ubuntu3)$(bs_no_archs), \
-	openjdk-6-jdk (>= $(req_openjdk_bd_ver))$(bs_archs),
+	$(bd_bs_openjdk)
 
 bd_gcc = \
 	g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
