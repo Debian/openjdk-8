@@ -10,7 +10,7 @@ openjdk-6 (6b10-1~pre1) UNRELEASED; urgency=low
     licenses in debian/copyright.
   * Use the certificates provided by the ca-certificates-java package.
 
- -- Matthias Klose <doko@ubuntu.com>  Sat, 31 May 2008 09:00:22 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 03 Jun 2008 07:04:07 +0200
 
 openjdk-6 (6b09-1~pre1) unstable; urgency=low
 
