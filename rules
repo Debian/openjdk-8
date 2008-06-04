@@ -513,6 +513,8 @@ install: packaging-files
 	cp -p debian/accessibility.properties $(d)/$(basedir)/jre/lib/
 	cp -p debian/swing.properties $(d)/$(basedir)/jre/lib/
 
+	rm -f $(d)/$(basedir)/jre/lib/security/cacerts
+
 	: # move config files to etc/$(jdiralias) and symlink them.
 	for i in \
 	  accessibility.properties \

@@ -16,7 +16,7 @@ openjdk-6 (6b10-1) unstable; urgency=low
   * Fix some lintian warnings.
   * Correct build-dependency for openjdk based bootstraps.
 
- -- Matthias Klose <doko@ubuntu.com>  Tue, 03 Jun 2008 07:04:07 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 04 Jun 2008 01:46:52 +0200
 
 openjdk-6 (6b09-1~pre1) unstable; urgency=low
 
