@@ -252,6 +252,7 @@ p_jdk	= $(basename)-jdk
 p_demo	= $(basename)-demo
 p_src	= $(basename)-source
 p_doc	= $(basename)-doc
+p_dbg	= $(basename)-dbg
 p_plug	= $(basename)-plugin
 p_plug	= icedtea-gcjwebplugin
 
@@ -263,6 +264,7 @@ d_jdk	= debian/$(p_jdk)
 d_demo	= debian/$(p_demo)
 d_src	= debian/$(p_src)
 d_doc	= debian/$(p_doc)
+d_dbg	= debian/$(p_dbg)
 d_plug	= debian/$(p_plug)
 
 control_vars = \
@@ -744,6 +746,11 @@ endif
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_lib); \
 	) > $(d_lib).links
 
+	: # create docdir symlinks for $(p_jdk)
+	( \
+	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_dbg); \
+	) > $(d_dbg).links
+
 	: # create links for the gnome accessibility bridge
 	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
 	    >> $(d_jrehl).links
@@ -856,7 +863,7 @@ endif
 	-dh_icons -s || dh_iconcache -s
 #	dh_installdebconf -s
 	dh_link -s
-	dh_strip -s
+	dh_strip -s --dbg-package=$(p_dbg)
 	dh_compress -s
 	dh_fixperms -s
 	dh_makeshlibs -p$(p_jrehl) -p$(p_jre)

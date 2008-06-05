@@ -1,3 +1,9 @@
+openjdk-6 (6b10-2) UNRELEASED; urgency=low
+
+  * Build an openjdk-6-dbg package.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 05 Jun 2008 14:31:43 +0200
+
 openjdk-6 (6b10-1) unstable; urgency=low
 
   * New code drop (b10).
