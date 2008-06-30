@@ -1,12 +1,23 @@
-openjdk-6 (6b10-2) UNRELEASED; urgency=low
+openjdk-6 (6b10dfsg-1) unstable; urgency=low
 
+  * Rebuild the upstream tar ball:
+    - Remove the jscheme jar files.
+    - Apply the patch from Iris Clark (Sun) for the copyright headers
+      (http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=141#c4).
+    - Remove jdk/src/share/classes/java/lang/instrument/package.html.
+    - Upload to main.
+  * Update IcedTea build infrastructure (20080628).
   * Build an openjdk-6-dbg package.
   * patches/gcc-mtune-generic.diff: Fix typo.
   * openjdk-6-jre: Depend on ttf-dejavu.
   * debian/copyright: Add two more copyright holders, not directly
     mentioned in the third party readme.
+    Replace Apache 2.0 license with pointer to common-licenses.
+  * Fix more lintian warnings.
+  * debian/sun_java_app.xpm: Downsize icon to 32x32 pixels.
+  * Build-depend/depend on rhino.
 
- -- Matthias Klose <doko@ubuntu.com>  Thu, 05 Jun 2008 14:31:43 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 29 Jun 2008 17:42:51 +0200
 
 openjdk-6 (6b10-1) unstable; urgency=low
 

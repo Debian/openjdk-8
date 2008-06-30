@@ -1,6 +1,6 @@
 ?package(@basename@-bin):\
 	needs="x11"\
-	section="Applications/System"\
+	section="Applications/System/Administration"\
 	title="@vendor@ Java @RELEASE@ Policy Tool"\
 	command="/@basedir@/bin/policytool"\
 	icon="/usr/share/pixmaps/@basename@.xpm"\

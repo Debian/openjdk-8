@@ -111,6 +111,7 @@ ifeq ($(STAGE1_JAVA),gcj)
 	--with-libgcj-jar=/usr/share/java/libgcj$(GCJ_SUFFIX).jar \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
+	--with-rhino=/usr/share/java/js.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
   build_target = icedtea-against-icedtea
 else ifeq ($(STAGE1_JAVA),openjdk)
@@ -124,6 +125,7 @@ else ifeq ($(STAGE1_JAVA),openjdk)
 	--with-jar=/usr/lib/jvm/java-6-openjdk/bin/jar \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
+	--with-rhino=/usr/share/java/js.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
   build_target = #icedtea-against-icedtea
 else ifeq ($(STAGE1_JAVA),icedtea)
@@ -137,6 +139,7 @@ else ifeq ($(STAGE1_JAVA),icedtea)
 	--with-jar=/usr/lib/jvm/java-7-icedtea/bin/jar \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
+	--with-rhino=/usr/share/java/js.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
   build_target = #icedtea-against-icedtea
 endif
@@ -212,11 +215,11 @@ ifeq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
 	g++-4.3, gcj-4.3$(bs_no_archs),
 endif
 bd_syslibs = \
-	libjpeg62-dev, libpng12-dev, libgif-dev | libungif4-dev, zlib1g-dev,
+	libjpeg62-dev, libpng12-dev, libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev), zlib1g-dev,
 bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, \
 	libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, \
-	libxalan2-java, liblcms1-dev, libxinerama-dev,
+	libxalan2-java, rhino, liblcms1-dev, libxinerama-dev,
 bd_zero = \
 	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [$(foreach a,$(hotspot_archs),!$(a))],
 ifeq ($(with_plugin),yes)
@@ -282,10 +285,6 @@ else ifeq ($(pkg_compress),bzip2)
   control_vars += '-Vdpkg:Depends=dpkg (>= 1.10.24)'
 endif
 
-ifneq (,$(filter $(distribution),Debian))
-  archive=non-free/
-endif
-
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
 	sed \
@@ -299,7 +298,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	      -e 's/@bd_compress@/$(pkg_compress)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
-	      -e 's,@archive@,$(archive),g' \
+	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
 	    debian/control.in $(if $(with_plugin),debian/control.plugin) > debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
@@ -837,7 +836,7 @@ binary-indep: build install
 	dh_builddeb -i $(bd_options)
 
 absarchdir = $(CURDIR)/$(d_jrehl)/$(basedir)/jre/lib/$(archdir)
-shlibdeps_ld_path =$(absarchdir):$(absarchdir)/client:$(absarchdir)/native_threads
+shlibdeps_ld_path =$(absarchdir):$(absarchdir)/client:$(absarchdir)/server:$(absarchdir)/native_threads
 
 # Build architecture dependant packages
 binary-arch: build install

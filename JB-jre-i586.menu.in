@@ -1,7 +1,7 @@
 
 ?package(@basename@-bin):\
 	needs="x11"\
-	section="Apps/System"\
+	section="Applications/System"\
 	title="@vendor@ Java @RELEASE@ Plugin Control Panel"\
 	command="/@basedir@/bin/ControlPanel"\
 	icon="/usr/share/pixmaps/@basename@.xpm"\
@@ -9,7 +9,7 @@
 
 ?package(@basename@-bin):\
 	needs="x11"\
-	section="Apps/Net"\
+	section="Applications/Network"\
 	title="@vendor@ Java @RELEASE@ Web Start"\
 	command="/@basedir@/bin/javaws -viewer"\
 	icon="/usr/share/pixmaps/@basename@.xpm"\

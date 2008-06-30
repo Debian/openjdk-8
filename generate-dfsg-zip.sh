@@ -70,17 +70,7 @@ rm -rf \
 
 # BEGIN Debian/Ubuntu additions
 
-# TODO: build fails without these
-# THIS PRODUCT CONTAINS RESTRICTED MATERIALS OF IBM
-if false; then
-  rm -f \
-    openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl.prp  \
-    openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/idl_*.prp  \
-    openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/toJavaPortable/toJavaPortable.prp \
-    openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/toJavaPortable/toJavaPortable_*.prp 
-  cp idl.prp openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/
-  cp toJavaPortable.prp openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/toJavaPortable/
-fi
+# patch -p0 < ../corba-idl.diff
 
 # binary files
 rm -f \
@@ -120,16 +110,23 @@ rm -f \
 # TODO
 #$ find openjdk -name '*.jar' -o -name '*.class'|grep -v test
 
-# no source
-#  openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib/jscheme.jar \
+rm -f \
+  openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib/jscheme.jar \
+  openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib/jschemelogutil.jar \
+
+rm -rf openjdk/corba/src/share/classes/com/sun/tools/corba/se/logutil/lib
 
 rm -f \
   openjdk/hotspot/agent/kk/src/share/lib/maf-1_0.jar \
   openjdk/hotspot/agent/kk/src/share/lib/jlfgr-1_0.jar \
 
+rm -f \
+  openjdk/jdk/src/share/classes/java/lang/instrument/package.html
+
 # END Debian/Ubuntu additions
 
 # Create new zip with new name.
+
 NEW_ZIP=$(echo $1 | sed -e 's/\.tar.gz/-dfsg.tar.gz/')
 (cd openjdk && tar -cz -f ../$NEW_ZIP *)
 

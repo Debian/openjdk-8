@@ -1,10 +1,10 @@
 Source: openjdk-6
-Section: @archive@devel
+Section: devel
 Priority: extra
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
 Uploaders: Michael Koch <konqueror@gmx.de>, Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
 Build-Depends: debhelper (>= 5), autotools-dev, @bd_compress@, m4, lsb-release, wget, zip, unzip, sharutils, gawk, pkg-config, procps, automake, autoconf, ant, @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_mauve@
-Standards-Version: 3.7.3
+Standards-Version: 3.8.0
 Homepage: http://openjdk.java.net/
 Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~openjdk/openjdk/openjdk6
 Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk6
@@ -12,7 +12,7 @@ Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk6
 Package: openjdk-6-jdk
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-6-jre (>= ${Source-Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: openjdk-6-jre (>= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
 Suggests: openjdk-6-demo, openjdk-6-source
 Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk
 Description: OpenJDK Development Kit (JDK)
@@ -25,8 +25,8 @@ Description: OpenJDK Development Kit (JDK)
 Package: openjdk-6-jre-headless
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Section: @archive@interpreters
-Depends: openjdk-6-jre-lib (>= ${Source-Version}), libaccess-bridge-java (>= 1.22), ca-certificates-java, java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Section: interpreters
+Depends: openjdk-6-jre-lib (>= @pkg_version@), rhino, libaccess-bridge-java (>= 1.22), ca-certificates-java, java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, libnss-mdns, tzdata-java
 Suggests: sun-java6-fonts, ttf-dejavu, @cjk_fonts@
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
@@ -40,8 +40,8 @@ Description: OpenJDK Java runtime (headless)
 Package: openjdk-6-jre
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Section: @archive@interpreters
-Depends: openjdk-6-jre-headless (>= ${Source-Version}), ttf-dejavu, ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}
+Section: interpreters
+Depends: openjdk-6-jre-headless (>= @pkg_version@), ttf-dejavu, ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}
 Recommends: ${dlopenjre:Recommends}, @cjk_fonts@
 Suggests: icedtea-gcjwebplugin
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
@@ -55,8 +55,8 @@ Description: OpenJDK Java runtime
 Package: openjdk-6-jre-lib
 Architecture: all
 Pre-Depends: ${dpkg:Depends}
-Section: @archive@interpreters
-Depends: openjdk-6-jre-headless (>= ${Source-Version}), ${misc:Depends}
+Section: interpreters
+Depends: openjdk-6-jre-headless (>= @pkg_version@), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
 Description: OpenJDK Java runtime (architecture independent libraries)
  OpenJDK Java runtime
@@ -67,7 +67,7 @@ Description: OpenJDK Java runtime (architecture independent libraries)
 Package: openjdk-6-demo
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-6-jre (>= ${Source-Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: openjdk-6-jre (>= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
 Description: Java runtime based on OpenJDK (demos and examples)
  OpenJDK Java runtime
  .
@@ -77,7 +77,7 @@ Description: Java runtime based on OpenJDK (demos and examples)
 Package: openjdk-6-source
 Architecture: all
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-6-jre (>= ${Source-Version}), openjdk-6-jdk (>= ${Source-Version})
+Depends: openjdk-6-jre (>= @pkg_version@), openjdk-6-jdk (>= @pkg_version@)
 Description: OpenJDK Development Kit (JDK) source files
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -89,7 +89,7 @@ Description: OpenJDK Development Kit (JDK) source files
  from the IcedTea project.
 
 Package: openjdk-6-doc
-Section: @archive@doc
+Section: doc
 Pre-Depends: ${dpkg:Depends}
 Architecture: all
 Suggests: openjdk-6-jdk
@@ -105,9 +105,9 @@ Description: OpenJDK Development Kit (JDK) documentation
 Package: openjdk-6-dbg
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-6-jre-headless (= ${Source-Version})
-Recommends: openjdk-6-jre (= ${Source-Version})
-Suggests: openjdk-6-jdk (= ${Source-Version})
+Depends: openjdk-6-jre-headless (= @pkg_version@)
+Recommends: openjdk-6-jre (= @pkg_version@)
+Suggests: openjdk-6-jdk (= @pkg_version@)
 Description: Java runtime based on OpenJDK (debugging symbols)
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
