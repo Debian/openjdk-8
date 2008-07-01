@@ -288,6 +288,7 @@ endif
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
 	sed \
+	      -e 's/@basename@/$(basename)/g' \
 	      -e 's/@bd_bootstrap@/$(bd_bootstrap)/g' \
 	      -e 's/@bd_openjdk@/$(bd_openjdk)/g' \
 	      -e 's/@bd_zero@/$(bd_zero)/g' \
