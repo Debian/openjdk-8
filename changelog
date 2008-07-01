@@ -5,6 +5,7 @@ openjdk-6 (6b10dfsg-2) UNRELEASED; urgency=low
   * Fixed name of the xulrunner-1.9-javaplugin.so in the .jinfo file.
     LP: #226911.
   * Ignore errors during activation of class data sharing.
+  * Start debian/buildwatch.sh for armel and sparc builds as well.
 
  -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Jun 2008 13:30:06 +0200
 

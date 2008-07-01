@@ -34,8 +34,8 @@ distrel := $(shell lsb_release --codename --short)
 
 with_wgy_zenhai = $(if $(filter $(distrel),hardy intrepid),yes)
 
-arch_map	:= amd64=amd64 i386=i586 lpia=i586 powerpc=ppc sparc=sparc ia64=ia64
-archdir_map	:= amd64=amd64 i386=i386 lpia=i386 powerpc=ppc sparc=sparc ia64=ia64
+arch_map	:= armel=arm amd64=amd64 i386=i586 lpia=i586 powerpc=ppc sparc=sparc ia64=ia64
+archdir_map	:= armel=arm amd64=amd64 i386=i386 lpia=i386 powerpc=ppc sparc=sparc ia64=ia64
 
 jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(arch_map))))
@@ -150,7 +150,7 @@ else
 endif
 
 # assume we don't build binary indep packages on these architectures
-ifneq (,$(filter $(DEB_HOST_ARCH), ia64 lpia powerpc sparc))
+ifneq (,$(filter $(DEB_HOST_ARCH), armel ia64 lpia powerpc sparc))
   CONFIGURE_ARGS += --disable-docs
 endif
 
@@ -390,7 +390,7 @@ endif
 
 build: stamps/build $(if $(with_check),stamps/mauve-check stamps/jtreg-check)
 stamps/build: stamps/patch
-ifneq (,$(filter $(DEB_HOST_ARCH), powerpc))
+ifneq (,$(filter $(DEB_HOST_ARCH), armel powerpc sparc))
 	sh -c 'sh debian/buildwatch.sh &'
 endif
 	$(MAKE) $(build_target)
