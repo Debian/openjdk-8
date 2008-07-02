@@ -6,6 +6,7 @@ openjdk-6 (6b10dfsg-2) UNRELEASED; urgency=low
     LP: #226911.
   * Ignore errors during activation of class data sharing.
   * Start debian/buildwatch.sh for armel and sparc builds as well.
+  * Allow configuration with --with-cacao.
 
  -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Jun 2008 13:30:06 +0200
 

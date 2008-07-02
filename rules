@@ -8,9 +8,15 @@ unexport LANG LC_ALL
 
 SHELL = /bin/bash
 
-DEB_HOST_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
-DEB_BUILD_GNU_TYPE	?= $(shell dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-DEB_HOST_ARCH		?= $(shell dpkg-architecture -qDEB_HOST_ARCH)
+vafilt = $(subst $(2)=,,$(filter $(2)=%,$(1)))
+
+DPKG_VARS		:= $(shell dpkg-architecture)
+DEB_HOST_GNU_TYPE	?= $(call vafilt,$(DPKG_VARS),DEB_HOST_GNU_TYPE)
+DEB_BUILD_GNU_TYPE	?= $(call vafilt,$(DPKG_VARS),DEB_BUILD_GNU_TYPE)
+DEB_HOST_ARCH		?= $(call vafilt,$(DPKG_VARS),DEB_HOST_ARCH)
+
+CHANGELOG_VARS := $(shell dpkg-parsechangelog | sed -n 's/ /_/g;/^[^_]/s/^\([^:]*\):_\(.*\)/\1=\2/p')
+PKGSOURCE := $(call vafilt,$(CHANGELOG_VARS),Source)
 
 # Support parallel=<n> in DEB_BUILD_OPTIONS (see #209008)
 COMMA=,
@@ -143,6 +149,11 @@ else ifeq ($(STAGE1_JAVA),icedtea)
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
   build_target = #icedtea-against-icedtea
 endif
+
+ifneq (,$(findstring cacao, $(PKGSOURCE)))
+  CONFIGURE_ARGS += --with-cacao --with-cacao-src-zip=$(CURDIR)/cacao-0.99.1.tar.gz
+endif
+
 ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
   CONFIGURE_ARGS += --enable-zero
 else
@@ -163,12 +174,17 @@ Vendor		:= OpenJDK
 
 TOP		= usr/lib/jvm
 jdirname	= java-$(shortver)-$(origin)
-origin		= openjdk
-basename	= openjdk-$(shortver)
+ifneq (,$(findstring cacao, $(PKGSOURCE)))
+  origin	= cacao
+  basename	= cacao-oj$(shortver)
+  priority	= 1059
+else
+  origin	= openjdk
+  basename	= openjdk-$(shortver)
+  priority	= 1061
+endif
 jvmver		= 1.6.0
 shortver	= 6
-# priority is higher than java-gcj-compat
-priority	= 1061
 jdiralias	= java-$(shortver)-$(origin)
 basedir		= usr/lib/jvm/$(jdiralias)
 jreimg		= openjdk/control/build/linux-$(jvmarch)/j2re-image
