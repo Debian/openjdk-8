@@ -40,8 +40,8 @@ distrel := $(shell lsb_release --codename --short)
 
 with_wgy_zenhai = $(if $(filter $(distrel),hardy intrepid),yes)
 
-arch_map	:= armel=arm amd64=amd64 i386=i586 lpia=i586 powerpc=ppc sparc=sparc ia64=ia64
-archdir_map	:= armel=arm amd64=amd64 i386=i386 lpia=i386 powerpc=ppc sparc=sparc ia64=ia64
+arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i586 lpia=i586 powerpc=ppc sparc=sparc ia64=ia64
+archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i386 lpia=i386 powerpc=ppc sparc=sparc ia64=ia64
 
 jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(arch_map))))
@@ -152,6 +152,9 @@ endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   CONFIGURE_ARGS += --with-cacao --with-cacao-src-zip=$(CURDIR)/cacao-0.99.1.tar.gz
+  ifneq (,$(filter $(DEB_HOST_ARCH), arm armel))
+    EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS=--enable-softfloat
+  endif
 endif
 
 ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
@@ -161,7 +164,7 @@ else
 endif
 
 # assume we don't build binary indep packages on these architectures
-ifneq (,$(filter $(DEB_HOST_ARCH), armel ia64 lpia powerpc sparc))
+ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel ia64 lpia powerpc sparc))
   CONFIGURE_ARGS += --disable-docs
 endif
 
@@ -374,7 +377,7 @@ ifeq (0,1)
 endif
 	mkdir -p stamps
 	: > gcjwebplugin.cc
-	./configure $(CONFIGURE_ARGS)
+	$(EXTRA_BUILD_ENV) ./configure $(CONFIGURE_ARGS)
 	touch $@
 
 unpack: stamps/backup-generated stamps/unpack
@@ -405,12 +408,20 @@ endif
 	$(MAKE) stamps/patch.stamp
 	touch $@
 
-build: stamps/build $(if $(with_check),stamps/mauve-check stamps/jtreg-check)
+ifeq ($(with_check),yes)
+  ifneq (,$(findstring cacao, $(PKGSOURCE)))
+    check_stamps = stamps/jtreg-check
+  else
+    check_stamps = stamps/mauve-check stamps/jtreg-check
+  endif
+endif
+
+build: stamps/build $(check_stamps)
 stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), armel powerpc sparc))
 	sh -c 'sh debian/buildwatch.sh &'
 endif
-	$(MAKE) $(build_target)
+	$(EXTRA_BUILD_ENV) $(MAKE) $(build_target)
 	touch $@
 
 stamps/mauve-build: stamps/build

@@ -1,14 +1,28 @@
 openjdk-6 (6b10dfsg-2) UNRELEASED; urgency=low
 
+  * Configure cacao builds with --enable-softfloat.
+  * Don't run the mauve testsuite for cacao builds (hangs the test runner
+    process).
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Jun 2008 13:30:06 +0200
+
+openjdk-6 (6b10dfsg-1ubuntu2) intrepid; urgency=low
+
+  * Update IcedTea build infrastructure (20080702).
+    - Do not configure --with-shark by default.
+    - Update license headers from jdk7.
+  * Start debian/buildwatch.sh for armel and sparc builds as well.
+  * Allow configuration with --with-cacao.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Jun 2008 13:30:06 +0200
+
+openjdk-6 (6b10dfsg-1ubuntu1) intrepid; urgency=low
+
   * The rebuilt upstream tarball now has GPL-compatible free software licenses
     and documented copyrights and licenses. LP: #238569.
   * Fixed name of the xulrunner-1.9-javaplugin.so in the .jinfo file.
     LP: #226911.
   * Ignore errors during activation of class data sharing.
-  * Start debian/buildwatch.sh for armel and sparc builds as well.
-  * Allow configuration with --with-cacao.
-
- -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Jun 2008 13:30:06 +0200
 
 openjdk-6 (6b10dfsg-1) unstable; urgency=low
 
