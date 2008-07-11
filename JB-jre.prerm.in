@@ -4,8 +4,10 @@ basedir=/@basedir@
 basediralias=/@basediralias@
 jre_tools='@jre_tools@'
 
-for i in $jre_tools; do
-    update-alternatives --remove $i $basediralias/jre/bin/$i
-done
+if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
+    for i in $jre_tools; do
+	update-alternatives --remove $i $basediralias/jre/bin/$i
+    done
+fi
 
 #DEBHELPER#
