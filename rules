@@ -265,7 +265,12 @@ cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
 cjk_fonts += ttf-kochi-gothic | ttf-sazanami-gothic,
 cjk_fonts += ttf-kochi-mincho | ttf-sazanami-mincho,
 cjk_fonts += $(if $(with_wgy_zenhai),ttf-wqy-zenhei,ttf-arphic-uming),
-cjk_fonts += ttf-indic-fonts-core, ttf-telugu-fonts, ttf-oriya-fonts, ttf-kannada-fonts, ttf-bengali-fonts,
+ifneq (,$(filter $(distrel),lenny sid))
+  cjk_fonts += ttf-indic-fonts,
+else
+  cjk_fonts += ttf-indic-fonts-core, ttf-telugu-fonts, ttf-oriya-fonts,
+  cjk_fonts += ttf-kannada-fonts, ttf-bengali-fonts,
+endif
 
 p_jre	= $(basename)-jre
 p_jrehl	= $(basename)-jre-headless

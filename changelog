@@ -5,6 +5,8 @@ openjdk-6 (6b10dfsg-2) UNRELEASED; urgency=low
     process).
   * Don't remove alternatives on upgrade.
   * debian/copyright: Add license for NanoXML.
+  * Do recommends ttf-indic-fonts instead of ttf-indic-fonts-core for
+    lenny and sid. Closes: #490619.
 
  -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Jun 2008 13:30:06 +0200
 
