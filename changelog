@@ -1,12 +1,14 @@
 openjdk-6 (6b10dfsg-2) UNRELEASED; urgency=low
 
-  * Configure cacao builds with --enable-softfloat.
+  * On arm configure cacao builds with --enable-softfloat.
   * Don't run the mauve testsuite for cacao builds (hangs the test runner
     process).
   * Don't remove alternatives on upgrade.
   * debian/copyright: Add license for NanoXML.
   * Do recommends ttf-indic-fonts instead of ttf-indic-fonts-core for
     lenny and sid. Closes: #490619.
+  * Ignore errors when registering the jar binfmt. The alternative may
+    already be registered by another JVM. Closes: #490594.
 
  -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Jun 2008 13:30:06 +0200
 

@@ -58,9 +58,10 @@ configure)
 	    jexec-binfmt \
 	    $basediralias/jre/lib/jar.binfmt
 
-    # register binfmt
+    # register binfmt; ignore errors, the alternative may already be
+    # registered by another JRE.
     if [ -x /usr/sbin/update-binfmts ] && [ -r /usr/share/binfmts/jar ]; then
-        /usr/sbin/update-binfmts --package @basename@ --import jar
+        /usr/sbin/update-binfmts --package @basename@ --import jar || true
     fi
 
     mount | grep -qs '^proc on /proc' || echo >&2 "/proc is not mounted; some java apps may fail"
