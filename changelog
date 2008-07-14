@@ -10,6 +10,7 @@ openjdk-6 (6b10dfsg-2) UNRELEASED; urgency=low
     lenny and sid. Closes: #490619.
   * Ignore errors when registering the jar binfmt. The alternative may
     already be registered by another JVM. Closes: #490594.
+  * openjdk-6-jre-headless: Depend on ttf-dejavu-core instead of ttf-dejavu.
 
  -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Jun 2008 13:30:06 +0200
 
@@ -29,7 +30,8 @@ openjdk-6 (6b10dfsg-1ubuntu1) intrepid; urgency=low
     and documented copyrights and licenses. LP: #238569.
   * Fixed name of the xulrunner-1.9-javaplugin.so in the .jinfo file.
     LP: #226911.
-  * Ignore errors during activation of class data sharing.
+  * Ignore errors during activation of class data sharing. Closes: #490617,
+    #490672.
 
 openjdk-6 (6b10dfsg-1) unstable; urgency=low
 

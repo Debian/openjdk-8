@@ -172,6 +172,9 @@ ifneq (,$(NJOBS))
   CONFIGURE_ARGS += --with-parallel-jobs=$(NJOBS)
 endif
 
+# experimental; we don't include the plugin in any package built from this source.
+#CONFIGURE_ARGS += --enable-liveconnect
+
 VENDOR		:= openjdk
 Vendor		:= OpenJDK
 
@@ -241,10 +244,10 @@ bd_openjdk = \
 	libxalan2-java, rhino, liblcms1-dev, libxinerama-dev,
 bd_zero = \
 	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [$(foreach a,$(hotspot_archs),!$(a))],
-ifeq ($(with_plugin),yes)
+#ifeq ($(with_plugin),yes)
   bd_plugin = \
-	libgtk2.0-dev, $(if $(filter $(distribution),Debian),libxul-dev,$(if $(filter $(distrel),hardy),xulrunner-1.9-dev,firefox-dev)),
-endif
+	libgtk2.0-dev, $(if $(filter $(distribution),Debian),iceape-dev,$(if $(filter $(distrel),hardy intrepid),xulrunner-1.9-dev,firefox-dev)),
+#endif
 bd_netx = fastjar,
 bd_mauve = mauve, xvfb, autoconf, automake, xauth, xfonts-base
 bd_compress = $(pkg_compress),
@@ -261,6 +264,11 @@ dlopen_jre_recommends = \
 
 browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
 
+ifneq (,$(filter $(distrel),etch dapper feisty))
+  core_fonts = ttf-dejavu
+else
+  core_fonts = ttf-dejavu-core
+endif
 cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
 cjk_fonts += ttf-kochi-gothic | ttf-sazanami-gothic,
 cjk_fonts += ttf-kochi-mincho | ttf-sazanami-mincho,
@@ -322,6 +330,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_netx@/$(bd_netx)/g' \
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	      -e 's/@bd_compress@/$(pkg_compress)/g' \
+	      -e 's/@core_fonts@/$(core_fonts)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
 	    debian/control.in $(if $(with_plugin),debian/control.plugin) > debian/control

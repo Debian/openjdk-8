@@ -28,7 +28,7 @@ Pre-Depends: ${dpkg:Depends}
 Section: interpreters
 Depends: @basename@-jre-lib (>= @pkg_version@), rhino, libaccess-bridge-java (>= 1.22), ca-certificates-java, java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, libnss-mdns, tzdata-java
-Suggests: sun-java6-fonts, ttf-dejavu, @cjk_fonts@
+Suggests: sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
 Replaces: @basename@-jre-lib (<< 6b06-0ubuntu11), @basename@-jre (<< 6b09dfsg-0ubuntu2)
 Description: OpenJDK Java runtime (headless)
@@ -41,7 +41,7 @@ Package: @basename@-jre
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Section: interpreters
-Depends: @basename@-jre-headless (>= @pkg_version@), ttf-dejavu, ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}
+Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}
 Recommends: ${dlopenjre:Recommends}, @cjk_fonts@
 Suggests: icedtea-gcjwebplugin
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
