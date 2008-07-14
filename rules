@@ -155,12 +155,12 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   ifneq (,$(filter $(DEB_HOST_ARCH), arm armel))
     EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS=--enable-softfloat
   endif
-endif
-
-ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
-  CONFIGURE_ARGS += --enable-zero
 else
-  CONFIGURE_ARGS += --disable-zero
+  ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+    CONFIGURE_ARGS += --enable-zero
+  else
+    CONFIGURE_ARGS += --disable-zero
+  endif
 endif
 
 # assume we don't build binary indep packages on these architectures
