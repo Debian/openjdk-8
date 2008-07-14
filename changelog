@@ -1,5 +1,6 @@
-openjdk-6 (6b10dfsg-2) UNRELEASED; urgency=low
+openjdk-6 (6b10dfsg-2) unstable; urgency=low
 
+  * Update IcedTea build infrastructure (20080714).
   * On arm configure cacao builds with --enable-softfloat.
   * Don't run the mauve testsuite for cacao builds (hangs the test runner
     process).
@@ -11,8 +12,9 @@ openjdk-6 (6b10dfsg-2) UNRELEASED; urgency=low
   * Ignore errors when registering the jar binfmt. The alternative may
     already be registered by another JVM. Closes: #490594.
   * openjdk-6-jre-headless: Depend on ttf-dejavu-core instead of ttf-dejavu.
+  * On amd64, i386 and sparc, bootstrap using openjdk.
 
- -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Jun 2008 13:30:06 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 14 Jul 2008 19:41:19 +0200
 
 openjdk-6 (6b10dfsg-1ubuntu2) intrepid; urgency=low
 
