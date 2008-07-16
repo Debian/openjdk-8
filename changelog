@@ -1,3 +1,11 @@
+openjdk-6 (6b11-0ubuntu1) UNRELEASED; urgency=low
+
+  * New code drop (b11).
+  * Update IcedTea build infrastructure (20080716).
+  * debian/generate-dfsg.sh: Update for b11.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 16 Jul 2008 10:45:01 +0200
+
 openjdk-6 (6b10dfsg-2) unstable; urgency=low
 
   * Update IcedTea build infrastructure (20080714).
