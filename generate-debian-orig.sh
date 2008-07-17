@@ -1,7 +1,7 @@
 
-tarball=openjdk-6-src-b10_30_may_2008-dfsg.tar.gz
-cacaotb=cacao-0.99.1.tar.bz2
-version=6b10dfsg
+tarball=openjdk-6-src-b11-10_jul_2008-dfsg.tar.gz
+cacaotb=cacao-0.99.2.tar.bz2
+version=6b11
 base=openjdk-6
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz

@@ -33,6 +33,7 @@ endif
 #export ALT_PARALLEL_COMPILE_JOBS = 1
 
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
+with_docs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),,yes)
 with_plugin =
 
 distribution := $(shell lsb_release --id --short)
@@ -57,12 +58,12 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(no_bootstrap_archs)))
 else
   STAGE1_JAVA = gcj
 endif
-OPENJDK_VERSION = b10
-OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)_30_may_2008-dfsg.tar.gz
+OPENJDK_VERSION = b11
+OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-10_jul_2008-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
-req_openjdk_bd_ver = 6b09-0
-req_openjdk_ver = 6b09-1
+req_openjdk_bd_ver = 6b10dfsg-1
+req_openjdk_ver = 6b10dfsg-1
 
 unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
@@ -83,12 +84,10 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/gcc-no-stack-protector.diff \
 	debian/patches/gcc-mtune-generic.diff \
 	debian/patches/ld-symbolic-functions.diff \
-	debian/patches/const_strings.patch \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
 	debian/patches/set-exec-name.diff \
-	debian/patches/issue-6659207.diff \
 	debian/patches/no-compiler-path.diff \
 
 #	debian/patches/javax.net.ssl.trustStore.diff \
@@ -128,12 +127,15 @@ else ifeq ($(STAGE1_JAVA),openjdk)
 	--with-java=/usr/lib/jvm/java-6-openjdk/bin/java \
 	--with-javah=/usr/lib/jvm/java-6-openjdk/bin/javah \
 	--with-rmic=/usr/lib/jvm/java-6-openjdk/bin/rmic \
-	--with-jar=/usr/lib/jvm/java-6-openjdk/bin/jar \
+	--with-jar=/usr/bin/fastjar \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-rhino=/usr/share/java/js.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
   build_target = #icedtea-against-icedtea
+
+#	--with-jar=/usr/lib/jvm/java-6-openjdk/bin/jar \
+
 else ifeq ($(STAGE1_JAVA),icedtea)
   CONFIGURE_ARGS = \
 	$(if $(with_plugin),,--disable-gcjwebplugin) \
@@ -164,8 +166,10 @@ else
 endif
 
 # assume we don't build binary indep packages on these architectures
-ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel ia64 lpia powerpc sparc))
-  CONFIGURE_ARGS += --disable-docs
+ifeq ($(with_docs),yes)
+  ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel ia64 lpia powerpc sparc))
+    CONFIGURE_ARGS += --disable-docs
+  endif
 endif
 
 ifneq (,$(NJOBS))
@@ -391,6 +395,7 @@ ifeq (0,1)
 endif
 	mkdir -p stamps
 	: > gcjwebplugin.cc
+	chmod +x configure
 	$(EXTRA_BUILD_ENV) ./configure $(CONFIGURE_ARGS)
 	touch $@
 
@@ -853,10 +858,13 @@ endif
 	  install -D -m644 $$FILE debian/$$PKG/usr/share/lintian/overrides/$$PKG; \
 	done
 
+nodocs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),-N$(p_doc))
+
 # Build architecture independant packages
 binary-indep: build install
 	dh_testdir
 	dh_testroot
+ifeq ($(with_docs),yes)
 	dh_installchangelogs -p$(p_doc)
 	dh_installdocs -p$(p_doc) 
 	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
@@ -866,16 +874,17 @@ binary-indep: build install
 	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jre)/; \
 	  ln -sf ../$(p_jre)/$$b $(d_doc)/usr/share/doc/$(p_doc)/$$b; \
 	done
-	dh_installmenu -i
-	-dh_icons -i || dh_iconcache -i
-#	dh_installdebconf -i
-	dh_link -i
-	dh_compress -i -Xexamples -Xdemos
-	dh_fixperms -i
-	dh_installdeb -i
-	dh_gencontrol -i -- $(control_vars)
-	dh_md5sums -i
-	dh_builddeb -i $(bd_options)
+endif
+	dh_installmenu -i $(nodocs)
+	-dh_icons -i $(nodocs) || dh_iconcache -i $(nodocs)
+#	dh_installdebconf -i $(nodocs)
+	dh_link -i $(nodocs)
+	dh_compress -i $(nodocs) -Xexamples -Xdemos
+	dh_fixperms -i $(nodocs)
+	dh_installdeb -i $(nodocs)
+	dh_gencontrol -i $(nodocs) -- $(control_vars)
+	dh_md5sums -i $(nodocs)
+	dh_builddeb -i $(nodocs) $(bd_options)
 
 absarchdir = $(CURDIR)/$(d_jrehl)/$(basedir)/jre/lib/$(archdir)
 shlibdeps_ld_path =$(absarchdir):$(absarchdir)/client:$(absarchdir)/server:$(absarchdir)/native_threads

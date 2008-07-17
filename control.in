@@ -56,7 +56,7 @@ Package: @basename@-jre-lib
 Architecture: all
 Pre-Depends: ${dpkg:Depends}
 Section: interpreters
-Depends: @basename@-jre-headless (>= @pkg_version@), ${misc:Depends}
+Depends: @basename@-jre-headless (>= ${base:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
 Description: OpenJDK Java runtime (architecture independent libraries)
  OpenJDK Java runtime
