@@ -127,15 +127,12 @@ else ifeq ($(STAGE1_JAVA),openjdk)
 	--with-java=/usr/lib/jvm/java-6-openjdk/bin/java \
 	--with-javah=/usr/lib/jvm/java-6-openjdk/bin/javah \
 	--with-rmic=/usr/lib/jvm/java-6-openjdk/bin/rmic \
-	--with-jar=/usr/bin/fastjar \
+	--with-jar=/usr/lib/jvm/java-6-openjdk/bin/jar \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-rhino=/usr/share/java/js.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
   build_target = #icedtea-against-icedtea
-
-#	--with-jar=/usr/lib/jvm/java-6-openjdk/bin/jar \
-
 else ifeq ($(STAGE1_JAVA),icedtea)
   CONFIGURE_ARGS = \
 	$(if $(with_plugin),,--disable-gcjwebplugin) \
