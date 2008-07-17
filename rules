@@ -167,6 +167,8 @@ ifeq ($(with_docs),yes)
   ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel ia64 lpia powerpc sparc))
     CONFIGURE_ARGS += --disable-docs
   endif
+else
+  CONFIGURE_ARGS += --disable-docs
 endif
 
 ifneq (,$(NJOBS))

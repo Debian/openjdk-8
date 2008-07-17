@@ -1,4 +1,4 @@
-openjdk-6 (6b11-0ubuntu1) UNRELEASED; urgency=low
+openjdk-6 (6b11-0) UNRELEASED; urgency=low
 
   * New code drop (b11).
   * Update IcedTea build infrastructure (20080716).
