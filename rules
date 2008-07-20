@@ -84,10 +84,12 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/gcc-no-stack-protector.diff \
 	debian/patches/gcc-mtune-generic.diff \
 	debian/patches/ld-symbolic-functions.diff \
+	debian/patches/set-exec-name.diff \
+
+DISTRIBUTION_PATCHES = \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
-	debian/patches/set-exec-name.diff \
 	debian/patches/no-compiler-path.diff \
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
@@ -241,7 +243,7 @@ bd_syslibs = \
 	libjpeg62-dev, libpng12-dev, libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev), zlib1g-dev,
 bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, \
-	libcupsys2-dev, lesstif2-dev, libasound2-dev, libfreetype6-dev, \
+	libcupsys2-dev, libasound2-dev, libfreetype6-dev, \
 	libxalan2-java, rhino, liblcms1-dev, libxinerama-dev,
 bd_zero = \
 	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [$(foreach a,$(hotspot_archs),!$(a))],

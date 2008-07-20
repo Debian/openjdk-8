@@ -1,13 +1,14 @@
 openjdk-6 (6b11-0) UNRELEASED; urgency=low
 
   * New code drop (b11).
-  * Update IcedTea build infrastructure (20080716).
+  * Update IcedTea build infrastructure (20080720).
   * debian/generate-dfsg.sh: Update for b11.
   * debian/patches/const_strings.patch, debian/patches/issue-6659207.diff:
     Remove, applied upstream.
   * debian/generate-debian-orig.sh: Fix /proc check.
   * debian/control.in: Loosen dependency of -jre-lib on -jre.
   * Support `nodocs' in DEB_BUILD_OPTIONS.
+  * Remove build-dependency on lesstif2-dev.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 16 Jul 2008 10:45:01 +0200
 
