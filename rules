@@ -90,8 +90,6 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/set-exec-name.diff \
 	debian/patches/no-compiler-path.diff \
 
-#	debian/patches/javax.net.ssl.trustStore.diff \
-
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   DISTRIBUTION_PATCHES += \
 	$(if $(filter $(DEB_HOST_ARCH), amd64), debian/patches/gcc-jdk-opt-O2.diff) \
