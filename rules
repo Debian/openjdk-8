@@ -51,6 +51,7 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 
 hotspot_archs	= amd64 i386 lpia sparc
 no_bootstrap_archs = amd64 i386 sparc
+no_bootstrap_archs :=
 
 # STAGE1_JAVA is either gcj or icedtea, the latter not yet supported
 ifneq (,$(filter $(DEB_HOST_ARCH), $(no_bootstrap_archs)))
