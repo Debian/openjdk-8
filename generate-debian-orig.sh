@@ -36,6 +36,13 @@ else
     fi
     tar -c -f - -C $icedtea_checkout . | tar -x -f - -C $pkgdir.orig
     rm -f $pkgdir.orig/gcjwebplugin.cc
+    (
+	cd $pkgdir.orig
+	aclocal
+	autoconf
+	automake
+	rm -rf autom4te.cache
+    )
     cp -a $pkgdir.orig $pkgdir
     rm -rf $pkgdir.orig/.hg
     cp -a $debian_checkout $pkgdir/debian
