@@ -468,7 +468,7 @@ endif
 stamps/jtreg-check: stamps/build
 ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
 	@echo "BEGIN jtreg"
-	$(MAKE) -k jtregcheck 2>&1 | tee jtreg_output
+	xvfb-run $(MAKE) -k jtregcheck 2>&1 | tee jtreg_output
 	@echo "END jtreg"
 endif
 	touch $@

@@ -10,6 +10,7 @@ openjdk-6 (6b11-0) UNRELEASED; urgency=low
   * Support `nodocs' in DEB_BUILD_OPTIONS.
   * Remove build-dependency on lesstif2-dev.
   * Bootstrap using gcj on all archs; the 6b10dfsg-2 packages are broken.
+  * Run the jtreg harness in a virtual X environment.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 16 Jul 2008 10:45:01 +0200
 
