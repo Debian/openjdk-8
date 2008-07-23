@@ -12,7 +12,8 @@ openjdk-6 (6b11-1) unstable; urgency=low
   * Bootstrap using gcj on all archs; the 6b10dfsg-2 packages are broken.
   * Run the jtreg harness in a virtual X environment.
   * Install javazic.jar in the jre-lib package.
-  * Don't run the testsuite on arm; the build already takes days.
+  * Don't run the testsuite on arm; the build already takes days; only
+    run the testsuite on hotspot archs and powerpc.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 23 Jul 2008 00:28:12 +0200
 

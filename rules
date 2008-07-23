@@ -437,7 +437,7 @@ ifeq ($(with_check),yes)
   ifneq (,$(findstring cacao, $(PKGSOURCE)))
     check_stamps = stamps/jtreg-check
   else
-    ifeq (,$(filter $(DEB_HOST_ARCH), arm armel))
+    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
       check_stamps = stamps/mauve-check stamps/jtreg-check
     endif
   endif
