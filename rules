@@ -66,8 +66,8 @@ OPENJDK_VERSION = b11
 OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-10_jul_2008-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
-req_openjdk_bd_ver = 6b10dfsg-1
-req_openjdk_ver = 6b10dfsg-1
+req_openjdk_bd_ver = 6b11
+req_openjdk_ver = 6b11
 
 unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
@@ -441,16 +441,17 @@ ifeq ($(with_check),yes)
   ifneq (,$(findstring cacao, $(PKGSOURCE)))
     ifneq (,$(filter $(DEB_HOST_ARCH), powerpc))
       # only activate after testing; hangs several tests. no fun with mauve
-      check_stamps = stamps/jtreg-check
+      with_jtreg_check = yes
     endif
   else
     ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
-      check_stamps = stamps/mauve-check stamps/jtreg-check
+      with_mauve_check = yes
+      with_jtreg_check = yes
     endif
   endif
 endif
 
-build: stamps/build $(check_stamps)
+build: stamps/build stamps/mauve-check stamps/jtreg-check
 stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel ia64 powerpc s390 sparc))
 	sh -c 'sh debian/buildwatch.sh &'
@@ -470,7 +471,7 @@ stamps/mauve-build: stamps/build
 	touch $@
 
 stamps/mauve-check: stamps/build stamps/mauve-build
-ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
+ifeq ($(with_mauve_check),yes)
 	cd mauve && \
 	    JAVA_HOME=$(CURDIR)/$(sdkimg) \
 	    PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
@@ -479,14 +480,18 @@ ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
 		    -file $(CURDIR)/debian/mauve_tests \
 		    -timeout 30000 2>&1 \
 		| tee mauve_output
+else
+	echo "mauve testsuite not run for this build" > mauve/mauve_output
 endif
 	touch $@
 
 stamps/jtreg-check: stamps/build
-ifeq (,$(findstring nocheck, $(DEB_BUILD_OPTIONS)))
+ifeq ($(with_jtreg_check),yes)
 	@echo "BEGIN jtreg"
 	xvfb-run --listen-tcp --server-num=7 $(MAKE) -k jtregcheck 2>&1 | tee jtreg_output
 	@echo "END jtreg"
+else
+	echo "jtreg harness not run for this build" > jtreg_output
 endif
 	touch $@
 
@@ -930,11 +935,9 @@ binary-arch: build install
 	for i in AUTHORS NEWS README; do \
 	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
 	done
-ifeq ($(with_check),yes)
 	mkdir -p $(d_jdk)/usr/share/doc/$(p_jre)
 	cp mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
 	cp jtreg_output $(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output.log
-endif
 
 	dh_installmenu -s $(nodemo)
 	-dh_icons -s $(nodemo) || dh_iconcache -s $(nodemo)

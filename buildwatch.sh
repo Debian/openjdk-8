@@ -21,7 +21,7 @@ while [ $wait -gt 0 ]; do
     fi
     old_quiet=$new_quiet
 
-    new_noisy=$(ls -l mauve_output jtreg_output 2>&1 | md5sum)
+    new_noisy=$(ls -l mauve/mauve_output jtreg_output 2>&1 | md5sum)
     if [ "$old_noisy" != "$new_noisy" ]; then
 	wait=$maxwait
     elif [ -n "$state" ]; then
