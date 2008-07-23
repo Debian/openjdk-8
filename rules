@@ -439,7 +439,10 @@ endif
 
 ifeq ($(with_check),yes)
   ifneq (,$(findstring cacao, $(PKGSOURCE)))
-    check_stamps = stamps/jtreg-check
+    ifneq (,$(filter $(DEB_HOST_ARCH), powerpc))
+      # only activate after testing; hangs several tests. no fun with mauve
+      check_stamps = stamps/jtreg-check
+    endif
   else
     ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
       check_stamps = stamps/mauve-check stamps/jtreg-check
