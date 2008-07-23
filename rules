@@ -866,6 +866,11 @@ endif
 	cp -p openjdk/control/build/linux-$(jvmarch)/btjars/javazic.jar \
 		$(d_lib)/$(basedir)/jre/lib/
 
+ifneq (,$(findstring cacao, $(PKGSOURCE)))
+	: # FIXME: the cacao build ends up with a reference to libjvm.so.1. why?
+	ln -sf libjvm.so $(d_jrehl)/$(basedir)/jre/lib/$(archdir)/server/libjvm.so.1
+endif
+
 	: # install lintian overrides
 	for FILE in debian/*.overrides; do \
 	  PKG=`basename $$FILE .overrides`; \
@@ -873,7 +878,7 @@ endif
 	done
 
 nodocs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),-N$(p_doc))
-nodemo = $(if $(findstring cacao, $(DEB_BUILD_OPTIONS)),-N$(p_demo))
+nodemo = $(if $(findstring cacao, $(PKGSOURCE)),-N$(p_demo))
 
 # Build architecture independant packages
 binary-indep: build install
