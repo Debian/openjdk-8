@@ -104,6 +104,10 @@ ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += debian/patches/openjdk-ubuntu-branding.patch
 endif
 
+ifneq (,$(findstring cacao, $(PKGSOURCE)))
+  DISTRIBUTION_PATCHES += debian/patches/cacao-no-mmap-first-page.diff
+endif
+
 export DISTRIBUTION_PATCHES
 
 ifeq ($(STAGE1_JAVA),gcj)
