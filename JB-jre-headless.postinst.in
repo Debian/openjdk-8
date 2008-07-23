@@ -74,7 +74,7 @@ configure)
 	rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
 	log=$(tempfile)
 	if ! $basedir/bin/java -client -Xshare:dump -XX:PermSize=128m > $log; then
-	    cat >2 $log
+	    cat >&2 $log
 	    rm -f $log
 	    exit 1
 	fi
