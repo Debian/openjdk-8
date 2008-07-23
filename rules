@@ -82,12 +82,10 @@ else
 endif
 
 DISTRIBUTION_PATCHES = \
-	debian/patches/gcc-no-stack-protector.diff \
+	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector.diff) \
 	debian/patches/gcc-mtune-generic.diff \
 	debian/patches/ld-symbolic-functions.diff \
 	debian/patches/set-exec-name.diff \
-
-DISTRIBUTION_PATCHES = \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
