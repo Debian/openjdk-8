@@ -34,6 +34,9 @@ endif
 
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
 with_docs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),,yes)
+ifneq (,$(findstring cacao, $(PKGSOURCE)))
+  with_docs = disabled for cacao
+endif
 with_plugin =
 
 distribution := $(shell lsb_release --id --short)
@@ -149,7 +152,7 @@ else ifeq ($(STAGE1_JAVA),icedtea)
 endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
-  CONFIGURE_ARGS += --with-cacao --with-cacao-src-zip=$(CURDIR)/cacao-0.99.1.tar.gz
+  CONFIGURE_ARGS += --with-cacao --with-cacao-src-zip=$(CURDIR)/cacao-0.99.2.tar.bz2
   ifneq (,$(filter $(DEB_HOST_ARCH), arm armel))
     EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS=--enable-softfloat
   endif
@@ -184,10 +187,16 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   origin	= cacao
   basename	= cacao-oj$(shortver)
   priority	= 1059
+  p_lib_arch	= any
 else
   origin	= openjdk
   basename	= openjdk-$(shortver)
-  priority	= 1061
+  ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+    priority	= 1061
+  else
+    priority	= 1057
+  endif
+  p_lib_arch	= all
 endif
 jvmver		= 1.6.0
 shortver	= 6
@@ -333,6 +342,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@core_fonts@/$(core_fonts)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
+	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/control.in $(if $(with_plugin),debian/control.plugin) > debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
@@ -859,12 +869,16 @@ endif
 	done
 
 nodocs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),-N$(p_doc))
+nodemo = $(if $(findstring cacao, $(DEB_BUILD_OPTIONS)),-N$(p_demo))
 
 # Build architecture independant packages
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-ifeq ($(with_docs),yes)
+ifneq (,$(findstring cacao, $(PKGSOURCE)))
+	: # not building any binary-indep packages for cacao
+else
+  ifeq ($(with_docs),yes)
 	dh_installchangelogs -p$(p_doc)
 	dh_installdocs -p$(p_doc) 
 	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
@@ -874,7 +888,7 @@ ifeq ($(with_docs),yes)
 	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jre)/; \
 	  ln -sf ../$(p_jre)/$$b $(d_doc)/usr/share/doc/$(p_doc)/$$b; \
 	done
-endif
+  endif
 	dh_installmenu -i $(nodocs)
 	-dh_icons -i $(nodocs) || dh_iconcache -i $(nodocs)
 #	dh_installdebconf -i $(nodocs)
@@ -885,6 +899,7 @@ endif
 	dh_gencontrol -i $(nodocs) -- $(control_vars)
 	dh_md5sums -i $(nodocs)
 	dh_builddeb -i $(nodocs) $(bd_options)
+endif
 
 absarchdir = $(CURDIR)/$(d_jrehl)/$(basedir)/jre/lib/$(archdir)
 shlibdeps_ld_path =$(absarchdir):$(absarchdir)/client:$(absarchdir)/server:$(absarchdir)/native_threads
@@ -909,21 +924,21 @@ ifeq ($(with_check),yes)
 	cp jtreg_output $(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output.log
 endif
 
-	dh_installmenu -s
-	-dh_icons -s || dh_iconcache -s
-#	dh_installdebconf -s
-	dh_link -s
-	dh_strip -s --dbg-package=$(p_dbg)
-	dh_compress -s
-	dh_fixperms -s
+	dh_installmenu -s $(nodemo)
+	-dh_icons -s $(nodemo) || dh_iconcache -s $(nodemo)
+#	dh_installdebconf -s $(nodemo)
+	dh_link -s $(nodemo)
+	dh_strip -s $(nodemo) --dbg-package=$(p_dbg)
+	dh_compress -s $(nodemo)
+	dh_fixperms -s $(nodemo)
 	dh_makeshlibs -p$(p_jrehl) -p$(p_jre)
-	dh_shlibdeps -s -L $(p_jrehl) \
+	dh_shlibdeps -s $(nodemo) -L $(p_jrehl) \
 		-l$(shlibdeps_ld_path) \
 		--
-	dh_installdeb -s
-	dh_gencontrol -s -- $(control_vars)
-	dh_md5sums -s
-	dh_builddeb -s #$(bd_options)
+	dh_installdeb -s $(nodemo)
+	dh_gencontrol -s $(nodemo) -- $(control_vars)
+	dh_md5sums -s $(nodemo)
+	dh_builddeb -s $(nodemo) #$(bd_options)
 
 binary: binary-arch binary-indep
 .PHONY: build clean binary-indep binary-arch binary install
