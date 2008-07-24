@@ -1,0 +1,22 @@
+--- cacao/cacao-0.99.2/configure.ac~	2008-07-07 13:37:05.000000000 +0200
++++ cacao/cacao-0.99.2/configure.ac	2008-07-24 17:31:08.473562587 +0200
+@@ -50,7 +50,7 @@
+     JAVA_ARCH="alpha"
+     ;;
+ 
+-arm | armv4 | armv4tl | armv5b | armv5l )
++arm | armv4 | armv4tl | armv5b | armv5l | armv5t* )
+     ARCH_DIR="arm"
+     ARCH_CFLAGS="-D__ARM__"
+     JAVA_ARCH="arm"
+--- cacao/cacao-0.99.2/configure~	2008-07-07 13:37:20.000000000 +0200
++++ cacao/cacao-0.99.2/configure	2008-07-24 17:31:19.713732142 +0200
+@@ -2812,7 +2812,7 @@
+     JAVA_ARCH="alpha"
+     ;;
+ 
+-arm | armv4 | armv4tl | armv5b | armv5l )
++arm | armv4 | armv4tl | armv5b | armv5l | armv5t* )
+     ARCH_DIR="arm"
+     ARCH_CFLAGS="-D__ARM__"
+     JAVA_ARCH="arm"
