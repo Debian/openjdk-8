@@ -484,7 +484,7 @@ ifeq ($(with_mauve_check),yes)
 	-cd mauve && \
 	    JAVA_HOME=$(CURDIR)/$(sdkimg) \
 	    PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
-		xvfb-run java Harness \
+		xvfb-run -s "-extension GLX" java Harness \
 		    -vm $(CURDIR)/$(sdkimg)/bin/java \
 		    -file $(CURDIR)/debian/mauve_tests \
 		    -timeout 30000 2>&1 \
@@ -497,7 +497,7 @@ endif
 stamps/jtreg-check: stamps/build
 ifeq ($(with_jtreg_check),yes)
 	@echo "BEGIN jtreg"
-	-xvfb-run --listen-tcp --server-num=7 $(MAKE) -k jtregcheck 2>&1 | tee jtreg_output
+	-xvfb-run --listen-tcp -s "-extension GLX" $(MAKE) -k jtregcheck 2>&1 | tee jtreg_output
 	@echo "END jtreg"
 else
 	echo "jtreg harness not run for this build" > jtreg_output
