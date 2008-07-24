@@ -1,0 +1,22 @@
+--- cacao/cacao-0.99.2/src/cacao/Makefile.am.orig	2008-07-23 20:23:18.371683000 +0000
++++ cacao/cacao-0.99.2/src/cacao/Makefile.am	2008-07-23 20:24:06.491683162 +0000
+@@ -35,7 +35,7 @@
+ 	libjvm.la
+ 
+ libjvm_la_LDFLAGS = \
+-	-version-info 1:0:0
++	-avoid-version
+ 
+ if WITH_JAVA_RUNTIME_LIBRARY_OPENJDK
+ libjvm_la_LDFLAGS += \
+--- cacao/cacao-0.99.2/src/cacao/Makefile.in.orig	2008-07-23 20:23:18.371683000 +0000
++++ cacao/cacao-0.99.2/src/cacao/Makefile.in	2008-07-23 20:24:26.740434262 +0000
+@@ -342,7 +342,7 @@
+ @ENABLE_LIBJVM_TRUE@lib_LTLIBRARIES = \
+ @ENABLE_LIBJVM_TRUE@	libjvm.la
+ 
+-@ENABLE_LIBJVM_TRUE@libjvm_la_LDFLAGS = -version-info 1:0:0 \
++@ENABLE_LIBJVM_TRUE@libjvm_la_LDFLAGS = -avoid-version \
+ @ENABLE_LIBJVM_TRUE@	$(am__append_1)
+ @ENABLE_LIBJVM_FALSE@CACAO_LIBS = \
+ @ENABLE_LIBJVM_FALSE@	libjvm.la

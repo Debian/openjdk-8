@@ -105,7 +105,9 @@ ifeq ($(distribution),Ubuntu)
 endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
-  DISTRIBUTION_PATCHES += debian/patches/cacao-no-mmap-first-page.diff
+  DISTRIBUTION_PATCHES += \
+	debian/patches/cacao-no-version-info.diff \
+	debian/patches/cacao-no-mmap-first-page.diff
 endif
 
 export DISTRIBUTION_PATCHES
@@ -873,11 +875,6 @@ endif
 		$(d_lib)/$(basedir)/jre/lib/
 	cp -p openjdk/control/build/linux-$(jvmarch)/btjars/javazic.jar \
 		$(d_lib)/$(basedir)/jre/lib/
-
-ifneq (,$(findstring cacao, $(PKGSOURCE)))
-	: # FIXME: the cacao build ends up with a reference to libjvm.so.1. why?
-	ln -sf libjvm.so $(d_jrehl)/$(basedir)/jre/lib/$(archdir)/server/libjvm.so.1
-endif
 
 	: # install lintian overrides
 	for FILE in debian/*.overrides; do \
