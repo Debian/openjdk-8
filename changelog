@@ -1,4 +1,4 @@
-openjdk-6 (6b11-2) UNRELEASED; urgency=low
+openjdk-6 (6b11-2) unstable; urgency=low
 
   * Update IcedTea build infrastructure (20080724).
   * debian/buildwatch.sh: Track long building files with no visible output.
@@ -7,7 +7,7 @@ openjdk-6 (6b11-2) UNRELEASED; urgency=low
   * Don't set a soversion for the cacao libjvm.
   * Configure with --host and --build.
 
- -- Matthias Klose <doko@ubuntu.com>  Thu, 24 Jul 2008 12:48:13 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 24 Jul 2008 22:25:30 +0200
 
 openjdk-6 (6b11-1) unstable; urgency=low
 

@@ -161,7 +161,9 @@ endif
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   CONFIGURE_ARGS += --with-cacao --with-cacao-src-zip=$(CURDIR)/cacao-0.99.2.tar.bz2
   ifneq (,$(filter $(DEB_HOST_ARCH), arm armel))
-    EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS=--enable-softfloat
+    EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS='--enable-softfloat --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
+  else
+    EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS='--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
   endif
 else
   ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
@@ -451,6 +453,8 @@ ifeq ($(with_check),yes)
   else
     ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
       with_mauve_check = yes
+    endif
+    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia sparc))
       with_jtreg_check = yes
     endif
   endif
@@ -477,7 +481,7 @@ stamps/mauve-build: stamps/build
 
 stamps/mauve-check: stamps/build stamps/mauve-build
 ifeq ($(with_mauve_check),yes)
-	cd mauve && \
+	-cd mauve && \
 	    JAVA_HOME=$(CURDIR)/$(sdkimg) \
 	    PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
 		xvfb-run java Harness \
@@ -493,7 +497,7 @@ endif
 stamps/jtreg-check: stamps/build
 ifeq ($(with_jtreg_check),yes)
 	@echo "BEGIN jtreg"
-	xvfb-run --listen-tcp --server-num=7 $(MAKE) -k jtregcheck 2>&1 | tee jtreg_output
+	-xvfb-run --listen-tcp --server-num=7 $(MAKE) -k jtregcheck 2>&1 | tee jtreg_output
 	@echo "END jtreg"
 else
 	echo "jtreg harness not run for this build" > jtreg_output

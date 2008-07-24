@@ -26,8 +26,8 @@ Package: openjdk-6-jre-headless
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Section: interpreters
-Depends: openjdk-6-jre-lib (>= ${binary:Version}), rhino, libaccess-bridge-java (>= 1.22), ca-certificates-java, java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
-Recommends: ${dlopenjl:Recommends}, libnss-mdns, tzdata-java
+Depends: openjdk-6-jre-lib (>= ${binary:Version}), rhino, libaccess-bridge-java (>= 1.22), java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Recommends: ${dlopenjl:Recommends}, libnss-mdns, tzdata-java, ca-certificates-java
 Suggests: sun-java6-fonts, ttf-dejavu-core, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic, ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming, ttf-indic-fonts,
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
 Replaces: openjdk-6-jre-lib (<< 6b06-0ubuntu11), openjdk-6-jre (<< 6b09dfsg-0ubuntu2)
