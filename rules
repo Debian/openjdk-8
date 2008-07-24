@@ -184,6 +184,8 @@ endif
 # experimental; we don't include the plugin in any package built from this source.
 #CONFIGURE_ARGS += --enable-liveconnect
 
+CONFIGURE_ARGS += --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
+
 VENDOR		:= openjdk
 Vendor		:= OpenJDK
 

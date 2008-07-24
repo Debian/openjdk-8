@@ -3,7 +3,8 @@ openjdk-6 (6b11-2) UNRELEASED; urgency=low
   * debian/buildwatch.sh: Track long building files with no visible output.
   * Fix build failure when not running the mauve testsuite.
   * Disable running the testsuite for cacao builds (leaving processes around).
-  * Don√'t set a soversion for the cacao libjvm.
+  * Don't set a soversion for the cacao libjvm.
+  * Configure with --host and --build.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 23 Jul 2008 15:32:04 +0200
 
