@@ -2,6 +2,8 @@ openjdk-6 (6b11-3) UNRELEASED; urgency=low
 
   [ Matthias Klose ]
   * Include the name of the VM used in the package description.
+  * Update IcedTea build infrastructure (20080726).
+  * Build for alpha, mips and mipsel.
 
   [ Torsten Werner ]
   * Switch from libcupsys2(-dev) to libcups2(-dev). (Closes: #492384)
