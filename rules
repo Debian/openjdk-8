@@ -263,7 +263,7 @@ bd_syslibs = \
 	libjpeg62-dev, libpng12-dev, libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev), zlib1g-dev,
 bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, \
-	libcupsys2-dev, libasound2-dev, libfreetype6-dev, \
+	libcups2-dev, libasound2-dev, libfreetype6-dev, \
 	libxalan2-java, rhino, liblcms1-dev, libxinerama-dev,
 bd_zero = \
 	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [$(foreach a,$(hotspot_archs),!$(a))],
@@ -276,7 +276,7 @@ bd_mauve = mauve, xvfb, autoconf, automake, xauth, xfonts-base
 bd_compress = $(pkg_compress),
 
 dlopen_hl_depends = \
-	libcupsys2, \
+	libcups2, \
 	liblcms1
 dlopen_hl_recommends = \
 dlopen_jre_depends = \

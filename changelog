@@ -1,8 +1,12 @@
 openjdk-6 (6b11-3) UNRELEASED; urgency=low
 
+  [ Matthias Klose ]
   * Include the name of the VM used in the package description.
 
- -- Matthias Klose <doko@ubuntu.com>  Sat, 26 Jul 2008 20:20:52 +0200
+  [ Torsten Werner ]
+  * Switch from libcupsys2(-dev) to libcups2(-dev). (Closes: #492384)
+
+ -- Torsten Werner <twerner@debian.org>  Sat, 26 Jul 2008 20:32:50 +0200
 
 openjdk-6 (6b11-2ubuntu1) intrepid; urgency=low
 
