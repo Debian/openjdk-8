@@ -1,3 +1,17 @@
+openjdk-6 (6b11-3) UNRELEASED; urgency=low
+
+  * Include the name of the VM used in the package description.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 26 Jul 2008 20:20:52 +0200
+
+openjdk-6 (6b11-2ubuntu1) intrepid; urgency=low
+
+  * xvfb seems to be broken when running with intrepid and an intrepid kernel.
+    Nevertheless, run xvfb-run -s "-extension GLX" on the buildds (hardy kernels).
+  * Stop the buildwatch process after the testsuite finishes.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 25 Jul 2008 12:33:44 +0200
+
 openjdk-6 (6b11-2) unstable; urgency=low
 
   * Update IcedTea build infrastructure (20080724).
@@ -9,6 +23,23 @@ openjdk-6 (6b11-2) unstable; urgency=low
   * Call xvfb-run with -s "-extension GLX".
 
  -- Matthias Klose <doko@ubuntu.com>  Thu, 24 Jul 2008 22:25:30 +0200
+
+openjdk-6 (6b11-1ubuntu2) intrepid; urgency=low
+
+  * Update IcedTea build infrastructure (20080724).
+  * debian/buildwatch.sh: Track long building files with no visible output.
+  * Fix build failure when not running the mauve testsuite.
+  * Disable running the testsuite for cacao builds (leaving processes around).
+  * Don't set a soversion for the cacao libjvm.
+  * Configure with --host and --build.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 24 Jul 2008 17:58:53 +0200
+
+openjdk-6 (6b11-1ubuntu1) intrepid; urgency=low
+
+  * Regenerate the control file.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 23 Jul 2008 00:42:16 +0200
 
 openjdk-6 (6b11-1) unstable; urgency=low
 

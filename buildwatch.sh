@@ -1,5 +1,7 @@
 #! /bin/sh
 
+echo $$ > buildwatch.pid
+
 maxwait=$(expr 180 \* 60)
 wait=$maxwait
 ival=$(expr 30 \* 60)
@@ -28,4 +30,9 @@ while [ $wait -gt 0 ]; do
 	echo $state
     fi
     old_noisy=$new_noisy
+
+    if [ ! -f buildwatch.pid ]; then
+	echo "buildwatch exit"
+	exit 0
+    fi
 done

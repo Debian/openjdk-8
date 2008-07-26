@@ -31,8 +31,9 @@ Recommends: ${dlopenjl:Recommends}, libnss-mdns, tzdata-java, ca-certificates-ja
 Suggests: sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
 Replaces: @basename@-jre-lib (<< 6b06-0ubuntu11), @basename@-jre (<< 6b09dfsg-0ubuntu2)
-Description: OpenJDK Java runtime (headless)
+Description: OpenJDK Java runtime, using ${vm_name} (headless)
  Minimal Java runtime - needed for executing non GUI Java programs.
+ Using ${vm_name}.
  .
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
@@ -45,9 +46,9 @@ Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shl
 Recommends: ${dlopenjre:Recommends}, @cjk_fonts@
 Suggests: icedtea-gcjwebplugin
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
-Description: OpenJDK Java runtime
+Description: OpenJDK Java runtime, using ${vm_name}
  Full Java runtime environment - needed for executing Java GUI and Webstart
- programs.
+ programs. Using ${vm_name}.
  .
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
@@ -59,7 +60,7 @@ Section: interpreters
 Depends: @basename@-jre-headless (>= ${base:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
 Description: OpenJDK Java runtime (architecture independent libraries)
- OpenJDK Java runtime
+ OpenJDK Java runtime, using ${vm_name}.
  .
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.

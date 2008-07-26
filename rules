@@ -199,13 +199,16 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   basename	= cacao-oj$(shortver)
   priority	= 1059
   p_lib_arch	= any
+  vm_name	= CacaoVM JIT
 else
   origin	= openjdk
   basename	= openjdk-$(shortver)
   ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
     priority	= 1061
+    vm_name	= Hotspot JIT
   else
     priority	= 1057
+    vm_name	= Hotspot Zero
   endif
   p_lib_arch	= all
 endif
@@ -323,6 +326,7 @@ d_dbg	= debian/$(p_dbg)
 d_plug	= debian/$(p_plug)
 
 control_vars = \
+	'-Vvm_name=$(vm_name)' \
 	'-Vbase:Version=$(req_openjdk_ver)' \
 	'-Vdlopenhl:Depends=$(dlopen_hl_depends)' \
 	'-Vdlopenhl:Recommends=$(dlopen_hl_recommends)' \
@@ -461,8 +465,14 @@ ifeq ($(with_check),yes)
 endif
 
 build: stamps/build stamps/mauve-check stamps/jtreg-check
+	if [ -f buildwatch.pid ]; then \
+	  pid=$$(cat buildwatch.pid); \
+	  kill -1 $$pid; sleep 1; kill -9 $$pid; \
+	fi
+	rm -f buildwatch.pid
+
 stamps/build: stamps/patch
-ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel ia64 powerpc s390 sparc))
+ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel ia64 m68k mips mipsel powerpc s390 sparc))
 	sh -c 'sh debian/buildwatch.sh &'
 endif
 	$(EXTRA_BUILD_ENV) $(MAKE) $(build_target)
@@ -497,7 +507,7 @@ endif
 stamps/jtreg-check: stamps/build
 ifeq ($(with_jtreg_check),yes)
 	@echo "BEGIN jtreg"
-	-xvfb-run --listen-tcp -s "-extension GLX" $(MAKE) -k jtregcheck 2>&1 | tee jtreg_output
+	-xvfb-run $(MAKE) -k jtregcheck 2>&1 | tee jtreg_output
 	@echo "END jtreg"
 else
 	echo "jtreg harness not run for this build" > jtreg_output
@@ -514,6 +524,7 @@ clean: debian-clean
 	rm -rf autom4te.cache
 	rm -rf mauve
 	rm -f jtreg_output
+	rm -f buildwatch.pid
 	rm -f gcjwebplugin.cc
 	if [ -f generated.tar ]; then \
 	  rm -rf generated; \
