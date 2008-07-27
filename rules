@@ -44,8 +44,8 @@ distrel := $(shell lsb_release --codename --short)
 
 with_wgy_zenhai = $(if $(filter $(distrel),hardy intrepid),yes)
 
-arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i586 lpia=i586 powerpc=ppc sparc=sparc s390=s390 ia64=ia64
-archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i386 lpia=i386 powerpc=ppc sparc=sparc s390=s390 ia64=ia64
+arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
+archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
 
 jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(arch_map))))
