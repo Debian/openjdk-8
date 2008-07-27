@@ -326,7 +326,7 @@ d_dbg	= debian/$(p_dbg)
 d_plug	= debian/$(p_plug)
 
 control_vars = \
-	'-Vvm_name=$(vm_name)' \
+	'-Vvm:Name=$(vm_name)' \
 	'-Vbase:Version=$(req_openjdk_ver)' \
 	'-Vdlopenhl:Depends=$(dlopen_hl_depends)' \
 	'-Vdlopenhl:Recommends=$(dlopen_hl_recommends)' \

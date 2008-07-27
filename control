@@ -31,9 +31,9 @@ Recommends: ${dlopenjl:Recommends}, libnss-mdns, tzdata-java, ca-certificates-ja
 Suggests: sun-java6-fonts, ttf-dejavu-core, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic, ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming, ttf-indic-fonts,
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
 Replaces: openjdk-6-jre-lib (<< 6b06-0ubuntu11), openjdk-6-jre (<< 6b09dfsg-0ubuntu2)
-Description: OpenJDK Java runtime, using ${vm_name} (headless)
+Description: OpenJDK Java runtime, using ${vm:Name} (headless)
  Minimal Java runtime - needed for executing non GUI Java programs.
- Using ${vm_name}.
+ Using ${vm:Name}.
  .
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
@@ -46,9 +46,9 @@ Depends: openjdk-6-jre-headless (>= ${binary:Version}), ${xandsound:Depends}, ${
 Recommends: ${dlopenjre:Recommends}, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic, ttf-kochi-mincho | ttf-sazanami-mincho, ttf-arphic-uming, ttf-indic-fonts,
 Suggests: icedtea-gcjwebplugin
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
-Description: OpenJDK Java runtime, using ${vm_name}
+Description: OpenJDK Java runtime, using ${vm:Name}
  Full Java runtime environment - needed for executing Java GUI and Webstart
- programs. Using ${vm_name}.
+ programs. Using ${vm:Name}.
  .
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
@@ -60,7 +60,7 @@ Section: interpreters
 Depends: openjdk-6-jre-headless (>= ${base:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
 Description: OpenJDK Java runtime (architecture independent libraries)
- OpenJDK Java runtime, using ${vm_name}.
+ OpenJDK Java runtime, using ${vm:Name}.
  .
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
