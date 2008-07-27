@@ -202,7 +202,7 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
 else
   origin	= openjdk
   basename	= openjdk-$(shortver)
-  ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+  ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
     priority	= 1061
     vm_name	= Hotspot JIT
   else
