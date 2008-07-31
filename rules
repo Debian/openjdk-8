@@ -92,7 +92,7 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/jexec.diff \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
 	debian/patches/no-compiler-path.diff \
-	patches/fix-race-cond-print.diff \
+	debian/patches/fix-race-cond-print.diff \
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   DISTRIBUTION_PATCHES += \
@@ -286,8 +286,7 @@ dlopen_hl_recommends = \
 dlopen_jre_depends = \
 	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
 	libxrandr2, libxinerama1, libgl1-mesa-glx
-dlopen_jre_recommends = \
-	lesstif2
+dlopen_jre_recommends =
 
 browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
 
@@ -471,7 +470,7 @@ endif
 build: stamps/build stamps/mauve-check stamps/jtreg-check
 	if [ -f buildwatch.pid ]; then \
 	  pid=$$(cat buildwatch.pid); \
-	  kill -1 $$pid; sleep 1; kill -9 $$pid; \
+	  kill -1 $$pid || :; sleep 1; kill -9 $$pid || :; \
 	fi
 	rm -f buildwatch.pid
 
