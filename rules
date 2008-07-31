@@ -168,6 +168,9 @@ else
   ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
     CONFIGURE_ARGS += --enable-zero
   endif
+  ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+    EXTRA_BUILD_ENV = LIBFFI_LIBS=-lffi_pic
+  endif
 endif
 
 # assume we don't build binary indep packages on these architectures
@@ -570,6 +573,10 @@ install: packaging-files
 	cp -a $(sdkimg)/* $(d)/$(basedir)/
 	cp -a $(jreimg)/man $(d)/$(basedir)/jre/
 	chmod -R u+w $(d)
+
+	: # add extra symlinks for header files
+	ln -sf linux/jni_md.h $(d)/$(basedir)/include/jni_md.h
+	ln -sf linux/jawt_md.h $(d)/$(basedir)/include/jawt_md.h
 
 	: # compress manpages
 	find $(d)/$(basedir)/man $(d)/$(basedir)/jre/man -type f ! -type l \
