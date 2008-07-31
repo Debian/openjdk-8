@@ -92,6 +92,7 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/jexec.diff \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
 	debian/patches/no-compiler-path.diff \
+	patches/fix-race-cond-print.diff \
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   DISTRIBUTION_PATCHES += \

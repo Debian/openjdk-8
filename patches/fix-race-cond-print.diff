@@ -1,0 +1,15 @@
+--- openjdk/jdk/src/solaris/classes/sun/print/UnixPrintServiceLookup.java       2008-04-11 04:18:13.000000000 -0400
++++ openjdk/jdk/src/solaris/classes/sun/print/UnixPrintServiceLookup.java       2008-07-30 12:45:40.000000000 -0400
+@@ -163,6 +163,12 @@
+
+
+     public UnixPrintServiceLookup() {
++       try {
++           refreshServices();
++       } catch (Exception se) {
++           IPPPrintService.debug_println(debugPrefix+"Exception in refreshServices()");
++       }
++
+         // start the printer listener thread
+         if (pollServices) {
+             PrinterChangeListener thr = new PrinterChangeListener();
