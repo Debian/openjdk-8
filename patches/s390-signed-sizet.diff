@@ -1,0 +1,325 @@
+--- openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp.old	2008-08-03 13:12:14.000000000 +0200
++++ openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp	2008-08-03 14:45:14.000000000 +0200
+@@ -371,7 +371,7 @@
+   _gc_points = 0;
+   _bb_count  = 0;    
+   int size = binsToHold(method()->code_size());
+-  _bb_hdr_bits = NEW_RESOURCE_ARRAY(uintptr_t,size);
++  _bb_hdr_bits = NEW_RESOURCE_ARRAY(size_t,size);
+   memset(_bb_hdr_bits, 0, size*sizeof(uintptr_t));
+ }
+  
+@@ -1024,7 +1024,7 @@
+          "new method size is too small");
+   int newWords = binsToHold(new_method_size);
+ 
+-  uintptr_t * new_bb_hdr_bits = NEW_RESOURCE_ARRAY(uintptr_t, newWords);
++  size_t * new_bb_hdr_bits = NEW_RESOURCE_ARRAY(size_t, newWords);
+ 
+   BitMap bb_bits(new_bb_hdr_bits, new_method_size);
+   bb_bits.clear();
+--- openjdk/hotspot/src/share/vm/oops/generateOopMap.hpp.old	2008-08-03 13:12:02.000000000 +0200
++++ openjdk/hotspot/src/share/vm/oops/generateOopMap.hpp	2008-08-03 14:46:40.000000000 +0200
+@@ -341,7 +341,7 @@
+   BasicBlock *    _basic_blocks;             // Array of basicblock info
+   int             _gc_points;
+   int             _bb_count;
+-  uintptr_t *     _bb_hdr_bits;
++  size_t *     _bb_hdr_bits;
+ 
+   // Basicblocks methods
+   void          initialize_bb               ();
+--- openjdk/hotspot/src/share/vm/compiler/methodLiveness.hpp.old	2008-07-10 22:04:30.000000000 +0200
++++ openjdk/hotspot/src/share/vm/compiler/methodLiveness.hpp	2008-07-24 21:44:15.612657124 +0200
+@@ -32,7 +32,7 @@
+   bool _is_valid;
+ 
+  public:
+-  MethodLivenessResult(uintptr_t* map, idx_t size_in_bits)
++  MethodLivenessResult(idx_t* map, idx_t size_in_bits)
+     : BitMap(map, size_in_bits)
+     , _is_valid(false)
+   {}
+--- openjdk/hotspot/src/share/vm/compiler/methodLiveness.cpp.old	2008-08-03 13:12:01.000000000 +0200
++++ openjdk/hotspot/src/share/vm/compiler/methodLiveness.cpp	2008-08-03 14:54:49.000000000 +0200
+@@ -566,15 +566,15 @@
+ 
+     
+ MethodLiveness::BasicBlock::BasicBlock(MethodLiveness *analyzer, int start, int limit) :
+-         _gen((uintptr_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
++         _gen((size_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
+                          analyzer->bit_map_size_bits()),
+-         _kill((uintptr_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
++         _kill((size_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
+                          analyzer->bit_map_size_bits()),
+-         _entry((uintptr_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
++         _entry((size_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
+                          analyzer->bit_map_size_bits()),
+-         _normal_exit((uintptr_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
++         _normal_exit((size_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
+                          analyzer->bit_map_size_bits()),
+-         _exception_exit((uintptr_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
++         _exception_exit((size_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
+                          analyzer->bit_map_size_bits()),
+          _last_bci(-1) {
+   _analyzer = analyzer;
+@@ -991,7 +991,7 @@
+ }
+ 
+ MethodLivenessResult MethodLiveness::BasicBlock::get_liveness_at(ciMethod* method, int bci) {
+-  MethodLivenessResult answer(NEW_RESOURCE_ARRAY(uintptr_t, _analyzer->bit_map_size_words()),
++  MethodLivenessResult answer(NEW_RESOURCE_ARRAY(size_t, _analyzer->bit_map_size_words()),
+                 _analyzer->bit_map_size_bits());
+   answer.set_is_valid();
+ 
+--- openjdk/hotspot/src/share/vm/gc_implementation/parallelScavenge/psPermGen.cpp.old	2008-08-03 13:12:01.000000000 +0200
++++ openjdk/hotspot/src/share/vm/gc_implementation/parallelScavenge/psPermGen.cpp	2008-08-03 14:58:48.000000000 +0200
+@@ -63,7 +63,7 @@
+   _last_used = current_live;
+ 
+   // We have different alignment constraints than the rest of the heap.
+-  const size_t alignment = MAX2(MinPermHeapExpansion,
++  const size_t alignment = MAX2((size_t) MinPermHeapExpansion,
+ 				virtual_space()->alignment());
+ 
+   // Compute the desired size:
+--- openjdk/hotspot/src/share/vm/gc_implementation/parallelScavenge/psParallelCompact.cpp.old	2008-08-03 13:12:01.000000000 +0200
++++ openjdk/hotspot/src/share/vm/gc_implementation/parallelScavenge/psParallelCompact.cpp	2008-08-03 14:58:15.000000000 +0200
+@@ -925,8 +925,8 @@
+ void PSParallelCompact::initialize_dead_wood_limiter()
+ {
+   const size_t max = 100;
+-  _dwl_mean = double(MIN2(ParallelOldDeadWoodLimiterMean, max)) / 100.0;
+-  _dwl_std_dev = double(MIN2(ParallelOldDeadWoodLimiterStdDev, max)) / 100.0;
++  _dwl_mean = double(MIN2((size_t) ParallelOldDeadWoodLimiterMean, max)) / 100.0;
++  _dwl_std_dev = double(MIN2((size_t) ParallelOldDeadWoodLimiterStdDev, max)) / 100.0;
+   _dwl_first_term = 1.0 / (sqrt(2.0 * M_PI) * _dwl_std_dev);
+   DEBUG_ONLY(_dwl_initialized = true;)
+   _dwl_adjustment = normal_distribution(1.0);
+--- openjdk/hotspot/src/share/vm/gc_implementation/concurrentMarkSweep/concurrentMarkSweepGeneration.cpp.old	2008-08-03 13:12:01.000000000 +0200
++++ openjdk/hotspot/src/share/vm/gc_implementation/concurrentMarkSweep/concurrentMarkSweepGeneration.cpp	2008-08-03 14:39:46.000000000 +0200
+@@ -926,7 +926,7 @@
+   if (free_percentage < desired_free_percentage) {
+     size_t desired_capacity = (size_t)(used() / ((double) 1 - desired_free_percentage));
+     assert(desired_capacity >= capacity(), "invalid expansion size");
+-    expand_bytes = MAX2(desired_capacity - capacity(), MinHeapDeltaBytes);
++    expand_bytes = MAX2((long unsigned int) (desired_capacity - capacity()), (long unsigned int) MinHeapDeltaBytes);
+   }
+   if (expand_bytes > 0) {
+     if (PrintGCDetails && Verbose) {
+@@ -5963,7 +5963,7 @@
+     HeapWord* curAddr = _markBitMap.startWord();
+     while (curAddr < _markBitMap.endWord()) {
+       size_t remaining  = pointer_delta(_markBitMap.endWord(), curAddr); 
+-      MemRegion chunk(curAddr, MIN2(CMSBitMapYieldQuantum, remaining));
++      MemRegion chunk(curAddr, MIN2((size_t) CMSBitMapYieldQuantum, remaining));
+       _markBitMap.clear_large_range(chunk);
+       if (ConcurrentMarkSweepThread::should_yield() &&
+           !foregroundGCIsActive() &&
+@@ -6141,7 +6141,7 @@
+   }
+   assert(_virtual_space.committed_size() == brs.size(),
+          "didn't reserve backing store for all of CMS bit map?");
+-  _bm.set_map((uintptr_t*)_virtual_space.low());
++  _bm.set_map((size_t*)_virtual_space.low());
+   assert(_virtual_space.committed_size() << (_shifter + LogBitsPerByte) >=
+          _bmWordSize, "inconsistency in bit map sizing");
+   _bm.set_size(_bmWordSize >> _shifter);
+@@ -6251,7 +6251,7 @@
+     return;
+   }
+   // Double capacity if possible
+-  size_t new_capacity = MIN2(_capacity*2, CMSMarkStackSizeMax);
++  size_t new_capacity = MIN2((size_t) (_capacity*2), (size_t) CMSMarkStackSizeMax);
+   // Do not give up existing stack until we have managed to
+   // get the double capacity that we desired.
+   ReservedSpace rs(ReservedSpace::allocation_align_size_up(
+--- openjdk/hotspot/src/share/vm/runtime/arguments.cpp.old	2008-08-03 13:49:24.000000000 +0200
++++ openjdk/hotspot/src/share/vm/runtime/arguments.cpp	2008-08-03 14:04:48.000000000 +0200
+@@ -1038,7 +1038,7 @@
+   // for "short" pauses ~ 4M*ParallelGCThreads
+   if (FLAG_IS_DEFAULT(MaxNewSize)) {  // MaxNewSize not set at command-line
+     if (!FLAG_IS_DEFAULT(NewSize)) {   // NewSize explicitly set at command-line
+-      FLAG_SET_DEFAULT(MaxNewSize, MAX2(NewSize, preferred_max_new_size));
++      FLAG_SET_DEFAULT(MaxNewSize, MAX2((size_t) NewSize, preferred_max_new_size));
+     } else {
+       FLAG_SET_DEFAULT(MaxNewSize, preferred_max_new_size);
+     }
+@@ -1047,7 +1047,7 @@
+   // Old to Young gen size so as to shift the collection load
+   // to the old generation concurrent collector
+   if (FLAG_IS_DEFAULT(NewRatio)) {
+-    FLAG_SET_DEFAULT(NewRatio, MAX2(NewRatio, new_ratio));
++    FLAG_SET_DEFAULT(NewRatio, MAX2((intx) NewRatio, new_ratio));
+   
+     size_t min_new  = align_size_up(ScaleForWordSize(min_new_default), os::vm_page_size());
+     size_t prev_initial_size = initial_heap_size();
+@@ -1069,15 +1069,15 @@
+       // Unless explicitly requested otherwise, make young gen
+       // at least min_new, and at most preferred_max_new_size.
+       if (FLAG_IS_DEFAULT(NewSize)) {
+-        FLAG_SET_DEFAULT(NewSize, MAX2(NewSize, min_new));
+-        FLAG_SET_DEFAULT(NewSize, MIN2(preferred_max_new_size, NewSize));
++        FLAG_SET_DEFAULT(NewSize, MAX2((size_t) NewSize, min_new));
++        FLAG_SET_DEFAULT(NewSize, MIN2(preferred_max_new_size, (size_t) NewSize));
+       }
+       // Unless explicitly requested otherwise, size old gen
+       // so that it's at least 3X of NewSize to begin with;
+       // later NewRatio will decide how it grows; see above.
+       if (FLAG_IS_DEFAULT(OldSize)) {
+         if (max_heap > NewSize) {
+-          FLAG_SET_DEFAULT(OldSize, MIN2(3*NewSize,  max_heap - NewSize));
++          FLAG_SET_DEFAULT(OldSize, MIN2((size_t) (3*NewSize),  max_heap - (size_t) NewSize));
+         }
+       }
+     }
+--- openjdk/hotspot/src/share/vm/memory/collectorPolicy.cpp.old	2008-08-03 13:12:01.000000000 +0200
++++ openjdk/hotspot/src/share/vm/memory/collectorPolicy.cpp	2008-08-03 14:21:27.000000000 +0200
+@@ -233,13 +233,13 @@
+     // as a lower bound as with
+     // _min_gen0_size = MIN2(_min_gen0_size, MaxNewSize);
+     // and 640k seemed too small a young generation.
+-    _min_gen0_size = MIN2(MAX2(_min_gen0_size, NewSize), MaxNewSize);
++    _min_gen0_size = MIN2(MAX2(_min_gen0_size, (size_t) NewSize), (size_t) MaxNewSize);
+   }	
+ 
+   // Parameters are valid, compute area sizes.
+   size_t max_new_size = align_size_down(_max_heap_byte_size / (NewRatio+1),
+ 					min_alignment());
+-  max_new_size = MIN2(MAX2(max_new_size, _min_gen0_size), MaxNewSize);
++  max_new_size = MIN2(MAX2(max_new_size, _min_gen0_size), (size_t) MaxNewSize);
+ 
+   // desired_new_size is used to set the initial size.  The
+   // initial size must be greater than the minimum size.
+--- openjdk/hotspot/src/share/vm/memory/threadLocalAllocBuffer.cpp.old	2008-08-03 13:12:02.000000000 +0200
++++ openjdk/hotspot/src/share/vm/memory/threadLocalAllocBuffer.cpp	2008-08-03 15:02:15.000000000 +0200
+@@ -222,7 +222,7 @@
+   size_t init_sz;
+ 
+   if (TLABSize > 0) {
+-    init_sz = MIN2(TLABSize / HeapWordSize, max_size());
++    init_sz = MIN2((size_t) (TLABSize / HeapWordSize), max_size());
+   } else if (global_stats() == NULL) {
+     // Startup issue - main thread initialized before heap initialized.
+     init_sz = min_size();
+--- openjdk/hotspot/src/share/vm/utilities/bitMap.hpp.old	2008-08-03 13:12:15.000000000 +0200
++++ openjdk/hotspot/src/share/vm/utilities/bitMap.hpp	2008-08-03 14:11:24.000000000 +0200
+@@ -314,7 +314,7 @@
+ 
+  public:
+   // Construction. bits_per_slot must be greater than 0.
+-  BitMap2D(uintptr_t* map, idx_t size_in_slots, idx_t bits_per_slot);
++  BitMap2D(idx_t* map, idx_t size_in_slots, idx_t bits_per_slot);
+ 
+   // Allocates necessary data structure in resource area. bits_per_slot must be greater than 0.
+   BitMap2D(idx_t size_in_slots, idx_t bits_per_slot);
+@@ -366,13 +366,13 @@
+ 
+ 
+ inline void BitMap::set_range_of_words(idx_t beg, idx_t end) {
+-  uintptr_t* map = _map;
+-  for (idx_t i = beg; i < end; ++i) map[i] = ~(uintptr_t)0;
++  idx_t* map = _map;
++  for (idx_t i = beg; i < end; ++i) map[i] = ~(idx_t)0;
+ }
+ 
+ 
+ inline void BitMap::clear_range_of_words(idx_t beg, idx_t end) {
+-  uintptr_t* map = _map;
++  idx_t* map = _map;
+   for (idx_t i = beg; i < end; ++i) map[i] = 0;
+ }
+ 
+--- openjdk/hotspot/src/share/vm/utilities/bitMap.cpp.old	2008-08-03 13:12:02.000000000 +0200
++++ openjdk/hotspot/src/share/vm/utilities/bitMap.cpp	2008-08-03 14:13:36.000000000 +0200
+@@ -43,7 +43,7 @@
+ void BitMap::resize(idx_t size_in_bits) {
+   assert(size_in_bits >= 0, "just checking");
+   size_t old_size_in_words = size_in_words();
+-  uintptr_t* old_map = map();
++  idx_t* old_map = map();
+   _size = size_in_bits;
+   size_t new_size_in_words = size_in_words();
+   _map = NEW_RESOURCE_ARRAY(idx_t, new_size_in_words);
+@@ -282,8 +282,8 @@
+ 
+ bool BitMap::contains(const BitMap other) const {
+   assert(size() == other.size(), "must have same size");
+-  uintptr_t* dest_map = map();
+-  uintptr_t* other_map = other.map();
++  idx_t* dest_map = map();
++  idx_t* other_map = other.map();
+   idx_t size = size_in_words();
+   for (idx_t index = 0; index < size_in_words(); index++) {
+     uintptr_t word_union = dest_map[index] | other_map[index];
+@@ -296,8 +296,8 @@
+ 
+ bool BitMap::intersects(const BitMap other) const {
+   assert(size() == other.size(), "must have same size");
+-  uintptr_t* dest_map = map();
+-  uintptr_t* other_map = other.map();
++  idx_t* dest_map = map();
++  idx_t* other_map = other.map();
+   idx_t size = size_in_words();
+   for (idx_t index = 0; index < size_in_words(); index++) {
+     if ((dest_map[index] & other_map[index]) != 0) return true;
+@@ -408,7 +408,7 @@
+ }
+ 
+ bool BitMap::is_full() const {
+-  uintptr_t* word = map();
++  idx_t* word = map();
+   idx_t rest = size();
+   for (; rest >= (idx_t) BitsPerWord; rest -= BitsPerWord) {
+     if (*word != (uintptr_t) AllBits) return false;
+@@ -419,7 +419,7 @@
+ 
+ 
+ bool BitMap::is_empty() const {
+-  uintptr_t* word = map();
++  idx_t* word = map();
+   idx_t rest = size();
+   for (; rest >= (idx_t) BitsPerWord; rest -= BitsPerWord) {
+     if (*word != (uintptr_t) NoBits) return false;
+@@ -558,7 +558,7 @@
+ #endif
+ 
+ 
+-BitMap2D::BitMap2D(uintptr_t* map, idx_t size_in_slots, idx_t bits_per_slot)
++BitMap2D::BitMap2D(idx_t* map, idx_t size_in_slots, idx_t bits_per_slot)
+   : _bits_per_slot(bits_per_slot)
+   , _map(map, size_in_slots * bits_per_slot)
+ {
+--- openjdk/jdk/src/solaris/hpi/native_threads/src/sys_api_td.c.old	2008-07-10 21:58:39.000000000 +0200
++++ openjdk/jdk/src/solaris/hpi/native_threads/src/sys_api_td.c	2008-08-03 16:26:16.000000000 +0200
+@@ -380,12 +380,12 @@
+     return socket(domain, type, protocol);
+ }
+ 
+-ssize_t
++SSIZE_T
+ sysRecv(int fd, char *buf, int nBytes, int flags) {
+     INTERRUPT_IO(recv(fd, buf, nBytes, flags))
+ }
+ 
+-ssize_t
++SSIZE_T
+ sysSend(int fd, char *buf, int nBytes, int flags) {
+     INTERRUPT_IO(send(fd, buf, nBytes, flags))
+ }
+@@ -595,13 +595,13 @@
+ /*
+  * Routines to do datagrams
+  */
+-ssize_t
++SSIZE_T
+ sysSendTo(int fd, char *buf, int len,
+           int flags, struct sockaddr *to, int tolen) {
+     INTERRUPT_IO(sendto(fd, buf, len, flags, to, tolen))
+ }
+ 
+-ssize_t
++SSIZE_T
+ sysRecvFrom(int fd, char *buf, int nBytes,
+             int flags, struct sockaddr *from, int *fromlen) {
+     INTERRUPT_IO(recvfrom(fd, buf, nBytes, flags, from, (uint *)fromlen))

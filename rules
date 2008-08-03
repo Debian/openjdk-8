@@ -93,6 +93,7 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
 	debian/patches/no-compiler-path.diff \
 	debian/patches/fix-race-cond-print.diff \
+	debian/patches/s390-signed-sizet.diff \
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   DISTRIBUTION_PATCHES += \
@@ -176,7 +177,7 @@ endif
 
 # assume we don't build binary indep packages on these architectures
 ifeq ($(with_docs),yes)
-  ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel ia64 lpia powerpc s390 sparc))
+  ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel hppa ia64 lpia m68k mips mipsel powerpc s390 sparc))
     CONFIGURE_ARGS += --disable-docs
   endif
 else
@@ -475,7 +476,7 @@ build: stamps/build stamps/mauve-check stamps/jtreg-check
 	rm -f buildwatch.pid
 
 stamps/build: stamps/patch
-ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel ia64 m68k mips mipsel powerpc s390 sparc))
+ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel hppa ia64 m68k mips mipsel powerpc s390 sparc))
 	sh -c 'sh debian/buildwatch.sh &'
 endif
 	$(EXTRA_BUILD_ENV) $(MAKE) $(build_target)
