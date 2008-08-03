@@ -506,6 +506,7 @@ ifeq ($(with_mauve_check),yes)
 		    -file $(CURDIR)/debian/mauve_tests \
 		    -timeout 30000 2>&1 \
 		| tee mauve_output
+	@sleep 5
 else
 	echo "mauve testsuite not run for this build" > mauve/mauve_output
 endif
