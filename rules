@@ -483,13 +483,16 @@ endif
 
 stamps/mauve-build: stamps/build
 	rm -rf mauve
+	mkdir -p mauve
+ifeq ($(with_mauve_check),yes)
 	tar xf /usr/src/mauve.tar.gz
 	cd mauve \
 	    && aclocal \
 	    && automake \
 	    && autoconf \
-	    && PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH ./configure 
+	    && PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
 	PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH $(MAKE) -C mauve
+endif
 	touch $@
 
 stamps/mauve-check: stamps/build stamps/mauve-build

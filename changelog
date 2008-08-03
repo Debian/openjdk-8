@@ -1,4 +1,10 @@
-openjdk-6 (6b11-4) UNRELEASED; urgency=low
+openjdk-6 (6b11-5) UNRELEASED; urgency=low
+
+  * debian/rules (stamps/mauve-build): Configure with --host and --build.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 03 Aug 2008 10:24:31 +0200
+
+openjdk-6 (6b11-4) unstable; urgency=low
 
   * Update IcedTea build infrastructure (20080801).
     - Fix typo, causing build failure on mipsel.
