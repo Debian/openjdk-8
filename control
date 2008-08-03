@@ -13,6 +13,7 @@ Package: openjdk-6-jdk
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-6-jre (>= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Recommends: libxt-dev
 Suggests: openjdk-6-demo, openjdk-6-source
 Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk
 Description: OpenJDK Development Kit (JDK)

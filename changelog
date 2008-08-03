@@ -1,6 +1,7 @@
 openjdk-6 (6b11-5) UNRELEASED; urgency=low
 
   * debian/rules (stamps/mauve-build): Configure with --host and --build.
+  * openjdk-6-jdk: Recommend libxt-dev (header includes of jawt_md.h).
 
  -- Matthias Klose <doko@ubuntu.com>  Sun, 03 Aug 2008 10:24:31 +0200
 
