@@ -1,6 +1,7 @@
 openjdk-6 (6b11-6) UNRELEASED; urgency=low
 
   * Set minimum heap size independent of available memory for cacao builds.
+  * Link the wrapper tools with -rdynamic for cacao builds.
 
  -- Matthias Klose <doko@ubuntu.com>  Mon, 04 Aug 2008 12:17:26 +0200
 
