@@ -109,7 +109,8 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   DISTRIBUTION_PATCHES += \
 	debian/patches/cacao-no-version-info.diff \
 	debian/patches/cacao-no-mmap-first-page.diff \
-	debian/patches/cacao-arm-configure.diff
+	debian/patches/cacao-arm-configure.diff \
+	debian/patches/cacao-min-heapsize.diff
 endif
 
 export DISTRIBUTION_PATCHES
