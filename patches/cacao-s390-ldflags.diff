@@ -4,7 +4,7 @@
  	endif
      endif
      ifeq ($(PLATFORM), linux)
-+        ifneq (,$(filter $(ARCH), s390 s390x))
++        ifneq (,$(filter $(ARCH), mips mipsel s390 s390x))
 +	    LDFLAGS += -rdynamic
 +	endif
  	LDFLAGS += -lz -Wl,-z -Wl,origin
