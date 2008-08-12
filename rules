@@ -55,12 +55,29 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 hotspot_archs	= amd64 i386 lpia sparc
 no_bootstrap_archs = alpha hppa
 
-# STAGE1_JAVA is either gcj or icedtea, the latter not yet supported
-ifneq (,$(filter $(DEB_HOST_ARCH), $(no_bootstrap_archs)))
-  STAGE1_JAVA = openjdk
-else
-  STAGE1_JAVA = gcj
+stage1_gcj_archs = amd64 armel i386 ia64 lpia powerpc m68k mips mipsel sparc s390
+stage1_openjdk_archs = alpha
+stage1_cacao_archs =
+
+ifneq (,$(findstring cacao, $(PKGSOURCE)))
+  stage1_gcj_archs = armel ia64 m68k mips mipsel s390
+  stage1_openjdk_archs = amd64 i386 lpia sparc
+  stage1_cacao_archs = alpha powerpc
 endif
+
+ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
+  STAGE1_JAVA = gcj
+  STAGE1_HOME = /usr/lib/jvm/java-gcj
+else ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_openjdk_archs)))
+  STAGE1_JAVA = openjdk
+  STAGE1_HOME = /usr/lib/jvm/java-6-openjdk
+else ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_cacao_archs)))
+  STAGE1_JAVA = cacao
+  STAGE1_HOME = /usr/lib/jvm/java-6-cacao
+else
+  $(error unknown bootstrap method for architecture $(DEB_HOST_ARCH))
+endif
+
 OPENJDK_VERSION = b11
 OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-10_jul_2008-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
@@ -107,62 +124,50 @@ endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   DISTRIBUTION_PATCHES += \
-	debian/patches/cacao-no-version-info.diff \
 	debian/patches/cacao-no-mmap-first-page.diff \
-	debian/patches/cacao-arm-configure.diff \
 	debian/patches/cacao-min-heapsize.diff \
-	debian/patches/cacao-s390-ldflags.diff
+	debian/patches/cacao-s390-ldflags.diff \
+	debian/patches/cacao-mipsel-linux.diff
 endif
 
 export DISTRIBUTION_PATCHES
 
 ifeq ($(STAGE1_JAVA),gcj)
   CONFIGURE_ARGS = \
-	$(if $(with_plugin),,--disable-gcjwebplugin) \
-	--with-gcj-home=/usr/lib/jvm/java-gcj \
+	--with-gcj-home=$(STAGE1_HOME) \
 	--with-ecj=/usr/bin/ecj \
-	--with-java=/usr/lib/jvm/java-gcj/bin/java \
+	--with-java=$(STAGE1_HOME)/bin/java \
 	--with-javah=/usr/bin/gjavah$(GCJ_SUFFIX) \
 	--with-rmic=/usr/bin/grmic$(GCJ_SUFFIX) \
-	--with-jar=/usr/bin/gjar$(GCJ_SUFFIX) \
-	--with-libgcj-jar=/usr/share/java/libgcj$(GCJ_SUFFIX).jar \
-	--with-xalan2-jar=/usr/share/java/xalan2.jar \
-	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
-	--with-rhino=/usr/share/java/js.jar \
-	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
+	--with-jar=/usr/bin/fastjar \
+	--with-alt-jar=/usr/bin/fastjar \
+	--with-libgcj-jar=/usr/share/java/libgcj$(GCJ_SUFFIX).jar
   build_target = icedtea-against-icedtea
 else ifeq ($(STAGE1_JAVA),openjdk)
   CONFIGURE_ARGS = \
-	$(if $(with_plugin),,--disable-gcjwebplugin) \
 	--with-icedtea \
-	--with-icedtea-home=/usr/lib/jvm/java-6-openjdk \
-	--with-java=/usr/lib/jvm/java-6-openjdk/bin/java \
-	--with-javah=/usr/lib/jvm/java-6-openjdk/bin/javah \
-	--with-rmic=/usr/lib/jvm/java-6-openjdk/bin/rmic \
-	--with-jar=/usr/lib/jvm/java-6-openjdk/bin/jar \
-	--with-xalan2-jar=/usr/share/java/xalan2.jar \
-	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
-	--with-rhino=/usr/share/java/js.jar \
-	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
+	--with-icedtea-home=$(STAGE1_HOME) \
+	--with-alt-jar=/usr/bin/fastjar
   build_target = #icedtea-against-icedtea
-else ifeq ($(STAGE1_JAVA),icedtea)
+else ifeq ($(STAGE1_JAVA),cacao)
   CONFIGURE_ARGS = \
-	$(if $(with_plugin),,--disable-gcjwebplugin) \
 	--with-icedtea \
-	--with-icedtea-home=/usr/lib/jvm/java-7-icedtea \
-	--with-java=/usr/lib/jvm/java-7-icedtea/bin/java \
-	--with-javah=/usr/lib/jvm/java-7-icedtea/bin/javah \
-	--with-rmic=/usr/lib/jvm/java-7-icedtea/bin/rmic \
-	--with-jar=/usr/lib/jvm/java-7-icedtea/bin/jar \
-	--with-xalan2-jar=/usr/share/java/xalan2.jar \
-	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
-	--with-rhino=/usr/share/java/js.jar \
-	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
+	--with-icedtea-home=$(STAGE1_HOME) \
+	--with-alt-jar=/usr/bin/fastjar
   build_target = #icedtea-against-icedtea
 endif
 
+CONFIGURE_ARGS += \
+	--with-xalan2-jar=/usr/share/java/xalan2.jar \
+	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
+	--with-rhino=/usr/share/java/js.jar \
+	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP) \
+	$(if $(with_plugin),,--disable-gcjwebplugin)
+
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
-  CONFIGURE_ARGS += --with-cacao --with-cacao-src-zip=$(CURDIR)/cacao-0.99.2.tar.bz2
+  CONFIGURE_ARGS += \
+	--with-cacao \
+	--with-cacao-src-zip=$(CURDIR)/cacao-0.99.3.tar.bz2
   ifneq (,$(filter $(DEB_HOST_ARCH), arm armel))
     EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS='--enable-softfloat --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
   else
@@ -247,23 +252,27 @@ else
 endif
 
 # build dependencies
-ifneq (,$(no_bootstrap_archs))
-  bs_archs = $(EMPTY) [$(strip $(foreach a,$(no_bootstrap_archs), $(a)))]
-  bs_no_archs = $(EMPTY) [$(strip $(foreach a,$(no_bootstrap_archs), !$(a)))]
-  bd_bs_openjdk = openjdk-6-jdk (>= $(req_openjdk_bd_ver))$(bs_archs),
+bd_bootstrap =
+ifneq (,$(stage1_gcj_archs))
+  bd_bootstrap += \
+	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
+	ecj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
+	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
 endif
-
-bd_bootstrap = \
-	gcj (>= 4:4.2.1)$(bs_no_archs), \
-	ecj$(bs_no_archs), \
-	java-gcj-compat-dev (>= 1.0.76-2ubuntu3)$(bs_no_archs), \
-	$(bd_bs_openjdk)
+ifneq (,$(stage1_openjdk_archs))
+  bd_bootstrap += \
+	openjdk-6-jdk (>= $(req_openjdk_bd_ver)) [$(strip $(foreach a,$(stage1_openjdk_archs), $(a)))],
+endif
+ifneq (,$(stage1_cacao_archs))
+  bd_bootstrap += \
+	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
+endif
 
 bd_gcc = \
 	g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
 ifeq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   bd_gcc = \
-	g++-4.3, gcj-4.3$(bs_no_archs),
+	g++-4.3,
 endif
 bd_syslibs = \
 	libjpeg62-dev, libpng12-dev, libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev), zlib1g-dev,
@@ -278,7 +287,7 @@ bd_zero = \
   bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),iceape-dev,$(if $(filter $(distrel),hardy intrepid),xulrunner-1.9-dev,firefox-dev)),
 #endif
-bd_netx = fastjar,
+bd_netx = fastjar (>= 2:0.95-2),
 bd_mauve = mauve, xvfb, autoconf, automake, xauth, xfonts-base
 bd_compress = $(pkg_compress),
 
