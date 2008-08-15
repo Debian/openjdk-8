@@ -7,9 +7,10 @@ openjdk-6 (6b11-6) UNRELEASED; urgency=low
     - Fix build failures on mipsel-linux.
   * Allow setting of the bootstrap compiler per architecture.
   * Configure --with-alt-jar set to fastjar to speed up builds.
-  * Update IcedTea build infrastructure (20080812).
+  * Update IcedTea build infrastructure (20080815), remove local patches
+    integrated in IcedTea.
 
- -- Matthias Klose <doko@ubuntu.com>  Tue, 12 Aug 2008 22:01:43 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 15 Aug 2008 02:06:53 +0000
 
 openjdk-6 (6b11-5) unstable; urgency=low
 

@@ -110,7 +110,6 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
 	debian/patches/no-compiler-path.diff \
 	debian/patches/fix-race-cond-print.diff \
-	debian/patches/s390-signed-sizet.diff \
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   DISTRIBUTION_PATCHES += \
