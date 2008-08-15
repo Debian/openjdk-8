@@ -1,4 +1,4 @@
-openjdk-6 (6b11-6) UNRELEASED; urgency=low
+openjdk-6 (6b11-6) unstable; urgency=low
 
   * Set minimum heap size independent of available memory for cacao builds.
   * Link the wrapper tools with -rdynamic for cacao builds.
@@ -9,14 +9,18 @@ openjdk-6 (6b11-6) UNRELEASED; urgency=low
   * Configure --with-alt-jar set to fastjar to speed up builds.
   * Update IcedTea build infrastructure (20080815), remove local patches
     integrated in IcedTea.
+    - Make use of unsigned/signed types explicit.
+    - Fix PR icedtea/184, adding support for returning floats and doubles
+      for zero builds.
+    - Fix Fix PR icedtea/181, class type checks.
 
- -- Matthias Klose <doko@ubuntu.com>  Fri, 15 Aug 2008 02:06:53 +0000
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 15 Aug 2008 16:59:48 +0000
 
 openjdk-6 (6b11-5) unstable; urgency=low
 
   * debian/rules (stamps/mauve-build): Configure with --host and --build.
   * openjdk-6-jdk: Recommend libxt-dev (jawt_md.h header includes).
-  * Fix build issues on s390 (signed size_t).
+  * Fix build issues on s390 (size_t is unsigned long).
 
  -- Matthias Klose <doko@ubuntu.com>  Sun, 03 Aug 2008 20:05:44 +0200
 
