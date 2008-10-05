@@ -286,7 +286,7 @@ bd_zero = \
   bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),iceape-dev,$(if $(filter $(distrel),hardy intrepid),xulrunner-1.9-dev,firefox-dev)),
 #endif
-bd_netx = fastjar (>= 2:0.95-2),
+bd_netx = fastjar (>= 2:0.96-0ubuntu2),
 bd_mauve = mauve, xvfb, autoconf, automake, xauth, xfonts-base
 bd_compress = $(pkg_compress),
 

@@ -28,8 +28,8 @@ Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Section: interpreters
 Depends: @basename@-jre-lib (>= @pkg_version@), rhino, libaccess-bridge-java (>= 1.22), java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
-Recommends: ${dlopenjl:Recommends}, libnss-mdns, tzdata-java, ca-certificates-java
-Suggests: sun-java6-fonts, @core_fonts@, @cjk_fonts@
+Recommends: ${dlopenjl:Recommends}, tzdata-java, ca-certificates-java
+Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
 Replaces: @basename@-jre-lib (<< 6b06-0ubuntu11), @basename@-jre (<< 6b09dfsg-0ubuntu2)
 Description: OpenJDK Java runtime, using ${vm:Name} (headless)

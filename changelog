@@ -1,3 +1,19 @@
+openjdk-6 (6b12~pre1-0ubuntu3) intrepid; urgency=low
+
+  * Update IcedTea build infrastructure (20080915).
+  * Reapply: openjdk-6-jre-headless: Make libnss-mdns a suggestion
+    instead of a recommendation. LP: #261847.
+  * Build-depend against fixed fastjar. LP: #267177.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 15 Sep 2008 20:16:51 +0200
+
+openjdk-6 (6b12~pre1-0ubuntu2) intrepid; urgency=low
+
+  * Update the icedtea-hotspot patch to b12, fixing build failures
+    on zero archs (ia64, powerpc).
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 13 Sep 2008 11:48:44 +0200
+
 openjdk-6 (6b12~pre1-0ubuntu1) intrepid; urgency=low
 
   * New code drop (b12).
