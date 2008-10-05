@@ -1,7 +1,7 @@
 
-tarball=openjdk-6-src-b11-10_jul_2008-dfsg.tar.gz
-cacaotb=cacao-0.99.2.tar.bz2
-version=6b11
+tarball=openjdk-6-src-b12-28_aug_2008-dfsg.tar.gz
+cacaotb=cacao-0.99.3.tar.bz2
+version=6b12~pre1
 base=openjdk-6
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
@@ -38,9 +38,7 @@ else
     rm -f $pkgdir.orig/gcjwebplugin.cc
     (
 	cd $pkgdir.orig
-	aclocal
-	autoconf
-	automake
+	sh autogen.sh
 	rm -rf autom4te.cache
     )
     cp -a $pkgdir.orig $pkgdir

@@ -1,3 +1,10 @@
+openjdk-6 (6b12~pre1-0ubuntu1) intrepid; urgency=low
+
+  * New code drop (b12).
+  * Update IcedTea build infrastructure (20080912).
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 13 Sep 2008 00:41:42 +0200
+
 openjdk-6 (6b11-6) unstable; urgency=low
 
   * Set minimum heap size independent of available memory for cacao builds.

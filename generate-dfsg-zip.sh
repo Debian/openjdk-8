@@ -19,13 +19,6 @@ rm -f \
   openjdk/jdk/test/sun/management/jmxremote/bootstrap/solaris-sparc/launcher \
   openjdk/jdk/test/sun/management/jmxremote/bootstrap/solaris-i586/launcher
 
-# Remove idl sources with questionable license headers.
-rm -f \
-  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/grammar.idl \
-  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/first.set \
-  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/grammar3.idl \
-  openjdk/corba/src/share/classes/com/sun/tools/corba/se/idl/follow.set
-
 # Remove test sources with questionable license headers.
 rm -f \
    openjdk/jdk/test/java/util/ResourceBundle/Bug4168625Resource3.java \
@@ -102,9 +95,6 @@ rm -f \
 
 # TODO
 #$ find openjdk -name '*.jar' -o -name '*.class'|grep -v test
-
-rm -f \
-  openjdk/jdk/src/share/classes/java/lang/instrument/package.html
 
 # END Debian/Ubuntu additions
 
