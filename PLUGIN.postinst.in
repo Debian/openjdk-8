@@ -4,7 +4,7 @@ PATH=/sbin:/bin:/usr/sbin:/usr/bin
 
 priority=@priority@
 browser_dirs="@browser_dirs@"
-PLUGIN=gcjwebplugin.so
+PLUGIN=@plugin_name@
 PLUGINPTH=/@basediralias@/jre/lib/@archdir@/$PLUGIN
 
 for browser_dir in $browser_dirs; do

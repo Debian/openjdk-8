@@ -1,10 +1,7 @@
 #!/bin/sh -e
 
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
-
-priority=@priority@
 browser_dirs="@browser_dirs@"
-PLUGIN=gcjwebplugin.so
+PLUGIN=@plugin_name@
 PLUGINPTH=/@basediralias@/jre/lib/@archdir@/$PLUGIN
 
 for browser_dir in $browser_dirs; do
@@ -13,13 +10,9 @@ for browser_dir in $browser_dirs; do
     else
         browser=$browser_dir
     fi
-    update-alternatives --quiet --install \
-	/usr/lib/$browser_dir/plugins/libjavaplugin.so \
+    update-alternatives --quiet --remove \
 	$browser-javaplugin.so \
-	$PLUGINPTH \
-	$priority
+	$PLUGINPTH
 done
 
 #DEBHELPER#
-
-exit 0

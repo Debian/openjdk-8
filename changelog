@@ -1,3 +1,13 @@
+openjdk-6 (6b12~pre1-0) experimental; urgency=low
+
+  * Update IcedTea build infrastructure (20081006).
+  * Configure with --enable-liveconnect, build an icedtea6-plugin package.
+  * Merge changes from 6b11-9 packaging.
+  * Build a openjdk-6-source-files packages (used as a build dependency
+    of cacao-oj6).
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 06 Oct 2008 12:42:16 +0200
+
 openjdk-6 (6b12~pre1-0ubuntu3) intrepid; urgency=low
 
   * Update IcedTea build infrastructure (20080915).

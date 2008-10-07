@@ -15,6 +15,12 @@ DEB_HOST_GNU_TYPE	?= $(call vafilt,$(DPKG_VARS),DEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE	?= $(call vafilt,$(DPKG_VARS),DEB_BUILD_GNU_TYPE)
 DEB_HOST_ARCH		?= $(call vafilt,$(DPKG_VARS),DEB_HOST_ARCH)
 
+# don't use it on 64bit archs
+ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 ppc64 s390x))
+  PATH := $(CURDIR)/bin:$(PATH)
+  export PATH
+endif
+
 CHANGELOG_VARS := $(shell dpkg-parsechangelog | sed -n 's/ /_/g;/^[^_]/s/^\([^:]*\):_\(.*\)/\1=\2/p')
 PKGSOURCE := $(call vafilt,$(CHANGELOG_VARS),Source)
 
@@ -37,7 +43,10 @@ with_docs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),,yes)
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   with_docs = disabled for cacao
 endif
-with_plugin =
+
+# even if not building the package, we configure for a specific plugin
+with_plugin_pkg = #yes # value is yes or empty
+plugin_name = IcedTeaPlugin.so # value is gcjwebplugin.so or IcedTeaPlugin.so
 
 distribution := $(shell lsb_release --id --short)
 distrel := $(shell lsb_release --codename --short)
@@ -102,7 +111,6 @@ endif
 
 DISTRIBUTION_PATCHES = \
 	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector.diff) \
-	debian/patches/gcc-mtune-generic.diff \
 	debian/patches/ld-symbolic-functions.diff \
 	debian/patches/set-exec-name.diff \
 	debian/patches/shebang.diff \
@@ -110,6 +118,8 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
 	debian/patches/no-compiler-path.diff \
 	debian/patches/fix-race-cond-print.diff \
+
+#	debian/patches/gcc-mtune-generic.diff \
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   DISTRIBUTION_PATCHES += \
@@ -160,8 +170,7 @@ CONFIGURE_ARGS += \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-rhino=/usr/share/java/js.jar \
-	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP) \
-	$(if $(with_plugin),,--disable-gcjwebplugin)
+	--with-openjdk-src-zip=$(firstword $(wildcard $(OPENJDK_SRC_ZIP) /usr/src/$(OPENJDK_SRC_ZIP)))
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   CONFIGURE_ARGS += \
@@ -194,8 +203,15 @@ ifneq (,$(NJOBS))
   CONFIGURE_ARGS += --with-parallel-jobs=$(NJOBS)
 endif
 
-# experimental; we don't include the plugin in any package built from this source.
-#CONFIGURE_ARGS += --enable-liveconnect
+ifeq ($(with_plugin_pkg),yes)
+  ifeq ($(plugin_name),gcjwebplugin.so)
+    CONFIGURE_ARGS += --enable-gcjwebplugin
+  else
+    CONFIGURE_ARGS += --enable-liveconnect
+  endif
+else
+  CONFIGURE_ARGS += --disable-gcjwebplugin --disable-liveconnect
+endif
 
 CONFIGURE_ARGS += --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
 
@@ -266,7 +282,7 @@ ifneq (,$(stage1_cacao_archs))
   bd_bootstrap += \
 	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
 endif
-
+bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b11~pre1)$(COMMA) $(p_tar) (<< 6b12)$(COMMA))
 bd_gcc = \
 	g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
 ifeq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
@@ -282,11 +298,17 @@ bd_openjdk = \
 	libxalan2-java, rhino, liblcms1-dev, libxinerama-dev,
 bd_zero = \
 	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [$(foreach a,$(hotspot_archs),!$(a))],
-#ifeq ($(with_plugin),yes)
+#ifeq ($(with_plugin_pkg),yes)
   bd_plugin = \
-	libgtk2.0-dev, $(if $(filter $(distribution),Debian),iceape-dev,$(if $(filter $(distrel),hardy intrepid),xulrunner-1.9-dev,firefox-dev)),
+	libgtk2.0-dev, $(if $(filter $(distribution),Debian),$(if $(findstring gcj,$(plugin_name)),iceape-dev,xulrunner-dev (>= 1.9.0)),$(if $(filter $(distrel),hardy intrepid),xulrunner-1.9-dev,firefox-dev)),
 #endif
 bd_netx = fastjar (>= 2:0.96-0ubuntu2),
+ifneq (,$(filter $(distrel),lenny sid experimental))
+  bd_netx = fastjar (>= 2:0.95-4),
+endif
+ifneq (,$(filter $(distrel),hardy))
+  bd_netx = fastjar (>= 2:0.95-1ubuntu2),
+endif
 bd_mauve = mauve, xvfb, autoconf, automake, xauth, xfonts-base
 bd_compress = $(pkg_compress),
 
@@ -300,6 +322,7 @@ dlopen_jre_depends = \
 dlopen_jre_recommends =
 
 browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
+browser_plugin_dirs = xulrunner-addons
 
 ifneq (,$(filter $(distrel),etch dapper feisty))
   core_fonts = ttf-dejavu
@@ -325,8 +348,12 @@ p_demo	= $(basename)-demo
 p_src	= $(basename)-source
 p_doc	= $(basename)-doc
 p_dbg	= $(basename)-dbg
-p_plug	= $(basename)-plugin
-p_plug	= icedtea-gcjwebplugin
+p_tar	= $(basename)-source-files
+ifeq ($(plugin_name),gcjwebplugin.so)
+  p_plug= icedtea-gcjwebplugin
+else
+  p_plug= icedtea6-plugin
+endif
 
 d	= debian/tmp
 d_jre	= debian/$(p_jre)
@@ -337,6 +364,7 @@ d_demo	= debian/$(p_demo)
 d_src	= debian/$(p_src)
 d_doc	= debian/$(p_doc)
 d_dbg	= debian/$(p_dbg)
+d_tar	= debian/$(p_tar)
 d_plug	= debian/$(p_plug)
 
 control_vars = \
@@ -368,11 +396,15 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_netx@/$(bd_netx)/g' \
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	      -e 's/@bd_compress@/$(pkg_compress)/g' \
+	      -e 's/@bd_tarball@/$(bd_tarball)/g' \
 	      -e 's/@core_fonts@/$(core_fonts)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
-	    debian/control.in $(if $(with_plugin),debian/control.plugin) > debian/control
+	    debian/control.in \
+	    $(if $(with_plugin_pkg),debian/control.$(plugin_name)) \
+	    $(if $(findstring openjdk-,$(PKGSOURCE)),debian/control.tarball) \
+		> debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
 	else \
@@ -385,7 +417,10 @@ debian/control: debian/control.in debian/rules
 packaging-files:
 	for f in debian/*.in; do \
 	  case "$$f" in debian/control.in) continue; esac; \
-	  f2=$$(echo $$f | sed 's/JB/$(basename)/;s/\.in$$//'); \
+	  case "$$f" in \
+	    debian/PLUGIN.*.in) f2=$$(echo $$f | sed 's/PLUGIN/$(p_plug)/;s/\.in$$//');; \
+	    *) f2=$$(echo $$f | sed 's/JB/$(basename)/;s/\.in$$//'); \
+	  esac; \
 	  sed -e 's/@JRE@/$(p_jre)/g' \
 	      -e 's/@JDK@/$(p_jdk)/g' \
 	      -e 's/@vendor@/$(Vendor)/g' \
@@ -408,6 +443,7 @@ packaging-files:
 	      -e 's/@corba_tools@/$(corba_tools)/g' \
 	      -e 's,@j2se_lib@,$(j2se_lib),g' \
 	      -e 's,@j2se_share@,$(j2se_share),g' \
+	      -e 's,@plugin_name@,$(plugin_name),g' \
 	      -e 's,@browser_dirs@,$(browser_plugin_dirs),g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	    $$f > $$f2; \
@@ -428,8 +464,25 @@ ifeq (0,1)
 	  (cd $$d && uudecode $$i.uu); \
 	done
 endif
+
+	mkdir -p bin
+	( \
+	  echo '#! /bin/sh'; \
+	  echo 'if [ -x /usr/bin/linux32 ]; then'; \
+	  echo '    exec /usr/bin/linux32 /bin/uname "$$@"'; \
+	  echo 'else'; \
+	  echo '    exec /bin/uname "$$@"'; \
+	  echo 'fi'; \
+	) > bin/uname
+	chmod +x bin/uname
+
+	echo "UNAME checks"
+	uname -a
+	/bin/uname -a
+	test -x /usr/bin/linux32 && linux32 uname -a || true
+	test -x /usr/bin/linux32 &&linux32 /bin/uname -a || true
+
 	mkdir -p stamps
-	: > gcjwebplugin.cc
 	chmod +x configure
 	$(EXTRA_BUILD_ENV) ./configure $(CONFIGURE_ARGS)
 	touch $@
@@ -541,9 +594,9 @@ clean: debian-clean
 	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
 	rm -rf autom4te.cache
 	rm -rf mauve
+	rm -rf bin
 	rm -f jtreg_output
 	rm -f buildwatch.pid
-	rm -f gcjwebplugin.cc
 	if [ -f generated.tar ]; then \
 	  rm -rf generated; \
 	  tar xf generated.tar; \
@@ -570,7 +623,10 @@ debian-clean:
 	dh_testroot
 	dh_clean -k
 	for f in debian/*.in; do \
-	  f2=$$(echo $$f | sed 's/JB/$(basename)/;s/\.in$$//'); \
+	  case "$$f" in \
+	    debian/PLUGIN.*.in) f2=$$(echo $$f | sed 's/PLUGIN/$(p_plug)/;s/\.in$$//');; \
+	    *) f2=$$(echo $$f | sed 's/JB/$(basename)/;s/\.in$$//'); \
+	  esac; \
 	  case "$$f2" in debian/control) continue; esac; \
 	  rm -f $$f2; \
 	done
@@ -701,7 +757,7 @@ install: packaging-files
 	cd $(CURDIR)/$(d); \
 	for i in $(basedir)/jre/lib/$(archdir)/*; do \
 	  case "$$i" in \
-	    */gcjwebplugin.so) continue;; \
+	    */$(plugin_name)) continue;; \
 	    */libsplashscreen.so|*/libjsoundalsa.so|*/xawt) echo $$i >> ../$(p_jre).install;; \
 	    *) echo $$i >> ../$(p_jrehl).install; \
 	  esac; \
@@ -734,14 +790,18 @@ install: packaging-files
 	  done; \
 	) > debian/$(p_jdk).install
 
-ifeq ($(with_plugin),yes)
+ifeq ($(with_plugin_pkg),yes)
 	dh_installdirs -p$(p_plug) \
 		$(foreach d, $(browser_plugin_dirs), usr/lib/$(d)/plugins)
 
 	: # $(p_plug).install
 	( \
-	  echo '$(basedir)/jre/lib/$(archdir)/gcjwebplugin.so'; \
+	  echo '$(basedir)/jre/lib/$(archdir)/$(plugin_name)'; \
 	) > debian/$(p_plug).install
+else
+	: # include the plugin in the $(p_jre) package
+	echo '$(basedir)/jre/lib/$(archdir)/$(plugin_name)' \
+		>> debian/$(p_jre).install
 endif
 
 	: # $(p_src).install
@@ -842,7 +902,7 @@ endif
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jdk); \
 	) > $(d_jdk).links
 
-ifeq ($(with_plugin),yes)
+ifeq ($(with_plugin_pkg),yes)
 	: # create docdir symlinks for $(p_plug)
 	( \
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_plug); \
@@ -895,7 +955,7 @@ endif
 	      xulrunner-addons) b=xulrunner-1.9;; \
 	      *) b=$$d;; \
 	    esac; \
-	    echo "plugin $$b-javaplugin.so /$(TOP)/$(jdiralias)/jre/lib/$(archdir)/gcjwebplugin.so"; \
+	    echo "plugin $$b-javaplugin.so /$(TOP)/$(jdiralias)/jre/lib/$(archdir)/$(plugin_name)"; \
 	  done; \
 	) > $(d_jrehl)/$(TOP)/.$(jdiralias).jinfo
 
@@ -942,6 +1002,12 @@ else
 	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jre)/; \
 	  ln -sf ../$(p_jre)/$$b $(d_doc)/usr/share/doc/$(p_doc)/$$b; \
 	done
+  endif
+  ifneq (,$(findstring openjdk-, $(PKGSOURCE)))
+	dh_installdocs -p$(p_tar)
+	dh_installchangelogs -p$(p_tar)
+	mkdir -p $(d_tar)/usr/src
+	cp -p $(OPENJDK_SRC_ZIP) $(d_tar)/usr/src/
   endif
 	dh_installmenu -i $(nodocs)
 	-dh_icons -i $(nodocs) || dh_iconcache -i $(nodocs)
