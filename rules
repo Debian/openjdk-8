@@ -175,7 +175,7 @@ CONFIGURE_ARGS += \
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   CONFIGURE_ARGS += \
 	--with-cacao \
-	--with-cacao-src-zip=$(CURDIR)/cacao-0.99.3.tar.bz2
+	--with-cacao-src-zip=$(firstword $(wildcard $(CURDIR)/cacao-*.tar.bz2 /usr/src/cacao-source*))
   ifneq (,$(filter $(DEB_HOST_ARCH), arm armel))
     EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS='--enable-softfloat --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
   else
@@ -283,6 +283,7 @@ ifneq (,$(stage1_cacao_archs))
 	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
 endif
 bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b11~pre1)$(COMMA) $(p_tar) (<< 6b12)$(COMMA))
+bd_cacao = $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.3)$(COMMA))
 bd_gcc = \
 	g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
 ifeq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
@@ -397,6 +398,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	      -e 's/@bd_compress@/$(pkg_compress)/g' \
 	      -e 's/@bd_tarball@/$(bd_tarball)/g' \
+	      -e 's/@bd_cacao@/$(bd_cacao)/g' \
 	      -e 's/@core_fonts@/$(core_fonts)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \

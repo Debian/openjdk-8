@@ -5,6 +5,7 @@ openjdk-6 (6b12~pre1-0) experimental; urgency=low
   * Merge changes from 6b11-9 packaging.
   * Build a openjdk-6-source-files packages (used as a build dependency
     of cacao-oj6).
+  * Build depend on cacao-source for cacao-oj6 builds.
 
  -- Matthias Klose <doko@ubuntu.com>  Mon, 06 Oct 2008 12:42:16 +0200
 
