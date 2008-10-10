@@ -357,7 +357,7 @@ p_demo	= $(basename)-demo
 p_src	= $(basename)-source
 p_doc	= $(basename)-doc
 p_dbg	= $(basename)-dbg
-p_tar	= $(basename)-source-files
+p_tar	= openjdk-6-source-files
 ifeq ($(plugin_name),gcjwebplugin.so)
   p_plug= icedtea-gcjwebplugin
 else
