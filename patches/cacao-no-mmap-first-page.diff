@@ -1,5 +1,5 @@
---- cacao/cacao-0.99.3/src/vm/jit/trap.c.orig	2008-07-07 13:36:19.000000000 +0200
-+++ cacao/cacao-0.99.3/src/vm/jit/trap.c	2008-07-23 10:45:30.480113152 +0200
+--- cacao/cacao/src/vm/jit/trap.c.orig	2008-07-07 13:36:19.000000000 +0200
++++ cacao/cacao/src/vm/jit/trap.c	2008-07-23 10:45:30.480113152 +0200
 @@ -59,20 +59,6 @@
   */
  void trap_init(void)

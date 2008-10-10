@@ -1,5 +1,5 @@
---- cacao/cacao-0.99.3/configure.ac.orig	2008-08-12 21:07:16.000000000 +0200
-+++ cacao/cacao-0.99.3/configure.ac	2008-08-12 21:09:11.000000000 +0200
+--- cacao/cacao/configure.ac.orig	2008-08-12 21:07:16.000000000 +0200
++++ cacao/cacao/configure.ac	2008-08-12 21:09:11.000000000 +0200
 @@ -74,13 +74,18 @@
      JAVA_ARCH="m68k"
      ;;
@@ -21,8 +21,8 @@
  powerpc )
      ARCH_DIR="powerpc"
      ARCH_CFLAGS="-m32 -D__POWERPC__"
---- cacao/cacao-0.99.3/configure.orig	2008-08-12 21:07:16.000000000 +0200
-+++ cacao/cacao-0.99.3/configure	2008-08-12 21:09:59.000000000 +0200
+--- cacao/cacao/configure.orig	2008-08-12 21:07:16.000000000 +0200
++++ cacao/cacao/configure	2008-08-12 21:09:59.000000000 +0200
 @@ -2836,10 +2836,16 @@
      JAVA_ARCH="m68k"
      ;;
