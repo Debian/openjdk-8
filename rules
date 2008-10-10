@@ -49,6 +49,9 @@ endif
 # with_plugin_pkg: yes or empty, plugin_name: IcedTeaPlugin.so or gcjwebplugin.so
 with_plugin_pkg = yes
 plugin_name = IcedTeaPlugin.so
+ifeq (,$(findstring openjdk, $(PKGSOURCE)))
+  with_plugin_pkg =
+endif
 
 distribution := $(shell lsb_release --id --short)
 distrel := $(shell lsb_release --codename --short)
@@ -177,7 +180,7 @@ CONFIGURE_ARGS += \
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   CONFIGURE_ARGS += \
 	--with-cacao \
-	--with-cacao-src-zip=$(firstword $(wildcard $(CURDIR)/cacao-*.tar.bz2 /usr/src/cacao-source*))
+	--with-cacao-src-zip=$(firstword $(wildcard $(CURDIR)/cacao-*.tar.* /usr/src/cacao-*.tar.*))
   ifneq (,$(filter $(DEB_HOST_ARCH), arm armel))
     EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS='--enable-softfloat --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
   else
