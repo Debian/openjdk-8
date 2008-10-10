@@ -800,7 +800,8 @@ install: packaging-files
 	  done; \
 	) > debian/$(p_jdk).install
 
-ifeq ($(with_plugin_pkg),yes)
+ifneq (,$(findstring openjdk, $(PKGSOURCE)))
+  ifeq ($(with_plugin_pkg),yes)
 	dh_installdirs -p$(p_plug) \
 		$(foreach d, $(browser_plugin_dirs), usr/lib/$(d)/plugins)
 
@@ -808,8 +809,13 @@ ifeq ($(with_plugin_pkg),yes)
 	( \
 	  echo '$(basedir)/jre/lib/$(archdir)/$(plugin_name)'; \
 	) > debian/$(p_plug).install
-else
+  else
 	: # include the plugin in the $(p_jre) package
+	echo '$(basedir)/jre/lib/$(archdir)/$(plugin_name)' \
+		>> debian/$(p_jre).install
+  endif
+else
+	: # just install it for cacao, untested
 	echo '$(basedir)/jre/lib/$(archdir)/$(plugin_name)' \
 		>> debian/$(p_jre).install
 endif
