@@ -45,7 +45,8 @@ Pre-Depends: ${dpkg:Depends}
 Section: interpreters
 Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}
 Recommends: ${dlopenjre:Recommends}, @cjk_fonts@
-Suggests: icedtea-gcjwebplugin
+Suggests: icedtea6-plugin
+Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4)
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
 Description: OpenJDK Java runtime, using ${vm:Name}
  Full Java runtime environment - needed for executing Java GUI and Webstart

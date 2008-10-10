@@ -39,14 +39,16 @@ endif
 #export ALT_PARALLEL_COMPILE_JOBS = 1
 
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
+with_check = disabled
 with_docs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),,yes)
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   with_docs = disabled for cacao
 endif
 
 # even if not building the package, we configure for a specific plugin
-with_plugin_pkg = #yes # value is yes or empty
-plugin_name = IcedTeaPlugin.so # value is gcjwebplugin.so or IcedTeaPlugin.so
+# with_plugin_pkg: yes or empty, plugin_name: IcedTeaPlugin.so or gcjwebplugin.so
+with_plugin_pkg = yes
+plugin_name = IcedTeaPlugin.so
 
 distribution := $(shell lsb_release --id --short)
 distrel := $(shell lsb_release --codename --short)

@@ -3,6 +3,7 @@ Package: icedtea6-plugin
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-6-jre (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
+Recommends: ca-certificates-java
 Conflicts: icedtea-gcjwebplugin
 Replaces: icedtea-gcjwebplugin
 Xb-Npp-Applications: ec8030f7-c20a-464f-9b0e-13a3a9e97384, 92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a, aa5ca914-c309-495d-91cf-3141bbb04115
