@@ -1,6 +1,8 @@
-openjdk-6 (6b12~pre1-0ubuntu5) intrepid; urgency=low
+openjdk-6 (6b12~pre2-0ubuntu1~ppa1) intrepid; urgency=low
 
+  * Update IcedTea build infrastructure (20081011).
   * debian/copyright: Add copyright notice for pulseaudio sound files.
+  * Add support to build with pulseaudio support.
 
  -- Matthias Klose <doko@ubuntu.com>  Sat, 11 Oct 2008 15:44:50 +0200
 
