@@ -30,8 +30,10 @@ if [ -f $origtar ]; then
 else
     rm -rf $pkgdir.orig
     mkdir -p $pkgdir.orig
-    #cp -p $tarball $pkgdir.orig/
-    case "$base" in cacao*)
+    case "$base" in
+      openjdk*)
+	cp -p $tarball $pkgdir.orig/ ;;
+      cacao*)
 	if [ -f $cacaotb ]; then
 	    cp -p $cacaotb $pkgdir.orig/
 	fi
