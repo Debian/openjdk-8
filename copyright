@@ -13,11 +13,14 @@ IcedTea (see AUTHORS for a current list):
     Lillian Angel <langel@redhat.com>
     Gary Benson <gbenson@redhat.com>
     Tania Bento <tbento@redhat.com>
+    Deepak Bhole <dbhole@redhat.com>
     Thomas Fitzsimmons <fitzsim@redhat.com>
     Kyle Galloway <kgallowa@redhat.com>
     Andrew Haley <aph@redhat.com>
+    Ioana Iivan <iivan@redhat.com>
     Matthias Klose <doko@ubuntu.com>
     Francis Kung <fkung@redhat.com>
+    Omair Majid <omajid@redhat.com>
     Casey Marshall <csm@gnu.org>
     Raif Naffah <admin@naffah-raif.name>
     Joshua Sumali <jsumali@redhat.com>
@@ -47,11 +50,14 @@ IcedTea:
     Portions Copyright © 2007 Lillian Angel <langel@redhat.com>
     Portions Copyright © 2007 Gary Benson <gbenson@redhat.com>
     Portions Copyright © 2007 Tania Bento <tbento@redhat.com>
+    Portions Copyright © 2008 Deepak Bhole <dbhole@redhat.com>
     Portions Copyright © 2007 Thomas Fitzsimmons <fitzsim@redhat.com>
     Portions Copyright © 2007 Kyle Galloway <kgallowa@redhat.com>
     Portions Copyright © 2007 Andrew Haley <aph@redhat.com>
+    Portions Copyright © 2008 Ioana Iivan <iivan@redhat.com>
     Portions Copyright © 2007 Matthias Klose <doko@ubuntu.com>
     Portions Copyright © 2007 Francis Kung <fkung@redhat.com>
+    Portions Copyright © 2008 Omair Majid <omajid@redhat.com>
     Portions Copyright © 2007 Casey Marshall <csm@gnu.org>
     Portions Copyright © 2007 Raif Naffah <admin@naffah-raif.name>
     Portions Copyright © 2007 Joshua Sumali <jsumali@redhat.com>
@@ -113,6 +119,11 @@ Packaging:
 
 IcedTea:
   IcedTea is licensed under the GPL v2. See `/usr/share/common-licenses/GPL-2'.
+
+  The sound files (pulseaudio/testsounds/*.wav) were taken from the KDE Project 
+  (www.kde.org). A copy of them can be obtained from 
+  http://websvn.kde.org/branches/KDE/4.0/kdeartwork/sounds/ . They are licensed 
+  by the copyright holders as GPLv2.
 
 OpenJDK:
   OpenJDK is licensed under the GPL v2 with exceptions,

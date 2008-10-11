@@ -1,5 +1,11 @@
 openjdk-6 (6b12~pre1-0ubuntu5) intrepid; urgency=low
 
+  * debian/copyright: Add copyright notice for pulseaudio sound files.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 11 Oct 2008 15:44:50 +0200
+
+openjdk-6 (6b12~pre1-0ubuntu5) intrepid; urgency=low
+
   * Move the plugin from the -jre package into the -plugin package.
 
  -- Matthias Klose <doko@ubuntu.com>  Fri, 10 Oct 2008 06:55:34 +0000
