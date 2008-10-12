@@ -293,7 +293,7 @@ ifneq (,$(stage1_cacao_archs))
   bd_bootstrap += \
 	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
 endif
-bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b11~pre1)$(COMMA) $(p_tar) (<< 6b12)$(COMMA))
+bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b12~pre2)$(COMMA) $(p_tar) (<< 6b13)$(COMMA))
 bd_cacao = libtool,
 ifneq ($(distribution),Ubuntu)
   bd_cacao = $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.3)$(COMMA))
