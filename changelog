@@ -1,3 +1,27 @@
+openjdk-6 (6b12~pre2-1) UNRELEASED; urgency=low
+
+  * Build a cacao-oj6-plugin package.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 12 Oct 2008 10:44:54 +0200
+
+openjdk-6 (6b12~pre2-1ubuntu1~ppa3) intrepid; urgency=low
+
+  * Reenable running the testsuite.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 11 Oct 2008 19:02:59 +0000
+
+openjdk-6 (6b12~pre2-1ubuntu1~ppa2) intrepid; urgency=low
+
+  * Fix pulse-java build failure on amd64.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 11 Oct 2008 16:35:51 +0000
+
+openjdk-6 (6b12~pre2-1ubuntu1~ppa1) intrepid; urgency=low
+
+  * Upload to PPA, configured with --enable-pulse-java.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 11 Oct 2008 15:56:05 +0000
+
 openjdk-6 (6b12~pre2-0ubuntu1) intrepid; urgency=low
 
   * Update IcedTea build infrastructure (20081011).

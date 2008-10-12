@@ -39,7 +39,6 @@ endif
 #export ALT_PARALLEL_COMPILE_JOBS = 1
 
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
-with_check = disabled
 with_docs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),,yes)
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   with_docs = disabled for cacao
@@ -49,9 +48,6 @@ endif
 # with_plugin_pkg: yes or empty, plugin_name: IcedTeaPlugin.so or gcjwebplugin.so
 with_plugin_pkg = yes
 plugin_name = IcedTeaPlugin.so
-ifeq (,$(findstring openjdk, $(PKGSOURCE)))
-  with_plugin_pkg =
-endif
 
 distribution := $(shell lsb_release --id --short)
 distrel := $(shell lsb_release --codename --short)
@@ -375,7 +371,7 @@ p_tar	= openjdk-6-source-files
 ifeq ($(plugin_name),gcjwebplugin.so)
   p_plug= icedtea-gcjwebplugin
 else
-  p_plug= icedtea6-plugin
+  p_plug = $(if $(findstring openjdk,$(PKGSOURCE)),icedtea6-plugin,$(basename)-plugin)
 endif
 
 d	= debian/tmp
@@ -425,6 +421,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_pulsejava@/$(bd_pulsejava)/g' \
 	      -e 's/@core_fonts@/$(core_fonts)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
+	      -e 's/@pkg_plugin@/$(p_plug)/g' \
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/control.in \
@@ -816,8 +813,7 @@ install: packaging-files
 	  done; \
 	) > debian/$(p_jdk).install
 
-ifneq (,$(findstring openjdk, $(PKGSOURCE)))
-  ifeq ($(with_plugin_pkg),yes)
+ifeq ($(with_plugin_pkg),yes)
 	dh_installdirs -p$(p_plug) \
 		$(foreach d, $(browser_plugin_dirs), usr/lib/$(d)/plugins)
 
@@ -825,13 +821,8 @@ ifneq (,$(findstring openjdk, $(PKGSOURCE)))
 	( \
 	  echo '$(basedir)/jre/lib/$(archdir)/$(plugin_name)'; \
 	) > debian/$(p_plug).install
-  else
-	: # include the plugin in the $(p_jre) package
-	echo '$(basedir)/jre/lib/$(archdir)/$(plugin_name)' \
-		>> debian/$(p_jre).install
-  endif
 else
-	: # just install it for cacao, untested
+	: # include the plugin in the $(p_jre) package
 	echo '$(basedir)/jre/lib/$(archdir)/$(plugin_name)' \
 		>> debian/$(p_jre).install
 endif
