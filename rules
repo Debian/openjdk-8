@@ -110,6 +110,12 @@ else
   export GCJ_SUFFIX = -4.3
 endif
 
+ifneq (,$(findstring cacao, $(PKGSOURCE)))
+  ifneq (,$(filter $(DEB_HOST_ARCH), ia64 sparc))
+    $(error cacao-is not ported for ia64-linux and sparc-linux)
+  endif
+endif
+
 ifeq ($(distribution),Ubuntu)
   ifneq (,$(findstring ppa, $(call vafilt,$(CHANGELOG_VARS),Version)))
     with_pulse = yes
