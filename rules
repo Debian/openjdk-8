@@ -540,8 +540,9 @@ endif
 
 ifeq ($(with_check),yes)
   ifneq (,$(findstring cacao, $(PKGSOURCE)))
-    ifneq (,$(filter $(DEB_HOST_ARCH), ))
+    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 powerpc))
       # only activate after testing; hangs several tests. no fun with mauve
+      with_mauve_check = yes
       with_jtreg_check = yes
     endif
   else
