@@ -1,6 +1,6 @@
---- openjdk/jdk/src/solaris/classes/sun/awt/fontconfigs/linux.fontconfig.Ubuntu.properties	2008-05-30 09:55:30.000000000 +0200
-+++ openjdk/jdk/src/solaris/classes/sun/awt/fontconfigs/linux.fontconfig.Ubuntu.properties	2008-06-02 22:40:25.728758000 +0200
-@@ -25,126 +25,329 @@
+--- openjdk/jdk/src/solaris/classes/sun/awt/fontconfigs/linux.fontconfig.Ubuntu.properties.orig	2008-10-12 10:35:09.000000000 +0000
++++ openjdk/jdk/src/solaris/classes/sun/awt/fontconfigs/linux.fontconfig.Ubuntu.properties	2008-10-12 10:40:55.000000000 +0000
+@@ -25,106 +25,260 @@
  
  # Version
  
@@ -14,10 +14,6 @@
 -dialog.plain.latin-1=DejaVu Sans
 -dialog.plain.japanese-x0208=Kochi Gothic
 -dialog.plain.korean=Baekmuk Dotum
--
--dialog.bold.latin-1=DejaVu Sans Bold
--dialog.bold.japanese-x0208=Kochi Gothic
--dialog.bold.korean=Baekmuk Dotum
 +# Chinese fonts
 +allfonts.umingcn=AR PL UMing CN
 +#allfonts.umingcn.motif=AR PL UMing CN
@@ -41,13 +37,13 @@
 +allfonts.telugu=Lohit Telugu
 +#allfonts.sinhala=LKLUG
  
+-dialog.bold.latin-1=DejaVu Sans Bold
+-dialog.bold.japanese-x0208=Kochi Gothic
+-dialog.bold.korean=Baekmuk Dotum
+ 
 -dialog.italic.latin-1=DejaVu Sans Oblique
 -dialog.italic.japanese-x0208=Kochi Gothic
 -dialog.italic.korean=Baekmuk Dotum
- 
--dialog.bolditalic.latin-1=DejaVu Sans Bold Oblique
--dialog.bolditalic.japanese-x0208=Kochi Gothic
--dialog.bolditalic.korean=Baekmuk Dotum
 +serif.plain.latin-1=DejaVu Serif
 +#serif.plain.latin-1.motif=LuxiSerif-Regular
 +serif.plain.japanese-kochi=Kochi Mincho
@@ -58,6 +54,9 @@
 +serif.plain.korean-un=UnBatang
 +#serif.plain.korean-un.motif=UnBatang
  
+-dialog.bolditalic.latin-1=DejaVu Sans Bold Oblique
+-dialog.bolditalic.japanese-x0208=Kochi Gothic
+-dialog.bolditalic.korean=Baekmuk Dotum
 +serif.bold.latin-1=DejaVu Serif Bold
 +#serif.bold.latin-1.motif=LuxiSerif-Bold
 +serif.bold.japanese-kochi=Kochi Mincho
@@ -67,8 +66,8 @@
 +#serif.bold.korean-baekmuk.motif=Baekmuk Batang
 +serif.bold.korean-un=UnBatang Bold
 +#serif.bold.korean-un.motif=UnBatang Bold
-+
-+serif.italic.latin-1=DejaVu Serif Italic
+ 
++serif.italic.latin-1=DejaVu Serif Oblique
 +#serif.italic.latin-1.motif=LuxiSerif-Oblique
 +serif.italic.japanese-kochi=Kochi Mincho
 +serif.italic.japanese-sazanami=Sazanami Mincho
@@ -78,7 +77,7 @@
 +serif.italic.korean-un=UnBatang
 +#serif.italic.korean-un.motif=UnBatang
 +
-+serif.bolditalic.latin-1=DejaVu Serif Bold Italic
++serif.bolditalic.latin-1=DejaVu Serif Bold Oblique
 +#serif.bolditalic.latin-1.motif=LuxiSerif-BoldOblique
 +serif.bolditalic.japanese-kochi=Kochi Mincho
 +serif.bolditalic.japanese-sazanami=Sazanami Mincho
@@ -201,7 +200,7 @@
 +#monospaced.bolditalic.korean-baekmuk.motif=Baekmuk Gulim
 +monospaced.bolditalic.korean-un=UnDotum Bold
 +#monospaced.bolditalic.korean-un.motif=UnDotum Bold
- 
++
 +dialog.plain.latin-1=DejaVu Sans
 +#dialog.plain.latin-1.motif=LuxiSans-Regular
 +dialog.plain.japanese-kochi=Kochi Gothic
@@ -211,7 +210,7 @@
 +#dialog.plain.korean-baekmuk.motif=Baekmuk Gulim
 +dialog.plain.korean-un=UnDotum
 +#dialog.plain.korean-un.motif=UnDotum
-+
+ 
 +dialog.bold.latin-1=DejaVu Sans Bold
 +#dialog.bold.latin-1.motif=LuxiSans-Bold
 +dialog.bold.japanese-kochi=Kochi Gothic
@@ -325,45 +324,20 @@
 +exclusion.japanese-vlgothic=0390-03d6,2200-22ef,2701-27be
  
  # Font File Names
-+filename.DejaVu_Sans=/usr/share/fonts/ttf-dejavu/DejaVuSans.ttf
-+filename.DejaVu_Sans_Bold=/usr/share/fonts/ttf-dejavu/DejaVuSans-Bold.ttf
-+filename.DejaVu_Sans_Oblique=/usr/share/fonts/ttf-dejavu/DejaVuSans-Oblique.ttf
-+filename.DejaVu_Sans_Bold_Oblique=/usr/share/fonts/ttf-dejavu/DejaVuSans-BoldOblique.ttf
-+
-+filename.DejaVu_Sans_Mono=/usr/share/fonts/ttf-dejavu/DejaVuSansMono.ttf
-+filename.DejaVu_Sans_Mono_Bold=/usr/share/fonts/ttf-dejavu/DejaVuSansMono-Bold.ttf
-+filename.DejaVu_Sans_Mono_Oblique=/usr/share/fonts/ttf-dejavu/DejaVuSansMono-Oblique.ttf
-+filename.DejaVu_Sans_Mono_Bold_Oblique=/usr/share/fonts/ttf-dejavu/DejaVuSansMono-BoldOblique.ttf
-+
-+filename.DejaVu_Serif=/usr/share/fonts/ttf-dejavu/DejaVuSerif.ttf
-+filename.DejaVu_Serif_Bold=/usr/share/fonts/ttf-dejavu/DejaVuSerif-Bold.ttf
-+filename.DejaVu_Serif_Italic=/usr/share/fonts/ttf-dejavu/DejaVuSerif-Oblique.ttf
-+filename.DejaVu_Serif_Bold_Italic=/usr/share/fonts/ttf-dejavu/DejaVuSerif-BoldOblique.ttf
-+
-+filename.AR_PL_UMing_CN=/usr/share/fonts/truetype/arphic/uming.ttc
-+filename.AR_PL_UMing_HK=/usr/share/fonts/truetype/arphic/uming.ttc
-+filename.AR_PL_UMing_TW=/usr/share/fonts/truetype/arphic/uming.ttc
-+filename.AR_PL_ShanHeiSun_Uni=/usr/share/fonts/truetype/arphic/uming.ttf
  
--filename.DejaVu_Sans=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf
--filename.DejaVu_Sans_Bold=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf
--filename.DejaVu_Sans_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Oblique.ttf
--filename.DejaVu_Sans_Bold_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-BoldOblique.ttf
--
--filename.DejaVu_Sans_Mono=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf
--filename.DejaVu_Sans_Mono_Bold=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono-Bold.ttf
--filename.DejaVu_Sans_Mono_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono-Oblique.ttf
--filename.DejaVu_Sans_Mono_Bold_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono-BoldOblique.ttf
--
--filename.DejaVu_Serif=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif.ttf
--filename.DejaVu_Serif_Bold=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-Bold.ttf
--filename.DejaVu_Serif_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-Oblique.ttf
--filename.DejaVu_Serif_Bold_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-BoldOblique.ttf
--
+@@ -143,8 +297,58 @@
+ filename.DejaVu_Serif_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-Oblique.ttf
+ filename.DejaVu_Serif_Bold_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-BoldOblique.ttf
+ 
 -filename.Kochi_Gothic=/usr/share/fonts/truetype/kochi/kochi-gothic-subst.ttf
 -filename.Kochi_Mincho=/usr/share/fonts/truetype/kochi/kochi-mincho-subst.ttf
 -filename.AR_PL_ZenKai_Uni=/usr/share/fonts//truetype/arphic/ukai.ttf
 -filename.Baekmuk_Dotum=/usr/share/fonts/truetype/baekmuk/dotum.ttf
++filename.AR_PL_UMing_CN=/usr/share/fonts/truetype/arphic/uming.ttc
++filename.AR_PL_UMing_HK=/usr/share/fonts/truetype/arphic/uming.ttc
++filename.AR_PL_UMing_TW=/usr/share/fonts/truetype/arphic/uming.ttc
++filename.AR_PL_ShanHeiSun_Uni=/usr/share/fonts/truetype/arphic/uming.ttf
++
 +filename.WenQuanYi_Zen_Hei=/usr/share/fonts/truetype/wqy/wqy-zenhei.ttf
  filename.Baekmuk_Batang=/usr/share/fonts/truetype/baekmuk/batang.ttf
 +filename.UnBatang=/usr/share/fonts/truetype/unfonts/UnBatang.ttf
@@ -403,7 +377,7 @@
 +filename.LuxiSerif-BoldOblique=/usr/share/fonts/truetype/ttf-xfree86-nonfree/luxirbi.ttf
 +
 +# AWT X11 font paths
-+awtfontpath.latin-1=/usr/lib/X11/fonts/Type1
++awtfontpath.latin-1=/usr/share/fonts/X11/Type1
 +awtfontpath.umingcn=/usr/share/fonts/truetype/arphic
 +awtfontpath.uminghk=/usr/share/fonts/truetype/arphic
 +awtfontpath.umingtw=/usr/share/fonts/truetype/arphic

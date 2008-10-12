@@ -1,6 +1,6 @@
---- openjdk/jdk/src/solaris/classes/sun/awt/fontconfigs/linux.fontconfig.Ubuntu.properties~	2008-04-11 10:18:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/classes/sun/awt/fontconfigs/linux.fontconfig.Ubuntu.properties	2008-05-28 20:37:46.611126112 +0200
-@@ -25,126 +25,194 @@
+--- openjdk/jdk/src/solaris/classes/sun/awt/fontconfigs/linux.fontconfig.Ubuntu.properties.orig	2008-10-12 10:42:26.000000000 +0000
++++ openjdk/jdk/src/solaris/classes/sun/awt/fontconfigs/linux.fontconfig.Ubuntu.properties	2008-10-12 10:43:49.000000000 +0000
+@@ -25,107 +25,156 @@
  
  # Version
  
@@ -208,41 +208,16 @@
 +
  # Font File Names
  
--filename.DejaVu_Sans=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf
--filename.DejaVu_Sans_Bold=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Bold.ttf
--filename.DejaVu_Sans_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-Oblique.ttf
--filename.DejaVu_Sans_Bold_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans-BoldOblique.ttf
--
--filename.DejaVu_Sans_Mono=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono.ttf
--filename.DejaVu_Sans_Mono_Bold=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono-Bold.ttf
--filename.DejaVu_Sans_Mono_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono-Oblique.ttf
--filename.DejaVu_Sans_Mono_Bold_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSansMono-BoldOblique.ttf
--
--filename.DejaVu_Serif=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif.ttf
--filename.DejaVu_Serif_Bold=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-Bold.ttf
--filename.DejaVu_Serif_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-Oblique.ttf
--filename.DejaVu_Serif_Bold_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-BoldOblique.ttf
--
+ filename.DejaVu_Sans=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSans.ttf
+@@ -143,8 +192,27 @@
+ filename.DejaVu_Serif_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-Oblique.ttf
+ filename.DejaVu_Serif_Bold_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-BoldOblique.ttf
+ 
 -filename.Kochi_Gothic=/usr/share/fonts/truetype/kochi/kochi-gothic-subst.ttf
 -filename.Kochi_Mincho=/usr/share/fonts/truetype/kochi/kochi-mincho-subst.ttf
 -filename.AR_PL_ZenKai_Uni=/usr/share/fonts//truetype/arphic/ukai.ttf
 -filename.Baekmuk_Dotum=/usr/share/fonts/truetype/baekmuk/dotum.ttf
 -filename.Baekmuk_Batang=/usr/share/fonts/truetype/baekmuk/batang.ttf
-+filename.DejaVu_Sans=/usr/share/fonts/ttf-dejavu/DejaVuSans.ttf
-+filename.DejaVu_Sans_Bold=/usr/share/fonts/ttf-dejavu/DejaVuSans-Bold.ttf
-+filename.DejaVu_Sans_Oblique=/usr/share/fonts/ttf-dejavu/DejaVuSans-Oblique.ttf
-+filename.DejaVu_Sans_Bold_Oblique=/usr/share/fonts/ttf-dejavu/DejaVuSans-BoldOblique.ttf
-+
-+filename.DejaVu_Sans_Mono=/usr/share/fonts/ttf-dejavu/DejaVuSansMono.ttf
-+filename.DejaVu_Sans_Mono_Bold=/usr/share/fonts/ttf-dejavu/DejaVuSansMono-Bold.ttf
-+filename.DejaVu_Sans_Mono_Oblique=/usr/share/fonts/ttf-dejavu/DejaVuSansMono-Oblique.ttf
-+filename.DejaVu_Sans_Mono_Bold_Oblique=/usr/share/fonts/ttf-dejavu/DejaVuSansMono-BoldOblique.ttf
-+
-+filename.DejaVu_Serif=/usr/share/fonts/ttf-dejavu/DejaVuSerif.ttf
-+filename.DejaVu_Serif_Bold=/usr/share/fonts/ttf-dejavu/DejaVuSerif-Bold.ttf
-+filename.DejaVu_Serif_Oblique=/usr/share/fonts/ttf-dejavu/DejaVuSerif-Oblique.ttf
-+filename.DejaVu_Serif_Bold_Oblique=/usr/share/fonts/ttf-dejavu/DejaVuSerif-BoldOblique.ttf
-+
 +filename.-misc-ar_pl_shanheisun_uni-medium-r-normal--*-*-*-*-p-*-iso10646-1=/usr/share/fonts/truetype/arphic/uming.ttf
 +filename.-misc-baekmuk_batang-medium-r-normal--*-%d-*-*-c-*-*-*=/usr/share/fonts/truetype/baekmuk/batang.ttf
 +filename.-misc-baekmuk_gulim-medium-r-normal--*-%d-*-*-c-*-*-*=/usr/share/fonts/truetype/baekmuk/gulim.ttf
@@ -263,7 +238,7 @@
 +filename.LuxiSerif-BoldOblique=/usr/share/fonts/truetype/ttf-xfree86-nonfree/luxirbi.ttf
 +
 +# AWT X11 font paths
-+awtfontpath.latin-1=/usr/lib/X11/fonts/Type1
++awtfontpath.latin-1=/usr/share/fonts/X11/Type1
 +awtfontpath.chinese-gb18030=/usr/share/fonts/truetype/arphic
 +awtfontpath.japanese-x0208=/usr/share/fonts/truetype/ipamona/
 +awtfontpath.korean=/usr/share/fonts/truetype/baekmuk
