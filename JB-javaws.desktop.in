@@ -1,6 +1,8 @@
 [Desktop Entry]
 Name=@vendor@ Java @RELEASE@ Web Start
+Name[fi]=@vendor@ Java @RELEASE@ - Web Start
 Comment=@vendor@ Java @RELEASE@ Web Start
+Comment[fi]=@vendor@ Java @RELEASE@ - Web Start
 Exec=/@basedir@/bin/javaws %u
 Terminal=false
 Type=Application

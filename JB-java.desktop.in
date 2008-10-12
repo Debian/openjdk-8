@@ -1,6 +1,8 @@
 [Desktop Entry]
 Name=@vendor@ Java @RELEASE@ Runtime
+Name[fi]=@vendor@ Java @RELEASE@ - ajonaikainen ympäristö
 Comment=@vendor@ Java @RELEASE@ Runtime
+Comment[fi]=@vendor@ Java @RELEASE@ - ajonaikainen ympäristö
 Exec=/@basedir@/bin/java -jar
 Terminal=false
 Type=Application
