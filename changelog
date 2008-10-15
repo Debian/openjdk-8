@@ -2,6 +2,7 @@ openjdk-6 (6b12~pre2-0ubuntu3) intrepid; urgency=low
 
   * Update IcedTea build infrastructure (20081015).
   * Add netscape/javascript class files to rt.jar.
+  * Be more verbose in the icedtea6-plugin package description.
 
  -- Matthias Klose <doko@ubuntu.com>  Sun, 12 Oct 2008 11:16:03 +0000
 
