@@ -301,7 +301,7 @@ ifneq (,$(stage1_cacao_archs))
 endif
 bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b12~pre2)$(COMMA) $(p_tar) (<< 6b13)$(COMMA))
 bd_cacao = libtool,
-bd_cacao = $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.3)$(COMMA))
+bd_cacao = $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.4~20081012)$(COMMA))
 bd_gcc = \
 	g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
 ifeq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
