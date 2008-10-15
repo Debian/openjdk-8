@@ -2,3 +2,6 @@
 # jdk is doing it. Check http://wiki.debian.org/RpathIssue for more
 # information.
 @basename@-jdk binary: binary-or-shlib-defines-rpath
+
+# this is in @basename@-jre
+@basename@-jdk binary: menu-icon-missing /usr/share/pixmaps/@basename@.xpm

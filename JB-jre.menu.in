@@ -1,4 +1,4 @@
-?package(@basename@-bin):\
+?package(@basename@-jre):\
 	needs="x11"\
 	section="Applications/System/Administration"\
 	title="@vendor@ Java @RELEASE@ Policy Tool"\

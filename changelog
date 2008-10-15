@@ -1,10 +1,11 @@
 openjdk-6 (6b12~pre2-0ubuntu3) intrepid; urgency=low
 
   * Update IcedTea build infrastructure (20081015).
-  * Add netscape/javascript class files to rt.jar.
+  * Add netscape/javascript class files to rt.jar. LP: #282762.
   * Be more verbose in the icedtea6-plugin package description.
+  * Fix some lintian warnings.
 
- -- Matthias Klose <doko@ubuntu.com>  Sun, 12 Oct 2008 11:16:03 +0000
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 15 Oct 2008 12:45:59 +0200
 
 openjdk-6 (6b12~pre2-0ubuntu2) intrepid; urgency=low
 
@@ -209,6 +210,8 @@ openjdk-6 (6b10dfsg-1ubuntu1) intrepid; urgency=low
     LP: #226911.
   * Ignore errors during activation of class data sharing. Closes: #490617,
     #490672.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 30 Jun 2008 13:30:06 +0200
 
 openjdk-6 (6b10dfsg-1) unstable; urgency=low
 

@@ -2,3 +2,6 @@
 # jdk is doing it. Check http://wiki.debian.org/RpathIssue for more
 # information.
 @basename@-jre binary: binary-or-shlib-defines-rpath
+
+# the doc directory and the symlink are in @basename@-jre-headless
+@basename@-jre binary: no-copyright-file

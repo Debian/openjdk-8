@@ -2,7 +2,7 @@
 Package: @pkg_plugin@
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre (= ${source:Version}), ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Recommends: ca-certificates-java
 Conflicts: icedtea-gcjwebplugin
 Replaces: icedtea-gcjwebplugin, @basename@-jre (<< 6b12~pre2)

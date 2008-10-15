@@ -48,11 +48,7 @@ configure)
 	    $slave1 $slave2
     done
     update-alternatives \
-	--install \
-	/usr/bin/jexec \
-	jexec \
-	$basediralias/jre/lib/jexec \
-	$priority \
+	--install /usr/bin/jexec jexec $basediralias/jre/lib/jexec $priority \
 	--slave \
 	    /usr/share/binfmts/jar \
 	    jexec-binfmt \
@@ -60,8 +56,8 @@ configure)
 
     # register binfmt; ignore errors, the alternative may already be
     # registered by another JRE.
-    if [ -x /usr/sbin/update-binfmts ] && [ -r /usr/share/binfmts/jar ]; then
-        /usr/sbin/update-binfmts --package @basename@ --import jar || true
+    if which update-binfmts >/dev/null && [ -r /usr/share/binfmts/jar ]; then
+        update-binfmts --package @basename@ --import jar || true
     fi
 
     mount | grep -qs 'on /proc type proc' || echo >&2 "/proc is not mounted; some java apps may fail"

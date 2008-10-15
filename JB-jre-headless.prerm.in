@@ -11,10 +11,10 @@ if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
 	update-alternatives --remove $i $basediralias/jre/bin/$i
     done
 
-    if [ -x /usr/sbin/update-binfmts ]; then
+    if which update-binfmts >/dev/null; then
 	# try to remove and ignore the error
 	if [ -e /var/lib/binfmts/@basename@ ]; then
-	    /usr/sbin/update-binfmts --package @basename@ \
+	    update-binfmts --package @basename@ \
 		--remove jar /usr/bin/jexec || true
 	fi
     fi
