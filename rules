@@ -679,6 +679,12 @@ install: packaging-files
 	ln -sf linux/jni_md.h $(d)/$(basedir)/include/jni_md.h
 	ln -sf linux/jawt_md.h $(d)/$(basedir)/include/jawt_md.h
 
+ifeq ($(with_plugin_pkg)-$(plugin_name),yes-IcedTeaPlugin.so)
+	: # add javascript files to the archive
+	if ! fastjar tf $(d)/$(basedir)/jre/lib/rt.jar | fgrep -q JSObject.class; then \
+	  fastjar -u -v -f $(d)/$(basedir)/jre/lib/rt.jar -C lib/rt netscape/javascript; \
+	fi
+endif
 	: # compress manpages
 	find $(d)/$(basedir)/man $(d)/$(basedir)/jre/man -type f ! -type l \
 	  | xargs gzip -9v
