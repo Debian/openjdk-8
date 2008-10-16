@@ -35,7 +35,8 @@ else
 	cp -p $tarball $pkgdir.orig/ ;;
       cacao*)
 	if [ -f $cacaotb ]; then
-	    cp -p $cacaotb $pkgdir.orig/
+	    : # don't include the cacao tarball anymore
+	    #cp -p $cacaotb $pkgdir.orig/
 	fi
     esac
     tar -c -f - -C $icedtea_checkout . | tar -x -f - -C $pkgdir.orig
