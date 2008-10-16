@@ -1,6 +1,6 @@
 
 tarball=openjdk-6-src-b12-28_aug_2008-dfsg.tar.gz
-version=6b12~pre2
+version=6b12
 cacaotb=cacao-0.99.4~20081010.tar.bz2
 base=openjdk-6
 #base=cacao-oj6
