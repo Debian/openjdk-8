@@ -1,8 +1,8 @@
-openjdk-6 (6b12-0) experimental; urgency=low
+openjdk-6 (6b12-0ubuntu2) intrepid; urgency=low
 
-  * Upload to experimental.
+  * icedtea6-plugin: Versioned conflict with icedtea-gcjwebplugin. LP: #184299.
 
- -- Matthias Klose <doko@ubuntu.com>  Thu, 16 Oct 2008 00:29:56 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 16 Oct 2008 13:43:47 +0200
 
 openjdk-6 (6b12-0ubuntu1) intrepid; urgency=low
 
