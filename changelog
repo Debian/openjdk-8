@@ -10,7 +10,7 @@ openjdk-6 (6b12-0ubuntu2) intrepid; urgency=low
   * openjdk-6-jdk: Suggest visualvm.
   * Remove cacao patches found in cacao 0.99.4~20081012.
 
- -- Matthias Klose <doko@ubuntu.com>  Fri, 17 Oct 2008 12:22:12 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 17 Oct 2008 13:25:45 +0200
 
 openjdk-6 (6b12-0ubuntu1) intrepid; urgency=low
 
