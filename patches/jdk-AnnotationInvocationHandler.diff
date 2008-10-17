@@ -1,0 +1,50 @@
+Description:
+
+sun/reflect/annotation/AnnotationInvocationHandler.java.getMemberMethods
+might throw if there is a security manager that does not allow
+getDeclaredMethods.
+
+The author of this code (Josh Bloch) confirms that the intent was for the
+doPrivileged block in this method to prevent security exceptions.
+The methods cannot escape to untrusted code.
+
+Evaluation:
+
+Yes.  Fix provided courtesy of Toby Reyelts and Josh Bloch at Google.
+
+# HG changeset patch
+# User martin
+# Date 1224185752 25200
+# Node ID 68730f05449cd4f39ce1cb82adc6c4e57f87554f
+# Parent  214ebdcf7252d4862449fe0ae295e6c60a127315
+SecurityException in AnnotationInvocationHandler.getMemberMethods
+Summary: Move call to getDeclaredMethods inside doPrivileged
+Reviewed-by:
+Contributed-by: jjb@google.com
+
+diff --git a/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java b/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java
+--- openjdk/jdk/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java
++++ openjdk/jdk/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java
+@@ -272,14 +272,14 @@
+      */
+     private Method[] getMemberMethods() {
+         if (memberMethods == null) {
+-            final Method[] mm = type.getDeclaredMethods();
+-            AccessController.doPrivileged(new PrivilegedAction<Void>() {
+-                public Void run() {
+-                    AccessibleObject.setAccessible(mm, true);
+-                    return null;
+-                }
+-            });
+-            memberMethods = mm;
++            memberMethods = AccessController.doPrivileged(
++                new PrivilegedAction<Method[]>() {
++                    public Method[] run() {
++                        final Method[] mm = type.getDeclaredMethods();
++                        AccessibleObject.setAccessible(mm, true);
++                        return mm;
++                    }
++                });
+         }
+         return memberMethods;
+     }

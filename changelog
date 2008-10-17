@@ -1,8 +1,15 @@
 openjdk-6 (6b12-0ubuntu2) intrepid; urgency=low
 
   * icedtea6-plugin: Versioned conflict with icedtea-gcjwebplugin. LP: #184299.
+  * Don't configure --with-alt-jar=/usr/bin/fastjar on hotspot archs
+    and cacao builds. Working around a problem generating rt.jar. Manually
+    add the netscape/javascript files in zero builds.
+  * Update IcedTea build infrastructure (20081017).
+    - configury updates.
+    - IcedTeaPlugin update.
+  * openjdk-6-jdk: Suggest visualvm.
 
- -- Matthias Klose <doko@ubuntu.com>  Thu, 16 Oct 2008 13:43:47 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 17 Oct 2008 12:22:12 +0200
 
 openjdk-6 (6b12-0ubuntu1) intrepid; urgency=low
 

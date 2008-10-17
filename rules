@@ -131,6 +131,8 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
 	debian/patches/no-compiler-path.diff \
 	debian/patches/fix-race-cond-print.diff \
+	debian/patches/jdk-AnnotationInvocationHandler.diff \
+	debian/patches/jdk-freetypeScaler-crash.diff \
 
 #	debian/patches/gcc-mtune-generic.diff \
 
@@ -162,21 +164,28 @@ ifeq ($(STAGE1_JAVA),gcj)
 	--with-javah=/usr/bin/gjavah$(GCJ_SUFFIX) \
 	--with-rmic=/usr/bin/grmic$(GCJ_SUFFIX) \
 	--with-jar=/usr/bin/fastjar \
-	--with-alt-jar=/usr/bin/fastjar \
 	--with-libgcj-jar=/usr/share/java/libgcj$(GCJ_SUFFIX).jar
   build_target = icedtea-against-icedtea
 else ifeq ($(STAGE1_JAVA),openjdk)
   CONFIGURE_ARGS = \
 	--with-icedtea \
 	--with-icedtea-home=$(STAGE1_HOME) \
-	--with-alt-jar=/usr/bin/fastjar
   build_target = #icedtea-against-icedtea
 else ifeq ($(STAGE1_JAVA),cacao)
   CONFIGURE_ARGS = \
 	--with-icedtea \
 	--with-icedtea-home=$(STAGE1_HOME) \
-	--with-alt-jar=/usr/bin/fastjar
   build_target = #icedtea-against-icedtea
+endif
+
+# there are problems --with-alt-jar=/usr/bin/fastjar,
+# see http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=217
+# only use it for zero ports except powerpc (which we assume as
+# fast enough to build.
+ifneq (,$(findstring openjdk, $(PKGSOURCE)))
+  ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) powerpc))
+    CONFIGURE_ARGS += --with-alt-jar=/usr/bin/fastjar
+  endif
 endif
 
 CONFIGURE_ARGS += \
@@ -187,7 +196,7 @@ CONFIGURE_ARGS += \
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   CONFIGURE_ARGS += \
-	--with-cacao \
+	--enable-cacao \
 	--with-cacao-src-zip=$(firstword $(wildcard $(CURDIR)/cacao-*.tar.* /usr/src/cacao-*.tar.*))
   ifneq (,$(filter $(DEB_HOST_ARCH), arm armel))
     EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS='--enable-softfloat --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
@@ -678,10 +687,12 @@ install: packaging-files
 	ln -sf linux/jni_md.h $(d)/$(basedir)/include/jni_md.h
 	ln -sf linux/jawt_md.h $(d)/$(basedir)/include/jawt_md.h
 
-ifeq ($(with_plugin_pkg)-$(plugin_name),yes-IcedTeaPlugin.so)
+ifneq (,$(filter --with-alt-jar=/usr/bin/fastjar, $(CONFIGURE_ARGS)))
 	: # add javascript files to the archive
 	if ! fastjar tf $(d)/$(basedir)/jre/lib/rt.jar | fgrep -q JSObject.class; then \
-	  fastjar -u -v -f $(d)/$(basedir)/jre/lib/rt.jar -C lib/rt netscape/javascript; \
+	  echo "FIXME: Adding class files for IcedTeaPlugin to rt.jar..."; \
+	  fastjar -u -v -0 -f $(d)/$(basedir)/jre/lib/rt.jar \
+		-C lib/rt netscape/javascript; \
 	fi
 endif
 	: # compress manpages
@@ -921,6 +932,12 @@ endif
 	mkdir -p $(d_demo)/usr/share/pixmaps
 	cp -p debian/sun_java_app.xpm \
 		$(d_demo)/usr/share/pixmaps/$(basename)-app.xpm
+
+	: # install icons
+	for i in 16 24 32 48; do \
+	  install -D -p openjdk/jdk/src/solaris/classes/sun/awt/X11/java-icon$${i}.png \
+	    $(d_jre)/usr/share/icons/hicolor/$${i}x$${i}/apps/$(basename).png; \
+	done
 
 	: # create docdir symlinks for $(p_jrehl)
 	( \
