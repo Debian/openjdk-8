@@ -149,9 +149,7 @@ endif
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   DISTRIBUTION_PATCHES += \
 	debian/patches/cacao-no-mmap-first-page.diff \
-	debian/patches/cacao-min-heapsize.diff \
-	debian/patches/cacao-s390-ldflags.diff \
-	debian/patches/cacao-mipsel-linux.diff
+	debian/patches/cacao-min-heapsize.diff
 endif
 
 export DISTRIBUTION_PATCHES
