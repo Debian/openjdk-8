@@ -167,12 +167,12 @@ ifeq ($(STAGE1_JAVA),gcj)
 else ifeq ($(STAGE1_JAVA),openjdk)
   CONFIGURE_ARGS = \
 	--with-icedtea \
-	--with-icedtea-home=$(STAGE1_HOME) \
+	--with-icedtea-home=$(STAGE1_HOME)
   build_target = #icedtea-against-icedtea
 else ifeq ($(STAGE1_JAVA),cacao)
   CONFIGURE_ARGS = \
 	--with-icedtea \
-	--with-icedtea-home=$(STAGE1_HOME) \
+	--with-icedtea-home=$(STAGE1_HOME)
   build_target = #icedtea-against-icedtea
 endif
 
