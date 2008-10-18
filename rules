@@ -581,6 +581,24 @@ endif
 	$(EXTRA_BUILD_ENV) $(MAKE) $(build_target)
 	touch $@
 
+stamps/xvfb-check:
+	mkdir -p bin
+	echo 'xvfb-run -a -e xvfb-run.log -s "-extension GLX" "$$@"' > bin/my-xvfb-run
+	if ! /bin/sh bin/my-xvfb-run : ; then \
+	  echo "error running $$(cat bin/my-xvfb-run)"; \
+	  cat xvfb-run.log; \
+	  echo 'xvfb-run -a -e xvfb-run.log -s "$$@"' > bin/my-xvfb-run; \
+	  if ! /bin/sh bin/my-xvfb-run : ; then \
+	    echo "error running $$(cat bin/my-xvfb-run)"; \
+	    cat xvfb-run.log; \
+	    rm -f bin/my-xvfb-run; \
+	  fi; \
+	fi
+	if [ -f bin/my-xvfb-run ]; then \
+	  echo "using $$(cat bin/my-xvfb-run)"; \
+	fi
+	touch $@
+
 stamps/mauve-build: stamps/build
 	rm -rf mauve
 	mkdir -p mauve
@@ -595,27 +613,70 @@ ifeq ($(with_mauve_check),yes)
 endif
 	touch $@
 
-stamps/mauve-check: stamps/build stamps/mauve-build
+stamps/mauve-check: stamps/build stamps/mauve-build stamps/xvfb-check
 ifeq ($(with_mauve_check),yes)
-	-cd mauve && \
+	if [ -f bin/my-xvfb-run ]; then \
+	  cd mauve && \
 	    JAVA_HOME=$(CURDIR)/$(sdkimg) \
 	    PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
-		xvfb-run -s "-extension GLX" java Harness \
+		/bin/sh $(CURDIR)/bin/my-xvfb-run java Harness \
 		    -vm $(CURDIR)/$(sdkimg)/bin/java \
 		    -file $(CURDIR)/debian/mauve_tests \
 		    -timeout 30000 2>&1 \
-		| tee mauve_output
+		| tee mauve_output; \
+	else \
+	  echo "mauve testsuite not run for this build (xvfb failures)" > mauve/mauve_output; \
+	  cat xvfb-run.log >> mauve/mauve_output; \
+	fi
 	@sleep 5
 else
 	echo "mauve testsuite not run for this build" > mauve/mauve_output
 endif
 	touch $@
 
-stamps/jtreg-check: stamps/build
+jtreg_processes = ps x -ww -o pid,ppid,args \
+	| awk '$$2 == 1 && $$3 ~ /^$(subst /,\/,/scratch)/' \
+	| sed 's,$(CURDIR)/$(sdkimg),<sdkimg>,g;s,$(CURDIR),<pwd>,g'
+jtreg_pids = ps x --no-headers -ww -o pid,ppid,args \
+	| awk '$$2 == 1 && $$3 ~ /^$(subst /,\/,$(CURDIR)/$(sdkimg))/ {print $$1}'
+
+stamps/jtreg-check: stamps/build stamps/xvfb-check
 ifeq ($(with_jtreg_check),yes)
 	@echo "BEGIN jtreg"
-	-xvfb-run $(MAKE) -k jtregcheck 2>&1 | tee jtreg_output
+	if [ -f bin/my-xvfb-run ]; then \
+	  /bin/sh bin/my-xvfb-run $(MAKE) -j $(NJOBS) -k jtregcheck 2>&1 | tee jtreg_output; \
+	else \
+	  echo "jtreg harness not run for this build" > jtreg_output; \
+	  cat xvfb-run.log >> jtreg_output; \
+	fi
 	@echo "END jtreg"
+
+	@echo "BEGIN jtreg-summary"
+	cat test/jtreg-summary.log
+	@echo "END jtreg-summary"
+
+	: # kill testsuite processes still hanging
+	@pids=$$($(jtreg_pids)); \
+	if [ -n "$$pids" ]; then \
+	  echo "killing processes..."; \
+	  $(jtreg_processes); \
+	  kill -1 $$pids; \
+	  sleep 2; \
+	  pids=$$($(jtreg_pids)); \
+	  if [ -n "$$pids" ]; then \
+	    echo "trying harder..."; \
+	    $(jtreg_processes); \
+	    kill -9 $$pids; \
+	    sleep 2; \
+	  fi; \
+	else \
+	  echo "nothing to cleanup"; \
+	fi; \
+	pids=$$($(jtreg_pids)); \
+	if [ -n "$$pids" ]; then \
+	  echo "leftover processes..."; \
+	  $(jtreg_processes); \
+	fi
 else
 	echo "jtreg harness not run for this build" > jtreg_output
 endif
@@ -631,7 +692,7 @@ clean: debian-clean
 	rm -rf autom4te.cache
 	rm -rf mauve
 	rm -rf bin
-	rm -f jtreg_output
+	rm -f jtreg_output xvfb-run.log
 	rm -f buildwatch.pid
 	if [ -f generated.tar ]; then \
 	  rm -rf generated; \
@@ -1092,6 +1153,7 @@ binary-arch: build install
 	mkdir -p $(d_jdk)/usr/share/doc/$(p_jre)
 	cp mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
 	cp jtreg_output $(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output.log
+	-cp test/jtreg-summary.log $(d_jdk)/usr/share/doc/$(p_jre)/
 
 	dh_installmenu -s $(nodemo)
 	-dh_icons -s $(nodemo) || dh_iconcache -s $(nodemo)

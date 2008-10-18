@@ -1,3 +1,14 @@
+openjdk-6 (6b12-0ubuntu3) intrepid; urgency=low
+
+  * Update IcedTea build infrastructure (20081018).
+    - Fix LiveConnect issues in the web plugin. LP: #282762.
+    - Fail the build, if patches don't apply.
+  * Show xvfb and xauth failures in the build log, when running the testsuites.
+  * Kill processes which still hang after running the testsuite. Closes: #493339.
+  * Run the testsuite in parallel, reducing build time.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 18 Oct 2008 14:58:42 +0200
+
 openjdk-6 (6b12-0) experimental; urgency=low
 
   * Upload to experimental.
