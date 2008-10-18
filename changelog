@@ -6,6 +6,7 @@ openjdk-6 (6b12-0ubuntu3) intrepid; urgency=low
   * Show xvfb and xauth failures in the build log, when running the testsuites.
   * Kill processes which still hang after running the testsuite. Closes: #493339.
   * Run the testsuite in parallel, reducing build time.
+  * openjdk-headless: Depend instead of recommending tzdata-java.
 
  -- Matthias Klose <doko@ubuntu.com>  Sat, 18 Oct 2008 14:58:42 +0200
 
