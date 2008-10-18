@@ -22,16 +22,15 @@ Summary: Move call to getDeclaredMethods inside doPrivileged
 Reviewed-by:
 Contributed-by: jjb@google.com
 
-diff --git a/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java b/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java
---- openjdk/jdk/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java
-+++ openjdk/jdk/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java
+--- openjdk/jdk/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java~	2008-08-28 10:14:34.000000000 +0200
++++ openjdk/jdk/src/share/classes/sun/reflect/annotation/AnnotationInvocationHandler.java	2008-10-18 11:21:46.000000000 +0200
 @@ -272,14 +272,14 @@
       */
      private Method[] getMemberMethods() {
          if (memberMethods == null) {
 -            final Method[] mm = type.getDeclaredMethods();
--            AccessController.doPrivileged(new PrivilegedAction<Void>() {
--                public Void run() {
+-            AccessController.doPrivileged(new PrivilegedAction() {
+-                public Object run() {
 -                    AccessibleObject.setAccessible(mm, true);
 -                    return null;
 -                }
