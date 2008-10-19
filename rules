@@ -556,7 +556,7 @@ ifeq ($(with_check),yes)
       # only activate after testing; problems on s390
       with_mauve_check = yes
     endif
-    ifneq (,$(filter $(DEB_HOST_ARCH), alpha amd64 i386 lpia powerpc s390))
+    ifneq (,$(filter $(DEB_HOST_ARCH), alpha amd64 armel i386 lpia mips mipsel powerpc s390))
       # only activate after testing; hangs several tests.
       with_jtreg_check = yes
     endif
