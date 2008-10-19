@@ -1,0 +1,22 @@
+--- openjdk/jdk/make/common/shared/Platform.gmk.old	2008-08-04 09:36:53.000000000 +0200
++++ openjdk/jdk/make/common/shared/Platform.gmk	2008-08-04 11:50:14.000000000 +0200
+@@ -309,7 +309,7 @@
+     REQUIRED_ALSA_VERSION = ^((0[.]9[.][1-9])|(1[.]0[.][0-9]))[0-9]*
+   endif
+   # How much RAM does this machine have:
+-  MB_OF_MEMORY := $(shell free -m | fgrep Mem: | sed -e 's@\ \ *@ @g' | cut -d' ' -f2)
++  MB_OF_MEMORY := $(shell m=`free -m | fgrep Mem: | sed -e 's@\ \ *@ @g' | cut -d' ' -f2`; if [ "$$m" -lt 384 ]; then echo 384; else echo $$m; fi)
+ endif
+ 
+ # Windows with and without CYGWIN will be slightly different
+--- openjdk/corba/make/common/shared/Platform.gmk.old	2008-08-04 09:36:53.000000000 +0200
++++ openjdk/corba/make/common/shared/Platform.gmk	2008-08-04 11:50:14.000000000 +0200
+@@ -309,7 +309,7 @@
+     REQUIRED_ALSA_VERSION = ^((0[.]9[.][1-9])|(1[.]0[.][0-9]))[0-9]*
+   endif
+   # How much RAM does this machine have:
+-  MB_OF_MEMORY := $(shell free -m | fgrep Mem: | sed -e 's@\ \ *@ @g' | cut -d' ' -f2)
++  MB_OF_MEMORY := $(shell m=`free -m | fgrep Mem: | sed -e 's@\ \ *@ @g' | cut -d' ' -f2`; if [ "$$m" -lt 384 ]; then echo 384; else echo $$m; fi)
+ endif
+ 
+ # Windows with and without CYGWIN will be slightly different

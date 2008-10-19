@@ -133,6 +133,7 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/fix-race-cond-print.diff \
 	debian/patches/jdk-AnnotationInvocationHandler.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
+	debian/patches/icedtea-pretend-memory.diff \
 
 #	debian/patches/gcc-mtune-generic.diff \
 
@@ -148,8 +149,7 @@ endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   DISTRIBUTION_PATCHES += \
-	debian/patches/cacao-no-mmap-first-page.diff \
-	debian/patches/cacao-min-heapsize.diff
+	debian/patches/cacao-no-mmap-first-page.diff
 endif
 
 export DISTRIBUTION_PATCHES
@@ -552,9 +552,12 @@ endif
 
 ifeq ($(with_check),yes)
   ifneq (,$(findstring cacao, $(PKGSOURCE)))
-    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc))
-      # only activate after testing; hangs several tests. no fun with mauve
+    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
+      # only activate after testing; problems on s390
       with_mauve_check = yes
+    endif
+    ifneq (,$(filter $(DEB_HOST_ARCH), alpha amd64 i386 lpia powerpc s390))
+      # only activate after testing; hangs several tests.
       with_jtreg_check = yes
     endif
   else

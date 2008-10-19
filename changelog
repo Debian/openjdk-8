@@ -1,3 +1,11 @@
+openjdk-6 (6b12-0) experimental; urgency=low
+
+  * Upload to experimental.
+  * Pretend the availability of at least 384MB RAM; better swap on the
+    buildds than failing the build.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 19 Oct 2008 11:15:28 +0200
+
 openjdk-6 (6b12-0ubuntu4) intrepid; urgency=low
 
   * Update IcedTea build infrastructure (20081019).
@@ -19,12 +27,6 @@ openjdk-6 (6b12-0ubuntu3) intrepid; urgency=low
   * openjdk-headless: Depend instead of recommending tzdata-java.
 
  -- Matthias Klose <doko@ubuntu.com>  Sat, 18 Oct 2008 17:15:14 +0200
-
-openjdk-6 (6b12-0) experimental; urgency=low
-
-  * Upload to experimental.
-
- -- Matthias Klose <doko@ubuntu.com>  Fri, 17 Oct 2008 19:26:32 +0200
 
 openjdk-6 (6b12-0ubuntu2) intrepid; urgency=low
 
