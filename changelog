@@ -1,8 +1,12 @@
 openjdk-6 (6b12-0ubuntu4) intrepid; urgency=low
 
+  * Update IcedTea build infrastructure (20081019).
+    - plugin fix (Make applet size factors doubles instead of ints).
+  * Don't fail the build when the jtreg summary is missing.
   * openjdk-6-source-files: Fix priority and section of the binary package.
+  * Fix section of the plugin package.
 
- -- Matthias Klose <doko@ubuntu.com>  Sat, 18 Oct 2008 20:50:35 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 19 Oct 2008 09:29:03 +0200
 
 openjdk-6 (6b12-0ubuntu3) intrepid; urgency=low
 

@@ -1,5 +1,6 @@
 
 Package: @pkg_plugin@
+Section: web
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}

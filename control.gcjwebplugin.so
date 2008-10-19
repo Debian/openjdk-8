@@ -1,5 +1,7 @@
 
 Package: icedtea6-gcjwebplugin
+Priority: extra
+Section: web
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-6-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}

@@ -652,7 +652,7 @@ ifeq ($(with_jtreg_check),yes)
 	@echo "END jtreg"
 
 	@echo "BEGIN jtreg-summary"
-	cat test/jtreg-summary.log
+	-cat test/jtreg-summary.log
 	@echo "END jtreg-summary"
 
 	: # kill testsuite processes still hanging
