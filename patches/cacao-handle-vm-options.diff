@@ -1,0 +1,45 @@
+
+# HG changeset patch
+# User Christian Thalinger <twisti@complang.tuwien.ac.at>
+# Date 1224505833 -7200
+# Node ID 2d980fd6a104ee2fa25bc242eac1038cace55068
+# Parent 8cd43c47e47bca45c0ad1f6353e399de1ddf8965
+* src/vm/vm.cpp [ENABLE_VERIFIER] (OPT_XVERIFY_ALL, OPT_XVERIFY_NONE):
+New options.
+(VM::VM) [ENABLE_VERIFIER]: Handle new options.
+
+--- cacao/cacao/src/vm/vm.c	Sun Oct 12 14:28:54 2008 +0200
++++ cacao/cacao/src/vm/vm.c	Mon Oct 20 14:30:33 2008 +0200
+@@ -226,6 +226,8 @@
+ 
+ #if defined(ENABLE_VERIFIER)
+ 	OPT_NOVERIFY,
++	OPT_XVERIFY_ALL,
++	OPT_XVERIFY_NONE,
+ #if defined(TYPECHECK_VERBOSE)
+ 	OPT_VERBOSETC,
+ #endif
+@@ -318,7 +320,8 @@
+ 	{ "noasyncgc",         false, OPT_IGNORE },
+ #if defined(ENABLE_VERIFIER)
+ 	{ "noverify",          false, OPT_NOVERIFY },
+-	{ "Xverify:none",      false, OPT_NOVERIFY },
++	{ "Xverify:all",       false, OPT_XVERIFY_ALL },
++	{ "Xverify:none",      false, OPT_XVERIFY_NONE },
+ #endif
+ 	{ "v",                 false, OPT_VERBOSE1 },
+ 	{ "verbose:",          true,  OPT_VERBOSE },
+@@ -1085,7 +1088,12 @@
+ 			break;
+ 
+ #if defined(ENABLE_VERIFIER)
++		case OPT_XVERIFY_ALL:
++			opt_verify = true;
++			break;
++
+ 		case OPT_NOVERIFY:
++		case OPT_XVERIFY_NONE:
+ 			opt_verify = false;
+ 			break;
+ #endif
+
