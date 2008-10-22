@@ -1,3 +1,11 @@
+openjdk-6 (6b12-0ubuntu5) intrepid; urgency=low
+
+  * openjdk-jre-headless: Depend on ca-certificates-java.
+  * Configure with --pkgversion=<package version> to encode the package
+    version in the -version output and in vm dumps.
+  
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 22 Oct 2008 16:51:27 +0200
+
 openjdk-6 (6b12-1~exp1) experimental; urgency=low
 
   * cacao: Handle VM options Xverify:all and Xverify:none.
