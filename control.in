@@ -27,7 +27,7 @@ Package: @basename@-jre-headless
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Section: interpreters
-Depends: @basename@-jre-lib (>= @pkg_version@), ca-certificates-java, tzdata-java, rhino, libaccess-bridge-java (>= 1.22), java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre-lib (>= @pkg_version@), ca-certificates-java (>= 20080712ubuntu1), tzdata-java, rhino, libaccess-bridge-java (>= 1.22), java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}
 Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless

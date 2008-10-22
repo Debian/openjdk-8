@@ -1,16 +1,15 @@
 openjdk-6 (6b12-0ubuntu5) intrepid; urgency=low
 
+  * Update IcedTea build infrastructure (20081022).
+    - Add --pkgversion=<package version> configure option.
+    - IcedTeaPlugin fixes.
+    - Fix xjc regressions.
   * openjdk-jre-headless: Depend on ca-certificates-java.
   * Configure with --pkgversion=<package version> to encode the package
     version in the -version output and in vm dumps.
-  
- -- Matthias Klose <doko@ubuntu.com>  Wed, 22 Oct 2008 16:51:27 +0200
-
-openjdk-6 (6b12-1~exp1) experimental; urgency=low
-
   * cacao: Handle VM options Xverify:all and Xverify:none.
-
- -- Matthias Klose <doko@ubuntu.com>  Sun, 19 Oct 2008 11:15:28 +0200
+  
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 22 Oct 2008 19:21:54 +0200
 
 openjdk-6 (6b12-0) experimental; urgency=low
 
