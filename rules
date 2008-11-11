@@ -53,7 +53,7 @@ plugin_name = IcedTeaPlugin.so
 distribution := $(shell lsb_release --id --short)
 distrel := $(shell lsb_release --codename --short)
 
-with_wgy_zenhai = $(if $(filter $(distrel),hardy intrepid),yes)
+with_wgy_zenhai = $(if $(filter $(distrel),hardy intrepid jaunty),yes)
 
 arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
 archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
@@ -90,7 +90,7 @@ else
 endif
 
 OPENJDK_VERSION = b13
-OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-5_nov_2008-dfsg.tar.gz
+OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-05_nov_2008-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
 req_openjdk_bd_ver = 6b11
@@ -132,7 +132,6 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
 	debian/patches/no-compiler-path.diff \
 	debian/patches/fix-race-cond-print.diff \
-	debian/patches/jdk-AnnotationInvocationHandler.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
 
@@ -330,7 +329,7 @@ bd_zero = \
 	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [$(foreach a,$(hotspot_archs),!$(a))],
 #ifeq ($(with_plugin_pkg),yes)
   bd_plugin = \
-	libgtk2.0-dev, $(if $(filter $(distribution),Debian),$(if $(findstring gcj,$(plugin_name)),iceape-dev,xulrunner-dev (>= 1.9.0)),$(if $(filter $(distrel),hardy intrepid),xulrunner-1.9-dev,firefox-dev)),
+	libgtk2.0-dev, $(if $(filter $(distribution),Debian),$(if $(findstring gcj,$(plugin_name)),iceape-dev,xulrunner-dev (>= 1.9.0)),$(if $(filter $(distrel),hardy intrepid jaunty),xulrunner-1.9-dev,firefox-dev)),
 #endif
 bd_netx = fastjar (>= 2:0.96-0ubuntu2),
 ifneq (,$(filter $(distrel),lenny sid experimental))
