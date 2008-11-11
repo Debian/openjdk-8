@@ -1,6 +1,30 @@
+openjdk-6 (6b13~pre1-1~exp1) UNRELEASED; urgency=low
+
+  * New code drop (b13).
+  * Update IcedTea build infrastructure (20081111).
+  * Build-depend on ecj-gcj instead of ecj on architectures using
+    gij/gcj as the bootstrap system.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 11 Nov 2008 12:39:16 +0100
+
+openjdk-6 (6b12-1~exp1) experimental; urgency=low
+
+  * Update IcedTea build infrastructure (20081025).
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 25 Oct 2008 23:35:14 +0200
+
+openjdk-6 (6b12-0ubuntu6) intrepid; urgency=low
+
+  * Make the dependency on ca-certificates-java unversioned.
+  * Merge from IcedTea: 
+    - plugin/icedtea/netscape/javascript/JSObject.java: Make
+      long constructor public.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 24 Oct 2008 23:06:32 +0200
+
 openjdk-6 (6b12-0ubuntu5) intrepid; urgency=low
 
-  * Update IcedTea build infrastructure (20081022).
+  * Update IcedTea build infrastructure (20081024).
     - Add --pkgversion=<package version> configure option.
     - IcedTeaPlugin fixes.
     - Fix xjc regressions.
@@ -9,7 +33,7 @@ openjdk-6 (6b12-0ubuntu5) intrepid; urgency=low
     version in the -version output and in vm dumps.
   * cacao: Handle VM options Xverify:all and Xverify:none.
   
- -- Matthias Klose <doko@ubuntu.com>  Wed, 22 Oct 2008 19:21:54 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 24 Oct 2008 13:39:29 +0200
 
 openjdk-6 (6b12-0) experimental; urgency=low
 

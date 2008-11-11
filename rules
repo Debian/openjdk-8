@@ -89,8 +89,8 @@ else
   $(error unknown bootstrap method for architecture $(DEB_HOST_ARCH))
 endif
 
-OPENJDK_VERSION = b12
-OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-28_aug_2008-dfsg.tar.gz
+OPENJDK_VERSION = b13
+OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-5_nov_2008-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
 req_openjdk_bd_ver = 6b11
@@ -299,7 +299,7 @@ bd_bootstrap =
 ifneq (,$(stage1_gcj_archs))
   bd_bootstrap += \
 	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
-	ecj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
+	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
 	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
 endif
 ifneq (,$(stage1_openjdk_archs))
