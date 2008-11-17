@@ -66,8 +66,8 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 hotspot_archs	= amd64 i386 lpia sparc
 no_bootstrap_archs = alpha hppa
 
-stage1_gcj_archs = amd64 armel i386 ia64 lpia powerpc m68k mips mipsel sparc s390
-stage1_openjdk_archs = alpha
+stage1_gcj_archs = amd64 i386 ia64 lpia powerpc m68k mips mipsel sparc s390
+stage1_openjdk_archs = alpha armel
 stage1_cacao_archs =
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
@@ -117,11 +117,11 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   endif
 endif
 
-ifeq ($(distribution),Ubuntu)
-  ifneq (,$(findstring ppa, $(call vafilt,$(CHANGELOG_VARS),Version)))
-    with_pulse = yes
-  endif
-endif
+#ifeq ($(distribution),Ubuntu)
+#  ifneq (,$(findstring ppa, $(call vafilt,$(CHANGELOG_VARS),Version)))
+#    with_pulse = yes
+#  endif
+#endif
 
 DISTRIBUTION_PATCHES = \
 	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector.diff) \

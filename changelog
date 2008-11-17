@@ -1,9 +1,33 @@
-openjdk-6 (6b13~pre1-1~exp1) UNRELEASED; urgency=low
+openjdk-6 (6b13~pre1-0ubuntu1) jaunty; urgency=low
+
+  * Use openjdk-6 on armel for a faster build.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 17 Nov 2008 13:08:26 +0000
+
+openjdk-6 (6b13~pre1-0ubuntu1) jaunty; urgency=low
 
   * New code drop (b13).
+    - In the langtools area, besides a few miscellaneous bug fixes (6760834,
+      6725036, 6657499), all the langtools regression tests now pass out of
+      the box (6728697, 6707027) and if using the most recent version of
+      jtreg, the langtools regression tests can be run in the much faster
+      "same vm" mode of jtreg, enabled with the -s option (6749967, 6748541,
+      6748546, 6748601, 6759775, 6759795, 6759796, 6759996, 6760805, 6760930).
+    - Gervill update, including applying a patch from IcedTea (6758986,
+      6748247, 6748251).
+    - Publishing a few dozen additional existing regression tests as open
+      source (6601457, 6759433, 6740185).
+    - JMX and monitoring fixes (6651382, 6616825, 6756202, 6754672).
+    - Man page updates (6757036, 6392810, 6504867, 6326773).
+    - Assorted other fixes (6746055, 6621697, 6756569, 6356642, 6761678).
   * Update IcedTea build infrastructure (20081111).
+    - Fix freeze in midi app, LP: #275672.
+    - Fixes in the IcedTeaPlugin: LP: #282570, LP: #282570, LP: #285729,
+      LP: #291377, LP: #37330, LP: #239533. 
+    - Fix vertical text metrics with freetype scaler. LP: #289784.
   * Build-depend on ecj-gcj instead of ecj on architectures using
     gij/gcj as the bootstrap system.
+  * Fixed in 6b12: Stack overflow running Kea. LP: #244731.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 11 Nov 2008 12:39:16 +0100
 
