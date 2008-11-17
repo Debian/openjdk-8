@@ -149,8 +149,7 @@ endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   DISTRIBUTION_PATCHES += \
-	debian/patches/cacao-no-mmap-first-page.diff \
-	debian/patches/cacao-handle-vm-options.diff
+	debian/patches/cacao-no-mmap-first-page.diff
 endif
 
 export DISTRIBUTION_PATCHES
@@ -309,7 +308,7 @@ ifneq (,$(stage1_cacao_archs))
   bd_bootstrap += \
 	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
 endif
-bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b12)$(COMMA) $(p_tar) (<< 6b13)$(COMMA))
+bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b13~pre1)$(COMMA) $(p_tar) (<< 6b14)$(COMMA))
 bd_cacao = libtool,
 bd_cacao = $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.4~20081012)$(COMMA))
 bd_gcc = \
