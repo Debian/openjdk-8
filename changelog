@@ -1,8 +1,18 @@
-openjdk-6 (6b13~pre1-0ubuntu1) jaunty; urgency=low
+openjdk-6 (6b13~pre1-0ubuntu3) jaunty; urgency=low
 
-  * Use openjdk-6 on armel for a faster build.
+  * Fix versioned conflict on icedtea-gcjwebplugin. LP: #284299.
+  * Update IcedTea build infrastructure (20081121).
+    - Fixes for the IcedTeaPlugin.
+  * Configure with pulseaudio in jaunty.
 
- -- Matthias Klose <doko@ubuntu.com>  Mon, 17 Nov 2008 13:08:26 +0000
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 21 Nov 2008 07:46:10 +0100
+
+openjdk-6 (6b13~pre1-0ubuntu2) jaunty; urgency=low
+
+  * Update IcedTea build infrastructure (20081117).
+  * Use openjdk-6 as stage1 compiler on armel for a faster build.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 17 Nov 2008 18:43:17 +0100
 
 openjdk-6 (6b13~pre1-0ubuntu1) jaunty; urgency=low
 

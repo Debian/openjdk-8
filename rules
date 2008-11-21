@@ -117,11 +117,9 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   endif
 endif
 
-#ifeq ($(distribution),Ubuntu)
-#  ifneq (,$(findstring ppa, $(call vafilt,$(CHANGELOG_VARS),Version)))
-#    with_pulse = yes
-#  endif
-#endif
+ifneq (,$(filter $(distrel),jaunty))
+  with_pulse = yes
+endif
 
 DISTRIBUTION_PATCHES = \
 	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector.diff) \
