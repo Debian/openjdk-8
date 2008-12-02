@@ -1,6 +1,6 @@
---- openjdk/hotspot/build/linux/makefiles/gcc.make~	2007-11-24 14:49:38.366274732 +0100
-+++ openjdk/hotspot/build/linux/makefiles/gcc.make	2007-11-24 15:00:51.616430558 +0100
-@@ -62,6 +62,7 @@
+--- openjdk/hotspot/make/linux/makefiles/gcc.make.orig	2008-12-02 14:56:38.000000000 +0100
++++ openjdk/hotspot/make/linux/makefiles/gcc.make	2008-12-02 14:58:56.000000000 +0100
+@@ -67,6 +67,7 @@
  CFLAGS += -fno-exceptions
  CFLAGS += -D_REENTRANT
  CFLAGS += -fcheck-new

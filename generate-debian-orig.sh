@@ -33,7 +33,7 @@ else
     mkdir -p $pkgdir.orig
     case "$base" in
       openjdk*)
-	cp -p $hotspot $pkgdir.orig/ ;;
+	cp -p $hotspot $pkgdir.orig/
 	cp -p $tarball $pkgdir.orig/ ;;
       cacao*)
 	if [ -f $cacaotb ]; then

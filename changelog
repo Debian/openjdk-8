@@ -2,6 +2,7 @@ openjdk-6 (6b13~pre2-0ubuntu1) jaunty; urgency=low
 
   * Update IcedTea build infrastructure (20081122).
     - Add Dec 3 OpenJDK security patches
+  * Build with --with-hotspot-build, update patches for this config.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 18:34:11 +0100
 

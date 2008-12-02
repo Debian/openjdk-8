@@ -132,6 +132,7 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/fix-race-cond-print.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
+	debian/patches/hotspot-warn-no-errformat.diff \
 
 #	debian/patches/gcc-mtune-generic.diff \
 
@@ -190,6 +191,7 @@ CONFIGURE_ARGS += \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-rhino=/usr/share/java/js.jar \
+	--with-hotspot-build \
 	--with-hotspot-src-zip=hotspot-20081202.tar.gz \
 	--with-openjdk-src-zip=$(firstword $(wildcard $(OPENJDK_SRC_ZIP) /usr/src/$(OPENJDK_SRC_ZIP)))
 
@@ -577,6 +579,10 @@ build: stamps/build stamps/mauve-check stamps/jtreg-check
 	  kill -1 $$pid || :; sleep 1; kill -9 $$pid || :; \
 	fi
 	rm -f buildwatch.pid
+	@echo "XXX jre image"
+	ls -l $(jreimg)
+	@echo "XXX sdk image"
+	ls -l $(sdkimg)
 
 stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel hppa ia64 m68k mips mipsel powerpc s390 sparc))
