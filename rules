@@ -190,6 +190,7 @@ CONFIGURE_ARGS += \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-rhino=/usr/share/java/js.jar \
+	--with-hotspot-src-zip=hotspot-20081202.tar.gz \
 	--with-openjdk-src-zip=$(firstword $(wildcard $(OPENJDK_SRC_ZIP) /usr/src/$(OPENJDK_SRC_ZIP)))
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
