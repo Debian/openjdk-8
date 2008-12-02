@@ -88,11 +88,6 @@ rm -f \
   openjdk/jdk/test/java/util/Locale/data/deflocale.winvista \
   openjdk/jdk/test/java/util/Locale/data/deflocale.winxp \
 
-# has w3c copyright. license to be checked / needs checking after decoding
-rm -f \
-  openjdk/jdk/test/javax/xml/crypto/dsig/data/xml-stylesheet \
-  openjdk/jdk/test/javax/xml/crypto/dsig/data/xml-stylesheet.b64
-
 # TODO
 #$ find openjdk -name '*.jar' -o -name '*.class'|grep -v test
 
