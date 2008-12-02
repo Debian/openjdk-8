@@ -1,17 +1,17 @@
---- openjdk/jdk/make/common/shared/Platform.gmk.orig	2008-10-19 11:42:03.000000000 +0200
-+++ openjdk/jdk/make/common/shared/Platform.gmk	2008-10-19 11:43:25.000000000 +0200
-@@ -315,7 +315,7 @@
-     REQUIRED_ALSA_VERSION = ^((0[.]9[.][1-9])|(1[.]0[.][0-9]))[0-9]*
+--- openjdk/jdk/make/common/shared/Platform.gmk.orig	2008-12-02 14:56:37.000000000 +0100
++++ openjdk/jdk/make/common/shared/Platform.gmk	2008-12-02 15:14:15.000000000 +0100
+@@ -177,7 +177,7 @@
+     REQUIRED_FREE_SPACE=1040000
    endif
    # How much RAM does this machine have:
--  MB_OF_MEMORY := $(shell free -m | fgrep Mem: | sed -e 's@\ \ *@ @g' | cut -d' ' -f2)
+-  MB_OF_MEMORY=$(shell /etc/prtconf | fgrep 'Memory size:' | expand | cut -d' ' -f3)
 +  MB_OF_MEMORY := $(shell m=`free -m | fgrep Mem: | sed -e 's@\ \ *@ @g' | cut -d' ' -f2`; if [ "$$m" -lt 384 ]; then echo 384; else echo $$m; fi)
  endif
  
- # Windows with and without CYGWIN will be slightly different
---- openjdk/corba/make/common/shared/Platform.gmk.orig	2008-10-19 11:42:03.000000000 +0200
-+++ openjdk/corba/make/common/shared/Platform.gmk	2008-10-19 11:43:25.000000000 +0200
-@@ -301,7 +301,7 @@
+ # Platform settings specific to Linux
+--- openjdk/corba/make/common/shared/Platform.gmk.orig	2008-12-02 14:56:37.000000000 +0100
++++ openjdk/corba/make/common/shared/Platform.gmk	2008-12-02 15:13:23.000000000 +0100
+@@ -270,7 +270,7 @@
      endif
    endif
    # How much RAM does this machine have:

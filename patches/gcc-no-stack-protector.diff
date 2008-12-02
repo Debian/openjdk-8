@@ -1,6 +1,6 @@
---- openjdk/hotspot/build/linux/makefiles/gcc.make~	2007-11-24 14:49:38.366274732 +0100
-+++ openjdk/hotspot/build/linux/makefiles/gcc.make	2007-11-24 15:00:51.616430558 +0100
-@@ -62,6 +62,7 @@
+--- openjdk/hotspot/make/linux/makefiles/gcc.make.orig	2008-12-02 14:56:38.000000000 +0100
++++ openjdk/hotspot/make/linux/makefiles/gcc.make	2008-12-02 14:58:56.000000000 +0100
+@@ -67,6 +67,7 @@
  CFLAGS += -fno-exceptions
  CFLAGS += -D_REENTRANT
  CFLAGS += -fcheck-new
@@ -8,20 +8,20 @@
  
  # Always generate full debuginfo on Linux.  It'll be in a separate
  # debuginfo package when building RPMs.
---- openjdk/corba/make/common/Defs-linux.gmk~	2008-03-28 20:11:54.075568406 +0100
-+++ openjdk/corba/make/common/Defs-linux.gmk	2008-03-28 20:13:51.537340290 +0100
-@@ -107,6 +107,8 @@
+--- openjdk/jdk/make/common/Defs-linux.gmk.orig	2008-12-02 14:56:41.000000000 +0100
++++ openjdk/jdk/make/common/Defs-linux.gmk	2008-12-02 15:00:34.000000000 +0100
+@@ -134,6 +134,8 @@
    LDFLAGS_COMMON        += $(LDFLAGS_COMMON_$(ARCH))
  endif
  
 +CFLAGS_REQUIRED         += -fno-stack-protector
 +
- # Add in platform specific optimizations for all opt levels
- CC_HIGHEST_OPT += $(_OPT_$(ARCH))
- CC_HIGHER_OPT  += $(_OPT_$(ARCH))
---- openjdk/jdk/make/common/Defs-linux.gmk~	2008-03-28 20:11:54.095568707 +0100
-+++ openjdk/jdk/make/common/Defs-linux.gmk	2008-03-28 20:14:15.037694787 +0100
-@@ -117,6 +117,8 @@
+ #
+ # Selection of warning messages
+ #
+--- openjdk/corba/make/common/Defs-linux.gmk.orig	2008-12-02 14:56:41.000000000 +0100
++++ openjdk/corba/make/common/Defs-linux.gmk	2008-12-02 14:58:59.000000000 +0100
+@@ -120,6 +120,8 @@
    LDFLAGS_COMMON        += $(LDFLAGS_COMMON_$(ARCH))
  endif
  

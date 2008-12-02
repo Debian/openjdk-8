@@ -1,3 +1,10 @@
+openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
+
+  * Build openjdk-7 snapshot (7b40).
+  * Update packaging for openjdk-7.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 14:27:03 +0100
+
 openjdk-6 (6b13~pre1-0ubuntu3) jaunty; urgency=low
 
   * Fix versioned conflict on icedtea-gcjwebplugin. LP: #284299.

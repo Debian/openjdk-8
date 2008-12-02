@@ -1,14 +1,14 @@
 
-tarball=openjdk-6-src-b13-05_nov_2008-dfsg.tar.gz
-version=6b13~pre1
+tarball=openjdk-7-ea-src-b40-20_nov_2008-dfsg.tar.gz
+version=7b40
 cacaotb=cacao-0.99.4~20081010.tar.bz2
-base=openjdk-6
+base=openjdk-7
 #base=cacao-oj6
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
-icedtea_checkout=../icedtea6
-debian_checkout=openjdk6
+icedtea_checkout=../icedtea7
+debian_checkout=openjdk7
 
 if [ -d $pkgdir ]; then
     echo directory $pkgdir already exists

@@ -9,8 +9,10 @@ dist=$(lsb_release -is)
 
 # Untar openjdk source zip.
 rm -rf openjdk
-mkdir openjdk
-tar xf $1 -C openjdk
+case "$1" in
+  *.zip) unzip -q -x $1 ;;
+  *.tar*) tar xf $1;;
+esac
 
 # Remove binaries
 rm -f \
@@ -88,11 +90,6 @@ rm -f \
   openjdk/jdk/test/java/util/Locale/data/deflocale.winvista \
   openjdk/jdk/test/java/util/Locale/data/deflocale.winxp \
 
-# has w3c copyright. license to be checked / needs checking after decoding
-rm -f \
-  openjdk/jdk/test/javax/xml/crypto/dsig/data/xml-stylesheet \
-  openjdk/jdk/test/javax/xml/crypto/dsig/data/xml-stylesheet.b64
-
 # TODO
 #$ find openjdk -name '*.jar' -o -name '*.class'|grep -v test
 
@@ -100,8 +97,8 @@ rm -f \
 
 # Create new zip with new name.
 
-NEW_ZIP=$(echo $1 | sed -e 's/\.tar.gz/-dfsg.tar.gz/')
-(cd openjdk && tar -cz -f ../$NEW_ZIP *)
+NEW_ZIP=$(echo $1 | sed -e 's/\.tar.gz/-dfsg.tar.gz/;s/\.zip/-dfsg.tar.gz/')
+tar -cz -f $NEW_ZIP openjdk
 
 # Remove old unzipped openjdk dir.
 rm -rf openjdk

@@ -66,8 +66,8 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 hotspot_archs	= amd64 i386 lpia sparc
 no_bootstrap_archs = alpha hppa
 
-stage1_gcj_archs = amd64 i386 ia64 lpia powerpc m68k mips mipsel sparc s390
-stage1_openjdk_archs = alpha armel
+stage1_gcj_archs =
+stage1_openjdk_archs = alpha amd64 armel i386 ia64 lpia powerpc m68k mips mipsel sparc s390
 stage1_cacao_archs =
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
@@ -89,12 +89,12 @@ else
   $(error unknown bootstrap method for architecture $(DEB_HOST_ARCH))
 endif
 
-OPENJDK_VERSION = b13
-OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-05_nov_2008-dfsg.tar.gz
+OPENJDK_VERSION = b40
+OPENJDK_SRC_ZIP = openjdk-7-ea-src-$(OPENJDK_VERSION)-20_nov_2008-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
 req_openjdk_bd_ver = 6b11
-req_openjdk_ver = 6b11
+req_openjdk_ver = 6b40
 
 unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
@@ -132,6 +132,7 @@ DISTRIBUTION_PATCHES = \
 	debian/patches/fix-race-cond-print.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
+	debian/patches/hotspot-warn-no-errformat.diff \
 
 #	debian/patches/gcc-mtune-generic.diff \
 
@@ -262,12 +263,12 @@ else
   endif
   p_lib_arch	= all
 endif
-jvmver		= 1.6.0
-shortver	= 6
+jvmver		= 1.7.0
+shortver	= 7
 jdiralias	= java-$(shortver)-$(origin)
 basedir		= usr/lib/jvm/$(jdiralias)
-jreimg		= openjdk/control/build/linux-$(jvmarch)/j2re-image
-sdkimg		= openjdk/control/build/linux-$(jvmarch)/j2sdk-image
+jreimg		= openjdk/build/linux-$(jvmarch)/j2re-image
+sdkimg		= openjdk/build/linux-$(jvmarch)/j2sdk-image
 security	= etc/$(jdiralias)/security
 
 # (most) jre and jdk tools handled by the alternatives system.
@@ -306,7 +307,7 @@ ifneq (,$(stage1_cacao_archs))
   bd_bootstrap += \
 	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
 endif
-bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b13~pre1)$(COMMA) $(p_tar) (<< 6b14)$(COMMA))
+bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b40)$(COMMA) $(p_tar) (<< 6b41)$(COMMA))
 bd_cacao = libtool,
 bd_cacao = $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.4~20081012)$(COMMA))
 bd_gcc = \
@@ -525,9 +526,6 @@ endif
 unpack: stamps/backup-generated stamps/unpack
 stamps/unpack: stamps/icedtea-configure stamps/backup-generated
 	$(MAKE) stamps/extract.stamp
-ifeq ($(STAGE1_JAVA),gcj)
-	$(MAKE) stamps/extract-ecj.stamp
-endif
 	touch $@
 
 dist-openjdk: $(OPENJDK_SRC_ZIP)
@@ -745,6 +743,10 @@ install: packaging-files
 	cp -a $(jreimg)/man $(d)/$(basedir)/jre/
 	chmod -R u+w $(d)
 
+	: # specific to OpenJDK7, or missing explicitely?
+	cp -p openjdk/jdk/src/share/lib/management/snmp.acl.template \
+		debian/tmp/usr/lib/jvm/java-7-openjdk/jre/lib/management/
+
 	: # add extra symlinks for header files
 	ln -sf linux/jni_md.h $(d)/$(basedir)/include/jni_md.h
 	ln -sf linux/jawt_md.h $(d)/$(basedir)/include/jawt_md.h
@@ -875,7 +877,6 @@ endif
 	: # $(p_lib).install
 	( \
 	  echo '$(basedir)/jre/ASSEMBLY_EXCEPTION'; \
-	  echo '$(basedir)/jre/README.html'; \
 	  echo '$(basedir)/jre/THIRD_PARTY_README'; \
 	  cd $(d); \
 	  for i in $(basedir)/jre/lib/*; do \
@@ -890,7 +891,6 @@ endif
 	  echo '$(basedir)/lib'; \
 	  echo '$(basedir)/LICENSE'; \
 	  echo '$(basedir)/ASSEMBLY_EXCEPTION'; \
-	  echo '$(basedir)/README.html'; \
 	  echo '$(basedir)/THIRD_PARTY_README'; \
 	  cd $(d); \
 	  for i in $(basedir)/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
@@ -1086,9 +1086,9 @@ endif
 
 	: # Install stuff to generate font config and timezone files.
 	mkdir -p $(d_lib)/$(basedir)/jre/lib
-	cp -p openjdk/control/build/linux-$(jvmarch)/btjars/compilefontconfig.jar \
+	cp -p openjdk/build/linux-$(jvmarch)/btjars/compilefontconfig.jar \
 		$(d_lib)/$(basedir)/jre/lib/
-	cp -p openjdk/control/build/linux-$(jvmarch)/btjars/javazic.jar \
+	cp -p openjdk/build/linux-$(jvmarch)/btjars/javazic.jar \
 		$(d_lib)/$(basedir)/jre/lib/
 
 	: # install lintian overrides
@@ -1111,7 +1111,7 @@ else
 	dh_installchangelogs -p$(p_doc)
 	dh_installdocs -p$(p_doc) 
 	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
-	for i in openjdk/control/build/linux-$(jvmarch)/docs/*; do \
+	for i in openjdk/build/linux-$(jvmarch)/docs/*; do \
 	  [ -e $$i ] || continue; \
 	  b=$$(basename $$i); \
 	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jre)/; \
