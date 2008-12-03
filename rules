@@ -90,8 +90,8 @@ else
   $(error unknown bootstrap method for architecture $(DEB_HOST_ARCH))
 endif
 
-OPENJDK_VERSION = b13
-OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-05_nov_2008-dfsg.tar.gz
+OPENJDK_VERSION = b14
+OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-25_nov_2008-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
 req_openjdk_bd_ver = 6b11
@@ -324,7 +324,7 @@ ifneq (,$(stage1_cacao_archs))
   bd_bootstrap += \
 	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
 endif
-bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b13~pre1)$(COMMA) $(p_tar) (<< 6b14)$(COMMA))
+bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b14~pre1)$(COMMA) $(p_tar) (<< 6b15)$(COMMA))
 bd_cacao = libtool,
 bd_cacao = $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.4~20081012)$(COMMA))
 bd_gcc = \

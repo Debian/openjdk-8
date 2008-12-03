@@ -1,3 +1,9 @@
+openjdk-6 (6b14~pre1-0ubuntu1) jaunty; urgency=low
+
+  * New code drop (b14).
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 03 Dec 2008 21:44:40 +0100
+
 openjdk-6 (6b13~pre2-0ubuntu2) jaunty; urgency=low
 
   * Update IcedTea build infrastructure (20081203).
