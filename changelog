@@ -1,8 +1,11 @@
 openjdk-6 (6b13~pre2-0ubuntu2) jaunty; urgency=low
 
+  * Update IcedTea build infrastructure (20081203).
+    - Fix build failures on zero based architectures.
   * Add build dependency on libxrender-dev.
+  * Don't use fastjar on ia64, working around a build failure.
 
- -- Matthias Klose <doko@ubuntu.com>  Wed, 03 Dec 2008 10:55:15 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 03 Dec 2008 18:43:23 +0100
 
 openjdk-6 (6b13~pre2-0ubuntu1) jaunty; urgency=low
 

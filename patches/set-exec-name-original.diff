@@ -1,0 +1,69 @@
+--- openjdk/hotspot/src/os/linux/launcher/java_md.c.orig	2008-05-13 11:00:46.020643623 +0200
++++ openjdk/hotspot/src/os/linux/launcher/java_md.c	2008-05-13 11:02:27.212170074 +0200
+@@ -1011,8 +1011,19 @@
+         char buf[PATH_MAX+1];
+         int len = readlink(self, buf, PATH_MAX);
+         if (len >= 0) {
++	    const char* prefixes[] = {"/cow/", "/persistmnt/", "/rofs/", "/rwfs/", "/squashmnt/", NULL};
++	    const char **prefix;
++	    size_t prefix_len = 0;
+ 	    buf[len] = '\0';		/* readlink doesn't nul terminate */
+-	    exec_path = strdup(buf);
++	    for (prefix = prefixes; *prefix; prefix++) {
++	      prefix_len = strlen(buf) < strlen(*prefix) ? strlen(buf) : strlen(*prefix);
++	      if (!strncmp(*prefix, buf, prefix_len)) {
++		    prefix_len--;
++		    break;
++	      }
++	      prefix_len = 0;
++	    }
++	    exec_path = strdup(buf + prefix_len);
+ 	}
+     }
+ #else /* !__sun && !__linux */
+--- openjdk/hotspot/src/os/solaris/launcher/java_md.c.orig	2008-05-13 11:00:46.020643623 +0200
++++ openjdk/hotspot/src/os/solaris/launcher/java_md.c	2008-05-13 11:02:08.771891907 +0200
+@@ -1011,8 +1011,19 @@
+         char buf[PATH_MAX+1];
+         int len = readlink(self, buf, PATH_MAX);
+         if (len >= 0) {
++	    const char* prefixes[] = {"/cow/", "/persistmnt/", "/rofs/", "/rwfs/", "/squashmnt/", NULL};
++	    const char **prefix;
++	    size_t prefix_len = 0;
+ 	    buf[len] = '\0';		/* readlink doesn't nul terminate */
+-	    exec_path = strdup(buf);
++	    for (prefix = prefixes; *prefix; prefix++) {
++	      prefix_len = strlen(buf) < strlen(*prefix) ? strlen(buf) : strlen(*prefix);
++	      if (!strncmp(*prefix, buf, prefix_len)) {
++		    prefix_len--;
++		    break;
++	      }
++	      prefix_len = 0;
++	    }
++	    exec_path = strdup(buf + prefix_len);
+ 	}
+     }
+ #else /* !__sun && !__linux */
+--- openjdk/jdk/src/solaris/bin/java_md.c.orig	2008-05-13 11:00:46.020643623 +0200
++++ openjdk/jdk/src/solaris/bin/java_md.c	2008-05-13 11:01:28.581285640 +0200
+@@ -884,8 +884,19 @@
+         char buf[PATH_MAX+1];
+         int len = readlink(self, buf, PATH_MAX);
+         if (len >= 0) {
++	    const char* prefixes[] = {"/cow/", "/persistmnt/", "/rofs/", "/rwfs/", "/squashmnt/", NULL};
++	    const char **prefix;
++	    size_t prefix_len = 0;
+             buf[len] = '\0';            /* readlink doesn't nul terminate */
+-            exec_path = JLI_StringDup(buf);
++	    for (prefix = prefixes; *prefix; prefix++) {
++	      prefix_len = strlen(buf) < strlen(*prefix) ? strlen(buf) : strlen(*prefix);
++	      if (!strncmp(*prefix, buf, prefix_len)) {
++		    prefix_len--;
++		    break;
++	      }
++	      prefix_len = 0;
++	    }
++            exec_path = JLI_StringDup(buf + prefix_len);
+         }
+     }
+ #else /* !__sun && !__linux */
