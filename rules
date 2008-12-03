@@ -319,7 +319,7 @@ endif
 bd_syslibs = \
 	libjpeg62-dev, libpng12-dev, libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev), zlib1g-dev,
 bd_openjdk = \
-	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, \
+	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2-dev,libcups2-dev), \
 	libasound2-dev, libfreetype6-dev, \
 	libxalan2-java, rhino, liblcms1-dev, libxinerama-dev,
