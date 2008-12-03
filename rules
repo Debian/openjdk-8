@@ -46,7 +46,7 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
 endif
 
 # even if not building the package, we configure for a specific plugin
-# with_plugin_pkg: yes or empty, plugin_name: IcedTeaPlugin.so or gcjwebplugin.so
+# with_plugin_pkg: yes or empty, plugin_name: IcedTeaPlugin.so
 with_plugin_pkg = yes
 plugin_name = IcedTeaPlugin.so
 
@@ -225,13 +225,9 @@ ifneq (,$(NJOBS))
 endif
 
 ifeq ($(with_plugin_pkg),yes)
-  ifeq ($(plugin_name),gcjwebplugin.so)
-    CONFIGURE_ARGS += --enable-gcjwebplugin
-  else
-    CONFIGURE_ARGS += --enable-liveconnect
-  endif
+  CONFIGURE_ARGS += --enable-liveconnect
 else
-  CONFIGURE_ARGS += --disable-gcjwebplugin --disable-liveconnect
+  CONFIGURE_ARGS += --disable-liveconnect
 endif
 
 ifeq ($(with_pulse),yes)
@@ -379,12 +375,8 @@ p_demo	= $(basename)-demo
 p_src	= $(basename)-source
 p_doc	= $(basename)-doc
 p_dbg	= $(basename)-dbg
-p_tar	= openjdk-6-source-files
-ifeq ($(plugin_name),gcjwebplugin.so)
-  p_plug= icedtea-gcjwebplugin
-else
-  p_plug = $(if $(findstring openjdk,$(PKGSOURCE)),icedtea6-plugin,$(basename)-plugin)
-endif
+p_tar	= openjdk-$(shortver)-source-files
+p_plug = $(if $(findstring openjdk,$(PKGSOURCE)),icedtea$(shortver)-plugin,$(basename)-plugin)
 
 d	= debian/tmp
 d_jre	= debian/$(p_jre)

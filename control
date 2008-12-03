@@ -120,7 +120,7 @@ Description: Java runtime based on OpenJDK (debugging symbols)
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
 
-Package: icedtea6-plugin
+Package: icedtea7-plugin
 Section: web
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
