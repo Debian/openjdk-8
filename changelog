@@ -1,8 +1,15 @@
+openjdk-6 (6b14~pre1-0ubuntu2) jaunty; urgency=low
+
+  * Install hotspot tarball in -source-files package.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 04 Dec 2008 12:36:54 +0100
+
 openjdk-6 (6b14~pre1-0ubuntu1) jaunty; urgency=low
 
   * New code drop (b14).
+  * Update IcedTea build infrastructure (20081204).
 
- -- Matthias Klose <doko@ubuntu.com>  Wed, 03 Dec 2008 21:44:40 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 04 Dec 2008 11:40:56 +0100
 
 openjdk-6 (6b13~pre2-0ubuntu2) jaunty; urgency=low
 

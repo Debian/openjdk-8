@@ -202,7 +202,7 @@ CONFIGURE_ARGS += \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-rhino=/usr/share/java/js.jar \
-	--with-hotspot-src-zip=hotspot-20081202.tar.gz \
+	--with-hotspot-src-zip=$(firstword $(wildcard hotspot-*.tar.gz /usr/src/hotspot-*.tar.gz)) \
 	--with-openjdk-src-zip=$(firstword $(wildcard $(OPENJDK_SRC_ZIP) /usr/src/$(OPENJDK_SRC_ZIP)))
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
@@ -1149,6 +1149,7 @@ else
 	dh_installchangelogs -p$(p_tar)
 	mkdir -p $(d_tar)/usr/src
 	cp -p $(OPENJDK_SRC_ZIP) $(d_tar)/usr/src/
+	cp -p hotspot-*.tar.gz $(d_tar)/usr/src/
   endif
 	dh_installmenu -i $(nodocs)
 	-dh_icons -i $(nodocs) || dh_iconcache -i $(nodocs)
