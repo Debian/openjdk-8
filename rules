@@ -64,6 +64,8 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(archdir_map))))
 
 hotspot_archs	= amd64 i386 lpia sparc
+hotspot_archs	= amd64 lpia sparc
+shark_archs	= i386
 no_bootstrap_archs = alpha hppa
 
 stage1_gcj_archs =
@@ -160,8 +162,11 @@ ifeq ($(STAGE1_JAVA),gcj)
 	--with-java=$(STAGE1_HOME)/bin/java \
 	--with-javah=/usr/bin/gjavah$(GCJ_SUFFIX) \
 	--with-rmic=/usr/bin/grmic$(GCJ_SUFFIX) \
-	--with-jar=/usr/bin/fastjar \
 	--with-libgcj-jar=/usr/share/java/libgcj$(GCJ_SUFFIX).jar
+  ifeq (,$(filter ia64, $(DEB_HOST_ARCH)))
+    CONFIGURE_ARGS += \
+	--with-jar=/usr/bin/fastjar
+  endif
   build_target = icedtea-against-icedtea
 else ifeq ($(STAGE1_JAVA),openjdk)
   CONFIGURE_ARGS = \
@@ -182,7 +187,7 @@ CONFIGURE_ARGS += --with-pkgversion="$(PKGVERSION)"
 # only use it for zero ports except powerpc (which we assume as
 # fast enough to build.
 ifneq (,$(findstring openjdk, $(PKGSOURCE)))
-  ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) powerpc))
+  ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) ia64 powerpc))
     CONFIGURE_ARGS += --with-alt-jar=/usr/bin/fastjar
   endif
 endif
@@ -205,6 +210,11 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
 else
   ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
     CONFIGURE_ARGS += --enable-zero
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
+      CONFIGURE_ARGS += --enable-shark
+    endif
+  else
+    CONFIGURE_ARGS += --with-hotspot-build
   endif
   ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
     EXTRA_BUILD_ENV = LIBFFI_LIBS=-lffi_pic
@@ -321,6 +331,9 @@ bd_openjdk = \
 	libxalan2-java, rhino, liblcms1-dev, libxinerama-dev,
 bd_zero = \
 	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [$(foreach a,$(hotspot_archs),!$(a))],
+bd_shark = \
+	llvm-dev (>= 2.4) [$(foreach a,$(shark_archs),$(a))],
+bd_shark =
 #ifeq ($(with_plugin_pkg),yes)
   bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),$(if $(findstring gcj,$(plugin_name)),iceape-dev,xulrunner-dev (>= 1.9.0)),$(if $(filter $(distrel),hardy intrepid jaunty),xulrunner-1.9-dev,firefox-dev)),
@@ -423,6 +436,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_tarball@/$(bd_tarball)/g' \
 	      -e 's/@bd_cacao@/$(bd_cacao)/g' \
 	      -e 's/@bd_pulsejava@/$(bd_pulsejava)/g' \
+	      -e 's/@bd_shark@/$(bd_shark)/g' \
 	      -e 's/@core_fonts@/$(core_fonts)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	      -e 's/@pkg_plugin@/$(p_plug)/g' \
