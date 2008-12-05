@@ -122,16 +122,23 @@ ifneq (,$(filter $(distrel),jaunty))
   with_pulse = yes
 endif
 
-DISTRIBUTION_PATCHES = \
+with_hotspot = new
+ifneq (,$(filter $(distrel),intrepid hardy gutsy feisty edgy dapper))
+  with_hotspot = original
+endif
+
+ifeq ($(with_hotspot),original)
+  DISTRIBUTION_PATCHES = \
+	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector-original.diff) \
+	debian/patches/ld-symbolic-functions-original.diff \
+	debian/patches/set-exec-name-original.diff
+else
+  DISTRIBUTION_PATCHES = \
 	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector.diff) \
 	debian/patches/ld-symbolic-functions.diff \
 	debian/patches/set-exec-name.diff \
-	debian/patches/hotspot-warn-no-errformat.diff \
-
-#DISTRIBUTION_PATCHES = \
-#	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector-original.diff) \
-#	debian/patches/ld-symbolic-functions-original.diff \
-#	debian/patches/set-exec-name-original.diff \
+	debian/patches/hotspot-warn-no-errformat.diff
+endif
 
 DISTRIBUTION_PATCHES += \
 	debian/patches/shebang.diff \
@@ -214,12 +221,18 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   else
     EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS='--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
   endif
+  ifeq ($(with_hotspot),original)
+    CONFIGURE_ARGS += --without-hotspot-build
+  endif
 else
   ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
     CONFIGURE_ARGS += --enable-zero
     ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
-      CONFIGURE_ARGS += --enable-shark --without-hotspot-build
+      CONFIGURE_ARGS += --enable-shark
     endif
+  endif
+  ifeq ($(with_hotspot),original)
+    CONFIGURE_ARGS += --without-hotspot-build
   else
     CONFIGURE_ARGS += --with-hotspot-build
   endif
