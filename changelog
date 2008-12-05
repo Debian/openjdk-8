@@ -1,8 +1,9 @@
 openjdk-6 (6b14~pre1-0ubuntu2) jaunty; urgency=low
 
   * Install hotspot tarball in -source-files package.
+  * Fix build failure on sparc.
 
- -- Matthias Klose <doko@ubuntu.com>  Thu, 04 Dec 2008 12:36:54 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 05 Dec 2008 09:43:51 +0100
 
 openjdk-6 (6b14~pre1-0ubuntu1) jaunty; urgency=low
 

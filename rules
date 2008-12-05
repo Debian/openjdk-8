@@ -580,7 +580,7 @@ ifeq ($(with_check),yes)
     endif
     ifneq (,$(filter $(DEB_HOST_ARCH), alpha amd64 armel i386 lpia mips mipsel powerpc s390))
       # only activate after testing; hangs several tests.
-      with_jtreg_check = yes
+      #with_jtreg_check = yes
     endif
   else
     ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
@@ -607,7 +607,15 @@ stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel hppa ia64 m68k mips mipsel powerpc s390 sparc))
 	sh -c 'sh debian/buildwatch.sh &'
 endif
-	$(EXTRA_BUILD_ENV) $(MAKE) $(build_target)
+	if $(EXTRA_BUILD_ENV) $(MAKE) $(build_target); then \
+	  : ; \
+	else \
+	  if [ -f buildwatch.pid ]; then \
+	    pid=$$(cat buildwatch.pid); \
+	    kill -1 $$pid || :; sleep 1; kill -9 $$pid || :; \
+	  fi; \
+	  false; \
+	fi
 	touch $@
 
 stamps/xvfb-check:
