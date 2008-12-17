@@ -1,3 +1,12 @@
+openjdk-6 (6b14~pre1-0ubuntu3) jaunty; urgency=low
+
+  * Update IcedTea build infrastructure (20081217).
+  * Add support for PARISC.
+  * Use a default jvm.cfg if the jvm.cfg doesn't yet exist after unpacking
+    the runtime package. LP: #288616.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 17 Dec 2008 09:58:26 +0100
+
 openjdk-6 (6b14~pre1-0ubuntu2) jaunty; urgency=low
 
   * Install hotspot tarball in -source-files package.

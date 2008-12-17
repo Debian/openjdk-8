@@ -16,7 +16,7 @@ DEB_BUILD_GNU_TYPE	?= $(call vafilt,$(DPKG_VARS),DEB_BUILD_GNU_TYPE)
 DEB_HOST_ARCH		?= $(call vafilt,$(DPKG_VARS),DEB_HOST_ARCH)
 
 # don't use it on 64bit archs
-ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 ppc64 s390x))
+ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 hppa ppc64 s390x))
   PATH := $(CURDIR)/bin:$(PATH)
   export PATH
 endif
@@ -55,8 +55,8 @@ distrel := $(shell lsb_release --codename --short)
 
 with_wgy_zenhai = $(if $(filter $(distrel),hardy intrepid jaunty),yes)
 
-arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
-archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
+arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
+archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
 
 jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(arch_map))))
@@ -68,12 +68,12 @@ hotspot_archs	= amd64 i386 lpia sparc
 no_bootstrap_archs = alpha hppa
 
 stage1_gcj_archs = amd64 i386 ia64 lpia powerpc m68k mips mipsel sparc s390
-stage1_openjdk_archs = alpha armel
+stage1_openjdk_archs = alpha armel hppa
 stage1_cacao_archs =
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   stage1_gcj_archs = armel ia64 m68k mips mipsel s390
-  stage1_openjdk_archs = amd64 i386 lpia sparc
+  stage1_openjdk_archs = amd64 hppa i386 lpia sparc
   stage1_cacao_archs = alpha powerpc
 endif
 
@@ -148,6 +148,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/fix-race-cond-print.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
+	debian/patches/default-jvm-cfg.diff \
 
 #	debian/patches/gcc-mtune-generic.diff \
 
@@ -791,6 +792,9 @@ install: packaging-files
 	cp -a $(sdkimg)/* $(d)/$(basedir)/
 	cp -a $(jreimg)/man $(d)/$(basedir)/jre/
 	chmod -R u+w $(d)
+
+	: # install default jvm config file
+	cp debian/jvm.cfg-default $(d)/$(basedir)/jre/lib/$(archdir)/
 
 	: # add extra symlinks for header files
 	ln -sf linux/jni_md.h $(d)/$(basedir)/include/jni_md.h
