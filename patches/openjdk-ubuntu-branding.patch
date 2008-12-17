@@ -1,10 +1,10 @@
---- openjdk/hotspot/src/share/vm/runtime/arguments.cpp~	2008-09-12 21:41:33.000000000 +0200
-+++ openjdk/hotspot/src/share/vm/runtime/arguments.cpp	2008-09-12 21:43:07.000000000 +0200
-@@ -28,7 +28,7 @@
+--- openjdk/hotspot/src/share/vm/runtime/arguments.cpp~	2008-12-17 10:14:03.000000000 +0100
++++ openjdk/hotspot/src/share/vm/runtime/arguments.cpp	2008-12-17 10:16:29.000000000 +0100
+@@ -25,7 +25,7 @@
  #include "incls/_precompiled.incl"
  #include "incls/_arguments.cpp.incl"
  
--#define DEFAULT_VENDOR_URL_BUG "http://java.sun.com/webapps/bugreport/crash.jsp"
+-#define DEFAULT_VENDOR_URL_BUG "http://icedtea.classpath.org/bugzilla"
 +#define DEFAULT_VENDOR_URL_BUG "https://bugs.launchpad.net/ubuntu/+source/openjdk-6/"
  #define DEFAULT_JAVA_LAUNCHER  "generic"
  
