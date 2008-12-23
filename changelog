@@ -1,4 +1,12 @@
-openjdk-6 (6b14~pre1-0ubuntu3) jaunty; urgency=low
+openjdk-6 (6b14-0ubuntu4) jaunty; urgency=low
+
+  * Use a default jvm.cfg not only for java, but for all jdk tools.
+    LP: #288616.
+  * Update IcedTea build infrastructure (20081223).
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 23 Dec 2008 09:24:23 +0100
+
+openjdk-6 (6b14-0ubuntu3) jaunty; urgency=low
 
   * Update IcedTea build infrastructure (20081217).
   * Add support for PARISC.

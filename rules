@@ -123,7 +123,7 @@ ifneq (,$(filter $(distrel),jaunty))
 endif
 
 with_hotspot = new
-ifneq (,$(filter $(distrel),intrepid hardy gutsy feisty edgy dapper))
+ifneq (,$(filter $(distrel),gutsy feisty edgy dapper))
   with_hotspot = original
 endif
 
@@ -750,6 +750,7 @@ clean: debian-clean
 	  tar xf generated.tar; \
 	  rm -f generated.tar; \
 	fi
+	rm -f pulseaudio/*.o
 
 ifeq (0,1)
 	for i in $$(find test/jtreg -name '*.gif') overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/expresso.mid overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/ding.sf2; do \
