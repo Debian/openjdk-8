@@ -3,6 +3,11 @@ openjdk-6 (6b14-0ubuntu5) jaunty; urgency=low
   * Update IcedTea build infrastructure (20090113).
   * Rebuild with updated nss/nspr packages.
   * Update debug patches.
+  * debian/patches/nonreparenting-wm.diff: If the _JAVA_AWT_WM_NONREPARENTING
+    environment variable is set, disable all workarounds causing blank windows
+    in non-reparentizing window managers (Bernhard R. Link). Closes: #508650.
+  * Fix location of plugin for Debian. Closes: #505726.
+  * Let the -jdk package provide java-compiler. Closes: #507641.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 13 Jan 2009 10:18:44 +0100
 

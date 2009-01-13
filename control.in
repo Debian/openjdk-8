@@ -15,7 +15,7 @@ Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre (>= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
 Recommends: libxt-dev
 Suggests: @basename@-demo, @basename@-source, visualvm
-Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk
+Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk, java-compiler
 Description: OpenJDK Development Kit (JDK)
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.

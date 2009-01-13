@@ -72,7 +72,9 @@ configure)
 	if ! $basedir/bin/java -client -Xshare:dump -XX:PermSize=128m > $log; then
 	    cat >&2 $log
 	    rm -f $log
-	    exit 1
+	    # this may fail on some machines/configurations, just ignore it.
+	    echo >&2 "ignoring dump failure"
+	    #exit 1
 	fi
 	rm -f $log
 	esac

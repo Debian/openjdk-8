@@ -149,6 +149,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \
+	debian/patches/nonreparenting-wm.diff \
 
 #	debian/patches/gcc-mtune-generic.diff \
 
@@ -386,8 +387,12 @@ dlopen_jre_depends = \
 	libxrandr2, libxinerama1, libgl1-mesa-glx
 dlopen_jre_recommends =
 
-browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
-browser_plugin_dirs = xulrunner-addons
+ifeq ($(distribution),Ubuntu)
+  browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
+  browser_plugin_dirs = xulrunner-addons
+else
+  browser_plugin_dirs = mozilla
+endif
 
 ifneq (,$(filter $(distrel),etch dapper feisty))
   core_fonts = ttf-dejavu
