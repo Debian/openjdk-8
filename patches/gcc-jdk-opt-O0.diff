@@ -1,0 +1,15 @@
+--- openjdk/jdk/make/common/Defs-linux.gmk.orig	2009-01-08 23:40:48.000000000 +0000
++++ openjdk/jdk/make/common/Defs-linux.gmk	2009-01-08 23:41:03.000000000 +0000
+@@ -86,9 +86,9 @@
+ #
+ # Default optimization
+ #
+-CC_HIGHEST_OPT = -O3
+-CC_HIGHER_OPT  = -O3
+-CC_LOWER_OPT   = -O2
++CC_HIGHEST_OPT = -O0
++CC_HIGHER_OPT  = -O0
++CC_LOWER_OPT   = -O0
+ CC_NO_OPT      =
+ 
+ ifeq ($(PRODUCT), java)
