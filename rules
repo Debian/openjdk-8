@@ -1216,6 +1216,7 @@ binary-arch: build install
 	cp jtreg_output $(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output.log
 	-cp test/jtreg-summary.log $(d_jdk)/usr/share/doc/$(p_jre)/
 
+	dh_desktop -s $(nodemo)
 	dh_installmenu -s $(nodemo)
 	-dh_icons -s $(nodemo) || dh_iconcache -s $(nodemo)
 #	dh_installdebconf -s $(nodemo)

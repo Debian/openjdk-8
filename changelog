@@ -1,3 +1,44 @@
+openjdk-6 (6b14-0ubuntu7) UNRELEASED; urgency=low
+
+  * debian/rules: Call dh_desktop. LP: #309999.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 13 Jan 2009 15:21:38 +0000
+
+openjdk-6 (6b14-0ubuntu6) jaunty; urgency=low
+
+  * The -source package now contains all source files. Closes: #504568.
+  * The 6b14 build fixes the following security related issues (sun bug number,
+    CVE, description):
+    - 6588160, CVE-2008-5348: jaas krb5 client leaks OS-level UDP sockets.
+    - 6497740, CVE-2009-5349: Limit the size of RSA public keys.
+    - 6484091, CVE-2008-5350: FileSystemView leaks directory info.
+    - 4486841, CVE-2008-5351: UTF-8 decoder needed adhere to Unicode 3.0.1
+      fixes.
+    - 6755943, CVE-2008-5352: JAR decompression should enforce stricter header
+      checks.
+    - 6734167, CVE-2008-5353: Calendar.readObject allows elevation of
+      privileges.
+    - 6733959, CVE-2008-5354: Insufficient checks for "Main-Class" manifest
+      entry in JAR files
+    - 6751322, CVE-2008-5356: Sun Java JRE TrueType Font Parsing Heap Overflow.
+    - 6733336, CVE-2008-5357: Crash on malformed font.
+    - 6766136, CVE-2008-5358: corrupted gif image may cause crash in java
+      splashscreen library.
+    - 6726779, CVE-2008-5359: ConvolveOp on USHORT raster can cause the JVM
+      crash.
+    - 6721753, CVE-2008-5360: File.createTempFile produces guessable file names.
+    - 6592792: Add com.sun.xml.internal to the "package.access" property in
+         $JAVA_HOME/lib/security/java.security.
+  * Regenerate the control file.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 13 Jan 2009 15:04:36 +0100
+
+openjdk-6 (6b14-0ubuntu2~ppa1) intrepid; urgency=low
+
+  * Upload to the OpenJDK PPA for intrepid.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 13 Jan 2009 13:28:38 +0100
+
 openjdk-6 (6b14-0ubuntu5) jaunty; urgency=low
 
   * Update IcedTea build infrastructure (20090113).
