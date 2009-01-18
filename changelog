@@ -3,6 +3,7 @@ openjdk-6 (6b14-0ubuntu7.2) UNRELEASED; urgency=low
   * debian/rules: Call dh_desktop. LP: #309999.
   * Test in different VM.
   * Build all with -fno-stack-protector -U_FORTIFY_SOURCE.
+  * Include jtr files of failed tests in the -jdk package.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 13 Jan 2009 15:21:38 +0000
 

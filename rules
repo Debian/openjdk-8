@@ -702,7 +702,7 @@ stamps/jtreg-check: stamps/build stamps/xvfb-check
 ifeq ($(with_jtreg_check),yes)
 	@echo "BEGIN jtreg"
 	if [ -f bin/my-xvfb-run ]; then \
-	  /bin/sh bin/my-xvfb-run $(MAKE) -j $(NJOBS) -k jtregcheck 2>&1 | tee jtreg_output; \
+	  /bin/sh bin/my-xvfb-run $(MAKE) -k jtregcheck 2>&1 | tee jtreg_output; \
 	else \
 	  echo "jtreg harness not run for this build" > jtreg_output; \
 	  cat xvfb-run.log >> jtreg_output; \
@@ -735,6 +735,13 @@ ifeq ($(with_jtreg_check),yes)
 	  echo "leftover processes..."; \
 	  $(jtreg_processes); \
 	fi
+
+	-for i in hotspot langtools jdk; do \
+	  for t in $$(egrep '^(FAILED|Error)' test/check-$$i.log | sed 's/.* \(.*\)\.[^.][^.]*$$/\1/'); do \
+	    echo test/$$i/JTwork/$$t.jtr; \
+	  done; \
+	done > test/failed_tests.list; \
+	tar cfzT test/failed_tests.tar.gz test/failed_tests.list
 else
 	echo "jtreg harness not run for this build" > jtreg_output
 endif
@@ -751,6 +758,7 @@ clean: debian-clean
 	rm -rf mauve
 	rm -rf bin
 	rm -f jtreg_output xvfb-run.log
+	rm -f test/failed_tests.tar.gz test/failed_tests.list
 	rm -f buildwatch.pid
 	if [ -f generated.tar ]; then \
 	  rm -rf generated; \
@@ -1217,6 +1225,7 @@ binary-arch: build install
 	cp mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
 	cp jtreg_output $(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output.log
 	-cp test/jtreg-summary.log $(d_jdk)/usr/share/doc/$(p_jre)/
+	-cp test/failed_tests.tar.gz $(d_jdk)/usr/share/doc/$(p_jre)/
 
 	dh_desktop -s $(nodemo)
 	dh_installmenu -s $(nodemo)
