@@ -1,0 +1,15 @@
+--- openjdk/jdk/make/common/Defs-linux.gmk~	2009-01-15 21:41:19.000000000 +0100
++++ openjdk/jdk/make/common/Defs-linux.gmk	2009-01-17 14:32:08.000000000 +0100
+@@ -86,9 +86,9 @@
+ #
+ # Default optimization
+ #
+-CC_HIGHEST_OPT = -O3
+-CC_HIGHER_OPT  = -O3
+-CC_LOWER_OPT   = -O2
++CC_HIGHEST_OPT = -O3 -fno-stack-protector -U_FORTIFY_SOURCE
++CC_HIGHER_OPT  = -O3 -fno-stack-protector -U_FORTIFY_SOURCE
++CC_LOWER_OPT   = -O2 -fno-stack-protector -U_FORTIFY_SOURCE
+ CC_NO_OPT      =
+ 
+ ifeq ($(PRODUCT), java)

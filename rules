@@ -150,6 +150,8 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \
 	debian/patches/nonreparenting-wm.diff \
+	debian/patches/gcc-jdk-no-stack-protector.diff \
+	debian/patches/gcc-hotspot-no-stack-protector.diff \
 
 #	debian/patches/gcc-mtune-generic.diff \
 
