@@ -1,11 +1,12 @@
-openjdk-6 (6b14-0ubuntu7.2) UNRELEASED; urgency=low
+openjdk-6 (6b14-0ubuntu7) jaunty; urgency=low
 
   * debian/rules: Call dh_desktop. LP: #309999.
-  * Test in different VM.
+  * Add dependency on libjpeg62 for the -headless package. LP: #318383.
+  * Test some jtreg tests which fail in samevm mode in a separate VM.
   * Build all with -fno-stack-protector -U_FORTIFY_SOURCE.
   * Include jtr files of failed tests in the -jdk package.
 
- -- Matthias Klose <doko@ubuntu.com>  Tue, 13 Jan 2009 15:21:38 +0000
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 19 Jan 2009 00:23:22 +0100
 
 openjdk-6 (6b14-0ubuntu6) jaunty; urgency=low
 

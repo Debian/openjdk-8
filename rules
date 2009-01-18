@@ -162,7 +162,10 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
 endif
 
 ifeq ($(distribution),Ubuntu)
-  DISTRIBUTION_PATCHES += debian/patches/openjdk-ubuntu-branding.patch
+  DISTRIBUTION_PATCHES += \
+	debian/patches/openjdk-ubuntu-branding.patch \
+	debian/patches/gcc-jdk-no-stack-protector.diff \
+	debian/patches/gcc-hotspot-no-stack-protector.diff
 endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
@@ -382,7 +385,7 @@ endif
 
 dlopen_hl_depends = \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2,libcups2), \
-	liblcms1
+	liblcms1, libjpeg62
 dlopen_hl_recommends = \
 dlopen_jre_depends = \
 	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
