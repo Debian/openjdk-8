@@ -1,3 +1,16 @@
+openjdk-6 (6b14-0ubuntu9) jaunty; urgency=low
+
+  * Update IcedTea build infrastructure (20090125).
+  * Run the jtreg testsuite for cacao builds, save all test logs.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 25 Jan 2009 15:40:52 +0100
+
+openjdk-6 (6b14-0ubuntu8) jaunty; urgency=low
+
+  * Fix merge error, don't apply patches twice.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 19 Jan 2009 01:15:19 +0100
+
 openjdk-6 (6b14-0ubuntu7) jaunty; urgency=low
 
   * debian/rules: Call dh_desktop. LP: #309999.

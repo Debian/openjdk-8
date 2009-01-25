@@ -622,7 +622,7 @@ ifeq ($(with_check),yes)
     endif
     ifneq (,$(filter $(DEB_HOST_ARCH), alpha amd64 armel i386 lpia mips mipsel powerpc s390))
       # only activate after testing; hangs several tests.
-      #with_jtreg_check = yes
+      with_jtreg_check = yes
     endif
   else
     ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
@@ -1245,7 +1245,7 @@ binary-arch: build install
 	mkdir -p $(d_jdk)/usr/share/doc/$(p_jre)
 	cp mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
 	cp jtreg_output $(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output.log
-	-cp test/jtreg-summary.log $(d_jdk)/usr/share/doc/$(p_jre)/
+	-cp test/jtreg-summary.log test/check-*.log $(d_jdk)/usr/share/doc/$(p_jre)/
 	-cp test/failed_tests.tar.gz $(d_jdk)/usr/share/doc/$(p_jre)/
 
 	dh_desktop -s $(nodemo)
