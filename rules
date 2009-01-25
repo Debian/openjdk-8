@@ -41,8 +41,8 @@ endif
 
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
 with_docs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),,yes)
-ifneq (,$(findstring cacao, $(PKGSOURCE)))
-  with_docs = disabled for cacao
+ifneq (,$(findstring cacao shark, $(PKGSOURCE)))
+  with_docs = disabled for cacao and shark
 endif
 
 # even if not building the package, we configure for a specific plugin
@@ -75,6 +75,11 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   stage1_gcj_archs = armel ia64 m68k mips mipsel s390
   stage1_openjdk_archs = amd64 hppa i386 lpia sparc
   stage1_cacao_archs = alpha powerpc
+endif
+
+ifneq (,$(findstring shark, $(PKGSOURCE)))
+  stage1_gcj_archs = armel ia64 m68k mips mipsel s390
+  stage1_openjdk_archs = alpha powerpc amd64 hppa i386 lpia sparc
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
@@ -150,8 +155,6 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \
 	debian/patches/nonreparenting-wm.diff \
-	debian/patches/gcc-jdk-no-stack-protector.diff \
-	debian/patches/gcc-hotspot-no-stack-protector.diff \
 
 #	debian/patches/gcc-mtune-generic.diff \
 
@@ -231,6 +234,10 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   ifeq ($(with_hotspot),original)
     CONFIGURE_ARGS += --without-hotspot-build
   endif
+else ifneq (,$(findstring shark, $(PKGSOURCE)))
+  CONFIGURE_ARGS += --enable-zero --enable-shark
+  CONFIGURE_ARGS += --disable-docs
+  EXTRA_BUILD_ENV = LIBFFI_LIBS=-lffi_pic
 else
   ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
     CONFIGURE_ARGS += --enable-zero
@@ -288,6 +295,12 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   priority	= 1059
   p_lib_arch	= any
   vm_name	= CacaoVM JIT
+else ifneq (,$(findstring shark, $(PKGSOURCE)))
+  origin	= shark
+  basename	= shark-oj$(shortver)
+  priority	= 1058
+  p_lib_arch	= any
+  vm_name	= Shark VM
 else
   origin	= openjdk
   basename	= openjdk-$(shortver)
@@ -362,9 +375,14 @@ bd_openjdk = \
 	libxalan2-java, rhino, liblcms1-dev, libxinerama-dev,
 bd_zero = \
 	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [$(foreach a,$(hotspot_archs),!$(a))],
-bd_shark = \
+ifneq (,$(findstring shark, $(PKGSOURCE)))
+  bd_shark = llvm-dev (>= 2.4),
+  bd_zero = libffi-dev,
+else
+  bd_shark = \
 	llvm-dev (>= 2.4) [$(foreach a,$(shark_archs),$(a))],
-bd_shark =
+  bd_shark =
+endif
 #ifeq ($(with_plugin_pkg),yes)
   bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),$(if $(findstring gcj,$(plugin_name)),iceape-dev,xulrunner-dev (>= 1.9.0)),$(if $(filter $(distrel),hardy intrepid jaunty),xulrunner-1.9-dev,firefox-dev)),

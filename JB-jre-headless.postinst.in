@@ -64,7 +64,7 @@ configure)
 
     # activate class data sharing
     case @jdiralias@ in
-	*cacao);;
+	*cacao|*shark);;
 	*)
 	case @archdir@ in i386|sparc)
 	rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
