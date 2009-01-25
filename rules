@@ -128,7 +128,7 @@ ifneq (,$(filter $(distrel),jaunty))
 endif
 
 with_hotspot = new
-ifneq (,$(filter $(distrel),gutsy feisty edgy dapper))
+ifneq (,$(filter $(distrel),gutsy feisty edgy dapper hardy intrepid))
   with_hotspot = original
 endif
 
@@ -167,8 +167,14 @@ endif
 ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += \
 	debian/patches/openjdk-ubuntu-branding.patch \
-	debian/patches/gcc-jdk-no-stack-protector.diff \
+	debian/patches/gcc-jdk-no-stack-protector.diff
+  ifeq ($(with_hotspot),original)
+    DISTRIBUTION_PATCHES += \
+	debian/patches/gcc-hotspot-no-stack-protector-original.diff
+  else
+    DISTRIBUTION_PATCHES += \
 	debian/patches/gcc-hotspot-no-stack-protector.diff
+  endif
 endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
