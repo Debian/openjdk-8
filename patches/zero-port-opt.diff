@@ -1,0 +1,52 @@
+--- platform_zero.in
++++ platform_zero.in
+@@ -14,4 +14,4 @@
+ 
+ gnu_dis_arch = zero
+ 
+-sysdefs = -DLINUX -D_GNU_SOURCE -DCC_INTERP -DZERO -D@ZERO_ARCHDEF@ -DZERO_LIBARCH=\"@ZERO_LIBARCH@\"
++sysdefs = -DHOTSPOT_OPT=1 -DLINUX -D_GNU_SOURCE -DCC_INTERP -DZERO -D@ZERO_ARCHDEF@ -DZERO_LIBARCH=\"@ZERO_LIBARCH@\"
+--- ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp
++++ ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp
+@@ -40,10 +40,14 @@
+   // platform-specific byte ordering.
+ #ifdef VM_LITTLE_ENDIAN
+   static inline u2   get_native_u2(address p){
++#ifdef HOTSPOT_OPT
++    return ( u2(p[1]) << 8 ) | ( u2(p[0])      );
++#else
+     return (intptr_t(p) & 1) == 0
+              ?   *(u2*)p
+              :   ( u2(p[1]) << 8 )
+                | ( u2(p[0])      );
++#endif
+   }
+ 
+   static inline u4   get_native_u4(address p) {
+@@ -135,10 +139,14 @@
+   }
+ #else
+   static inline u2   get_native_u2(address p){
++#ifdef HOTSPOT_OPT
++    return ( u2(p[0]) << 8 ) | ( u2(p[1])      );
++#else
+     return (intptr_t(p) & 1) == 0
+              ?   *(u2*)p
+              :   ( u2(p[0]) << 8 )
+                | ( u2(p[1])      );
++#endif
+   }
+ 
+   static inline u4   get_native_u4(address p) {
+@@ -237,7 +245,11 @@
+   // Byte-order reversal is needed
+   static inline u2 get_Java_u2(address p)
+   {
++#ifdef HOTSPOT_OPT
++    return ( u2(p[0]) << 8 ) | ( u2(p[1])      );
++#else
+     return swap_u2(get_native_u2(p));
++#endif
+   }
+   static inline u4 get_Java_u4(address p)
+   {

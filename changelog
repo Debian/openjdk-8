@@ -1,3 +1,45 @@
+openjdk-6 (6b14-0ubuntu14) jaunty; urgency=low
+
+  * Configure with --disable-nio2 on armel as well.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 13 Feb 2009 10:13:55 +0100
+
+openjdk-6 (6b14-0ubuntu13) jaunty; urgency=low
+
+  * Really configure with --disable-nio2.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 12 Feb 2009 17:26:43 +0100
+
+openjdk-6 (6b14-0ubuntu12) jaunty; urgency=low
+
+  * Configure with --disable-nio2.
+  * Run mauve and jtreg testsuites on armel.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 11 Feb 2009 13:00:15 +0100
+
+openjdk-6 (6b14-0ubuntu11) jaunty; urgency=low
+
+  [Edward Nevill]
+  * Performance improvements for the zero build (currently applied
+    on armel only).
+
+  [Matthias Klose]
+  * Update IcedTea (20090210).
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 10 Feb 2009 15:29:22 +0100
+
+openjdk-6 (6b14-0ubuntu10) jaunty; urgency=low
+
+  * Explicitely remove PulseAudioMuteControl.java.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 26 Jan 2009 22:09:21 +0100
+
+openjdk-6 (6b14-0ubuntu9.1) jaunty; urgency=low
+
+  * Test build.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 25 Jan 2009 17:03:51 +0100
+
 openjdk-6 (6b14-0ubuntu9) jaunty; urgency=low
 
   * Update IcedTea build infrastructure (20090125).

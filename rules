@@ -123,7 +123,7 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   endif
 endif
 
-ifneq (,$(filter $(distrel),jaunty))
+ifneq (,$(filter $(distrel),jaunty unstable))
   with_pulse = yes
 endif
 
@@ -175,6 +175,11 @@ ifeq ($(distribution),Ubuntu)
     DISTRIBUTION_PATCHES += \
 	debian/patches/gcc-hotspot-no-stack-protector.diff
   endif
+  ifneq (,$(filter $(DEB_HOST_ARCH),armel i386))
+    DISTRIBUTION_PATCHES += \
+	debian/patches/zero-port-opt.diff \
+	debian/patches/zero-hotspot-opt.diff
+  endif
 endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
@@ -208,6 +213,9 @@ else ifeq ($(STAGE1_JAVA),cacao)
 	--with-icedtea-home=$(STAGE1_HOME)
   build_target = #icedtea-against-icedtea
 endif
+
+# works on amd64, i386 and lpia only
+CONFIGURE_ARGS += --disable-nio2
 
 CONFIGURE_ARGS += --with-pkgversion="$(PKGVERSION)"
 
@@ -598,6 +606,7 @@ stamps/unpack: stamps/icedtea-configure stamps/backup-generated
 ifeq ($(STAGE1_JAVA),gcj)
 	$(MAKE) stamps/extract-ecj.stamp
 endif
+	rm -f pulseaudio/src/java/org/classpath/icedtea/pulseaudio/PulseAudioMuteControl.java
 	touch $@
 
 dist-openjdk: $(OPENJDK_SRC_ZIP)
@@ -631,10 +640,10 @@ ifeq ($(with_check),yes)
       with_jtreg_check = yes
     endif
   else
-    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
+    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 armel i386 lpia powerpc sparc))
       with_mauve_check = yes
     endif
-    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia sparc))
+    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 armel i386 lpia sparc))
       with_jtreg_check = yes
     endif
   endif
@@ -793,6 +802,9 @@ clean: debian-clean
 	  rm -f generated.tar; \
 	fi
 	rm -f pulseaudio/*.o
+	rm -f pulseaudio/src/java/org/classpath/icedtea/pulseaudio/PulseAudioMuteControl.java
+	: # revert patch for files not in the openjdk directory
+	-patch -p0 -R < debian/patches/zero-port-opt.diff
 
 ifeq (0,1)
 	for i in $$(find test/jtreg -name '*.gif') overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/expresso.mid overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/ding.sf2; do \
