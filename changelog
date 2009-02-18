@@ -1,3 +1,11 @@
+openjdk-6 (6b14-0ubuntu15) jaunty; urgency=low
+
+  [ Edward Nevill ]
+  * Added ARM assembler interpreter loop
+  * mauve and jtreg removed again for alpha release
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 18 Feb 2009 13:35:02 +0100
+
 openjdk-6 (6b14-0ubuntu14) jaunty; urgency=low
 
   * Configure with --disable-nio2 on armel as well.

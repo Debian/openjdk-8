@@ -1,13 +1,3989 @@
---- platform_zero.in
-+++ platform_zero.in
-@@ -14,4 +14,4 @@
+diff -ruNE ports/hotspot/build/linux/makefiles/zero.make ports/hotspot/build/linux/makefiles/zero.make
+--- ports/hotspot/build/linux/makefiles/zero.make	2008-03-25 10:00:11.000000000 +0000
++++ ports/hotspot/build/linux/makefiles/zero.make	2009-02-17 10:39:51.000000000 +0000
+@@ -23,6 +23,16 @@
+ #
+ #
  
- gnu_dis_arch = zero
- 
--sysdefs = -DLINUX -D_GNU_SOURCE -DCC_INTERP -DZERO -D@ZERO_ARCHDEF@ -DZERO_LIBARCH=\"@ZERO_LIBARCH@\"
-+sysdefs = -DHOTSPOT_OPT=1 -DLINUX -D_GNU_SOURCE -DCC_INTERP -DZERO -D@ZERO_ARCHDEF@ -DZERO_LIBARCH=\"@ZERO_LIBARCH@\"
---- ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp
-+++ ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp
++# Not included in includeDB because it has no dependencies
++ifdef ICEDTEA_ZERO_BUILD
++# ECN - For the time being HOTSPOT_OPT only enabled for ARM
++# CFLAGS += -DHOTSPOT_OPT
++ifeq ($(ZERO_LIBARCH),arm)
++Obj_Files += bytecodeInterpreter_arm.o
++  CFLAGS += -DHOTSPOT_OPT -DHOTSPOT_ASM
++endif
++endif
++
+ # The copied fdlibm routines in sharedRuntimeTrig.o must not be optimized
+ OPT_CFLAGS/sharedRuntimeTrig.o = $(OPT_CFLAGS/NOOPT)
+ # The copied fdlibm routines in sharedRuntimeTrans.o must not be optimized
+diff -ruNE ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S
+--- ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S	1970-01-01 01:00:00.000000000 +0100
++++ ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S	2009-02-17 10:44:13.000000000 +0000
+@@ -0,0 +1,3959 @@
++#define tos		r0
++
++#define java_locals	r4
++#define constant_pool	r5
++#define safepoint_state	r6
++#define	java_stack	r7
++#define java_pc		r8
++#define state1_table	r9
++#define istate		r10
++#define state0_table	r11
++
++#define PUSH(Rn)	str	Rn, [java_stack], #-4
++#define POP(Rn)		ldr	Rn, [java_stack, #4]!
++
++#define POPGE(Rn)	ldrge	Rn, [java_stack, #4]!
++
++	.arch armv5t
++	.eabi_attribute 27, 3
++	.fpu vfp
++	.eabi_attribute 20, 1
++	.eabi_attribute 21, 1
++	.eabi_attribute 23, 3
++	.eabi_attribute 24, 1
++	.eabi_attribute 25, 1
++	.eabi_attribute 26, 2
++	.eabi_attribute 30, 2
++	.eabi_attribute 18, 4
++
++	.global	__aeabi_idiv
++	.global	__aeabi_ldivmod
++	.global	__aeabi_idivmod
++	.global	__aeabi_ldivmod
++	.global	__aeabi_l2f
++	.global	__aeabi_l2d
++	.text
++	.global	_ZN19BytecodeInterpreter7run_optEPS_
++	.type	_ZN19BytecodeInterpreter7run_optEPS_, %function
++_ZN19BytecodeInterpreter7run_optEPS_:
++	@ args = 0, pretend = 0, frame = 40
++	@ frame_needed = 0, uses_anonymous_args = 0
++	stmfd	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
++	ldr	java_pc, [r0, #4]
++	ldr	r9, globals_table
++	adr	state0_table, opclabels_data_state0
++	ldrb	r2, [java_pc, #0]
++	ldr	java_stack, [r0, #24]
++	mov	istate, r0
++pic_location:
++	add	r9, pc, r9		@ Don't move this instruction from the pic_location label
++	ldr	java_locals, [r0, #8]
++	ldr	r2, [state0_table, r2, asl #2]
++	ldr	constant_pool, [istate, #12]
++	ldr	r0, globals_table+4
++	ldr	safepoint_state, [r9, r0]
++	add	state1_table, state0_table, #opclabels_data_state1 - opclabels_data_state0
++	mov	pc, r2
++
++	.align	2
++globals_table:
++	.word	_GLOBAL_OFFSET_TABLE_-(pic_location+8)
++	.word	_ZN20SafepointSynchronize6_stateE(GOT)
++
++	.align	2
++opclabels_data_state0:
++	.word	do_nop_state0
++	.word	do_aconst_null_state0
++	.word	do_iconst_m1_state0
++	.word	do_iconst_0_state0
++	.word	do_iconst_1_state0
++	.word	do_iconst_2_state0
++	.word	do_iconst_3_state0
++	.word	do_iconst_4_state0
++	.word	do_iconst_5_state0
++	.word	do_lconst_0_state0
++	.word	do_lconst_1_state0
++	.word	do_fconst_0_state0
++	.word	do_fconst_1_state0
++	.word	do_fconst_2_state0
++	.word	do_dconst_0_state0
++	.word	do_dconst_1_state0
++	.word	do_bipush_state0
++	.word	do_sipush_state0
++	.word	do_ldc_state0
++	.word	do_ldc_w_state0
++	.word	do_ldc2_w_state0
++	.word	do_iload_state0
++	.word	do_lload_state0
++	.word	do_fload_state0
++	.word	do_dload_state0
++	.word	do_aload_state0
++	.word	do_iload_0_state0
++	.word	do_iload_1_state0
++	.word	do_iload_2_state0
++	.word	do_iload_3_state0
++	.word	do_lload_0_state0
++	.word	do_lload_1_state0
++	.word	do_lload_2_state0
++	.word	do_lload_3_state0
++	.word	do_fload_0_state0
++	.word	do_fload_1_state0
++	.word	do_fload_2_state0
++	.word	do_fload_3_state0
++	.word	do_dload_0_state0
++	.word	do_dload_1_state0
++	.word	do_dload_2_state0
++	.word	do_dload_3_state0
++	.word	do_aload_0_state0
++	.word	do_aload_1_state0
++	.word	do_aload_2_state0
++	.word	do_aload_3_state0
++	.word	do_iaload_state0
++	.word	do_laload_state0
++	.word	do_faload_state0
++	.word	do_daload_state0
++	.word	do_aaload_state0
++	.word	do_baload_state0
++	.word	do_caload_state0
++	.word	do_saload_state0
++	.word	do_istore_state0
++	.word	do_lstore_state0
++	.word	do_fstore_state0
++	.word	do_dstore_state0
++	.word	do_astore_state0
++	.word	do_istore_0_state0
++	.word	do_istore_1_state0
++	.word	do_istore_2_state0
++	.word	do_istore_3_state0
++	.word	do_lstore_0_state0
++	.word	do_lstore_1_state0
++	.word	do_lstore_2_state0
++	.word	do_lstore_3_state0
++	.word	do_fstore_0_state0
++	.word	do_fstore_1_state0
++	.word	do_fstore_2_state0
++	.word	do_fstore_3_state0
++	.word	do_dstore_0_state0
++	.word	do_dstore_1_state0
++	.word	do_dstore_2_state0
++	.word	do_dstore_3_state0
++	.word	do_astore_0_state0
++	.word	do_astore_1_state0
++	.word	do_astore_2_state0
++	.word	do_astore_3_state0
++	.word	do_iastore_state0
++	.word	do_lastore_state0
++	.word	do_fastore_state0
++	.word	do_dastore_state0
++	.word	do_aastore_state0
++	.word	do_bastore_state0
++	.word	do_castore_state0
++	.word	do_sastore_state0
++	.word	do_pop_state0
++	.word	do_pop2_state0
++	.word	do_dup_state0
++	.word	do_dup_x1_state0
++	.word	do_dup_x2_state0
++	.word	do_dup2_state0
++	.word	do_dup2_x1_state0
++	.word	do_dup2_x2_state0
++	.word	do_swap_state0
++	.word	do_iadd_state0
++	.word	do_ladd_state0
++	.word	do_fadd_state0
++	.word	do_dadd_state0
++	.word	do_isub_state0
++	.word	do_lsub_state0
++	.word	do_fsub_state0
++	.word	do_dsub_state0
++	.word	do_imul_state0
++	.word	do_lmul_state0
++	.word	do_fmul_state0
++	.word	do_dmul_state0
++	.word	do_idiv_state0
++	.word	do_ldiv_state0
++	.word	do_fdiv_state0
++	.word	do_ddiv_state0
++	.word	do_irem_state0
++	.word	do_lrem_state0
++	.word	do_frem_state0
++	.word	do_drem_state0
++	.word	do_ineg_state0
++	.word	do_lneg_state0
++	.word	do_fneg_state0
++	.word	do_dneg_state0
++	.word	do_ishl_state0
++	.word	do_lshl_state0
++	.word	do_ishr_state0
++	.word	do_lshr_state0
++	.word	do_iushr_state0
++	.word	do_lushr_state0
++	.word	do_iand_state0
++	.word	do_land_state0
++	.word	do_ior_state0
++	.word	do_lor_state0
++	.word	do_ixor_state0
++	.word	do_lxor_state0
++	.word	do_iinc_state0
++	.word	do_i2l_state0
++	.word	do_i2f_state0
++	.word	do_i2d_state0
++	.word	do_l2i_state0
++	.word	do_l2f_state0
++	.word	do_l2d_state0
++	.word	do_f2i_state0
++	.word	do_f2l_state0
++	.word	do_f2d_state0
++	.word	do_d2i_state0
++	.word	do_d2l_state0
++	.word	do_d2f_state0
++	.word	do_i2b_state0
++	.word	do_i2c_state0
++	.word	do_i2s_state0
++	.word	do_lcmp_state0
++	.word	do_fcmpl_state0
++	.word	do_fcmpg_state0
++	.word	do_dcmpl_state0
++	.word	do_dcmpg_state0
++	.word	do_ifeq_state0
++	.word	do_ifne_state0
++	.word	do_iflt_state0
++	.word	do_ifge_state0
++	.word	do_ifgt_state0
++	.word	do_ifle_state0
++	.word	do_if_icmpeq_state0
++	.word	do_if_icmpne_state0
++	.word	do_if_icmplt_state0
++	.word	do_if_icmpge_state0
++	.word	do_if_icmpgt_state0
++	.word	do_if_icmple_state0
++	.word	do_if_acmpeq_state0
++	.word	do_if_acmpne_state0
++	.word	do_goto_state0
++	.word	do_jsr_state0
++	.word	do_ret_state0
++	.word	do_tableswitch_state0
++	.word	do_lookupswitch_state0
++	.word	do_ireturn_state0
++	.word	do_lreturn_state0
++	.word	do_freturn_state0
++	.word	do_dreturn_state0
++	.word	do_areturn_state0
++	.word	do_return_state0
++	.word	do_getstatic_state0
++	.word	do_putstatic_state0
++	.word	do_getfield_state0
++	.word	do_exit_asm_state0
++	.word	do_invokevirtual_state0
++	.word	do_invokespecial_state0
++	.word	do_invokestatic_state0
++	.word	do_invokeinterface_state0
++	.word	do_xxxunusedxxx_state0
++	.word	do_new_state0
++	.word	do_newarray_state0
++	.word	do_anewarray_state0
++	.word	do_arraylength_state0
++	.word	do_athrow_state0
++	.word	do_checkcast_state0
++	.word	do_instanceof_state0
++	.word	do_monitorenter_state0
++	.word	do_monitorexit_state0
++	.word	do_wide_state0
++	.word	do_multianewarray_state0
++	.word	do_ifnull_state0
++	.word	do_ifnonnull_state0
++	.word	do_goto_w_state0
++	.word	do_jsr_w_state0
++	.word	do_breakpoint_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++	.word	do_exit_asm_state0
++opclabels_data_state1:
++	.word	do_nop_state1
++	.word	do_aconst_null_state1
++	.word	do_iconst_m1_state1
++	.word	do_iconst_0_state1
++	.word	do_iconst_1_state1
++	.word	do_iconst_2_state1
++	.word	do_iconst_3_state1
++	.word	do_iconst_4_state1
++	.word	do_iconst_5_state1
++	.word	do_lconst_0_state1
++	.word	do_lconst_1_state1
++	.word	do_fconst_0_state1
++	.word	do_fconst_1_state1
++	.word	do_fconst_2_state1
++	.word	do_dconst_0_state1
++	.word	do_dconst_1_state1
++	.word	do_bipush_state1
++	.word	do_sipush_state1
++	.word	do_ldc_state1
++	.word	do_ldc_w_state1
++	.word	do_ldc2_w_state1
++	.word	do_iload_state1
++	.word	do_lload_state1
++	.word	do_fload_state1
++	.word	do_dload_state1
++	.word	do_aload_state1
++	.word	do_iload_0_state1
++	.word	do_iload_1_state1
++	.word	do_iload_2_state1
++	.word	do_iload_3_state1
++	.word	do_lload_0_state1
++	.word	do_lload_1_state1
++	.word	do_lload_2_state1
++	.word	do_lload_3_state1
++	.word	do_fload_0_state1
++	.word	do_fload_1_state1
++	.word	do_fload_2_state1
++	.word	do_fload_3_state1
++	.word	do_dload_0_state1
++	.word	do_dload_1_state1
++	.word	do_dload_2_state1
++	.word	do_dload_3_state1
++	.word	do_aload_0_state1
++	.word	do_aload_1_state1
++	.word	do_aload_2_state1
++	.word	do_aload_3_state1
++	.word	do_iaload_state1
++	.word	do_laload_state1
++	.word	do_faload_state1
++	.word	do_daload_state1
++	.word	do_aaload_state1
++	.word	do_baload_state1
++	.word	do_caload_state1
++	.word	do_saload_state1
++	.word	do_istore_state1
++	.word	do_lstore_state1
++	.word	do_fstore_state1
++	.word	do_dstore_state1
++	.word	do_astore_state1
++	.word	do_istore_0_state1
++	.word	do_istore_1_state1
++	.word	do_istore_2_state1
++	.word	do_istore_3_state1
++	.word	do_lstore_0_state1
++	.word	do_lstore_1_state1
++	.word	do_lstore_2_state1
++	.word	do_lstore_3_state1
++	.word	do_fstore_0_state1
++	.word	do_fstore_1_state1
++	.word	do_fstore_2_state1
++	.word	do_fstore_3_state1
++	.word	do_dstore_0_state1
++	.word	do_dstore_1_state1
++	.word	do_dstore_2_state1
++	.word	do_dstore_3_state1
++	.word	do_astore_0_state1
++	.word	do_astore_1_state1
++	.word	do_astore_2_state1
++	.word	do_astore_3_state1
++	.word	do_iastore_state1
++	.word	do_lastore_state1
++	.word	do_fastore_state1
++	.word	do_dastore_state1
++	.word	do_aastore_state1
++	.word	do_bastore_state1
++	.word	do_castore_state1
++	.word	do_sastore_state1
++	.word	do_pop_state1
++	.word	do_pop2_state1
++	.word	do_dup_state1
++	.word	do_dup_x1_state1
++	.word	do_dup_x2_state1
++	.word	do_dup2_state1
++	.word	do_dup2_x1_state1
++	.word	do_dup2_x2_state1
++	.word	do_swap_state1
++	.word	do_iadd_state1
++	.word	do_ladd_state1
++	.word	do_fadd_state1
++	.word	do_dadd_state1
++	.word	do_isub_state1
++	.word	do_lsub_state1
++	.word	do_fsub_state1
++	.word	do_dsub_state1
++	.word	do_imul_state1
++	.word	do_lmul_state1
++	.word	do_fmul_state1
++	.word	do_dmul_state1
++	.word	do_idiv_state1
++	.word	do_ldiv_state1
++	.word	do_fdiv_state1
++	.word	do_ddiv_state1
++	.word	do_irem_state1
++	.word	do_lrem_state1
++	.word	do_frem_state1
++	.word	do_drem_state1
++	.word	do_ineg_state1
++	.word	do_lneg_state1
++	.word	do_fneg_state1
++	.word	do_dneg_state1
++	.word	do_ishl_state1
++	.word	do_lshl_state1
++	.word	do_ishr_state1
++	.word	do_lshr_state1
++	.word	do_iushr_state1
++	.word	do_lushr_state1
++	.word	do_iand_state1
++	.word	do_land_state1
++	.word	do_ior_state1
++	.word	do_lor_state1
++	.word	do_ixor_state1
++	.word	do_lxor_state1
++	.word	do_iinc_state1
++	.word	do_i2l_state1
++	.word	do_i2f_state1
++	.word	do_i2d_state1
++	.word	do_l2i_state1
++	.word	do_l2f_state1
++	.word	do_l2d_state1
++	.word	do_f2i_state1
++	.word	do_f2l_state1
++	.word	do_f2d_state1
++	.word	do_d2i_state1
++	.word	do_d2l_state1
++	.word	do_d2f_state1
++	.word	do_i2b_state1
++	.word	do_i2c_state1
++	.word	do_i2s_state1
++	.word	do_lcmp_state1
++	.word	do_fcmpl_state1
++	.word	do_fcmpg_state1
++	.word	do_dcmpl_state1
++	.word	do_dcmpg_state1
++	.word	do_ifeq_state1
++	.word	do_ifne_state1
++	.word	do_iflt_state1
++	.word	do_ifge_state1
++	.word	do_ifgt_state1
++	.word	do_ifle_state1
++	.word	do_if_icmpeq_state1
++	.word	do_if_icmpne_state1
++	.word	do_if_icmplt_state1
++	.word	do_if_icmpge_state1
++	.word	do_if_icmpgt_state1
++	.word	do_if_icmple_state1
++	.word	do_if_acmpeq_state1
++	.word	do_if_acmpne_state1
++	.word	do_goto_state1
++	.word	do_jsr_state1
++	.word	do_ret_state1
++	.word	do_tableswitch_state1
++	.word	do_lookupswitch_state1
++	.word	do_ireturn_state1
++	.word	do_lreturn_state1
++	.word	do_freturn_state1
++	.word	do_dreturn_state1
++	.word	do_areturn_state1
++	.word	do_return_state1
++	.word	do_getstatic_state1
++	.word	do_putstatic_state1
++	.word	do_getfield_state1
++	.word	do_exit_asm_state1
++	.word	do_invokevirtual_state1
++	.word	do_invokespecial_state1
++	.word	do_invokestatic_state1
++	.word	do_invokeinterface_state1
++	.word	do_xxxunusedxxx_state1
++	.word	do_new_state1
++	.word	do_newarray_state1
++	.word	do_anewarray_state1
++	.word	do_arraylength_state1
++	.word	do_athrow_state1
++	.word	do_checkcast_state1
++	.word	do_instanceof_state1
++	.word	do_monitorenter_state1
++	.word	do_monitorexit_state1
++	.word	do_wide_state1
++	.word	do_multianewarray_state1
++	.word	do_ifnull_state1
++	.word	do_ifnonnull_state1
++	.word	do_goto_w_state1
++	.word	do_jsr_w_state1
++	.word	do_breakpoint_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++	.word	do_exit_asm_state1
++
++
++@ ----- The Bytecode Implementations --------------------------------------
++
++do_nop_state1:
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++do_nop_state0:
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_iconst_m1_state1:
++	ldrb	r3, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r3, asl #2]
++	mvn	tos, #0
++	mov	pc, r2
++do_iconst_m1_state0:
++	ldrb	r3, [java_pc, #1]!
++	mvn	tos, #0
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_aconst_null_state1:
++do_iconst_0_state1:
++do_fconst_0_state1:
++	ldrb	r3, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	tos, #0
++	mov	pc, r2
++do_aconst_null_state0:
++do_iconst_0_state0:
++do_fconst_0_state0:
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #0
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_iconst_1_state1:
++	ldrb	r3, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	tos, #1
++	mov	pc, r2
++do_iconst_1_state0:
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #1
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_iconst_2_state1:
++	ldrb	r3, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	tos, #2
++	mov	pc, r2
++do_iconst_2_state0:
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #2
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_iconst_3_state1:
++	ldrb	r3, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	tos, #3
++	mov	pc, r2
++do_iconst_3_state0:
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #3
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_iconst_4_state1:
++	ldrb	r3, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	tos, #4
++	mov	pc, r2
++do_iconst_4_state0:
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #4
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_iconst_5_state1:
++	ldrb	r3, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	tos, #5
++	mov	pc, r2
++do_iconst_5_state0:
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #5
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_fconst_1_state1:
++	ldrb	r3, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	tos, #1065353216
++	mov	pc, r2
++do_fconst_1_state0:
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #1065353216
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_fconst_2_state1:
++	ldrb	r3, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	tos, #1073741824
++	mov	pc, r2
++do_fconst_2_state0:
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #1073741824
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_dconst_0_state1:
++do_lconst_0_state1:
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	mov	tos, #0
++	ldr	r2, [state1_table, r2, asl #2]
++	PUSH(tos)
++	mov	pc, r2
++do_dconst_0_state0:
++do_lconst_0_state0:
++	ldrb	r2, [java_pc, #1]!
++	mov	tos, #0
++	ldr	r2, [state1_table, r2, asl #2]
++	PUSH(tos)
++	mov	pc, r2
++
++do_lconst_1_state1:
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	mov	r0, #1
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	r1, #0
++	PUSH(r1)
++	mov	pc, r2
++do_lconst_1_state0:
++	ldrb	r2, [java_pc, #1]!
++	mov	r0, #1
++	mov	r1, #0
++	ldr	r2, [state1_table, r2, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++do_dconst_1_state1:
++	PUSH(tos)
++do_dconst_1_state0:
++	ldrb	r2, [java_pc, #1]!
++	mov	r1, #0x3f000000
++	mov	r0, #0
++	ldr	r2, [state1_table, r2, asl #2]
++	orr	r1, r1, #0x00f00000
++	PUSH(r1)
++	mov	pc, r2
++
++do_bipush_state1:
++	ldrb	r2, [java_pc, #2]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r2, asl #2]
++	ldrsb	tos, [java_pc, #-1]
++	mov	pc, r2
++do_bipush_state0:
++	ldrb	r2, [java_pc, #2]!
++	ldrsb	tos, [java_pc, #-1]
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	pc, r2
++
++do_sipush_state1:
++	ldrb	r2, [java_pc, #3]!
++	ldrsb	r3, [java_pc, #-2]
++	ldrb	r1, [java_pc, #-1]
++	ldr	r2, [state1_table, r2, asl #2]
++	PUSH(tos)
++	orr	tos, r1, r3, lsl #8
++	mov	pc, r2
++do_sipush_state0:
++	ldrb	r2, [java_pc, #3]!
++	ldrsb	r0, [java_pc, #-2]
++	ldrb	r1, [java_pc, #-1]
++	ldr	r2, [state1_table, r2, asl #2]
++	orr	tos, r1, r0, lsl #8
++	mov	pc, r2
++
++do_aload_state1:
++do_iload_state1:
++do_fload_state1:
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	PUSH(tos)
++	ldr	ip, [state1_table, ip, asl #2]
++	ldr	tos, [java_locals, -r3, asl #2]
++	mov	pc, ip
++do_aload_state0:
++do_iload_state0:
++do_fload_state0:
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	ldr	ip, [state1_table, ip, asl #2]
++	ldr	tos, [java_locals, -r3, asl #2]
++	mov	pc, ip
++
++do_dload_state1:
++do_lload_state1:
++	PUSH(tos)
++do_dload_state0:
++do_lload_state0:
++	ldrb	r3, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]!
++	sub	r3, java_locals, r3, lsl #2
++	ldmda	r3, {r0, r1}
++	ldr	r2, [state1_table, ip, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++do_aload_0_state1:
++do_iload_0_state1:
++do_fload_0_state1:
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r2, asl #2]
++	ldr	tos, [java_locals, #0]
++	mov	pc, r2
++do_aload_0_state0:
++do_iload_0_state0:
++do_fload_0_state0:
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #0]
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	pc, r2
++
++do_aload_1_state1:
++do_iload_1_state1:
++do_fload_1_state1:
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r2, asl #2]
++	ldr	tos, [java_locals, #-4]
++	mov	pc, r2
++do_aload_1_state0:
++do_iload_1_state0:
++do_fload_1_state0:
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-4]
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	pc, r2
++
++do_aload_2_state1:
++do_iload_2_state1:
++do_fload_2_state1:
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r2, asl #2]
++	ldr	tos, [java_locals, #-8]
++	mov	pc, r2
++do_aload_2_state0:
++do_iload_2_state0:
++do_fload_2_state0:
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-8]
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	pc, r2
++
++do_aload_3_state1:
++do_iload_3_state1:
++do_fload_3_state1:
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [state1_table, r2, asl #2]
++	ldr	tos, [java_locals, #-12]
++	mov	pc, r2
++do_aload_3_state0:
++do_iload_3_state0:
++do_fload_3_state0:
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-12]
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	pc, r2
++
++do_dload_0_state1:
++do_lload_0_state1:
++	PUSH(tos)
++do_dload_0_state0:
++do_lload_0_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldmda	java_locals, {r0-r1}
++	ldr	ip, [state1_table, ip, asl #2]
++	PUSH(r1)
++	mov	pc, ip
++
++do_dload_1_state1:
++do_lload_1_state1:
++	PUSH(tos)
++do_dload_1_state0:
++do_lload_1_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldmdb	java_locals, {r0-r1}
++	ldr	ip, [state1_table, ip, asl #2]
++	PUSH(r1)
++	mov	pc, ip
++
++do_dload_2_state1:
++do_lload_2_state1:
++	PUSH(tos)
++do_dload_2_state0:
++do_lload_2_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldr	r2, [java_locals, #-8]
++	ldr	r0, [java_locals, #-12]
++	ldr	ip, [state1_table, ip, asl #2]
++	PUSH(r2)
++	mov	pc, ip
++
++do_dload_3_state1:
++do_lload_3_state1:
++	PUSH(tos)
++do_dload_3_state0:
++do_lload_3_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldr	r2, [java_locals, #-12]
++	ldr	r0, [java_locals, #-16]
++	ldr	ip, [state1_table, ip, asl #2]
++	PUSH(r2)
++	mov	pc, ip
++
++do_faload_state0:
++do_aaload_state0:
++do_iaload_state0:
++	POP(tos)
++do_faload_state1:
++do_aaload_state1:
++do_iaload_state1:
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	state1_exit_iaload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	state1_exit_iaload
++	ldr	ip, [state1_table, ip, asl #2]
++	add	r3, r2, tos, lsl #2
++	ldr	tos, [r3, #12]
++	mov	pc, ip
++
++do_baload_state0:
++	POP(tos)
++do_baload_state1:
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	state1_exit_iaload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	state1_exit_iaload
++	ldr	ip, [state1_table, ip, asl #2]
++	add	r3, r2, tos
++	ldrsb	tos, [r3, #12]
++	mov	pc, ip
++
++do_caload_state0:
++	POP(tos)
++do_caload_state1:
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	state1_exit_iaload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	state1_exit_iaload
++	ldr	ip, [state1_table, ip, asl #2]
++	add	r3, r2, tos, lsl #1
++	ldrh	tos, [r3, #12]
++	mov	pc, ip
++
++do_saload_state0:
++	POP(tos)
++do_saload_state1:
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	state1_exit_iaload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	state1_exit_iaload
++	ldr	ip, [state1_table, ip, asl #2]
++	add	r3, r2, tos, lsl #1
++	ldrsh	tos, [r3, #12]
++	mov	pc, ip
++
++do_daload_state0:
++do_laload_state0:
++	POP(tos)
++do_daload_state1:
++do_laload_state1:
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	state1_exit_laload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	state1_exit_laload
++	add	r3, r2, tos, asl #3
++	ldr	r2, [r3, #20]
++	ldr	ip, [state1_table, ip, asl #2]
++	ldr	tos, [r3, #16]
++	PUSH(r2)
++	mov	pc, ip
++
++do_istore_state0:
++do_fstore_state0:
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	POP(tos)
++	ldr	ip, [state0_table, ip, asl #2]
++	str	tos, [java_locals, -r3, asl #2]
++	mov	pc, ip
++do_istore_state1:
++do_fstore_state1:
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	ldr	ip, [state0_table, ip, asl #2]
++	str	tos, [java_locals, -r3, asl #2]
++	mov	pc, ip
++
++
++do_dstore_state0:
++do_lstore_state0:
++	POP(tos)
++do_dstore_state1:
++do_lstore_state1:
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	POP(r1)
++	ldr	ip, [state0_table, ip, asl #2]
++	sub	r3, java_locals, r3, lsl #2
++	stmda	r3, {r0, r1}
++	mov	pc, ip
++
++do_istore_0_state0:
++do_fstore_0_state0:
++	ldrb	r2, [java_pc, #1]!
++	POP(tos)
++	ldr	r2, [state0_table, r2, asl #2]
++	str	tos, [java_locals, #0]
++	mov	pc, r2
++do_istore_0_state1:
++do_fstore_0_state1:
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [state0_table, r2, asl #2]
++	str	tos, [java_locals, #0]
++	mov	pc, r2
++
++do_istore_1_state0:
++do_fstore_1_state0:
++	ldrb	r2, [java_pc, #1]!
++	POP(tos)
++	ldr	r2, [state0_table, r2, asl #2]
++	str	tos, [java_locals, #-4]
++	mov	pc, r2
++do_istore_1_state1:
++do_fstore_1_state1:
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [state0_table, r2, asl #2]
++	str	tos, [java_locals, #-4]
++	mov	pc, r2
++
++do_istore_2_state0:
++do_fstore_2_state0:
++	ldrb	r2, [java_pc, #1]!
++	POP(tos)
++	ldr	r2, [state0_table, r2, asl #2]
++	str	tos, [java_locals, #-8]
++	mov	pc, r2
++do_istore_2_state1:
++do_fstore_2_state1:
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [state0_table, r2, asl #2]
++	str	tos, [java_locals, #-8]
++	mov	pc, r2
++
++do_istore_3_state0:
++do_fstore_3_state0:
++	ldrb	r2, [java_pc, #1]!
++	POP(tos)
++	ldr	r2, [state0_table, r2, asl #2]
++	str	tos, [java_locals, #-12]
++	mov	pc, r2
++do_istore_3_state1:
++do_fstore_3_state1:
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [state0_table, r2, asl #2]
++	str	tos, [java_locals, #-12]
++	mov	pc, r2
++
++do_dstore_0_state0:
++do_lstore_0_state0:
++	POP(tos)
++do_dstore_0_state1:
++do_lstore_0_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [state0_table, ip, asl #2]
++	stmda	java_locals, {r0,r1}
++	mov	pc, ip
++
++do_dstore_1_state0:
++do_lstore_1_state0:
++	POP(tos)
++do_dstore_1_state1:
++do_lstore_1_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [state0_table, ip, asl #2]
++	stmdb	java_locals, {r0,r1}
++	mov	pc, ip
++
++do_dstore_2_state0:
++do_lstore_2_state0:
++	POP(tos)
++do_dstore_2_state1:
++do_lstore_2_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r3)
++	str	tos, [java_locals, #-12]
++	ldr	ip, [state0_table, ip, asl #2]
++	str	r3, [java_locals, #-8]
++	mov	pc, ip
++
++do_dstore_3_state0:
++do_lstore_3_state0:
++	POP(tos)
++do_dstore_3_state1:
++do_lstore_3_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r3)
++	str	tos, [java_locals, #-16]
++	ldr	ip, [state0_table, ip, asl #2]
++	str	r3, [java_locals, #-12]
++	mov	pc, ip
++
++do_fastore_state0:
++do_iastore_state0:
++	POP(tos)
++do_fastore_state1:
++do_iastore_state1:
++	ldmib	java_stack!, {r1, r2}	@ r0 = value; r1 = index; r2 = arrayref
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	state1_exit_iastore
++	ldr	r3, [r2, #8]
++	cmp	r1, r3
++	bcs	state1_exit_iastore
++	ldr	ip, [state0_table, ip, asl #2]
++	add	r3, r2, r1, lsl #2
++	str	tos, [r3, #12]
++	mov	pc, ip
++
++do_bastore_state0:
++	POP(tos)
++do_bastore_state1:
++	ldmib	java_stack!, {r1, r2}	@ r0 = value; r1 = index; r2 = arrayref
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	state1_exit_iastore
++	ldr	r3, [r2, #8]
++	cmp	r1, r3
++	bcs	state1_exit_iastore
++	ldr	ip, [state0_table, ip, asl #2]
++	add	r3, r2, r1
++	strb	tos, [r3, #12]
++	mov	pc, ip
++
++do_castore_state0:
++do_sastore_state0:
++	POP(tos)
++do_castore_state1:
++do_sastore_state1:
++	ldmib	java_stack!, {r1, r2}	@ r0 = value; r1 = index; r2 = arrayref
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	state1_exit_iastore
++	ldr	r3, [r2, #8]
++	cmp	r1, r3
++	bcs	state1_exit_iastore
++	ldr	ip, [state0_table, ip, asl #2]
++	add	r3, r2, r1, lsl #1
++	strh	tos, [r3, #12]
++	mov	pc, ip
++
++do_dastore_state0:
++do_lastore_state0:
++	POP(tos)
++do_dastore_state1:
++do_lastore_state1:
++	ldmib	java_stack!, {r1, r2, r3} @ r0,r1 = value, r2 = index, r3 = arrayref
++	ldrb	ip, [java_pc, #1]!
++	cmp	r3, #0
++	beq	state1_exit_lastore
++	ldr	lr, [r3, #8]
++	cmp	r2, lr
++	bcs	state1_exit_lastore
++	add	r3, r3, r2, lsl #3
++	ldr	ip, [state0_table, ip, asl #2]
++	str	r0, [r3, #16]
++	str	r1, [r3, #20]
++	mov	pc, ip
++
++do_pop_state0:
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++do_pop_state1:
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_pop2_state0:
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #8
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++do_pop2_state1:
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_dup_state0:
++	ldrb	r3, [java_pc, #1]!
++	ldr	r0, [java_stack, #4]
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++do_dup_state1:
++	ldrb	r3, [java_pc, #1]!
++	str	r0, [java_stack], #-4
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_dup2_state0:
++	ldrb	r3, [java_pc, #1]!
++	ldmib	java_stack, {r0,r1}
++	ldr	r2, [state1_table, r3, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++do_dup2_state1:
++	ldrb	r3, [java_pc, #1]!
++	ldr	r1, [java_stack, #4]
++	PUSH(r0)
++	ldr	r2, [state1_table, r3, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++do_dup_x1_state0:
++	ldrb	r3, [java_pc, #1]!
++	ldmib	java_stack!, {r0,r1}
++	ldr	r2, [state1_table, r3, asl #2]
++	PUSH(tos)
++	PUSH(r1)
++	mov	pc, r2
++do_dup_x1_state1:
++	ldrb	r3, [java_pc, #1]!
++	POP(r1)
++	PUSH(tos)
++	ldr	r2, [state1_table, r3, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++do_dup_x2_state0:
++	POP(tos)
++do_dup_x2_state1:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1,r2}
++	PUSH(tos)
++	ldr	ip, [state1_table, ip, asl #2]
++	stmda	java_stack!, {r1,r2}
++	mov	pc, ip
++
++do_dup2_x1_state0:
++	POP(tos)
++do_dup2_x1_state1:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1,r2}
++	ldr	ip, [state1_table, ip, asl #2]
++	stmda	java_stack!, {r0,r1}
++	stmda	java_stack!, {r1,r2}
++	mov	pc, ip
++
++do_dup2_x2_state0:
++	POP(tos)
++do_dup2_x2_state1:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1,r2,r3}
++	ldr	ip, [state1_table, ip, asl #2]
++	stmda	java_stack!, {r0,r1}
++	stmda	java_stack!, {r1,r2,r3}
++	mov	pc, ip
++
++do_swap_state0:
++	POP(tos)
++do_swap_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	PUSH(tos)
++	ldr	ip, [state1_table, ip, asl #2]
++	mov	tos, r1
++	mov	pc, ip
++
++do_iadd_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r0, r1}
++	ldr	ip, [state1_table, ip, asl #2]
++	add	r0, r0, r1
++	mov	pc, ip
++do_iadd_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [state1_table, ip, asl #2]
++	add	r0, r0, r1
++	mov	pc, ip
++
++do_isub_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r0,r1}
++	ldr	ip, [state1_table, ip, asl #2]
++	sub	r0, r1, r0
++	mov	pc, ip
++do_isub_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [state1_table, ip, asl #2]
++	sub	r0, r1, r0
++	mov	pc, ip
++
++do_imul_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r0,r1}
++	ldr	ip, [state1_table, ip, asl #2]
++	mul	r0, r1, r0
++	mov	pc, ip
++do_imul_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [state1_table, ip, asl #2]
++	mul	r0, r1, r0
++	mov	pc, ip
++
++do_iand_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r0,r1}
++	ldr	ip, [state1_table, ip, asl #2]
++	and	r0, r1, r0
++	mov	pc, ip
++do_iand_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [state1_table, ip, asl #2]
++	and	r0, r1, r0
++	mov	pc, ip
++
++do_ior_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r0,r1}
++	ldr	ip, [state1_table, ip, asl #2]
++	orr	r0, r1, r0
++	mov	pc, ip
++do_ior_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [state1_table, ip, asl #2]
++	orr	r0, r1, r0
++	mov	pc, ip
++
++do_ixor_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r0,r1}
++	ldr	ip, [state1_table, ip, asl #2]
++	eor	r0, r1, r0
++	mov	pc, ip
++do_ixor_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [state1_table, ip, asl #2]
++	eor	r0, r1, r0
++	mov	pc, ip
++
++do_ladd_state0:
++	POP(tos)
++do_ladd_state1:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1-r3}
++	ldr	ip, [state1_table, ip, asl #2]
++	adds	r0, r0, r2
++	adc	r1, r1, r3
++	PUSH(r1)
++	mov	pc, ip
++
++do_lsub_state0:
++	POP(tos)
++do_lsub_state1:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1-r3}
++	ldr	ip, [state1_table, ip, asl #2]
++	subs	r0, r2, r0
++	sbc	r1, r3, r1
++	PUSH(r1)
++	mov	pc, ip
++
++do_lmul_state0:
++	POP(tos)
++do_lmul_state1:
++	ldmib	java_stack!, {r1-r3}
++	umull	lr, ip, r2, r0
++	mla	r1, r2, r1, ip
++	ldrb	r2, [java_pc, #1]!
++	mla	r1, r3, r0, r1
++	PUSH(r1)
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	tos, lr
++	mov	pc, r2
++
++do_land_state0:
++	POP(tos)
++do_land_state1:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1-r3}
++	ldr	ip, [state1_table, ip, asl #2]
++	and	r0, r2, r0
++	and	r1, r3, r1
++	PUSH(r1)
++	mov	pc, ip
++
++do_lor_state0:
++	POP(tos)
++do_lor_state1:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1-r3}
++	ldr	ip, [state1_table, ip, asl #2]
++	orr	r0, r2, r0
++	orr	r1, r3, r1
++	PUSH(r1)
++	mov	pc, ip
++
++do_lxor_state0:
++	POP(tos)
++do_lxor_state1:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1-r3}
++	ldr	ip, [state1_table, ip, asl #2]
++	eor	r0, r2, r0
++	eor	r1, r3, r1
++	PUSH(r1)
++	mov	pc, ip
++
++do_ineg_state0:
++	ldrb	r2, [java_pc, #1]!
++	POP(tos)
++	ldr	r2, [state1_table, r2, asl #2]
++	rsb	tos, tos, #0
++	mov	pc, r2
++do_ineg_state1:
++	ldrb	r2, [java_pc, #1]!
++	rsb	tos, tos, #0
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	pc, r2
++
++do_lneg_state0:
++	POP(tos)
++do_lneg_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	rsbs	tos, tos, #0
++	ldr	ip, [state1_table, ip, asl #2]
++	rsc	r1, r1, #0
++	PUSH(r1)
++	mov	pc, ip
++
++do_ishl_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r0, r1}
++	ldr	ip, [state1_table, ip, asl #2]
++	and	r0, r0, #31
++	mov	tos, r1, lsl r0
++	mov	pc, ip
++do_ishl_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	and	tos, tos, #31
++	ldr	ip, [state1_table, ip, asl #2]
++	mov	tos, r1, lsl r0
++	mov	pc, ip
++
++do_lshl_state0:
++	POP(tos)
++do_lshl_state1:
++        ldrb    ip, [java_pc, #1]!
++        tst     tos, #32
++        and     r2, tos, #31
++	ldmib	java_stack!, {r1,r3}
++	ldr	ip, [state1_table, ip, asl #2]
++        movne   r0, #0
++        movne   r3, r1, lsl r2
++        moveq   r0, r1, lsl r2
++        moveq   r3, r3, lsl r2
++        rsbeq   r2, r2, #32
++        orreq   r3, r3, r1, lsr r2
++	PUSH(r3)
++	mov	pc, ip
++
++do_ishr_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r0, r1}
++	ldr	ip, [state1_table, ip, asl #2]
++	and	r0, r0, #31
++	mov	tos, r1, asr r0
++	mov	pc, ip
++do_ishr_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	and	r0, r0, #31
++	ldr	ip, [state1_table, ip, asl #2]
++	mov	tos, r1, asr r0
++	mov	pc, ip
++
++do_lshr_state0:
++	POP(tos)
++do_lshr_state1:
++        ldrb    ip, [java_pc, #1]!
++        tst     tos, #32
++        and     a3, tos, #31
++	ldmib	java_stack!, {a1, a4}
++	ldr	ip, [state1_table, ip, asl #2]
++        movne   a2, a4, asr #31
++        movne   a1, a4, asr a3
++        moveq   a2, a4, asr a3
++        moveq   a1, a1, lsr a3
++        rsbeq   a3, a3, #32
++        orreq   a1, a1, a4, lsl a3
++	PUSH(a2)
++	mov	pc, ip
++
++do_iushr_state0:
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r0, r1}
++	ldr	ip, [state1_table, ip, asl #2]
++	and	r0, r0, #31
++	mov	tos, r1, lsr r0
++	mov	pc, ip
++do_iushr_state1:
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	and	r0, r0, #31
++	ldr	ip, [state1_table, ip, asl #2]
++	mov	tos, r1, lsr r0
++	mov	pc, ip
++
++do_lushr_state0:
++	POP(tos)
++do_lushr_state1:
++        ldrb    ip, [java_pc, #1]!
++        tst     tos, #32
++        and     a3, tos, #31
++	ldmib	java_stack!, {a1, a4}
++	ldr	ip, [state1_table, ip, asl #2]
++        movne   a2, #0
++        movne   a1, a4, lsr a3
++        moveq   a2, a4, lsr a3
++        moveq   a1, a1, lsr a3
++        rsbeq   a3, a3, #32
++        orreq   a1, a1, a4, lsl a3
++	PUSH(a2)
++	mov	pc, ip
++
++do_iinc_state0:
++	ldrb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #3]!
++	ldrsb	r1, [java_pc, #-1]
++	ldr	r3, [java_locals, -r2, lsl #2]
++	ldr	ip, [state0_table, ip, asl #2]
++	add	r3, r3, r1
++	str	r3, [java_locals, -r2, lsl #2]
++	mov	pc, ip
++do_iinc_state1:
++	ldrb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #3]!
++	ldrsb	r1, [java_pc, #-1]
++	ldr	r3, [java_locals, -r2, lsl #2]
++	ldr	ip, [state1_table, ip, asl #2]
++	add	r3, r3, r1
++	str	r3, [java_locals, -r2, lsl #2]
++	mov	pc, ip
++
++do_jsr_state1:
++	PUSH(tos)
++	ldr	r2, [istate, #16]
++	ldr	r3, [r2, #8]
++	rsb	r3, r3, java_pc
++	sub	tos, r3, #45
++
++do_goto_state1:
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	do_goto1_state1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	state1_exit_goto
++
++	ldr	r1, [istate, #16]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++do_goto1_state1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_jsr_state0:
++	ldr	r2, [istate, #16]
++	ldr	r3, [r2, #8]
++	rsb	r3, r3, java_pc
++	sub	r3, r3, #45
++	PUSH(r3)
++
++do_goto_state0:
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	do_goto1_state0
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	state0_exit_goto
++
++	ldr	r1, [istate, #16]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++do_goto1_state0:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_dcmpl_state1:
++	PUSH(tos)
++do_dcmpl_state0:
++	fldd	d6, [java_stack, #12]
++	fldd	d7, [java_stack, #4]
++	fcmped	d6, d7
++	fmstat
++	mvnmi	tos, #0
++	bmi	do_dcmpl_1_state1
++	movgt	tos, #1
++	bgt	do_dcmpl_1_state1
++	fcmpd	d6, d7
++	fmstat
++	moveq	tos, #0
++	mvnne	tos, #0
++do_dcmpl_1_state1:
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #16
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_ldiv_state1:
++	PUSH(tos)
++do_ldiv_state0:
++	ldmib	java_stack!, {r2, r3}
++	ldmib	java_stack!, {r0, r1}
++	orrs	lr, r2, r3
++	beq	ldiv_0
++	bl	__aeabi_ldivmod(PLT)
++	ldrb	r3, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_lrem_state1:
++	PUSH(tos)
++do_lrem_state0:
++	ldmib	java_stack!, {r2, r3}
++	ldmib	java_stack!, {r0, r1}
++	orrs	lr, r2, r3
++	beq	lrem_0
++	bl	__aeabi_ldivmod(PLT)
++	ldrb	r0, [java_pc, #1]!
++	PUSH(r3)
++	ldr	ip, [state1_table, r0, asl #2]
++	mov	tos, r2
++	mov	pc, ip
++
++do_dadd_state1:
++	PUSH(tos)
++do_dadd_state0:
++	ldrb	r3, [java_pc, #1]!
++	fldd	d7, [java_stack, #12]
++	fldd	d6, [java_stack, #4]
++	ldr	r2, [state0_table, r3, asl #2]
++	faddd	d7, d7, d6
++	fstd	d7, [java_stack, #12]
++	add	java_stack, java_stack, #8
++	mov	pc, r2
++
++do_fadd_state1:
++	PUSH(tos)
++do_fadd_state0:
++	ldrb	r3, [java_pc, #1]!
++	flds	s15, [java_stack, #8]
++	flds	s14, [java_stack, #4]
++	ldr	r2, [state0_table, r3, asl #2]
++	fadds	s15, s15, s14
++	fsts	s15, [java_stack, #8]
++	add	java_stack, java_stack, #4
++	mov	pc, r2
++
++do_dsub_state1:
++	PUSH(tos)
++do_dsub_state0:
++	ldrb	r3, [java_pc, #1]!
++	fldd	d7, [java_stack, #12]
++	fldd	d6, [java_stack, #4]
++	ldr	r2, [state0_table, r3, asl #2]
++	fsubd	d7, d7, d6
++	fstd	d7, [java_stack, #12]
++	add	java_stack, java_stack, #8
++	mov	pc, r2
++
++do_getfield_state1:
++	PUSH(tos)
++do_getfield_state0:
++	ldrb	r3, [java_pc,#1]
++	ldrb	r2, [java_pc,#2]
++	ldrb	r0, [java_pc,#3]!
++	orr	r3, r3, r2, lsl #8
++	add	r1, constant_pool, #16
++	ldr	r3, [r1, r3, lsl #4]!			@ r1 = cache
++
++	ldr	ip, [state1_table, r0, asl #2]
++
++	and	r3, r3, #0x00ff0000
++	cmp	r3, #180 << 16
++
++	bne	exit_getfield_1
++
++	ldr	r0, [java_stack, #4]!
++	cmp	r0, #0
++	beq	exit_getfield
++
++	ldr	r2, [r1, #12]
++	ldr	lr, [r1, #8]
++	mov	r2, r2, lsr #28
++	cmp	r2, #7
++	cmpne	r2, #3
++	cmpne	r2, #5
++	beq	do_getfield_word_state0
++
++	cmp	r2, #4
++	cmpne	r2, #6
++	beq	do_getfield_double_state0
++
++	cmp	r2, #1
++	beq	do_getfield_char_state0
++	cmp	r2, #2
++	beq	do_getfield_short_state0
++
++	ldrsb	tos, [r0, lr]
++	mov	pc, ip
++
++do_getstatic_word_state0:
++do_getfield_word_state0:
++	ldr	tos, [r0, lr]
++	mov	pc, ip
++do_getstatic_char_state0:
++do_getfield_char_state0:
++	ldrh	tos, [r0, lr]
++	mov	pc, ip
++do_getstatic_short_state0:
++do_getfield_short_state0:
++	ldrsh	tos, [r0, lr]
++	mov	pc, ip
++do_getstatic_double_state0:
++do_getfield_double_state0:
++	add	r2, r0, lr
++	ldmia	r2, {r0,r1}
++	PUSH(r1)
++	mov	pc, ip
++
++do_getstatic_state1:
++	PUSH(tos)
++do_getstatic_state0:
++	ldrb	r3, [java_pc,#1]
++	ldrb	r2, [java_pc,#2]
++	ldrb	r0, [java_pc,#3]!
++	orr	r3, r3, r2, lsl #8
++	add	r1, constant_pool, #16
++	ldr	r3, [r1, r3, lsl #4]!			@ r1 = cache
++
++	ldr	ip, [state1_table, r0, asl #2]
++
++	and	r3, r3, #0x00ff0000
++	cmp	r3, #178 << 16
++
++	bne	exit_getstatic_1
++
++	ldr	r0, [r1, #4]
++
++@	ldr	r0, [java_stack, #4]!
++@	cmp	r0, #0
++@	beq	exit_getstatic
++
++	ldr	r2, [r1, #12]
++	ldr	lr, [r1, #8]
++	mov	r2, r2, lsr #28
++	cmp	r2, #7
++	cmpne	r2, #3
++	cmpne	r2, #5
++	beq	do_getstatic_word_state0
++
++	cmp	r2, #4
++	cmpne	r2, #6
++	beq	do_getstatic_double_state0
++
++	cmp	r2, #1
++	beq	do_getstatic_char_state0
++	cmp	r2, #2
++	beq	do_getstatic_short_state0
++
++	ldrsb	tos, [r0, lr]
++	mov	pc, ip
++
++do_ret_state1:
++	PUSH(tos)
++do_ret_state0:
++	ldrb	r2, [java_pc, #1]
++	ldr	r0, [istate, #16]
++	mov	r2, r2, asl #2
++	ldr	r3, [r0, #8]
++	rsb	r2, r2, #0
++	add	r3, r3, #48
++	ldr	r1, [java_locals, r2]
++	add	java_pc, r3, r1
++	ldrb	r2, [r3, r1]
++	ldr	r2, [state0_table, r2, asl #2]
++	mov	pc, r2
++
++do_arraylength_state0:
++	POP(tos)
++do_arraylength_state1:
++	ldrb	r2, [java_pc, #1]!
++	cmp	tos, #0
++	beq	exit_arraylength
++	ldr	r2, [state1_table, r2, asl #2]
++	ldr	tos, [tos, #8]
++	mov	pc, r2
++
++do_astore_0_state1:
++	PUSH(tos)
++do_astore_0_state0:
++	mov	r0, java_stack
++	mov	r2, java_locals
++	mov	r3, #0
++	mvn	r1, #0
++	bl	_ZN19BytecodeInterpreter6astoreEPiiS0_i(PLT)
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_astore_1_state1:
++	PUSH(tos)
++do_astore_1_state0:
++	mov	r0, java_stack
++	mov	r2, java_locals
++	mov	r3, #1
++	mvn	r1, #0
++	bl	_ZN19BytecodeInterpreter6astoreEPiiS0_i(PLT)
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_astore_2_state1:
++	PUSH(tos)
++do_astore_2_state0:
++	mov	r0, java_stack
++	mov	r2, java_locals
++	mov	r3, #2
++	mvn	r1, #0
++	bl	_ZN19BytecodeInterpreter6astoreEPiiS0_i(PLT)
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_astore_3_state1:
++	PUSH(tos)
++do_astore_3_state0:
++	mov	r0, java_stack
++	mov	r2, java_locals
++	mov	r3, #3
++	mvn	r1, #0
++	bl	_ZN19BytecodeInterpreter6astoreEPiiS0_i(PLT)
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_astore_state1:
++	PUSH(tos)
++do_astore_state0:
++	mov	r0, java_stack
++	ldrb	r3, [java_pc, #1]
++	mov	r2, java_locals
++	mvn	r1, #0
++	bl	_ZN19BytecodeInterpreter6astoreEPiiS0_i(PLT)
++	ldrb	r3, [java_pc, #2]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_dcmpg_state1:
++	PUSH(tos)
++do_dcmpg_state0:
++	ldrb	r3, [java_pc, #1]!
++	fldd	d6, [java_stack, #12]
++	fldd	d7, [java_stack, #4]
++	fcmped	d6, d7
++	ldr	r2, [state1_table, r3, asl #2]
++	fmstat
++	mvnmi	tos, #0
++	bmi	do_dcmpg_1_state1
++	movgt	tos, #1
++	bgt	do_dcmpg_1_state1
++	fcmpd	d6, d7
++	fmstat
++	moveq	tos, #0
++	movne	tos, #1
++do_dcmpg_1_state1:
++	add	java_stack, java_stack, #16
++	mov	pc, r2
++
++do_lcmp_state1:
++	PUSH(tos)
++do_lcmp_state0:
++	ldmib	java_stack!, {r0-r3}
++	ldrb	ip, [java_pc, #1]!
++        subs    tos, r2, r0
++        movne   tos, #1
++        sbcs    r3, r3, r1
++	ldr	ip, [state1_table, ip, asl #2]
++        movne   tos, #1
++        rsblt   tos, tos, #0
++	mov	pc, ip
++
++do_fsub_state1:
++	PUSH(tos)
++do_fsub_state0:
++	ldrb	r3, [java_pc, #1]!
++	flds	s15, [java_stack, #8]
++	flds	s14, [java_stack, #4]
++	ldr	r2, [state0_table, r3, asl #2]
++	fsubs	s15, s15, s14
++	fsts	s15, [java_stack, #8]
++	add	java_stack, java_stack, #4
++	mov	pc, r2
++
++do_dmul_state1:
++	PUSH(tos)
++do_dmul_state0:
++	ldrb	r3, [java_pc, #1]!
++	fldd	d5, [java_stack, #12]
++	fldd	d7, [java_stack, #4]
++	ldr	r2, [state0_table, r3, asl #2]
++	fmuld	d6, d5, d7
++	fstd	d6, [java_stack, #12]
++	add	java_stack, java_stack, #8
++	mov	pc, r2
++
++do_fmul_state1:
++	PUSH(tos)
++do_fmul_state0:
++	ldrb	r3, [java_pc, #1]!
++	flds	s13, [java_stack, #8]
++	flds	s15, [java_stack, #4]
++	ldr	r2, [state0_table, r3, asl #2]
++	fmuls	s14, s13, s15
++	fsts	s14, [java_stack, #8]
++	add	java_stack, java_stack, #4
++	mov	pc, r2
++
++do_ddiv_state1:
++	PUSH(tos)
++do_ddiv_state0:
++	ldrb	r3, [java_pc, #1]!
++	fldd	d5, [java_stack, #12]
++	fldd	d7, [java_stack, #4]
++	ldr	r2, [state0_table, r3, asl #2]
++	fdivd	d6, d5, d7
++	fstd	d6, [java_stack, #12]
++	add	java_stack, java_stack, #8
++	mov	pc, r2
++
++do_fdiv_state1:
++	PUSH(tos)
++do_fdiv_state0:
++	ldrb	r3, [java_pc, #1]!
++	flds	s13, [java_stack, #8]
++	flds	s15, [java_stack, #4]
++	ldr	r2, [state0_table, r3, asl #2]
++	fdivs	s14, s13, s15
++	fsts	s14, [java_stack, #8]
++	add	java_stack, java_stack, #4
++	mov	pc, r2
++
++do_drem_state0:
++	POP(tos)
++do_drem_state1:
++	mov	r2, tos
++	POP(r3)
++	ldmib	java_stack!, {r0, r1}
++	bl	fmod(PLT)
++	ldrb	r3, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_frem_state1:
++	PUSH(tos)
++do_frem_state0:
++	flds	s15, [java_stack, #8]
++	fcvtds	d6, s15
++	flds	s14, [java_stack, #4]
++	fmrrd	r0, r1, d6
++	fcvtds	d6, s14
++	fmrrd	r2, r3, d6
++	bl	fmod(PLT)
++	ldrb	r3, [java_pc, #1]!
++	fmdrr	d6, r0, r1
++	fcvtsd	s15, d6
++	ldr	r2, [state0_table, r3, asl #2]
++	fsts	s15, [java_stack, #8]
++	add	java_stack, java_stack, #4
++	mov	pc, r2
++
++do_fneg_state0:
++	POP(tos)
++do_fneg_state1:
++	ldrb	r3, [java_pc, #1]!
++	eor	tos, tos, #0x80000000
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_dneg_state0:
++	ldrb	r3, [java_pc, #1]!
++	ldr	r1, [java_stack, #8]
++	eor	r1, r1, #0x80000000
++	ldr	r2, [state0_table, r3, asl #2]
++	str	r1, [java_stack, #8]
++	mov	pc, r2
++
++do_dneg_state1:
++	ldrb	r3, [java_pc, #1]!
++	POP(r1)
++	eor	r1, r1, #0x80000000
++	ldr	r2, [state1_table, r3, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++do_i2f_state0:
++	POP(tos)
++do_i2f_state1:
++	ldrb	r3, [java_pc, #1]!
++	fmsr	s12, tos
++	fsitos	s15, s12
++	ldr	r2, [state0_table, r3, asl #2]
++	fsts	s15, [java_stack]
++	sub	java_stack, java_stack, #4
++	mov	pc, r2
++
++do_i2l_state0:
++	POP(tos)
++do_i2l_state1:
++	ldrb	r2, [java_pc, #1]!
++	mov	r1, tos, asr #31
++	ldr	r2, [state1_table, r2, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++do_i2d_state0:
++	POP(tos)
++do_i2d_state1:
++	ldrb	r3, [java_pc, #1]!
++	fmsr	s13, tos
++	fsitod	d7, s13
++	ldr	r2, [state0_table, r3, asl #2]
++	fstd	d7, [java_stack, #-4]
++	sub	java_stack, java_stack, #8
++	mov	pc, r2
++
++do_l2i_state0:
++	POP(tos)
++do_l2i_state1:
++	ldrb	r2, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	pc, r2
++
++do_l2f_state0:
++	POP(tos)
++do_l2f_state1:
++	POP(r1)
++	bl	__aeabi_l2f(PLT)
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_l2d_state0:
++	POP(tos)
++do_l2d_state1:
++	POP(r1)
++	bl	__aeabi_l2d(PLT)
++	ldrb	r2, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	pc, r2
++
++do_f2i_state0:
++	POP(tos)
++do_f2i_state1:
++	bl	_ZN13SharedRuntime3f2iEf(PLT)
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_f2l_state0:
++	POP(tos)
++do_f2l_state1:
++	bl	_ZN13SharedRuntime3f2lEf(PLT)
++	ldrb	r3, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_f2d_state1:
++	PUSH(tos)
++do_f2d_state0:
++	flds	s14, [java_stack, #4]
++	fcvtds	d7, s14
++	fstd	d7, [java_stack, #0]
++	ldrb	r3, [java_pc, #1]!
++	sub	java_stack, java_stack, #4
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_d2i_state0:
++	POP(tos)
++do_d2i_state1:
++	POP(r1)
++	bl	_ZN13SharedRuntime3d2iEd(PLT)
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_d2f_state1:
++	PUSH(tos)
++do_d2f_state0:
++	fldd	d7, [java_stack, #4]
++	fcvtsd	s14, d7
++	fsts	s14, [java_stack, #8]
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_d2l_state0:
++	POP(tos)
++do_d2l_state1:
++	POP(r1)
++	bl	_ZN13SharedRuntime3d2lEd(PLT)
++	ldrb	r3, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_i2b_state0:
++	POP(tos)
++do_i2b_state1:
++	ldrb	r2, [java_pc, #1]!
++	mov	tos, tos, asl #24
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	tos, tos, asr #24
++	mov	pc, r2
++
++do_i2c_state0:
++	POP(tos)
++do_i2c_state1:
++	ldrb	r2, [java_pc, #1]!
++	mov	tos, tos, asl #16
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	tos, tos, lsr #16
++	mov	pc, r2
++
++do_i2s_state0:
++	POP(tos)
++do_i2s_state1:
++	ldrb	r2, [java_pc, #1]!
++	mov	tos, tos, asl #16
++	ldr	r2, [state1_table, r2, asl #2]
++	mov	tos, tos, asr #16
++	mov	pc, r2
++
++do_if_icmplt_state0:
++	POP(tos)
++do_if_icmplt_state1:
++	POP(r3)
++	cmp	r3, tos
++	ldrgeb	r2, [java_pc, #3]!
++	ldrge	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	if_icmplt_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++if_icmplt_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_iflt_state0:
++	POP(tos)
++do_iflt_state1:
++	cmp	tos, #0
++	ldrgeb	r2, [java_pc, #3]!
++	ldrge	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	iflt_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch1op
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++iflt_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_if_icmpgt_state0:
++	POP(tos)
++do_if_icmpgt_state1:
++	POP(r3)
++	cmp	r3, tos
++	ldrleb	r2, [java_pc, #3]!
++	ldrle	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	if_icmpgt_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++if_icmpgt_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_ifgt_state0:
++	POP(tos)
++do_ifgt_state1:
++	cmp	tos, #0
++	ldrleb	r2, [java_pc, #3]!
++	ldrle	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	ifgt_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch1op
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++ifgt_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_if_icmple_state0:
++	POP(tos)
++do_if_icmple_state1:
++	POP(r3)
++	cmp	r3, tos
++	ldrgtb	r2, [java_pc, #3]!
++	ldrgt	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	if_icmple_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++if_icmple_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_ifle_state0:
++	POP(tos)
++do_ifle_state1:
++	cmp	tos, #0
++	ldrgtb	r2, [java_pc, #3]!
++	ldrgt	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	ifle_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch1op
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++ifle_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_ifnonnull_state0:
++do_ifne_state0:
++	POP(tos)
++do_ifnonnull_state1:
++do_ifne_state1:
++	cmp	tos, #0
++	ldreqb	r2, [java_pc, #3]!
++	ldreq	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	ifne_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch1op
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++ifne_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_ifnull_state0:
++do_ifeq_state0:
++	POP(tos)
++do_ifnull_state1:
++do_ifeq_state1:
++	cmp	tos, #0
++	ldrneb	r2, [java_pc, #3]!
++	ldrne	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	ifeq_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch1op
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++ifeq_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_if_acmpeq_state0:
++do_if_icmpeq_state0:
++	POP(tos)
++do_if_acmpeq_state1:
++do_if_icmpeq_state1:
++	POP(r3)
++	cmp	r3, tos
++	ldrneb	r2, [java_pc, #3]!
++	ldrne	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	if_icmpeq_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++if_icmpeq_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_if_acmpne_state0:
++do_if_icmpne_state0:
++	POP(tos)
++do_if_acmpne_state1:
++do_if_icmpne_state1:
++	POP(r3)
++	cmp	r3, tos
++	ldreqb	r2, [java_pc, #3]!
++	ldreq	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	if_icmpne_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++if_icmpne_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_if_icmpge_state0:
++	POP(tos)
++do_if_icmpge_state1:
++	POP(r3)
++	cmp	r3, tos
++	ldrltb	r2, [java_pc, #3]!
++	ldrlt	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	if_icmpge_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++if_icmpge_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_ifge_state0:
++	POP(tos)
++do_ifge_state1:
++	cmp	tos, #0
++	ldrltb	r2, [java_pc, #3]!
++	ldrlt	pc, [state0_table, r2, lsl #2]
++
++	ldrsb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orrs	ip, ip, r2, lsl #8
++	add	java_pc, java_pc, ip
++	bpl	ifge_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_branch1op
++
++	ldrb	ip, [java_pc, #0]
++	ldr	r1, [istate, #16]
++	ldr	ip, [state0_table, ip, asl #2]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++	mov	pc, ip
++
++ifge_1:
++	ldrb	r3, [java_pc, #0]
++	ldr	r2, [state0_table, r3, asl #2]
++	mov	pc, r2
++
++do_ldc_state1:
++	PUSH(tos)
++do_ldc_state0:
++	ldr	r3, [istate, #16]
++	ldrb	r1, [java_pc, #1]
++
++	ldr	r0, [r3, #12]
++	ldr	r2, [r0, #8]
++	add	r2, r2, #12
++	ldrb	r3, [r2, r1]
++
++	cmp	r3, #3			@ int
++	cmpne	r3, #4			@ float
++	cmpne	r3, #8			@ string
++	bne	exit_asm
++
++	ldrb	ip, [java_pc, #2]!
++	add	r3, r0, r1, lsl #2
++	ldr	tos, [r3, #32]
++	ldr	pc, [state1_table, ip, lsl #2]
++
++do_ldc_w_state1:
++	PUSH(tos)
++do_ldc_w_state0:
++	ldr	r3, [istate, #16]
++	ldrb	r0, [java_pc, #1]
++	ldrb	r2, [java_pc, #2]
++
++	ldr	ip, [r3, #12]
++	orr	r2, r2, r0, asl #8
++	ldr	r1, [ip, #8]
++	add	r1, r1, #12
++	ldrb	r3, [r1, r2]
++
++	cmp	r3, #3			@ int
++	cmpne	r3, #4			@ float
++	cmpne	r3, #8			@ string
++	bne	exit_asm
++
++	ldrb	r1, [java_pc, #3]!
++	add	r3, ip, r2, lsl #2
++	ldr	tos, [r3, #32]
++	ldr	pc, [state1_table, r1, lsl #2]
++
++do_ldc2_w_state1:
++	PUSH(tos)
++do_ldc2_w_state0:
++	ldr	r3, [istate, #16]
++	ldrb	r0, [java_pc, #1]
++	ldrb	r2, [java_pc, #2]
++
++	ldr	ip, [r3, #12]
++	orr	r2, r2, r0, asl #8
++	ldr	r1, [ip, #8]
++	add	r1, r1, #12
++	ldrb	r3, [r1, r2]
++
++	cmp	r3, #5
++	cmpne	r3, #6
++	bne	exit_asm
++
++	ldrb	r3, [java_pc, #3]!
++	add	ip, ip, r2, lsl #2
++	add	ip, ip, #32
++	ldmia	ip, {r0, r1}
++	PUSH(r1)
++	ldr	pc, [state1_table, r3, lsl #2]
++	
++do_fcmpl_state1:
++	PUSH(tos)
++do_fcmpl_state0:
++	flds	s14, [java_stack, #8]
++	flds	s15, [java_stack, #4]
++	fcmpes	s14, s15
++	add	java_stack, java_stack, #8
++	fmstat
++	mvnmi	tos, #0
++	bmi	do_fcmpl_1_state1
++	movgt	tos, #1
++	bgt	do_fcmpl_1_state1
++	fcmps	s14, s15
++	fmstat
++	moveq	tos, #0
++	mvnne	tos, #0
++do_fcmpl_1_state1:
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++do_fcmpg_state1:
++	PUSH(tos)
++do_fcmpg_state0:
++	flds	s14, [java_stack, #8]
++	flds	s15, [java_stack, #4]
++	fcmpes	s14, s15
++	add	java_stack, java_stack, #8
++	fmstat
++	mvnmi	tos, #0
++	bmi	do_fcmpg_1_state1
++	movgt	tos, #1
++	bgt	do_fcmpg_1_state1
++	fcmps	s14, s15
++	fmstat
++	moveq	tos, #0
++	movne	tos, #1
++do_fcmpg_1_state1:
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [state1_table, r3, asl #2]
++	mov	pc, r2
++
++@---- DONE TO HERE ---
++
++state1_exit_lastore:
++	sub	java_pc, java_pc, #1
++	sub	java_stack, java_stack, #12
++	PUSH(tos)
++	b	exit_asm
++
++state1_exit_iastore:
++	sub	java_pc, java_pc, #1
++	sub	java_stack, java_stack, #8
++	PUSH(tos)
++	b	exit_asm
++
++state1_exit_iaload:
++state1_exit_laload:
++	sub	java_pc, java_pc, #1
++	sub	java_stack, java_stack, #4
++	PUSH(tos)
++	b	exit_asm
++
++exit_tableswitch:
++	sub	java_stack, java_stack, #4
++	b	exit_asm
++exit_branch1op:
++	sub	java_stack, java_stack, #4
++	sub	java_pc, java_pc, ip
++	b	exit_asm
++exit_branch:
++	sub	java_stack, java_stack, #8
++	sub	java_pc, java_pc, ip
++	b	exit_asm
++state1_exit_goto:
++	PUSH(tos)
++state0_exit_goto:
++	sub	java_pc, java_pc, ip
++	b	exit_asm
++
++exit_getstatic:
++exit_getfield:
++	sub	java_stack, java_stack, #4
++exit_getstatic_1:
++exit_getfield_1:
++	sub	java_pc, java_pc, #3
++	b	exit_asm
++lrem_0:
++ldiv_0:
++	sub	java_stack, java_stack, #16
++	b	exit_asm
++remc_0:
++divc_0:
++	sub	java_stack, java_stack, #4
++	PUSH(tos)
++	sub	java_pc, java_pc, #1	@ undo autoincrement
++exit_asm:
++	mov	r0, #0
++	str	java_pc, [istate, #4]
++	str	java_stack, [istate, #24]
++	ldmfd	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
++exit_arraylength:
++	PUSH(tos)
++	sub	java_pc, java_pc, #1
++	b	exit_asm
++
++do_aastore_state1:
++do_ireturn_state1:
++do_lreturn_state1:
++do_freturn_state1:
++do_dreturn_state1:
++do_areturn_state1:
++do_return_state1:
++do_putstatic_state1:
++do_invokevirtual_state1:
++do_invokespecial_state1:
++do_invokestatic_state1:
++do_invokeinterface_state1:
++do_xxxunusedxxx_state1:
++do_new_state1:
++do_newarray_state1:
++do_anewarray_state1:
++do_athrow_state1:
++do_checkcast_state1:
++do_instanceof_state1:
++do_monitorenter_state1:
++do_monitorexit_state1:
++do_wide_state1:
++do_multianewarray_state1:
++do_goto_w_state1:
++do_jsr_w_state1:
++do_breakpoint_state1:
++do_exit_asm_state1:
++	PUSH(tos)
++do_aastore_state0:
++do_ireturn_state0:
++do_lreturn_state0:
++do_freturn_state0:
++do_dreturn_state0:
++do_areturn_state0:
++do_return_state0:
++do_putstatic_state0:
++do_invokevirtual_state0:
++do_invokespecial_state0:
++do_invokestatic_state0:
++do_invokeinterface_state0:
++do_xxxunusedxxx_state0:
++do_new_state0:
++do_newarray_state0:
++do_anewarray_state0:
++do_athrow_state0:
++do_checkcast_state0:
++do_instanceof_state0:
++do_monitorenter_state0:
++do_monitorexit_state0:
++do_wide_state0:
++do_multianewarray_state0:
++do_goto_w_state0:
++do_jsr_w_state0:
++do_breakpoint_state0:
++do_exit_asm_state0:
++	mov	r0, #0
++	str	java_pc, [istate, #4]
++	str	java_stack, [istate, #24]
++	ldmfd	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
++
++@ ----- The Bytecode Implementations --------------------------------------
++
++do_tableswitch_state0:
++	POP(tos)
++do_tableswitch_state1:
++	mov	a2, tos
++        bic     a1, java_pc, #3
++        ldr     a4,[a1,#8]
++@       BYTESEX_REVERSE a3, a4, a3
++
++	eor	a3, a4, a4, ror #16
++	bic	a3, a3, #0xff0000
++	mov	a4, a4, ror #8
++	eor	a3, a4, a3, lsr #8
++
++        ldr     a4,[a1,#12]
++@       BYTESEX_REVERSE a4, a4, ip
++
++	eor	ip, a4, a4, ror #16
++	bic	ip, ip, #0xff0000
++	mov	a4, a4, ror #8
++	eor	a4, a4, ip, lsr #8
++
++        sub     a2,a2,a3
++        sub     a4,a4,a3
++        cmp     a4,a2
++        ldrcc   a1,[a1,#4]
++        addcs   a1,a1,a2,LSL #2
++        ldrcs   a1,[a1,#16]
++@       BYTESEX_REVERSE a1, a1, a4
++
++	eor	a4, a1, a1, ror #16
++	bic	a4, a4, #0xff0000
++	mov	a1, a1, ror #8
++	eors	ip, a1, a4, lsr #8
++	bpl	tableswitch_1
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_tableswitch
++
++	ldr	r1, [istate, #16]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++tableswitch_1:
++	ldrb	r2, [java_pc, ip]!
++	ldr	pc, [state0_table, r2, lsl #2]
++
++do_lookupswitch_state0:
++	POP(tos)
++do_lookupswitch_state1:
++	mov	a2, tos
++        bic     a1, java_pc, #3
++@       BYTESEX_REVERSE a2, a2, ip
++
++	eor	ip, a2, a2, ror #16
++	bic	ip, ip, #0xff0000
++	mov	a2, a2, ror #8
++	eor	a2, a2, ip, lsr #8
++
++        ldr     a3,[a1,#8]
++@       BYTESEX_REVERSE a3, a3, ip
++
++	eor	ip, a3, a3, ror #16
++	bic	ip, ip, #0xff0000
++	mov	a3, a3, ror #8
++	eor	a3, a3, ip, lsr #8
++
++        subs    a4,a3,#1
++        bmi     lookupswitch1
++        add     a1, a1, #4
++lookupswitch0:
++        ldr      a3,[a1,#8]!
++        cmp     a3,a2
++        beq     lookupswitch2
++        subs    a4,a4,#1
++        bpl     lookupswitch0
++lookupswitch1:
++        bic     a1, java_pc, #3
++lookupswitch2:
++        ldr      a2,[a1,#4]
++@       BYTESEX_REVERSE a2, a2, ip
++
++	eor	ip, a2, a2, ror #16
++	bic	ip, ip, #0xff0000
++	mov	a2, a2, ror #8
++	eors	ip, a2, ip, lsr #8
++	bpl	lookupswitch3
++
++	ldr	r2, [safepoint_state, #0]
++	cmp	r2, #1
++	beq	exit_tableswitch
++
++	ldr	r1, [istate, #16]
++	ldr	r3, [r1, #52]
++	add	r3, r3, #8
++	str	r3, [r1, #52]
++
++lookupswitch3:
++	ldrb	r2, [java_pc, ip]!
++	ldr	pc, [state0_table, r2, lsl #2]
++
++do_irem_state0:
++	POP(tos)
++do_irem_state1:
++	POP(r1)
++	ldrb	lr, [r8, #1]!
++	adr	r3, rem_table
++	cmp	r0, #0x20
++	ldrcc	r3, [r3, r0, lsl #2]
++	ldr	lr, [state0_table, lr, asl #2]
++	movcc	pc, r3
++_irem:
++        ands    a4, a1, #0x80000000
++        rsbmi   a1, a1, #0
++        eors    ip, a4, a2, ASR #32
++        rsbcs   a2, a2, #0
++	movs	a3, a1
++r_loop:
++        cmp     a3, a2, LSR #8
++        movls   a3, a3, LSL #8
++        blo     r_loop
++        cmp     a3, a2, LSR #1
++        bhi     r_jump7
++        cmp     a3, a2, LSR #2
++        bhi     r_jump6
++        cmp     a3, a2, LSR #3
++        bhi     r_jump5
++        cmp     a3, a2, LSR #4
++        bhi     r_jump4
++        cmp     a3, a2, LSR #5
++        bhi     r_jump3
++        cmp     a3, a2, LSR #6
++        bhi     r_jump2
++        cmp     a3, a2, LSR #7
++        bhi     r_jump1
++r_loop2:
++@ not executed when falling into r_loop2
++        movhi   a3, a3, LSR #8
++        cmp     a2, a3, LSL #7
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #7
++        cmp     a2, a3, LSL #6
++r_jump1:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #6
++        cmp     a2, a3, LSL #5
++r_jump2:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #5
++        cmp     a2, a3, LSL #4
++r_jump3:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #4
++        cmp     a2, a3, LSL #3
++r_jump4:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #3
++        cmp     a2, a3, LSL #2
++r_jump5:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #2
++        cmp     a2, a3, LSL #1
++r_jump6:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #1
++r_jump7:
++        cmp     a2, a3
++        adc     a4, a4, a4
++        subcs   a2, a2, a3
++        cmp     a3, a1
++        bne     r_loop2
++        movs    ip, ip, lsl #1
++	rsbmi	a2, a2, #0
++	str	a2, [java_stack], #-4
++	mov	pc, lr
++
++rem_table:
++	.word	remc_0
++	.word	remc_1
++	.word	remc_2
++	.word	remc_3
++	.word	remc_4
++	.word	remc_5
++	.word	remc_6
++	.word	remc_7
++	.word	remc_8
++	.word	remc_9
++	.word	remc_10
++	.word	remc_11
++	.word	remc_12
++	.word	remc_13
++	.word	remc_14
++	.word	remc_15
++	.word	remc_16
++	.word	remc_17
++	.word	remc_18
++	.word	remc_19
++	.word	remc_20
++	.word	remc_21
++	.word	remc_22
++	.word	remc_23
++	.word	remc_24
++	.word	remc_25
++	.word	remc_26
++	.word	remc_27
++	.word	remc_28
++	.word	remc_29
++	.word	remc_30
++	.word	remc_31
++
++remc_1:
++	mov	a1, #0
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_2:
++	add	ip, a2, a2, lsr #31
++        mov	a1, ip, asr #1
++	sub	a1, a2, a1, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_3:
++	ldr	a1, dc_3
++        smull	a3, a4, a2, a1
++        sub	a1, a4, a2, asr #31
++	add	ip, a1, a1, lsl #1
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_4:
++	movs	ip, a2
++        addmi	ip, ip, #3
++        mov	a1, ip, asr #2
++	sub	a1, a2, a1, lsl #2
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_5:
++	ldr	a1, dc_5
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #1
++	add	ip, a1, a1, lsl #2
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_6:
++	ldr	a1, dc_6
++        smull	a3, a4, a2, a1
++        sub	a1, a4, a2, asr #31
++	add	ip, a1, a1, lsl #1
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_7:
++	ldr	a1, dc_7
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #2
++	rsb	ip, a1, a1, lsl #3
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_8:
++	movs	ip, a2
++        addmi	ip, ip, #7
++        mov	a1, ip, asr #3
++	sub	a1, a2, a1, lsl #3
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_9:
++	ldr	a1, dc_9
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #1
++	add	ip, a1, a1, lsl #3
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_10:
++	ldr	a1, dc_10
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #2
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_11:
++	ldr	a1, dc_11
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #1
++	add	ip, a1, a1, lsl #2
++	add	ip, a1, ip, lsl #1
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_12:
++	ldr	a1, dc_12
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #1
++	add	ip, a1, a1, lsl #1
++	sub	a1, a2, ip, lsl #2
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_13:
++	ldr	a1, dc_13
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #1
++	add	ip, a1, ip, lsl #2
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_14:
++	ldr	a1, dc_14
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #3
++	rsb	ip, a1, a1, lsl #3
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_15:
++	ldr	a1, dc_15
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #3
++	rsb	ip, a1, a1, lsl #4
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_16:
++	movs	ip, a2
++        addmi	ip, ip, #15
++        mov	a1, ip, asr #4
++	sub	a1, a2, a1, lsl #4
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_17:
++	ldr	a1, dc_17
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #4
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_18:
++	ldr	a1, dc_18
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #3
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_19:
++	ldr	a1, dc_19
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #3
++	add	ip, a1, ip, lsl #1
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_20:
++	ldr	a1, dc_20
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #2
++	sub	a1, a2, ip, lsl #2
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_21:
++	ldr	a1, dc_21
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #1
++	rsb	ip, ip, ip, lsl #3
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_22:
++	ldr	a1, dc_22
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #2
++	add	ip, a1, ip, lsl #1
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_23:
++	ldr	a1, dc_23
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	add	ip, a1, a1, lsl #1
++	rsb	ip, a1, ip, lsl #3
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_24:
++	ldr	a1, dc_24
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #1
++	sub	a1, a2, ip, lsl #3
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_25:
++	ldr	a1, dc_25
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #2
++	add	ip, ip, ip, lsl #2
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_26:
++	ldr	a1, dc_26
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #1
++	add	ip, a1, ip, lsl #2
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_27:
++	ldr	a1, dc_27
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #1
++	add	ip, ip, ip, lsl #3
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_28:
++	ldr	a1, dc_28
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	rsb	ip, a1, a1, lsl #3
++	sub	a1, a2, ip, lsl #2
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_29:
++	ldr	a1, dc_29
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	rsb	ip, a1, a1, lsl #3
++	add	ip, a1, ip, lsl #2
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_30:
++	ldr	a1, dc_30
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	rsb	ip, a1, a1, lsl #4
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++remc_31:
++	ldr	a1, dc_31
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	rsb	ip, a1, a1, lsl #5
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++
++do_idiv_state0:
++	POP(tos)
++do_idiv_state1:
++	POP(r1)
++	ldrb	lr, [r8, #1]!
++	adr	r3, div_table
++@	add	r3, state0_table, #div_table
++	cmp	r0, #0x20
++	ldrcc	r3, [r3, r0, lsl #2]
++	ldr	lr, [state0_table, lr, asl #2]
++	movcc	pc, r3
++_idiv:
++        ands    a4, a1, #0x80000000
++        rsbmi   a1, a1, #0
++        eors    ip, a4, a2, ASR #32
++        rsbcs   a2, a2, #0
++	movs	a3, a1
++s_loop:
++        cmp     a3, a2, LSR #8
++        movls   a3, a3, LSL #8
++        blo     s_loop
++        cmp     a3, a2, LSR #1
++        bhi     s_jump7
++        cmp     a3, a2, LSR #2
++        bhi     s_jump6
++        cmp     a3, a2, LSR #3
++        bhi     s_jump5
++        cmp     a3, a2, LSR #4
++        bhi     s_jump4
++        cmp     a3, a2, LSR #5
++        bhi     s_jump3
++        cmp     a3, a2, LSR #6
++        bhi     s_jump2
++        cmp     a3, a2, LSR #7
++        bhi     s_jump1
++s_loop2:
++@ not executed when falling into s_loop2
++        movhi   a3, a3, LSR #8
++        cmp     a2, a3, LSL #7
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #7
++        cmp     a2, a3, LSL #6
++s_jump1:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #6
++        cmp     a2, a3, LSL #5
++s_jump2:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #5
++        cmp     a2, a3, LSL #4
++s_jump3:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #4
++        cmp     a2, a3, LSL #3
++s_jump4:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #3
++        cmp     a2, a3, LSL #2
++s_jump5:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #2
++        cmp     a2, a3, LSL #1
++s_jump6:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #1
++s_jump7:
++        cmp     a2, a3
++        adc     a4, a4, a4
++        subcs   a2, a2, a3
++        cmp     a3, a1
++        bne     s_loop2
++        movs    ip, ip, lsl #1
++	rsbcs	a4, a4, #0
++	str	a4, [java_stack], #-4
++	mov	pc, lr
++
++div_table:
++	.word	divc_0
++	.word	divc_1
++	.word	divc_2
++	.word	divc_3
++	.word	divc_4
++	.word	divc_5
++	.word	divc_6
++	.word	divc_7
++	.word	divc_8
++	.word	divc_9
++	.word	divc_10
++	.word	divc_11
++	.word	divc_12
++	.word	divc_13
++	.word	divc_14
++	.word	divc_15
++	.word	divc_16
++	.word	divc_17
++	.word	divc_18
++	.word	divc_19
++	.word	divc_20
++	.word	divc_21
++	.word	divc_22
++	.word	divc_23
++	.word	divc_24
++	.word	divc_25
++	.word	divc_26
++	.word	divc_27
++	.word	divc_28
++	.word	divc_29
++	.word	divc_30
++	.word	divc_31
++
++divc_1:
++	str	a2, [java_stack], #-4
++	mov	pc, lr
++divc_2:
++        add     a2, a2, a2, lsr #31
++        mov     a1, a2, asr #1
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_3:
++	ldr	a1, dc_3
++        smull	a3, a4, a2, a1
++        sub	a1, a4, a2, asr #31
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_4:
++	movs	a4, a2
++        addmi	a4, a4, #3
++        mov	a1, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_5:
++	ldr	a1, dc_5
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #1
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_6:
++	ldr	a1, dc_6
++        smull	a3, a4, a2, a1
++        sub	a1, a4, a2, asr #31
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_7:
++	ldr	a1, dc_7
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_8:
++	movs	a3, a2
++        addmi	a3, a3, #7
++        mov	a1, a3, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_9:
++	ldr	a1, dc_9
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #1
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_10:
++	ldr	a1, dc_10
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_11:
++	ldr	a1, dc_11
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #1
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_12:
++	ldr	a1, dc_12
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #1
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_13:
++	ldr	a1, dc_13
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_14:
++	ldr	a1, dc_14
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_15:
++	ldr	a1, dc_15
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_16:
++	movs	a3, a2
++        addmi	a3, a3, #15
++        mov	a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_17:
++	ldr	a1, dc_17
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_18:
++	ldr	a1, dc_18
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_19:
++	ldr	a1, dc_19
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_20:
++	ldr	a1, dc_20
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_21:
++	ldr	a1, dc_21
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_22:
++	ldr	a1, dc_22
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_23:
++	ldr	a1, dc_23
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_24:
++	ldr	a1, dc_24
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_25:
++	ldr	a1, dc_25
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_26:
++	ldr	a1, dc_26
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_27:
++	ldr	a1, dc_27
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_28:
++	ldr	a1, dc_28
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_29:
++	ldr	a1, dc_29
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_30:
++	ldr	a1, dc_30
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++divc_31:
++	ldr	a1, dc_31
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++dc_7:
++dc_14:
++	.word     0x92492493
++dc_15:
++dc_30:
++	.word     0x88888889
++dc_23:
++	.word     0xb21642c9
++dc_28:
++	.word     0x92492493
++dc_29:
++	.word     0x8d3dcb09
++dc_31:
++	.word     0x84210843
++dc_6:
++dc_12:
++dc_24:
++	.word     0x2aaaaaab
++dc_19:
++	.word     0x6bca1af3
++dc_5:
++dc_10:
++dc_20:
++	.word     0x66666667
++dc_21:
++	.word     0x30c30c31
++dc_11:
++dc_22:
++	.word     0x2e8ba2e9
++dc_26:
++dc_13:
++	.word     0x4ec4ec4f
++dc_25:
++	.word     0x51eb851f
++dc_27:
++	.word     0x4bda12f7
++dc_3:
++	.word     0x55555556
++dc_17:
++	.word     0x78787879
++dc_9:
++dc_18:
++	.word     0x38e38e39
++
++	.align	2
++	.size	_ZN19BytecodeInterpreter7run_optEPS_, .-_ZN19BytecodeInterpreter7run_optEPS_
++
++
++	.section	.data.rel.ro.local,"aw",%progbits
++	.align	2
++
++	.global	execute_opt
++	.section	.rodata
++	.type	execute_opt, %object
++	.size	execute_opt, 256
++execute_opt:
++	.byte	1	@ nop		0x00
++	.byte	1	@ aconst_null
++	.byte	1	@ iconst_m1
++	.byte	1	@ iconst_0
++	.byte	1	@ iconst_1
++	.byte	1	@ iconst_2
++	.byte	1	@ iconst_3
++	.byte	1	@ iconst_4
++	.byte	1	@ iconst_5
++	.byte	1	@ lconst_0
++	.byte	1	@ lconst_1
++	.byte	1	@ fconst_0
++	.byte	1	@ fconst_1
++	.byte	1	@ fconst_2
++	.byte	1	@ dconst_0
++	.byte	1	@ dconst_1
++	.byte	1	@ 0x10
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x20
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x30
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x40
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x50
++	.byte	1
++	.byte	1
++	.byte	0
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x60
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x70
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x80
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x90
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0xA0
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0	@ 0xB0
++	.byte	0
++	.byte	1
++	.byte	0
++	.byte	1
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	1
++	.byte	0
++	.byte	0	@ 0xC0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	1
++	.byte	1
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0	@ 0xD0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0	@ 0xE0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0	@ 0xF0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++
++	.ident	"GCC: (Debian 4.3.2-1.1) 4.3.2"
++	.section	.note.GNU-stack,"",%progbits
+diff -ruNE ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp
+--- ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp	2008-03-25 10:00:11.000000000 +0000
++++ ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp	2009-02-17 10:41:27.000000000 +0000
 @@ -40,10 +40,14 @@
    // platform-specific byte ordering.
  #ifdef VM_LITTLE_ENDIAN
