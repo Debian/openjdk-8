@@ -1,0 +1,234 @@
+--- ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S~	2009-02-27 12:51:06.000000000 +0000
++++ ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S	2009-02-27 13:11:56.000000000 +0000
+@@ -1638,6 +1638,7 @@
+ do_dcmpl_state1:
+ 	PUSH(tos)
+ do_dcmpl_state0:
++	b	exit_asm
+ 	fldd	d6, [java_stack, #12]
+ 	fldd	d7, [java_stack, #4]
+ 	fcmped	d6, d7
+@@ -1686,6 +1687,7 @@
+ do_dadd_state1:
+ 	PUSH(tos)
+ do_dadd_state0:
++	b	exit_asm
+ 	ldrb	r3, [java_pc, #1]!
+ 	fldd	d7, [java_stack, #12]
+ 	fldd	d6, [java_stack, #4]
+@@ -1698,6 +1700,7 @@
+ do_fadd_state1:
+ 	PUSH(tos)
+ do_fadd_state0:
++	b	exit_asm
+ 	ldrb	r3, [java_pc, #1]!
+ 	flds	s15, [java_stack, #8]
+ 	flds	s14, [java_stack, #4]
+@@ -1710,6 +1713,7 @@
+ do_dsub_state1:
+ 	PUSH(tos)
+ do_dsub_state0:
++	b	exit_asm
+ 	ldrb	r3, [java_pc, #1]!
+ 	fldd	d7, [java_stack, #12]
+ 	fldd	d6, [java_stack, #4]
+@@ -1915,6 +1919,7 @@
+ do_dcmpg_state1:
+ 	PUSH(tos)
+ do_dcmpg_state0:
++	b	exit_asm
+ 	ldrb	r3, [java_pc, #1]!
+ 	fldd	d6, [java_stack, #12]
+ 	fldd	d7, [java_stack, #4]
+@@ -1949,6 +1954,7 @@
+ do_fsub_state1:
+ 	PUSH(tos)
+ do_fsub_state0:
++	b	exit_asm
+ 	ldrb	r3, [java_pc, #1]!
+ 	flds	s15, [java_stack, #8]
+ 	flds	s14, [java_stack, #4]
+@@ -1961,6 +1967,7 @@
+ do_dmul_state1:
+ 	PUSH(tos)
+ do_dmul_state0:
++	b	exit_asm
+ 	ldrb	r3, [java_pc, #1]!
+ 	fldd	d5, [java_stack, #12]
+ 	fldd	d7, [java_stack, #4]
+@@ -1973,6 +1980,7 @@
+ do_fmul_state1:
+ 	PUSH(tos)
+ do_fmul_state0:
++	b	exit_asm
+ 	ldrb	r3, [java_pc, #1]!
+ 	flds	s13, [java_stack, #8]
+ 	flds	s15, [java_stack, #4]
+@@ -1985,6 +1993,7 @@
+ do_ddiv_state1:
+ 	PUSH(tos)
+ do_ddiv_state0:
++	b	exit_asm
+ 	ldrb	r3, [java_pc, #1]!
+ 	fldd	d5, [java_stack, #12]
+ 	fldd	d7, [java_stack, #4]
+@@ -1997,6 +2006,7 @@
+ do_fdiv_state1:
+ 	PUSH(tos)
+ do_fdiv_state0:
++	b	exit_asm
+ 	ldrb	r3, [java_pc, #1]!
+ 	flds	s13, [java_stack, #8]
+ 	flds	s15, [java_stack, #4]
+@@ -2063,6 +2073,8 @@
+ do_i2f_state0:
+ 	POP(tos)
+ do_i2f_state1:
++	PUSH(tos)
++	b	exit_asm
+ 	ldrb	r3, [java_pc, #1]!
+ 	fmsr	s12, tos
+ 	fsitos	s15, s12
+@@ -2083,6 +2095,8 @@
+ do_i2d_state0:
+ 	POP(tos)
+ do_i2d_state1:
++	PUSH(tos)
++	b	exit_asm
+ 	ldrb	r3, [java_pc, #1]!
+ 	fmsr	s13, tos
+ 	fsitod	d7, s13
+@@ -2138,6 +2152,7 @@
+ do_f2d_state1:
+ 	PUSH(tos)
+ do_f2d_state0:
++	b	exit_asm
+ 	flds	s14, [java_stack, #4]
+ 	fcvtds	d7, s14
+ 	fstd	d7, [java_stack, #0]
+@@ -2158,6 +2173,7 @@
+ do_d2f_state1:
+ 	PUSH(tos)
+ do_d2f_state0:
++	b	exit_asm
+ 	fldd	d7, [java_stack, #4]
+ 	fcvtsd	s14, d7
+ 	fsts	s14, [java_stack, #8]
+@@ -2660,6 +2676,7 @@
+ do_fcmpl_state1:
+ 	PUSH(tos)
+ do_fcmpl_state0:
++	b	exit_asm
+ 	flds	s14, [java_stack, #8]
+ 	flds	s15, [java_stack, #4]
+ 	fcmpes	s14, s15
+@@ -2681,6 +2698,7 @@
+ do_fcmpg_state1:
+ 	PUSH(tos)
+ do_fcmpg_state0:
++	b	exit_asm
+ 	flds	s14, [java_stack, #8]
+ 	flds	s15, [java_stack, #4]
+ 	fcmpes	s14, s15
+@@ -2724,11 +2742,12 @@
+ 	sub	java_stack, java_stack, #4
+ 	b	exit_asm
+ exit_branch1op:
+-	sub	java_stack, java_stack, #4
++	PUSH(tos)
+ 	sub	java_pc, java_pc, ip
+ 	b	exit_asm
+ exit_branch:
+-	sub	java_stack, java_stack, #8
++	sub	java_stack, java_stack, #4
++	PUSH(tos)
+ 	sub	java_pc, java_pc, ip
+ 	b	exit_asm
+ state1_exit_goto:
+@@ -2825,9 +2844,10 @@
+ 
+ @ ----- The Bytecode Implementations --------------------------------------
+ 
++do_tableswitch_state1:
++	PUSH(tos)
+ do_tableswitch_state0:
+ 	POP(tos)
+-do_tableswitch_state1:
+ 	mov	a2, tos
+         bic     a1, java_pc, #3
+         ldr     a4,[a1,#8]
+@@ -2873,9 +2893,10 @@
+ 	ldrb	r2, [java_pc, ip]!
+ 	ldr	pc, [state0_table, r2, lsl #2]
+ 
++do_lookupswitch_state1:
++	PUSH(tos)
+ do_lookupswitch_state0:
+ 	POP(tos)
+-do_lookupswitch_state1:
+ 	mov	a2, tos
+         bic     a1, java_pc, #3
+ @       BYTESEX_REVERSE a2, a2, ip
+@@ -3796,20 +3817,20 @@
+ 	.byte	1
+ 	.byte	1	@ 0x60
+ 	.byte	1
++	.byte	0	@ fadd disabled
++	.byte	0	@ dadd disabled
+ 	.byte	1
+ 	.byte	1
++	.byte	0	@ fsub disabled
++	.byte	0	@ dsub disabled
+ 	.byte	1
+ 	.byte	1
++	.byte	0	@ fmul disabled
++	.byte	0	@ dmul disabled
+ 	.byte	1
+ 	.byte	1
+-	.byte	1
+-	.byte	1
+-	.byte	1
+-	.byte	1
+-	.byte	1
+-	.byte	1
+-	.byte	1
+-	.byte	1
++	.byte	0	@ fdiv disabled
++	.byte	0	@ ddiv disabled
+ 	.byte	1	@ 0x70
+ 	.byte	1
+ 	.byte	1
+@@ -3832,25 +3853,25 @@
+ 	.byte	1
+ 	.byte	1
+ 	.byte	1
++	.byte	0	@ i2f disabled
++	.byte	0	@ i2d disabled
+ 	.byte	1
+ 	.byte	1
+ 	.byte	1
+ 	.byte	1
+ 	.byte	1
++	.byte	0	@ f2d disabled
+ 	.byte	1
+ 	.byte	1
+-	.byte	1
+-	.byte	1
+-	.byte	1
+-	.byte	1	@ 0x90
+-	.byte	1
+-	.byte	1
+-	.byte	1
+-	.byte	1
++	.byte	0	@ 0x90 - d2f disabled
+ 	.byte	1
+ 	.byte	1
+ 	.byte	1
+ 	.byte	1
++	.byte	0	@ fcmpl disabled
++	.byte	0	@ fcmpg disabled
++	.byte	0	@ dcmpl disabled
++	.byte	0	@ dcmpg disabled
+ 	.byte	1
+ 	.byte	1
+ 	.byte	1
