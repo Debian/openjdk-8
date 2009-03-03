@@ -175,9 +175,10 @@ ifeq ($(distribution),Ubuntu)
     DISTRIBUTION_PATCHES += \
 	debian/patches/gcc-hotspot-no-stack-protector.diff
   endif
-  ifneq (,$(filter $(DEB_HOST_ARCH),armel i386))
+  ifneq (,$(filter $(DEB_HOST_ARCH),armel))
     DISTRIBUTION_PATCHES += \
 	debian/patches/zero-port-opt.diff \
+	debian/patches/zero-port-opt-novfp.diff \
 	debian/patches/zero-hotspot-opt.diff
   endif
 endif
@@ -640,7 +641,7 @@ ifeq ($(with_check),yes)
       with_jtreg_check = yes
     endif
   else
-    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 armel i386 lpia powerpc sparc))
+    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
       with_mauve_check = yes
     endif
     ifneq (,$(filter $(DEB_HOST_ARCH), amd64 armel i386 lpia sparc))
@@ -804,7 +805,8 @@ clean: debian-clean
 	rm -f pulseaudio/*.o
 	rm -f pulseaudio/src/java/org/classpath/icedtea/pulseaudio/PulseAudioMuteControl.java
 	: # revert patch for files not in the openjdk directory
-	-patch -p0 -R < debian/patches/zero-port-opt.diff
+	-patch -t -p0 -R < debian/patches/zero-port-opt-novfp.diff
+	-patch -t -p0 -R < debian/patches/zero-port-opt.diff
 
 ifeq (0,1)
 	for i in $$(find test/jtreg -name '*.gif') overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/expresso.mid overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/ding.sf2; do \
@@ -1135,7 +1137,7 @@ endif
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_lib); \
 	) > $(d_lib).links
 
-	: # create docdir symlinks for $(p_jdk)
+	: # create docdir symlinks for $(p_dbg)
 	( \
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_dbg); \
 	) > $(d_dbg).links

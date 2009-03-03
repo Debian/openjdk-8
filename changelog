@@ -1,8 +1,28 @@
+openjdk-6 (6b14-0ubuntu17) jaunty; urgency=low
+
+  [ Edward Nevill ]
+  * Remove VFP from asm loop
+  * Disble the mauve testsuite for armel.
+
+  [Matthias Klose]
+  * Update IcedTea (20090302).
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 02 Mar 2009 16:18:01 +0100
+
+openjdk-6 (6b14-0ubuntu16) jaunty; urgency=low
+
+  * Regenerate auto files.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 18 Feb 2009 15:20:10 +0100
+
 openjdk-6 (6b14-0ubuntu15) jaunty; urgency=low
 
   [ Edward Nevill ]
   * Added ARM assembler interpreter loop
   * mauve and jtreg removed again for alpha release
+
+  [Matthias Klose]
+  * Update IcedTea (20090218).
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 18 Feb 2009 13:35:02 +0100
 
