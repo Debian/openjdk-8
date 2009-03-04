@@ -712,7 +712,7 @@ ALT_CACAO_CONFIGURE_ARGS = \
 	--with-java-runtime-library-classes=$(CURDIR)/build/lib/rt \
 	--enable-jre-layout 
 ifneq (,$(filter $(DEB_HOST_ARCH), armel))
-  ALT_CACAO_CONFIGURE_ARGS = --enable-softfloat
+  ALT_CACAO_CONFIGURE_ARGS += --enable-softfloat
 endif
 
 stamps/build-altcacao: stamps/build
