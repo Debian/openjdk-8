@@ -71,6 +71,14 @@ stage1_gcj_archs = amd64 i386 ia64 lpia powerpc m68k mips mipsel sparc s390
 stage1_openjdk_archs = alpha armel hppa
 stage1_cacao_archs =
 
+cacao_archs = alpha armel i386 lpia powerpc m68k mips mipsel s390
+
+ifneq (,$(findstring openjdk, $(PKGSOURCE)))
+  ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
+    alternate_vms = cacao
+  endif
+endif
+
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   stage1_gcj_archs = armel ia64 m68k mips mipsel s390
   stage1_openjdk_archs = amd64 hppa i386 lpia sparc
@@ -186,6 +194,11 @@ endif
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   DISTRIBUTION_PATCHES += \
 	debian/patches/cacao-no-mmap-first-page.diff
+endif
+
+ifneq (,$(filter cacao, $(alternate_vms)))
+  DISTRIBUTION_PATCHES += \
+	debian/patches/cacao-alternate-jvm.diff
 endif
 
 export DISTRIBUTION_PATCHES
@@ -373,8 +386,7 @@ ifneq (,$(stage1_cacao_archs))
 	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
 endif
 bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b14~pre1)$(COMMA) $(p_tar) (<< 6b15)$(COMMA))
-bd_cacao = libtool,
-bd_cacao = $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.4~20081012)$(COMMA))
+
 bd_gcc = \
 	g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
 ifeq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
@@ -398,6 +410,15 @@ else
 	llvm-dev (>= 2.4) [$(foreach a,$(shark_archs),$(a))],
   bd_shark =
 endif
+
+bd_cacao = libtool,
+bd_cacao += $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.4~20081012)$(COMMA))
+ifneq (,$(filter cacao, $(alternate_vms)))
+  ifneq ($(distribution),Ubuntu)
+    bd_cacao += cacao-source (>= 0.99.4~20081012)$(COMMA)
+  endif
+endif
+
 #ifeq ($(with_plugin_pkg),yes)
   bd_plugin = \
 	libgtk2.0-dev, $(if $(filter $(distribution),Debian),$(if $(findstring gcj,$(plugin_name)),iceape-dev,xulrunner-dev (>= 1.9.0)),$(if $(filter $(distrel),hardy intrepid jaunty),xulrunner-1.9-dev,firefox-dev)),
@@ -450,6 +471,7 @@ endif
 
 p_jre	= $(basename)-jre
 p_jrehl	= $(basename)-jre-headless
+p_jrec	= icedtea-6-jre-cacao
 p_lib	= $(basename)-jre-lib
 p_jdk	= $(basename)-jdk
 p_demo	= $(basename)-demo
@@ -466,6 +488,7 @@ endif
 d	= debian/tmp
 d_jre	= debian/$(p_jre)
 d_jrehl	= debian/$(p_jrehl)
+d_jrec	= debian/$(p_jrec)
 d_lib	= debian/$(p_lib)
 d_jdk	= debian/$(p_jdk)
 d_demo	= debian/$(p_demo)
@@ -492,6 +515,10 @@ else ifeq ($(pkg_compress),bzip2)
   control_vars += '-Vdpkg:Depends=dpkg (>= 1.10.24)'
 endif
 
+ifneq (,$(filter-out $(hotspot_archs), $(cacao_archs)))
+  control_vars += '-Vcacao:Recommends=$(p_jrec) (= $${binary:Version})'
+endif
+
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
 	sed \
@@ -512,11 +539,13 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@core_fonts@/$(core_fonts)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	      -e 's/@pkg_plugin@/$(p_plug)/g' \
+	      -e 's/@cacao_archs@/$(cacao_archs)/g' \
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/control.in \
 	    $(if $(with_plugin_pkg),debian/control.$(plugin_name)) \
 	    $(if $(findstring openjdk-,$(PKGSOURCE)),debian/control.tarball) \
+	    $(if $(filter cacao, $(alternate_vms)),debian/control.cacao-jre) \
 		> debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
@@ -607,7 +636,6 @@ stamps/unpack: stamps/icedtea-configure stamps/backup-generated
 ifeq ($(STAGE1_JAVA),gcj)
 	$(MAKE) stamps/extract-ecj.stamp
 endif
-	rm -f pulseaudio/src/java/org/classpath/icedtea/pulseaudio/PulseAudioMuteControl.java
 	touch $@
 
 dist-openjdk: $(OPENJDK_SRC_ZIP)
@@ -650,7 +678,12 @@ ifeq ($(with_check),yes)
   endif
 endif
 
-build: stamps/build stamps/mauve-check stamps/jtreg-check
+build_stamps = stamps/build
+ifneq (,$(filter cacao, $(alternate_vms)))
+  build_stamps += stamps/build-altcacao
+endif
+build_stamps +=  stamps/mauve-check stamps/jtreg-check
+build: $(build_stamps)
 	if [ -f buildwatch.pid ]; then \
 	  pid=$$(cat buildwatch.pid); \
 	  kill -1 $$pid || :; sleep 1; kill -9 $$pid || :; \
@@ -674,6 +707,31 @@ endif
 	  fi; \
 	  false; \
 	fi
+	touch $@
+
+ALT_CACAO_CONFIGURE_ARGS = \
+	--host=$(DEB_HOST_GNU_TYPE) \
+	--build=$(DEB_BUILD_GNU_TYPE) \
+	--target=$(DEB_BUILD_GNU_TYPE) \
+	--prefix=$(CURDIR)/cacao/install \
+	--with-java-runtime-library=openjdk \
+	--with-java-runtime-library-prefix=$(CURDIR)/openjdk \
+	--with-java-runtime-library-classes=$(CURDIR)/lib/rt \
+	--enable-jre-layout 
+ifneq (,$(filter $(DEB_HOST_ARCH), armel))
+  ALT_CACAO_CONFIGURE_ARGS = --enable-softfloat
+endif
+
+stamps/build-altcacao: stamps/build
+	for i in cacao cacao-*; do [ -f $$i ] || rm -rf $$i; done
+	mkdir -p cacao
+	tar xf $(firstword $(wildcard $(CURDIR)/cacao-*.tar.* /usr/src/cacao-*.tar.*)) -C cacao
+	ln -s $$(basename cacao/cacao-*) cacao/cacao
+	patch -p0 < debian/patches/cacao-no-mmap-first-page.diff
+	patch -p0 < debian/patches/cacao-jni-version.diff
+	cd cacao/cacao && \
+	./configure $(ALT_CACAO_CONFIGURE_ARGS)
+	make -C cacao/cacao install
 	touch $@
 
 stamps/xvfb-check:
@@ -805,8 +863,11 @@ clean: debian-clean
 	rm -f pulseaudio/*.o
 	rm -f pulseaudio/src/java/org/classpath/icedtea/pulseaudio/PulseAudioMuteControl.java
 	: # revert patch for files not in the openjdk directory
-	-patch -t -p0 -R < debian/patches/zero-port-opt-novfp.diff
-	-patch -t -p0 -R < debian/patches/zero-port-opt.diff
+	if [ -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ]; then \
+	  patch -p0 -R < debian/patches/zero-port-opt-novfp.diff; \
+	  patch -p0 -R < debian/patches/zero-port-opt.diff; \
+	  rm -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S; \
+	fi
 
 ifeq (0,1)
 	for i in $$(find test/jtreg -name '*.gif') overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/expresso.mid overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/ding.sf2; do \
@@ -897,6 +958,16 @@ endif
 
 	rm -f $(d)/$(basedir)/jre/lib/security/cacerts
 
+ifneq (,$(filter cacao, $(alternate_vms)))
+	mkdir -p $(d)/$(basedir)/jre/lib/$(archdir)/cacao
+	install -m 644 cacao/install/lib/libjvm.so \
+		$(d)/$(basedir)/jre/lib/$(archdir)/cacao/
+	install -m 644 cacao/install/jre/lib/$(archdir)/server/libjsig.so \
+		$(d)/$(basedir)/jre/lib/$(archdir)/cacao/
+	install -m 644 cacao/install/jre/lib/$(archdir)/server/Xusage.txt \
+		$(d)/$(basedir)/jre/lib/$(archdir)/cacao/
+endif
+
 	: # move config files to etc/$(jdiralias) and symlink them.
 	for i in \
 	  accessibility.properties \
@@ -976,6 +1047,7 @@ endif
 	  case "$$i" in \
 	    */$(plugin_name)) continue;; \
 	    */libsplashscreen.so|*/libjsoundalsa.so|$(if $(with_pulse),*/libpulse-java.so|)*/xawt) echo $$i >> ../$(p_jre).install;; \
+	    */cacao) echo $$i >> ../$(p_jrec).install;; \
 	    *) echo $$i >> ../$(p_jrehl).install; \
 	  esac; \
 	done
@@ -1207,6 +1279,7 @@ endif
 
 nodocs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),-N$(p_doc))
 nodemo = $(if $(findstring cacao, $(PKGSOURCE)),-N$(p_demo))
+nojrec = $(if $(filter cacao, $(alternate_vms)),,-N$(p_jrec))
 
 # Build architecture independant packages
 binary-indep: build install
@@ -1268,22 +1341,26 @@ binary-arch: build install
 	-cp test/jtreg-summary.log test/check-*.log $(d_jdk)/usr/share/doc/$(p_jre)/
 	-cp test/failed_tests.tar.gz $(d_jdk)/usr/share/doc/$(p_jre)/
 
-	dh_desktop -s $(nodemo)
-	dh_installmenu -s $(nodemo)
-	-dh_icons -s $(nodemo) || dh_iconcache -s $(nodemo)
-#	dh_installdebconf -s $(nodemo)
-	dh_link -s $(nodemo)
-	dh_strip -s $(nodemo) --dbg-package=$(p_dbg)
-	dh_compress -s $(nodemo)
-	dh_fixperms -s $(nodemo)
+ifneq (,$(filter cacao, $(alternate_vms)))
+	dh_installchangelogs -p$(p_jrec)
+	dh_installdocs -p$(p_jrec)
+endif
+	dh_desktop -s $(nodemo) $(nojrec)
+	dh_installmenu -s $(nodemo) $(nojrec)
+	-dh_icons -s $(nodemo) $(nojrec) || dh_iconcache -s $(nodemo) $(nojrec)
+#	dh_installdebconf -s $(nodemo) $(nojrec)
+	dh_link -s $(nodemo) $(nojrec)
+	dh_strip -s $(nodemo) $(nojrec) --dbg-package=$(p_dbg)
+	dh_compress -s $(nodemo) $(nojrec)
+	dh_fixperms -s $(nodemo) $(nojrec)
 	dh_makeshlibs -p$(p_jrehl) -p$(p_jre)
-	dh_shlibdeps -s $(nodemo) -L $(p_jrehl) \
+	dh_shlibdeps -s $(nodemo) $(nojrec) -L $(p_jrehl) \
 		-l$(shlibdeps_ld_path) \
 		--
-	dh_installdeb -s $(nodemo)
-	dh_gencontrol -s $(nodemo) -- $(control_vars)
-	dh_md5sums -s $(nodemo)
-	dh_builddeb -s $(nodemo) #$(bd_options)
+	dh_installdeb -s $(nodemo) $(nojrec)
+	dh_gencontrol -s $(nodemo) $(nojrec) -- $(control_vars)
+	dh_md5sums -s $(nodemo) $(nojrec)
+	dh_builddeb -s $(nodemo) $(nojrec) #$(bd_options)
 
 binary: binary-arch binary-indep
 .PHONY: build clean binary-indep binary-arch binary install

@@ -1,0 +1,60 @@
+--- openjdk/jdk/src/solaris/bin/i586/jvm.cfg.orig	2009-03-02 23:21:31.000000000 +0000
++++ openjdk/jdk/src/solaris/bin/i586/jvm.cfg	2009-03-02 23:21:48.000000000 +0000
+@@ -36,3 +36,4 @@
+ -classic WARN
+ -native ERROR
+ -green ERROR
++-cacao KNOWN
+--- openjdk/jdk/src/solaris/bin/ia64/jvm.cfg.orig	2009-03-02 23:21:31.000000000 +0000
++++ openjdk/jdk/src/solaris/bin/ia64/jvm.cfg	2009-03-02 23:21:48.000000000 +0000
+@@ -41,3 +41,4 @@
+ -client IGNORE
+ -native ERROR
+ -green ERROR
++-cacao KNOWN
+--- openjdk/jdk/src/solaris/bin/amd64/jvm.cfg.orig	2009-03-02 23:21:31.000000000 +0000
++++ openjdk/jdk/src/solaris/bin/amd64/jvm.cfg	2009-03-02 23:21:48.000000000 +0000
+@@ -37,3 +37,4 @@
+ -classic WARN
+ -native ERROR
+ -green ERROR
++-cacao KNOWN
+--- openjdk/jdk/src/share/bin/java.c.orig	2009-03-02 23:21:31.000000000 +0000
++++ openjdk/jdk/src/share/bin/java.c	2009-03-02 23:23:53.000000000 +0000
+@@ -199,6 +199,8 @@
+   InvocationFunctions ifn;
+ };
+ 
++#define JNI_VERSION_CACAO 0xCACA0000
++
+ /*
+  * Entry point.
+  */
+@@ -360,6 +389,8 @@
+ 
+     { /* Create a new thread to create JVM and invoke main method */
+       struct JavaMainArgs args;
++      struct JDK1_1InitArgs cacao_args;
++      int jvm_init_rv;
+ 
+       args.argc = argc;
+       args.argv = argv;
+@@ -367,7 +398,17 @@
+       args.classname = classname;
+       args.ifn = ifn;
+ 
+-      return ContinueInNewThread(JavaMain, threadStackSize, (void*)&args, ret);
++      memset((void*)&cacao_args, 0, sizeof(cacao_args));
++      cacao_args.version = JNI_VERSION_CACAO;
++
++      jvm_init_rv = ifn.GetDefaultJavaVMInitArgs(&cacao_args);
++      if (_launcher_debug)
++	printf("using cacao as VM: %s\n", (jvm_init_rv == 0) ? "yes" : "no");
++
++      if (jvm_init_rv == 0)
++	return JavaMain((void*)&args);
++      else
++	return ContinueInNewThread(JavaMain, threadStackSize, (void*)&args, ret);
+     }
+ }
+ 
