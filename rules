@@ -131,7 +131,7 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   endif
 endif
 
-ifneq (,$(filter $(distrel),jaunty unstable experimental))
+ifneq (,$(filter $(distrel),jaunty unstable experimental sid))
   with_pulse = yes
 endif
 
