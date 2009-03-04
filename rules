@@ -247,8 +247,8 @@ CONFIGURE_ARGS += \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-rhino=/usr/share/java/js.jar \
-	--with-hotspot-src-zip=$(firstword $(wildcard hotspot-*.tar.gz /usr/src/hotspot-*.tar.gz)) \
-	--with-openjdk-src-zip=$(firstword $(wildcard $(OPENJDK_SRC_ZIP) /usr/src/$(OPENJDK_SRC_ZIP)))
+	--with-hotspot-src-zip=$(firstword $(wildcard $(CURDIR)/hotspot-*.tar.gz /usr/src/hotspot-*.tar.gz)) \
+	--with-openjdk-src-zip=$(firstword $(wildcard $(CURDIR)/$(OPENJDK_SRC_ZIP) /usr/src/$(OPENJDK_SRC_ZIP)))
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   CONFIGURE_ARGS += \
@@ -345,8 +345,8 @@ jvmver		= 1.6.0
 shortver	= 6
 jdiralias	= java-$(shortver)-$(origin)
 basedir		= usr/lib/jvm/$(jdiralias)
-jreimg		= openjdk/control/build/linux-$(jvmarch)/j2re-image
-sdkimg		= openjdk/control/build/linux-$(jvmarch)/j2sdk-image
+jreimg		= build/openjdk/control/build/linux-$(jvmarch)/j2re-image
+sdkimg		= build/openjdk/control/build/linux-$(jvmarch)/j2sdk-image
 security	= etc/$(jdiralias)/security
 
 # (most) jre and jdk tools handled by the alternatives system.
@@ -626,36 +626,29 @@ endif
 	test -x /usr/bin/linux32 &&linux32 /bin/uname -a || true
 
 	mkdir -p stamps
+	mkdir -p build
 	chmod +x configure
-	$(EXTRA_BUILD_ENV) ./configure $(CONFIGURE_ARGS)
+	cd build && $(EXTRA_BUILD_ENV) ../configure $(CONFIGURE_ARGS)
 	touch $@
 
-unpack: stamps/backup-generated stamps/unpack
-stamps/unpack: stamps/icedtea-configure stamps/backup-generated
-	$(MAKE) stamps/extract.stamp
+unpack: stamps/unpack
+stamps/unpack: stamps/icedtea-configure
+	$(MAKE) -C build stamps/extract.stamp
 ifeq ($(STAGE1_JAVA),gcj)
-	$(MAKE) stamps/extract-ecj.stamp
+	$(MAKE) -C build stamps/extract-ecj.stamp
 endif
 	touch $@
 
 dist-openjdk: $(OPENJDK_SRC_ZIP)
 	@echo "downloading openjdk source from hg to create zipfile: $(OPENJDK_SRC_ZIP)"
-	$(MAKE) $@
-
-stamps/backup-generated: stamps/icedtea-configure
-	if [ -f generated.tar ]; then \
-	  echo >&2 "backup of generated files already exists"; \
-	  exit 2; \
-	fi
-	tar cf generated.tar generated
-	touch $@
+	$(MAKE) -C build $@
 
 patch: stamps/patch
 stamps/patch: stamps/unpack
 ifeq ($(STAGE1_JAVA),gcj)
-	$(MAKE) stamps/patch-ecj.stamp
+	$(MAKE) -C build stamps/patch-ecj.stamp
 endif
-	$(MAKE) stamps/patch.stamp
+	$(MAKE) -C build stamps/patch.stamp
 	touch $@
 
 ifeq ($(with_check),yes)
@@ -698,7 +691,7 @@ stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel hppa ia64 m68k mips mipsel powerpc s390 sparc))
 	sh -c 'sh debian/buildwatch.sh &'
 endif
-	if $(EXTRA_BUILD_ENV) $(MAKE) $(build_target); then \
+	if $(EXTRA_BUILD_ENV) $(MAKE) -C build $(build_target); then \
 	  : ; \
 	else \
 	  if [ -f buildwatch.pid ]; then \
@@ -713,25 +706,26 @@ ALT_CACAO_CONFIGURE_ARGS = \
 	--host=$(DEB_HOST_GNU_TYPE) \
 	--build=$(DEB_BUILD_GNU_TYPE) \
 	--target=$(DEB_BUILD_GNU_TYPE) \
-	--prefix=$(CURDIR)/cacao/install \
+	--prefix=$(CURDIR)/build/cacao/install \
 	--with-java-runtime-library=openjdk \
-	--with-java-runtime-library-prefix=$(CURDIR)/openjdk \
-	--with-java-runtime-library-classes=$(CURDIR)/lib/rt \
+	--with-java-runtime-library-prefix=$(CURDIR)/build/openjdk \
+	--with-java-runtime-library-classes=$(CURDIR)/build/lib/rt \
 	--enable-jre-layout 
 ifneq (,$(filter $(DEB_HOST_ARCH), armel))
   ALT_CACAO_CONFIGURE_ARGS = --enable-softfloat
 endif
 
 stamps/build-altcacao: stamps/build
-	for i in cacao cacao-*; do [ -f $$i ] || rm -rf $$i; done
-	mkdir -p cacao
-	tar xf $(firstword $(wildcard $(CURDIR)/cacao-*.tar.* /usr/src/cacao-*.tar.*)) -C cacao
-	ln -s $$(basename cacao/cacao-*) cacao/cacao
-	patch -p0 < debian/patches/cacao-no-mmap-first-page.diff
-	patch -p0 < debian/patches/cacao-jni-version.diff
-	cd cacao/cacao && \
+	rm -rf build/cacao*
+	mkdir -p build/cacao
+	tar -x -C build/cacao \
+	  -f $(firstword $(wildcard $(CURDIR)/cacao-*.tar.* /usr/src/cacao-*.tar.*))
+	ln -s $$(basename build/cacao/cacao-*) build/cacao/cacao
+	patch -d build -p0 < debian/patches/cacao-no-mmap-first-page.diff
+	patch -d build -p0 < debian/patches/cacao-jni-version.diff
+	cd build/cacao/cacao && \
 	./configure $(ALT_CACAO_CONFIGURE_ARGS)
-	make -C cacao/cacao install
+	make -C build/cacao/cacao install
 	touch $@
 
 stamps/xvfb-check:
@@ -753,37 +747,37 @@ stamps/xvfb-check:
 	touch $@
 
 stamps/mauve-build: stamps/build
-	rm -rf mauve
-	mkdir -p mauve
+	rm -rf build/mauve
+	mkdir -p build/mauve
 ifeq ($(with_mauve_check),yes)
-	tar xf /usr/src/mauve.tar.gz
-	cd mauve \
+	tar -x -C build -f /usr/src/mauve.tar.gz
+	cd build/mauve \
 	    && aclocal \
 	    && automake \
 	    && autoconf \
-	    && PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
-	PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH $(MAKE) -C mauve
+	    && PATH=$(CURDIR)/build/$(sdkimg)/bin:$$PATH ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
+	PATH=$(CURDIR)/build/$(sdkimg)/bin:$$PATH $(MAKE) -C build/mauve
 endif
 	touch $@
 
 stamps/mauve-check: stamps/build stamps/mauve-build stamps/xvfb-check
 ifeq ($(with_mauve_check),yes)
 	if [ -f bin/my-xvfb-run ]; then \
-	  cd mauve && \
-	    JAVA_HOME=$(CURDIR)/$(sdkimg) \
-	    PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
+	  cd build/mauve && \
+	    JAVA_HOME=$(CURDIR)/build/$(sdkimg) \
+	    PATH=$(CURDIR)/build/$(sdkimg)/bin:$$PATH \
 		/bin/sh $(CURDIR)/bin/my-xvfb-run java Harness \
-		    -vm $(CURDIR)/$(sdkimg)/bin/java \
+		    -vm $(CURDIR)/build/$(sdkimg)/bin/java \
 		    -file $(CURDIR)/debian/mauve_tests \
 		    -timeout 30000 2>&1 \
 		| tee mauve_output; \
 	else \
-	  echo "mauve testsuite not run for this build (xvfb failures)" > mauve/mauve_output; \
+	  echo "mauve testsuite not run for this build (xvfb failures)" > build/mauve/mauve_output; \
 	  cat xvfb-run.log >> mauve/mauve_output; \
 	fi
 	@sleep 5
 else
-	echo "mauve testsuite not run for this build" > mauve/mauve_output
+	echo "mauve testsuite not run for this build" > build/mauve/mauve_output
 endif
 	touch $@
 
@@ -797,7 +791,7 @@ stamps/jtreg-check: stamps/build stamps/xvfb-check
 ifeq ($(with_jtreg_check),yes)
 	@echo "BEGIN jtreg"
 	if [ -f bin/my-xvfb-run ]; then \
-	  /bin/sh bin/my-xvfb-run $(MAKE) -k jtregcheck 2>&1 | tee jtreg_output; \
+	  /bin/sh bin/my-xvfb-run $(MAKE) -C build -k jtregcheck 2>&1 | tee jtreg_output; \
 	else \
 	  echo "jtreg harness not run for this build" > jtreg_output; \
 	  cat xvfb-run.log >> jtreg_output; \
@@ -845,29 +839,12 @@ endif
 clean: debian-clean
 	dh_testdir
 	dh_testroot
-	rm -rf stamps
-	[ ! -f Makefile ] || $(MAKE) distclean
-	rm -rf openjdk openjdk-ecj
-	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
+	rm -rf stamps build
 	rm -rf autom4te.cache
-	rm -rf mauve
 	rm -rf bin
 	rm -f jtreg_output xvfb-run.log
 	rm -f test/failed_tests.tar.gz test/failed_tests.list
 	rm -f buildwatch.pid
-	if [ -f generated.tar ]; then \
-	  rm -rf generated; \
-	  tar xf generated.tar; \
-	  rm -f generated.tar; \
-	fi
-	rm -f pulseaudio/*.o
-	rm -f pulseaudio/src/java/org/classpath/icedtea/pulseaudio/PulseAudioMuteControl.java
-	: # revert patch for files not in the openjdk directory
-	if [ -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ]; then \
-	  patch -p0 -R < debian/patches/zero-port-opt-novfp.diff; \
-	  patch -p0 -R < debian/patches/zero-port-opt.diff; \
-	  rm -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S; \
-	fi
 
 ifeq (0,1)
 	for i in $$(find test/jtreg -name '*.gif') overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/expresso.mid overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/ding.sf2; do \
@@ -960,11 +937,11 @@ endif
 
 ifneq (,$(filter cacao, $(alternate_vms)))
 	mkdir -p $(d)/$(basedir)/jre/lib/$(archdir)/cacao
-	install -m 644 cacao/install/lib/libjvm.so \
+	install -m 644 build/cacao/install/lib/libjvm.so \
 		$(d)/$(basedir)/jre/lib/$(archdir)/cacao/
-	install -m 644 cacao/install/jre/lib/$(archdir)/server/libjsig.so \
+	install -m 644 build/cacao/install/jre/lib/$(archdir)/server/libjsig.so \
 		$(d)/$(basedir)/jre/lib/$(archdir)/cacao/
-	install -m 644 cacao/install/jre/lib/$(archdir)/server/Xusage.txt \
+	install -m 644 build/cacao/install/jre/lib/$(archdir)/server/Xusage.txt \
 		$(d)/$(basedir)/jre/lib/$(archdir)/cacao/
 endif
 
@@ -1177,7 +1154,7 @@ endif
 
 	: # install icons
 	for i in 16 24 32 48; do \
-	  install -D -m 644 -p openjdk/jdk/src/solaris/classes/sun/awt/X11/java-icon$${i}.png \
+	  install -D -m 644 -p build/openjdk/jdk/src/solaris/classes/sun/awt/X11/java-icon$${i}.png \
 	    $(d_jre)/usr/share/icons/hicolor/$${i}x$${i}/apps/$(basename).png; \
 	done
 
@@ -1266,9 +1243,9 @@ endif
 
 	: # Install stuff to generate font config and timezone files.
 	mkdir -p $(d_lib)/$(basedir)/jre/lib
-	cp -p openjdk/control/build/linux-$(jvmarch)/btjars/compilefontconfig.jar \
+	cp -p build/openjdk/control/build/linux-$(jvmarch)/btjars/compilefontconfig.jar \
 		$(d_lib)/$(basedir)/jre/lib/
-	cp -p openjdk/control/build/linux-$(jvmarch)/btjars/javazic.jar \
+	cp -p build/openjdk/control/build/linux-$(jvmarch)/btjars/javazic.jar \
 		$(d_lib)/$(basedir)/jre/lib/
 
 	: # install lintian overrides
@@ -1292,7 +1269,7 @@ else
 	dh_installchangelogs -p$(p_doc)
 	dh_installdocs -p$(p_doc) 
 	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
-	for i in openjdk/control/build/linux-$(jvmarch)/docs/*; do \
+	for i in build/openjdk/control/build/linux-$(jvmarch)/docs/*; do \
 	  [ -e $$i ] || continue; \
 	  b=$$(basename $$i); \
 	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jre)/; \
@@ -1336,7 +1313,7 @@ binary-arch: build install
 	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
 	done
 	mkdir -p $(d_jdk)/usr/share/doc/$(p_jre)
-	cp mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
+	cp build/mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
 	cp jtreg_output $(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output.log
 	-cp test/jtreg-summary.log test/check-*.log $(d_jdk)/usr/share/doc/$(p_jre)/
 	-cp test/failed_tests.tar.gz $(d_jdk)/usr/share/doc/$(p_jre)/
