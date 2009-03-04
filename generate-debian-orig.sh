@@ -1,8 +1,8 @@
 
 tarball=openjdk-6-src-b14-25_nov_2008-dfsg.tar.gz
 version=6b14
-hotspot=hotspot-20081202.tar.gz
-cacaotb=cacao-0.99.4~20081117.tar.bz2
+hotspot=hotspot-20081220.tar.gz
+cacaotb=cacao-0.99.4~20090303.tar.bz2
 base=openjdk-6
 #base=cacao-oj6
 pkgdir=$base-$version
@@ -34,7 +34,11 @@ else
     case "$base" in
       openjdk*)
 	cp -p $hotspot $pkgdir.orig/
-	cp -p $tarball $pkgdir.orig/ ;;
+	cp -p $tarball $pkgdir.orig/
+	if [ $(lsb_release -is) = Ubuntu ]; then
+	    cp -p $cacaotb $pkgdir.orig/
+	fi
+	;;
       cacao*)
 	if [ -f $cacaotb ]; then
 	    : # don't include the cacao tarball anymore

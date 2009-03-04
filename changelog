@@ -1,4 +1,4 @@
-openjdk-6 (6b15~pre1-0ubuntu1~ppa1) jaunty; urgency=low
+openjdk-6 (6b14-1~exp1) experimental; urgency=low
 
   * Update hotspot to 14.0-b10.
   * Build the Cacao VM as an additional JVM (call as `java -cacao').

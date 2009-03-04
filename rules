@@ -71,7 +71,7 @@ stage1_gcj_archs = amd64 i386 ia64 lpia powerpc m68k mips mipsel sparc s390
 stage1_openjdk_archs = alpha armel hppa
 stage1_cacao_archs =
 
-cacao_archs = alpha armel i386 lpia powerpc m68k mips mipsel s390
+cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
 
 ifneq (,$(findstring openjdk, $(PKGSOURCE)))
   ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
@@ -131,7 +131,7 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   endif
 endif
 
-ifneq (,$(filter $(distrel),jaunty unstable))
+ifneq (,$(filter $(distrel),jaunty unstable experimental))
   with_pulse = yes
 endif
 
@@ -545,7 +545,7 @@ debian/control: debian/control.in debian/rules
 	    debian/control.in \
 	    $(if $(with_plugin_pkg),debian/control.$(plugin_name)) \
 	    $(if $(findstring openjdk-,$(PKGSOURCE)),debian/control.tarball) \
-	    $(if $(filter cacao, $(alternate_vms)),debian/control.cacao-jre) \
+	    debian/control.cacao-jre \
 		> debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
