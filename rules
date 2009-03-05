@@ -185,8 +185,6 @@ ifeq ($(distribution),Ubuntu)
   endif
   ifneq (,$(filter $(DEB_HOST_ARCH),armel))
     DISTRIBUTION_PATCHES += \
-	debian/patches/zero-port-opt.diff \
-	debian/patches/zero-port-opt-novfp.diff \
 	debian/patches/zero-hotspot-opt.diff
   endif
 endif
@@ -625,6 +623,9 @@ endif
 	test -x /usr/bin/linux32 && linux32 uname -a || true
 	test -x /usr/bin/linux32 &&linux32 /bin/uname -a || true
 
+	patch -p0 < debian/patches/zero-port-opt.diff
+	patch -p0 < debian/patches/zero-port-opt-novfp.diff
+
 	mkdir -p stamps
 	mkdir -p build
 	chmod +x configure
@@ -845,6 +846,12 @@ clean: debian-clean
 	rm -f jtreg_output xvfb-run.log
 	rm -f test/failed_tests.tar.gz test/failed_tests.list
 	rm -f buildwatch.pid
+
+	if [ -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ]; then \
+	  patch -p0 -R < debian/patches/zero-port-opt-novfp.diff; \
+	  patch -p0 -R < debian/patches/zero-port-opt.diff; \
+	  rm -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S; \
+	fi
 
 ifeq (0,1)
 	for i in $$(find test/jtreg -name '*.gif') overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/expresso.mid overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/ding.sf2; do \
