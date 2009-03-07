@@ -1,3 +1,17 @@
+openjdk-6 (6b14-1.5~pre1-3) unstable; urgency=low
+
+  * Don't configure the additional zero JVM with --enable-shark, currently
+    fails to build.
+  * Don't build the JDK when building the additional zero JVM.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 07 Mar 2009 20:37:08 +0100
+
+openjdk-6 (6b14-1.5~pre1-2) experimental; urgency=low
+
+  * Build the Zero/Shark VM as an additional JVM (call as `java -zero').
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 06 Mar 2009 11:16:07 +0100
+
 openjdk-6 (6b14-1.5~pre1-1) experimental; urgency=low
 
   * Update hotspot to 14.0-b10.

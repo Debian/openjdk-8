@@ -422,10 +422,11 @@ ifneq (,$(filter cacao, $(alternate_vms)))
   endif
 endif
 ifneq (,$(filter zero, $(alternate_vms)))
+  bd_zero = $(pkg_ffidev),
   ifneq ($(distribution),Ubuntu)
-    bd_zero = $(pkg_ffidev),
     bd_shark = llvm-dev (>= 2.5) [$(foreach a,$(hotspot_archs),$(a))],
   endif
+  bd_shark =
 endif
 
 #ifeq ($(with_plugin_pkg),yes)
@@ -742,7 +743,20 @@ endif
 	  fi; \
 	  false; \
 	fi
-ifeq (,$(filter zero, $(alternate_vms)))
+ifneq (,$(filter cacao, $(alternate_vms)))
+	grep -- '^-cacao KNOWN'  build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg \
+	  || printf -- '-cacao KNOWN\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
+else
+	printf -- '-cacao ERROR\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
+endif
+ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+  ifneq (,$(filter zero, $(alternate_vms)))
+	grep -- '^-zero KNOWN'  build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg \
+	  || printf -- '-zero KNOWN\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
+  else
+	printf -- '-zero ERROR\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
+  endif
+else
 	printf -- '-zero ALIASED_TO -server\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
 endif
 	touch $@
@@ -783,11 +797,13 @@ stamps/build-altcacao: stamps/build
 		|| printf -- '-cacao KNOWN\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
 	touch $@
 
+# --enable-shark
 ALT_ZERO_CONFIGURE_ARGS = --with-openjdk --with-openjdk-home=$(CURDIR)/build/$(sdkimg) \
-			--enable-zero --enable-shark --disable-docs \
+			--enable-zero --disable-docs \
 			$(filter-out --with-gcj-home=% --with-ecj=% \
 			  --with-java=% --with-javah=% --with-rmic=% \
-			  --with-icedtea --with-icedtea-home=%, \
+			  --with-icedtea --with-icedtea-home=% \
+			  --with-openjdk --with-openjdk-home=% , \
 			  $(CONFIGURE_ARGS))
 alt_zero_dir = $(CURDIR)/build/openjdk/control/build/linux-$(jvmarch)
 ALT_ZERO_EXTRA_BUILD_ENV = \
@@ -795,6 +811,7 @@ ALT_ZERO_EXTRA_BUILD_ENV = \
 	BUILD_JAXP=false      ALT_JAXP_DIST=$(alt_zero_dir)/jaxp/dist \
 	BUILD_JAXWS=false     ALT_JAXWS_DIST=$(alt_zero_dir)/jaxws/dist \
 	BUILD_CORBA=false     ALT_CORBA_DIST=$(alt_zero_dir)/corba/dist \
+	BUILD_JDK=false
 
 stamps/configure-altzero: stamps/build
 	rm -rf build-zero
@@ -817,9 +834,10 @@ endif
 	fi
 
 	mkdir -p build/$(sdkimg)/jre/lib/$(archdir)
-	cp -a build-zero/$(sdkimg)/jre/lib/$(archdir)/server \
+	cp -a build-zero/openjdk/control/build/linux-$(jvmarch)/hotspot/import/jre/lib/$(archdir)/server \
 		build/$(sdkimg)/jre/lib/$(archdir)/zero
-	printf -- '-zero KNOWN\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
+	grep -- '^-zero KNOWN'  build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg \
+	  || printf -- '-zero KNOWN\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
 	touch $@
 
 stamps/xvfb-check:
@@ -891,12 +909,13 @@ ifneq (,$(filter $(VMNAME), $(with_mauve_check)))
 		    -timeout 30000 2>&1 \
 		| tee mauve_output-$(VMNAME); \
 	else \
-	  echo "mauve testsuite not run for this build (xvfb failures)" > build/mauve/mauve_output-$(VMNAME); \
+	  echo "mauve testsuite not run for this build (xvfb failures)" > build/mauve-$(VMNAME)/mauve_output-$(VMNAME); \
 	  cat xvfb-run.log >> build/mauve/mauve_output-$(VMNAME); \
 	fi
 	@sleep 5
 else
-	echo "mauve testsuite not run for this build" > build/mauve/mauve_output-$(VMNAME)
+	mkdir -p build/mauve-$(VMNAME)
+	echo "mauve testsuite not run for this build" > build/mauve-$(VMNAME)/mauve_output-$(VMNAME)
 endif
 
 jtreg_processes = ps x -ww -o pid,ppid,args \
