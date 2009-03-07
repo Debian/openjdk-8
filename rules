@@ -67,6 +67,8 @@ hotspot_archs	= amd64 i386 lpia sparc
 #shark_archs	= 
 no_bootstrap_archs = alpha hppa
 
+default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
+
 stage1_gcj_archs = amd64 i386 ia64 lpia powerpc m68k mips mipsel sparc s390
 stage1_openjdk_archs = alpha armel hppa
 stage1_cacao_archs =
@@ -75,7 +77,12 @@ cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
 
 ifneq (,$(findstring openjdk, $(PKGSOURCE)))
   ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
-    alternate_vms = cacao
+    alternate_vms += cacao
+  endif
+endif
+ifneq (,$(findstring openjdk, $(PKGSOURCE)))
+  ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+    alternate_vms += zero
   endif
 endif
 
@@ -207,8 +214,7 @@ ifeq ($(STAGE1_JAVA),gcj)
 	--with-ecj=/usr/bin/ecj \
 	--with-java=$(STAGE1_HOME)/bin/java \
 	--with-javah=/usr/bin/gjavah$(GCJ_SUFFIX) \
-	--with-rmic=/usr/bin/grmic$(GCJ_SUFFIX) \
-	--with-libgcj-jar=/usr/share/java/libgcj$(GCJ_SUFFIX).jar
+	--with-rmic=/usr/bin/grmic$(GCJ_SUFFIX)
   ifeq (,$(filter ia64, $(DEB_HOST_ARCH)))
     CONFIGURE_ARGS += \
 	--with-jar=/usr/bin/fastjar
@@ -343,13 +349,13 @@ jvmver		= 1.6.0
 shortver	= 6
 jdiralias	= java-$(shortver)-$(origin)
 basedir		= usr/lib/jvm/$(jdiralias)
-jreimg		= build/openjdk/control/build/linux-$(jvmarch)/j2re-image
-sdkimg		= build/openjdk/control/build/linux-$(jvmarch)/j2sdk-image
+jreimg		= openjdk/control/build/linux-$(jvmarch)/j2re-image
+sdkimg		= openjdk/control/build/linux-$(jvmarch)/j2sdk-image
 security	= etc/$(jdiralias)/security
 
 # (most) jre and jdk tools handled by the alternatives system.
 # dups in heimdal-clients, krb5-user: kinit, klist, ktab, no alternatives
-all_jre_tools	= $(notdir $(wildcard $(jreimg)/bin/*))
+all_jre_tools	= $(notdir $(wildcard build/$(jreimg)/bin/*))
 jre_tools	= $(filter javaws pluginappletviewer policytool, $(all_jre_tools))
 jre_hl_tools	:= $(filter-out $(jre_tools), $(all_jre_tools))
 
@@ -357,7 +363,7 @@ corba_tools	= orbd servertool tnameserv
 jre_hl_tools_alt= $(filter-out $(corba_tools), $(jre_hl_tools)) $(corba_tools)
 jre_tools_alt	= $(filter-out kinit klist ktab, $(jre_tools))
 
-all_jdk_tools	= $(notdir $(wildcard $(sdkimg)/bin/*))
+all_jdk_tools	= $(notdir $(wildcard build/$(sdkimg)/bin/*))
 jdk_tools	= $(filter-out $(all_jre_tools), $(all_jdk_tools))
 jdk_tools_alt	= $(filter-out java-rmi.cgi, $(jdk_tools))
 
@@ -398,15 +404,14 @@ bd_openjdk = \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2-dev,libcups2-dev), \
 	libasound2-dev, libfreetype6-dev, \
 	libxalan2-java, rhino, liblcms1-dev, libxinerama-dev,
+pkg_ffidev = $(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev)
 bd_zero = \
-	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [$(foreach a,$(hotspot_archs),!$(a))],
+	$(pkg_ffidev) [$(foreach a,$(hotspot_archs),!$(a))],
 ifneq (,$(findstring shark, $(PKGSOURCE)))
-  bd_shark = llvm-dev (>= 2.4),
-  bd_zero = libffi-dev,
+  bd_shark = llvm-dev (>= 2.5),
+  bd_zero = $(pkg_ffidev),
 else
-  bd_shark = \
-	llvm-dev (>= 2.4) [$(foreach a,$(shark_archs),$(a))],
-  bd_shark =
+  bd_shark = llvm-dev (>= 2.5) [$(foreach a,$(shark_archs),$(a))],
 endif
 
 bd_cacao = libtool,
@@ -414,6 +419,12 @@ bd_cacao += $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.4~20081
 ifneq (,$(filter cacao, $(alternate_vms)))
   ifneq ($(distribution),Ubuntu)
     bd_cacao += cacao-source (>= 0.99.4~20081012)$(COMMA)
+  endif
+endif
+ifneq (,$(filter zero, $(alternate_vms)))
+  ifneq ($(distribution),Ubuntu)
+    bd_zero = $(pkg_ffidev),
+    bd_shark = llvm-dev (>= 2.5) [$(foreach a,$(hotspot_archs),$(a))],
   endif
 endif
 
@@ -470,6 +481,7 @@ endif
 p_jre	= $(basename)-jre
 p_jrehl	= $(basename)-jre-headless
 p_jrec	= icedtea-6-jre-cacao
+p_jrez	= $(basename)-jre-zero
 p_lib	= $(basename)-jre-lib
 p_jdk	= $(basename)-jdk
 p_demo	= $(basename)-demo
@@ -487,6 +499,7 @@ d	= debian/tmp
 d_jre	= debian/$(p_jre)
 d_jrehl	= debian/$(p_jrehl)
 d_jrec	= debian/$(p_jrec)
+d_jrez	= debian/$(p_jrez)
 d_lib	= debian/$(p_lib)
 d_jdk	= debian/$(p_jdk)
 d_demo	= debian/$(p_demo)
@@ -538,12 +551,14 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	      -e 's/@pkg_plugin@/$(p_plug)/g' \
 	      -e 's/@cacao_archs@/$(cacao_archs)/g' \
+	      -e 's/@hotspot_archs@/$(hotspot_archs)/g' \
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/control.in \
 	    $(if $(with_plugin_pkg),debian/control.$(plugin_name)) \
 	    $(if $(findstring openjdk-,$(PKGSOURCE)),debian/control.tarball) \
 	    debian/control.cacao-jre \
+	    debian/control.zero-jre \
 		> debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
@@ -664,19 +679,45 @@ ifeq ($(with_check),yes)
     endif
   else
     ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
-      with_mauve_check = yes
+      with_mauve_check = $(default_vm)
     endif
     ifneq (,$(filter $(DEB_HOST_ARCH), amd64 armel i386 lpia sparc))
-      with_jtreg_check = yes
+      with_jtreg_check = $(default_vm)
     endif
+
+    ifneq (,$(filter cacao, $(alternate_vms)))
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
+        # only activate after testing; problems on s390
+        with_mauve_check += cacao
+      endif
+      ifneq (,$(filter $(DEB_HOST_ARCH), alpha amd64 armel i386 lpia mips mipsel powerpc s390))
+        # only activate after testing; hangs several tests.
+        with_jtreg_check += cacao
+      endif
+    endif
+
+    ifneq (,$(filter zero, $(alternate_vms)))
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
+        # only activate after testing
+        with_mauve_check += zero
+      endif
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
+        # only activate after testing; hangs several tests.
+        with_jtreg_check += zero
+      endif
+    endif
+
   endif
 endif
 
 build_stamps = stamps/build
-ifneq (,$(filter cacao, $(alternate_vms)))
-  build_stamps += stamps/build-altcacao
-endif
-build_stamps +=  stamps/mauve-check stamps/jtreg-check
+build_stamps += $(if $(filter cacao, $(alternate_vms)),stamps/build-altcacao)
+build_stamps += $(if $(filter zero, $(alternate_vms)),stamps/build-altzero)
+
+build_stamps +=  stamps/mauve-check-default stamps/jtreg-check-default
+#build_stamps += $(if $(filter cacao, $(alternate_vms)),stamps/mauve-check-cacao stamps/jtreg-check-cacao)
+#build_stamps += $(if $(filter zero, $(alternate_vms)),stamps/mauve-check-zero stamps/jtreg-check-zero)
+
 build: $(build_stamps)
 	if [ -f buildwatch.pid ]; then \
 	  pid=$$(cat buildwatch.pid); \
@@ -684,13 +725,13 @@ build: $(build_stamps)
 	fi
 	rm -f buildwatch.pid
 	@echo "XXX jre image"
-	ls -l $(jreimg)
+	ls -l build/$(jreimg)
 	@echo "XXX sdk image"
-	ls -l $(sdkimg)
+	ls -l build/$(sdkimg)
 
 stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel hppa ia64 m68k mips mipsel powerpc s390 sparc))
-	sh -c 'sh debian/buildwatch.sh &'
+	sh -c 'sh debian/buildwatch.sh $(CURDIR)/build &'
 endif
 	if $(EXTRA_BUILD_ENV) $(MAKE) -C build $(build_target); then \
 	  : ; \
@@ -701,6 +742,9 @@ endif
 	  fi; \
 	  false; \
 	fi
+ifeq (,$(filter zero, $(alternate_vms)))
+	printf -- '-zero ALIASED_TO -server\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
+endif
 	touch $@
 
 ALT_CACAO_CONFIGURE_ARGS = \
@@ -727,6 +771,55 @@ stamps/build-altcacao: stamps/build
 	cd build/cacao/cacao && \
 	./configure $(ALT_CACAO_CONFIGURE_ARGS)
 	make -C build/cacao/cacao install
+
+	mkdir -p build/$(sdkimg)/jre/lib/$(archdir)/cacao
+	install -m 644 build/cacao/install/lib/libjvm.so \
+		build/$(sdkimg)/jre/lib/$(archdir)/cacao/
+	install -m 644 build/cacao/install/jre/lib/$(archdir)/server/libjsig.so \
+		build/$(sdkimg)/jre/lib/$(archdir)/cacao/
+	install -m 644 build/cacao/install/jre/lib/$(archdir)/server/Xusage.txt \
+		build/$(sdkimg)/jre/lib/$(archdir)/cacao/
+	grep -- '^-cacao KNOWN'  build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg \
+		|| printf -- '-cacao KNOWN\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
+	touch $@
+
+ALT_ZERO_CONFIGURE_ARGS = --with-openjdk --with-openjdk-home=$(CURDIR)/build/$(sdkimg) \
+			--enable-zero --enable-shark --disable-docs \
+			$(filter-out --with-gcj-home=% --with-ecj=% \
+			  --with-java=% --with-javah=% --with-rmic=% \
+			  --with-icedtea --with-icedtea-home=%, \
+			  $(CONFIGURE_ARGS))
+alt_zero_dir = $(CURDIR)/build/openjdk/control/build/linux-$(jvmarch)
+ALT_ZERO_EXTRA_BUILD_ENV = \
+	BUILD_LANGTOOLS=false ALT_LANGTOOLS_DIST=$(alt_zero_dir)/langtools/dist \
+	BUILD_JAXP=false      ALT_JAXP_DIST=$(alt_zero_dir)/jaxp/dist \
+	BUILD_JAXWS=false     ALT_JAXWS_DIST=$(alt_zero_dir)/jaxws/dist \
+	BUILD_CORBA=false     ALT_CORBA_DIST=$(alt_zero_dir)/corba/dist \
+
+stamps/configure-altzero: stamps/build
+	rm -rf build-zero
+	mkdir -p build-zero
+	cd build-zero && $(EXTRA_BUILD_ENV) $(ALT_ZERO_EXTRA_BUILD_ENV) ../configure $(ALT_ZERO_CONFIGURE_ARGS)
+	touch $@
+
+stamps/build-altzero: stamps/build stamps/configure-altzero
+ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel hppa ia64 m68k mips mipsel powerpc s390 sparc))
+	sh -c 'sh debian/buildwatch.sh $(CURDIR)/build-zero &'
+endif
+	if $(EXTRA_BUILD_ENV) $(ALT_ZERO_EXTRA_BUILD_ENV) $(MAKE) -C build-zero $(build_target); then \
+	  : ; \
+	else \
+	  if [ -f buildwatch.pid ]; then \
+	    pid=$$(cat buildwatch.pid); \
+	    kill -1 $$pid || :; sleep 1; kill -9 $$pid || :; \
+	  fi; \
+	  false; \
+	fi
+
+	mkdir -p build/$(sdkimg)/jre/lib/$(archdir)
+	cp -a build-zero/$(sdkimg)/jre/lib/$(archdir)/server \
+		build/$(sdkimg)/jre/lib/$(archdir)/zero
+	printf -- '-zero KNOWN\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
 	touch $@
 
 stamps/xvfb-check:
@@ -747,6 +840,18 @@ stamps/xvfb-check:
 	fi
 	touch $@
 
+stamps/mauve-check-default: stamps/build stamps/xvfb-check
+	$(MAKE) -f debian/rules mauve-run-check VMNAME=$(default_vm) VMARGS=
+	touch $@
+
+stamps/mauve-check-cacao: stamps/build-altcacao stamps/xvfb-check
+	$(MAKE) -f debian/rules mauve-run-check VMNAME=cacao VMARGS='-vmarg -cacao'
+	touch $@
+
+stamps/mauve-check-zero: stamps/build-altzero stamps/xvfb-check
+	$(MAKE) -f debian/rules mauve-run-check VMNAME=zero VMARGS='-vmarg -zero'
+	touch $@
+
 stamps/mauve-build: stamps/build
 	rm -rf build/mauve
 	mkdir -p build/mauve
@@ -762,46 +867,75 @@ endif
 	touch $@
 
 stamps/mauve-check: stamps/build stamps/mauve-build stamps/xvfb-check
-ifeq ($(with_mauve_check),yes)
+
+mauve-run-check:
+	rm -rf build/mauve build/mauve-$(VMNAME)
+ifneq (,$(filter $(VMNAME), $(with_mauve_check)))
+	tar -x -C build -f /usr/src/mauve.tar.gz
+	mv build/mauve build/mauve-$(VMNAME)
+	cd build/mauve-$(VMNAME) \
+	    && aclocal \
+	    && automake \
+	    && autoconf \
+	    && PATH=$(CURDIR)/build/$(sdkimg)/bin:$$PATH ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
+	PATH=$(CURDIR)/build/$(sdkimg)/bin:$$PATH $(MAKE) -C build/mauve-$(VMNAME)
+
 	if [ -f bin/my-xvfb-run ]; then \
-	  cd build/mauve && \
+	  cd build/mauve-$(VMNAME) && \
 	    JAVA_HOME=$(CURDIR)/build/$(sdkimg) \
 	    PATH=$(CURDIR)/build/$(sdkimg)/bin:$$PATH \
 		/bin/sh $(CURDIR)/bin/my-xvfb-run java Harness \
 		    -vm $(CURDIR)/build/$(sdkimg)/bin/java \
+		    $(VMARGS) \
 		    -file $(CURDIR)/debian/mauve_tests \
 		    -timeout 30000 2>&1 \
-		| tee mauve_output; \
+		| tee mauve_output-$(VMNAME); \
 	else \
-	  echo "mauve testsuite not run for this build (xvfb failures)" > build/mauve/mauve_output; \
-	  cat xvfb-run.log >> mauve/mauve_output; \
+	  echo "mauve testsuite not run for this build (xvfb failures)" > build/mauve/mauve_output-$(VMNAME); \
+	  cat xvfb-run.log >> build/mauve/mauve_output-$(VMNAME); \
 	fi
 	@sleep 5
 else
-	echo "mauve testsuite not run for this build" > build/mauve/mauve_output
+	echo "mauve testsuite not run for this build" > build/mauve/mauve_output-$(VMNAME)
 endif
-	touch $@
 
 jtreg_processes = ps x -ww -o pid,ppid,args \
 	| awk '$$2 == 1 && $$3 ~ /^$(subst /,\/,/scratch)/' \
-	| sed 's,$(CURDIR)/$(sdkimg),<sdkimg>,g;s,$(CURDIR),<pwd>,g'
+	| sed 's,$(CURDIR)/build/$(sdkimg),<sdkimg>,g;s,$(CURDIR),<pwd>,g'
 jtreg_pids = ps x --no-headers -ww -o pid,ppid,args \
-	| awk '$$2 == 1 && $$3 ~ /^$(subst /,\/,$(CURDIR)/$(sdkimg))/ {print $$1}'
+	| awk '$$2 == 1 && $$3 ~ /^$(subst /,\/,$(CURDIR)/build/$(sdkimg))/ {print $$1}'
 
-stamps/jtreg-check: stamps/build stamps/xvfb-check
-ifeq ($(with_jtreg_check),yes)
+stamps/jtreg-check-default: stamps/build stamps/xvfb-check
+	$(MAKE) -f debian/rules jtreg-run-check VMNAME=$(default_vm) VMARGS=
+	touch $@
+
+stamps/jtreg-check-cacao: stamps/build stamps/xvfb-check
+	$(MAKE) -f debian/rules jtreg-run-check VMNAME=cacao VMARGS='-vmoption:-cacao'
+	touch $@
+
+stamps/jtreg-check-zero: stamps/build stamps/xvfb-check
+	$(MAKE) -f debian/rules jtreg-run-check VMNAME=zero VMARGS='-vmoption:-zero'
+	touch $@
+
+jtreg-run-check:
+ifneq (,$(filter $(VMNAME), $(with_jtreg_check)))
 	@echo "BEGIN jtreg"
 	if [ -f bin/my-xvfb-run ]; then \
-	  /bin/sh bin/my-xvfb-run $(MAKE) -C build -k jtregcheck 2>&1 | tee jtreg_output; \
+	  /bin/sh bin/my-xvfb-run $(MAKE) -C build -k jtregcheck ICEDTEA_JTREG_OPTIONS='$(VMARGS)' \
+		2>&1 | tee jtreg_output-$(VMNAME); \
 	else \
-	  echo "jtreg harness not run for this build" > jtreg_output; \
-	  cat xvfb-run.log >> jtreg_output; \
+	  echo "jtreg harness not run for this build" > jtreg_output-$(VMNAME); \
+	  cat xvfb-run.log >> jtreg_output-$(VMNAME); \
 	fi
 	@echo "END jtreg"
 
-	@echo "BEGIN jtreg-summary"
-	-cat test/jtreg-summary.log
-	@echo "END jtreg-summary"
+	for i in check-hotspot.log check-jdk.log check-langtools.log jtreg-summary.log; do \
+	  mv build/test/$$i build/test/$${i%*.log}-$(VMNAME).log; \
+	done
+
+	@echo "BEGIN jtreg-summary-$(VMNAME)"
+	-cat build/test/jtreg-summary-$(VMNAME).log
+	@echo "END jtreg-summary-$(VMNAME)"
 
 	: # kill testsuite processes still hanging
 	@pids=$$($(jtreg_pids)); \
@@ -827,20 +961,19 @@ ifeq ($(with_jtreg_check),yes)
 	fi
 
 	-for i in hotspot langtools jdk; do \
-	  for t in $$(egrep '^(FAILED|Error)' test/check-$$i.log | sed 's/.* \(.*\)\.[^.][^.]*$$/\1/'); do \
+	  for t in $$(egrep '^(FAILED|Error)' test/check-$$i-$(VMNAME).log | sed 's/.* \(.*\)\.[^.][^.]*$$/\1/'); do \
 	    echo test/$$i/JTwork/$$t.jtr; \
 	  done; \
-	done > test/failed_tests.list; \
-	tar cfzT test/failed_tests.tar.gz test/failed_tests.list
+	done > build/test/failed_tests-$(VMNAME).list; \
+	tar -C build -c -z -f build/test/failed_tests-$(VMNAME).tar.gz -T build/test/failed_tests-$(VMNAME).list
 else
-	echo "jtreg harness not run for this build" > jtreg_output
+	echo "jtreg harness not run for this build" > jtreg_output-$(VMNAME)
 endif
-	touch $@
 
 clean: debian-clean
 	dh_testdir
 	dh_testroot
-	rm -rf stamps build
+	rm -rf stamps build build-*
 	rm -rf autom4te.cache
 	rm -rf bin
 	rm -f jtreg_output xvfb-run.log
@@ -891,8 +1024,8 @@ install: packaging-files
 
 	: # install into temporary location
 	mkdir -p $(d)/$(basedir)
-	cp -a $(sdkimg)/* $(d)/$(basedir)/
-	cp -a $(jreimg)/man $(d)/$(basedir)/jre/
+	cp -a build/$(sdkimg)/* $(d)/$(basedir)/
+	cp -a build/$(jreimg)/man $(d)/$(basedir)/jre/
 	chmod -R u+w $(d)
 
 	: # install default jvm config file
@@ -941,16 +1074,6 @@ endif
 	cp -p debian/swing.properties $(d)/$(basedir)/jre/lib/
 
 	rm -f $(d)/$(basedir)/jre/lib/security/cacerts
-
-ifneq (,$(filter cacao, $(alternate_vms)))
-	mkdir -p $(d)/$(basedir)/jre/lib/$(archdir)/cacao
-	install -m 644 build/cacao/install/lib/libjvm.so \
-		$(d)/$(basedir)/jre/lib/$(archdir)/cacao/
-	install -m 644 build/cacao/install/jre/lib/$(archdir)/server/libjsig.so \
-		$(d)/$(basedir)/jre/lib/$(archdir)/cacao/
-	install -m 644 build/cacao/install/jre/lib/$(archdir)/server/Xusage.txt \
-		$(d)/$(basedir)/jre/lib/$(archdir)/cacao/
-endif
 
 	: # move config files to etc/$(jdiralias) and symlink them.
 	for i in \
@@ -1032,6 +1155,7 @@ endif
 	    */$(plugin_name)) continue;; \
 	    */libsplashscreen.so|*/libjsoundalsa.so|$(if $(with_pulse),*/libpulse-java.so|)*/xawt) echo $$i >> ../$(p_jre).install;; \
 	    */cacao) echo $$i >> ../$(p_jrec).install;; \
+	    */zero) echo $$i >> ../$(p_jrez).install;; \
 	    *) echo $$i >> ../$(p_jrehl).install; \
 	  esac; \
 	done
@@ -1171,6 +1295,13 @@ endif
 	  echo usr/share/doc/$(p_jre) $(basedir)/docs; \
 	) > $(d_jrehl).links
 
+ifneq (,$(filter zero, $(alternate_vms)))
+	: # create docdir symlinks for $(p_jrez)
+	( \
+	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jrez); \
+	) > $(d_jrez).links
+endif
+
 	: # create docdir symlinks for $(p_src)
 	( \
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_src); \
@@ -1264,6 +1395,7 @@ endif
 nodocs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),-N$(p_doc))
 nodemo = $(if $(findstring cacao, $(PKGSOURCE)),-N$(p_demo))
 nojrec = $(if $(filter cacao, $(alternate_vms)),,-N$(p_jrec))
+nojrez = $(if $(filter zero, $(alternate_vms)),,-N$(p_jrez))
 
 # Build architecture independant packages
 binary-indep: build install
@@ -1320,31 +1452,52 @@ binary-arch: build install
 	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
 	done
 	mkdir -p $(d_jdk)/usr/share/doc/$(p_jre)
-	cp build/mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
-	cp jtreg_output $(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output.log
-	-cp test/jtreg-summary.log test/check-*.log $(d_jdk)/usr/share/doc/$(p_jre)/
-	-cp test/failed_tests.tar.gz $(d_jdk)/usr/share/doc/$(p_jre)/
+	cp build/mauve-$(default_vm)/mauve_output-$(default_vm) \
+		$(d_jdk)/usr/share/doc/$(p_jre)/mauve_output-$(default_vm).log
+	cp jtreg_output-$(default_vm) \
+		$(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output-$(default_vm).log
+	-cp build/test/jtreg-summary-$(default_vm).log build/test/check-*-$(default_vm).log \
+		$(d_jdk)/usr/share/doc/$(p_jre)/
+	-cp build/test/failed_tests-$(default_vm).tar.gz $(d_jdk)/usr/share/doc/$(p_jre)/
 
 ifneq (,$(filter cacao, $(alternate_vms)))
 	dh_installchangelogs -p$(p_jrec)
 	dh_installdocs -p$(p_jrec)
+	mkdir -p $(d_jrec)/usr/share/doc/$(p_jre)
+	-cp build/mauve-cacao/mauve_output-cacao \
+		$(d_jrec)/usr/share/doc/$(p_jre)/mauve_output-cacao.log
+	-cp jtreg_output-cacao \
+		$(d_jrec)/usr/share/doc/$(p_jre)/jtreg_output-cacao.log
+	-cp build/test/jtreg-summary-cacao.log build/test/check-*-cacao.log \
+		$(d_jrec)/usr/share/doc/$(p_jre)/
+	-cp build/test/failed_tests-cacao.tar.gz $(d_jrec)/usr/share/doc/$(p_jre)/
 endif
-	dh_desktop -s $(nodemo) $(nojrec)
-	dh_installmenu -s $(nodemo) $(nojrec)
-	-dh_icons -s $(nodemo) $(nojrec) || dh_iconcache -s $(nodemo) $(nojrec)
-#	dh_installdebconf -s $(nodemo) $(nojrec)
-	dh_link -s $(nodemo) $(nojrec)
-	dh_strip -s $(nodemo) $(nojrec) --dbg-package=$(p_dbg)
-	dh_compress -s $(nodemo) $(nojrec)
-	dh_fixperms -s $(nodemo) $(nojrec)
+ifneq (,$(filter zero, $(alternate_vms)))
+	mkdir -p $(d_jrez)/usr/share/doc/$(p_jre)
+	-cp build/mauve-zero/mauve_output-zero \
+		$(d_jrez)/usr/share/doc/$(p_jre)/mauve_output-zero.log
+	-cp jtreg_output-zero \
+		$(d_jrez)/usr/share/doc/$(p_jre)/jtreg_output-zero.log
+	-cp build/test/jtreg-summary-zero.log build/test/check-*-zero.log \
+		$(d_jrez)/usr/share/doc/$(p_jre)/
+	-cp build/test/failed_tests-zero.tar.gz $(d_jrez)/usr/share/doc/$(p_jre)/
+endif
+	dh_desktop -s $(nodemo) $(nojrec) $(nojrez)
+	dh_installmenu -s $(nodemo) $(nojrec) $(nojrez)
+	-dh_icons -s $(nodemo) $(nojrec) $(nojrez) || dh_iconcache -s $(nodemo) $(nojrec) $(nojrez)
+#	dh_installdebconf -s $(nodemo) $(nojrec) $(nojrez)
+	dh_link -s $(nodemo) $(nojrec) $(nojrez)
+	dh_strip -s $(nodemo) $(nojrec) $(nojrez) --dbg-package=$(p_dbg)
+	dh_compress -s $(nodemo) $(nojrec) $(nojrez)
+	dh_fixperms -s $(nodemo) $(nojrec) $(nojrez)
 	dh_makeshlibs -p$(p_jrehl) -p$(p_jre)
-	dh_shlibdeps -s $(nodemo) $(nojrec) -L $(p_jrehl) \
+	dh_shlibdeps -s $(nodemo) $(nojrec) $(nojrez) -L $(p_jrehl) \
 		-l$(shlibdeps_ld_path) \
 		--
-	dh_installdeb -s $(nodemo) $(nojrec)
-	dh_gencontrol -s $(nodemo) $(nojrec) -- $(control_vars)
-	dh_md5sums -s $(nodemo) $(nojrec)
-	dh_builddeb -s $(nodemo) $(nojrec) #$(bd_options)
+	dh_installdeb -s $(nodemo) $(nojrec) $(nojrez)
+	dh_gencontrol -s $(nodemo) $(nojrec) $(nojrez) -- $(control_vars)
+	dh_md5sums -s $(nodemo) $(nojrec) $(nojrez)
+	dh_builddeb -s $(nodemo) $(nojrec) $(nojrez) #$(bd_options)
 
 binary: binary-arch binary-indep
 .PHONY: build clean binary-indep binary-arch binary install
