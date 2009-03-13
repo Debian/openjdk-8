@@ -995,8 +995,7 @@ clean: debian-clean
 	rm -rf stamps build build-*
 	rm -rf autom4te.cache
 	rm -rf bin
-	rm -f jtreg_output xvfb-run.log
-	rm -f test/failed_tests.tar.gz test/failed_tests.list
+	rm -f jtreg_output* xvfb-run.log
 	rm -f buildwatch.pid
 
 	if [ -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ]; then \
