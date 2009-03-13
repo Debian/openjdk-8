@@ -1,6 +1,6 @@
 
 Package: @basename@-jre-zero
-Architecture: @hotspot_archs@
+Architecture: @altzero_archs@
 Pre-Depends: ${dpkg:Depends}
 Section: interpreters
 Depends: @basename@-jre-headless (= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}

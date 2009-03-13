@@ -74,6 +74,7 @@ stage1_openjdk_archs = alpha armel hppa
 stage1_cacao_archs =
 
 cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
+altzero_archs = $(filter-out sparc, $(hotspot_archs))
 
 ifneq (,$(findstring openjdk, $(PKGSOURCE)))
   ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
@@ -81,7 +82,7 @@ ifneq (,$(findstring openjdk, $(PKGSOURCE)))
   endif
 endif
 ifneq (,$(findstring openjdk, $(PKGSOURCE)))
-  ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+  ifneq (,$(filter $(DEB_HOST_ARCH), $(altzero_archs)))
     alternate_vms += zero
   endif
 endif
@@ -553,6 +554,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@pkg_plugin@/$(p_plug)/g' \
 	      -e 's/@cacao_archs@/$(cacao_archs)/g' \
 	      -e 's/@hotspot_archs@/$(hotspot_archs)/g' \
+	      -e 's/@altzero_archs@/$(altzero_archs)/g' \
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/control.in \
@@ -780,8 +782,8 @@ stamps/build-altcacao: stamps/build
 	tar -x -C build/cacao \
 	  -f $(firstword $(wildcard $(CURDIR)/cacao-*.tar.* /usr/src/cacao-*.tar.*))
 	ln -s $$(basename build/cacao/cacao-*) build/cacao/cacao
-	patch -d build -p0 < debian/patches/cacao-no-mmap-first-page.diff
-	patch -d build -p0 < debian/patches/cacao-jni-version.diff
+	patch --verbose -d build -p0 < debian/patches/cacao-no-mmap-first-page.diff
+	patch --verbose -d build -p0 < debian/patches/cacao-jni-version.diff
 	cd build/cacao/cacao && \
 	./configure $(ALT_CACAO_CONFIGURE_ARGS)
 	make -C build/cacao/cacao install
@@ -999,8 +1001,8 @@ clean: debian-clean
 	rm -f buildwatch.pid
 
 	if [ -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ]; then \
-	  patch -p0 -R < debian/patches/zero-port-opt-novfp.diff; \
-	  patch -p0 -R < debian/patches/zero-port-opt.diff; \
+	  patch --verbose -p0 -R < debian/patches/zero-port-opt-novfp.diff; \
+	  patch --verbose -p0 -R < debian/patches/zero-port-opt.diff; \
 	  rm -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S; \
 	fi
 
