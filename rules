@@ -171,6 +171,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \
 	debian/patches/nonreparenting-wm.diff \
+	debian/patches/default-libpath.diff \
 
 #	debian/patches/gcc-mtune-generic.diff \
 
@@ -191,10 +192,11 @@ ifeq ($(distribution),Ubuntu)
     DISTRIBUTION_PATCHES += \
 	debian/patches/gcc-hotspot-no-stack-protector.diff
   endif
-  ifneq (,$(filter $(DEB_HOST_ARCH),armel))
-    DISTRIBUTION_PATCHES += \
+endif
+
+ifneq (,$(filter $(DEB_HOST_ARCH),armel))
+  DISTRIBUTION_PATCHES += \
 	debian/patches/zero-hotspot-opt.diff
-  endif
 endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
@@ -416,10 +418,10 @@ else
 endif
 
 bd_cacao = libtool,
-bd_cacao += $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.4~20081012)$(COMMA))
+bd_cacao += $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.4-1)$(COMMA))
 ifneq (,$(filter cacao, $(alternate_vms)))
   ifneq ($(distribution),Ubuntu)
-    bd_cacao += cacao-source (>= 0.99.4~20081012)$(COMMA)
+    bd_cacao += cacao-source (>= 0.99.4-1)$(COMMA)
   endif
 endif
 ifneq (,$(filter zero, $(alternate_vms)))
@@ -681,10 +683,10 @@ ifeq ($(with_check),yes)
       with_jtreg_check = yes
     endif
   else
-    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc s390))
       with_mauve_check = $(default_vm)
     endif
-    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 armel i386 lpia sparc))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc s390))
       with_jtreg_check = $(default_vm)
     endif
 
@@ -783,7 +785,6 @@ stamps/build-altcacao: stamps/build
 	  -f $(firstword $(wildcard $(CURDIR)/cacao-*.tar.* /usr/src/cacao-*.tar.*))
 	ln -s $$(basename build/cacao/cacao-*) build/cacao/cacao
 	patch --verbose -d build -p0 < debian/patches/cacao-no-mmap-first-page.diff
-	patch --verbose -d build -p0 < debian/patches/cacao-jni-version.diff
 	cd build/cacao/cacao && \
 	./configure $(ALT_CACAO_CONFIGURE_ARGS)
 	make -C build/cacao/cacao install

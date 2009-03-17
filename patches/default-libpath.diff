@@ -1,0 +1,16 @@
+--- openjdk/hotspot/src/os/linux/vm/os_linux.cpp.orig	2009-03-14 19:24:41.000000000 +0100
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2009-03-17 09:20:37.000000000 +0100
+@@ -279,12 +279,7 @@
+  *        ...
+  *        7: The default directories, normally /lib and /usr/lib.
+  */
+-
+-#if defined(AMD64) || defined(_LP64) && (defined(PPC) || defined(S390))
+-#define DEFAULT_LIBPATH "/usr/lib64:/lib64:/lib:/usr/lib"
+-#else
+-#define DEFAULT_LIBPATH	"/lib:/usr/lib"
+-#endif
++#define DEFAULT_LIBPATH	"/usr/lib/jni:/lib:/usr/lib"
+ 
+ #define EXTENSIONS_DIR  "/lib/ext"
+ #define ENDORSED_DIR    "/lib/endorsed"

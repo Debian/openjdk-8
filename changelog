@@ -1,10 +1,29 @@
+openjdk-6 (6b14-1.5~pre1-5) UNRELEASED; urgency=low
+
+  * Fix build failure on armel.
+  * Require the final cacao-0.99.4 release.
+  * Add /usr/lib/jni to the library path. Closes: #517338.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 17 Mar 2009 08:48:20 +0100
+
+openjdk-6 (6b14-1.5~pre1-4) unstable; urgency=low
+
+  * Disable the additional zero JVM on sparc.
+  * Fix casts in hotspot on s390. Closes: #518823.
+  * Add special flags for javac on s390 to work around a VM problem with bad
+    code generation during inlining.
+  * Run the testsuites for the default VM on all architectures.
+  * Update IcedTea (20090314).
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 14 Mar 2009 18:29:49 +0100
+
 openjdk-6 (6b14-1.5~pre1-3) unstable; urgency=low
 
   * Don't configure the additional zero JVM with --enable-shark, currently
     fails to build.
   * Don't build the JDK when building the additional zero JVM.
 
- -- Matthias Klose <doko@ubuntu.com>  Sat, 07 Mar 2009 20:37:08 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 07 Mar 2009 21:11:16 +0100
 
 openjdk-6 (6b14-1.5~pre1-2) experimental; urgency=low
 

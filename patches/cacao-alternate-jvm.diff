@@ -1,31 +1,10 @@
---- openjdk/jdk/src/solaris/bin/i586/jvm.cfg.orig	2009-03-02 23:21:31.000000000 +0000
-+++ openjdk/jdk/src/solaris/bin/i586/jvm.cfg	2009-03-02 23:21:48.000000000 +0000
-@@ -36,3 +36,4 @@
- -classic WARN
- -native ERROR
- -green ERROR
-+-cacao KNOWN
---- openjdk/jdk/src/solaris/bin/ia64/jvm.cfg.orig	2009-03-02 23:21:31.000000000 +0000
-+++ openjdk/jdk/src/solaris/bin/ia64/jvm.cfg	2009-03-02 23:21:48.000000000 +0000
-@@ -41,3 +41,4 @@
- -client IGNORE
- -native ERROR
- -green ERROR
-+-cacao KNOWN
---- openjdk/jdk/src/solaris/bin/amd64/jvm.cfg.orig	2009-03-02 23:21:31.000000000 +0000
-+++ openjdk/jdk/src/solaris/bin/amd64/jvm.cfg	2009-03-02 23:21:48.000000000 +0000
-@@ -37,3 +37,4 @@
- -classic WARN
- -native ERROR
- -green ERROR
-+-cacao KNOWN
 --- openjdk/jdk/src/share/bin/java.c.orig	2009-03-02 23:21:31.000000000 +0000
 +++ openjdk/jdk/src/share/bin/java.c	2009-03-02 23:23:53.000000000 +0000
 @@ -199,6 +199,8 @@
    InvocationFunctions ifn;
  };
  
-+#define JNI_VERSION_CACAO 0xCACA0000
++#define JNI_VERSION_CACAO 0xcaca0000
 +
  /*
   * Entry point.
