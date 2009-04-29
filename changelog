@@ -1,5 +1,7 @@
 openjdk-6 (6b14-1.5~pre1-3ubuntu1) karmic; urgency=low
 
+  * New code drop (b16).
+  * Update IcedTea build infrastructure (20090429).
   * Merge changes from 6b14-1.4.1.
   * Fix section names (using the java section).
 
