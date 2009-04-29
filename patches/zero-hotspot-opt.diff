@@ -1,6 +1,6 @@
 diff -ruNE openjdk/hotspot/make/linux/makefiles/rules.make openjdk/hotspot/make/linux/makefiles/rules.make
---- openjdk/hotspot/make/linux/makefiles/rules.make	2009-02-16 18:42:06.000000000 +0000
-+++ openjdk/hotspot/make/linux/makefiles/rules.make	2009-02-17 10:21:19.000000000 +0000
+--- openjdk/hotspot/make/linux/makefiles/rules.make	2009-04-01 08:09:31.000000000 +0000
++++ openjdk/hotspot/make/linux/makefiles/rules.make	2009-04-03 15:08:59.000000000 +0000
 @@ -148,6 +148,11 @@
  	$(QUIETLY) $(REMOVE_TARGET)
  	$(QUIETLY) $(AS.S) -o $@ $< $(COMPILE_DONE)
@@ -14,26 +14,25 @@ diff -ruNE openjdk/hotspot/make/linux/makefiles/rules.make openjdk/hotspot/make/
  	@echo Generating assembly for $<
  	$(QUIETLY) $(GENASM.CC) -o $@ $<
 diff -ruNE openjdk/hotspot/src/share/vm/includeDB_core openjdk/hotspot/src/share/vm/includeDB_core
---- openjdk/hotspot/src/share/vm/includeDB_core	2008-11-22 00:11:18.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/includeDB_core	2009-02-17 10:33:47.000000000 +0000
-@@ -393,6 +393,8 @@
- bytecodeInterpreter.cpp                 threadCritical.hpp
- bytecodeInterpreter.cpp                 vmSymbols.hpp
+--- openjdk/hotspot/src/share/vm/includeDB_core	2009-04-01 08:09:39.000000000 +0000
++++ openjdk/hotspot/src/share/vm/includeDB_core	2009-04-03 14:05:54.000000000 +0000
+@@ -414,6 +414,8 @@
+ 
+ bytecodeInterpreterWithChecks.cpp       bytecodeInterpreter.cpp
  
 +bytecodeInterpreterOpt.cpp		bytecodeInterpreter.hpp
 +
- bytecodeInterpreter_<arch>.cpp          assembler.hpp
- bytecodeInterpreter_<arch>.cpp          bytecodeInterpreter.hpp
- bytecodeInterpreter_<arch>.cpp          bytecodeInterpreter.inline.hpp
+ bytecodeInterpreter.hpp                 allocation.hpp
+ bytecodeInterpreter.hpp                 bytes_<arch>.hpp
+ bytecodeInterpreter.hpp                 frame.hpp
 diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp
---- openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp	2009-02-16 18:42:27.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp	2009-02-17 10:23:06.000000000 +0000
-@@ -46,6 +46,21 @@
+--- openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp	2009-04-01 08:09:39.000000000 +0000
++++ openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp	2009-04-03 13:20:23.000000000 +0000
+@@ -46,6 +46,20 @@
  #endif
  #endif
  
-+/*
-+ * If HOTSPOT_OPT set turn USELABELS off. This is because each time round the loop
++/* ECN: If HOTSPOT_OPT set turn USELABELS off. This is because each time round
 + * it needs to test the execute_opt[] array to check whether optimized execution
 + * exists for the current bytecode and if so xfer control to run_opt.
 + * It may be possible to do this as part of the CONTINUE macro however it is
@@ -50,7 +49,217 @@ diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp open
  #undef CASE
  #ifdef USELABELS
  #define CASE(opcode) opc ## opcode
-@@ -856,6 +871,19 @@
+@@ -156,6 +170,13 @@
+ #define DEBUGGER_SINGLE_STEP_NOTIFY()
+ #endif
+ 
++// ECN: Only use notices_safepoints if USELABELS (otherwise no labels table to update!)
++//      Don't do it for JVMTI, it should work, but no point
++#undef NOTICE_SAFEPOINTS
++#if defined(USELABELS) && !defined(VM_JVMTI)
++#define NOTICE_SAFEPOINTS
++#endif
++
+ /*
+  * CONTINUE - Macro for executing the next opcode.
+  */
+@@ -163,7 +184,19 @@
+ #ifdef USELABELS
+ // Have to do this dispatch this way in C++ because otherwise gcc complains about crossing an
+ // initialization (which is is the initialization of the table pointer...)
++#ifdef NOTICE_SAFEPOINTS
++/* ECN: The cast in the following is necessary because load_ptr_acquire is declared as
++ *
++ * static void* load_ptr_acquire(volatile void *p);
++ *
++ * rather than
++ *
++ * static void* load_ptr_acquire(void * volatile *p);
++ */
++#define DISPATCH(opcode) goto *OrderAccess::load_ptr_acquire((volatile void *)&dispatch_table[opcode])
++#else
+ #define DISPATCH(opcode) goto *(void*)dispatch_table[opcode]
++#endif
+ #define CONTINUE {                              \
+         opcode = *pc;                           \
+         DO_UPDATE_INSTRUCTION_COUNT(opcode);    \
+@@ -296,12 +329,10 @@
+             istate->set_osr_entry(osr_nmethod->osr_entry());                                        \
+             return;                                                                                 \
+           }                                                                                         \
+-        } else {                                                                                    \
+-          INCR_INVOCATION_COUNT;                                                                    \
+-          SAFEPOINT;                                                                                \
+         }                                                                                           \
++	/* ECN: Only increment counter if we need it (UseCompiler && UseLoopCounter) */		    \
++        INCR_INVOCATION_COUNT;                                                                      \
+       }  /* UseCompiler ... */                                                                      \
+-      INCR_INVOCATION_COUNT;                                                                        \
+       SAFEPOINT;                                                                                    \
+     }
+ 
+@@ -383,6 +414,74 @@
+           if (THREAD->has_pending_exception()) goto label;        \
+         }
+ 
++
++typedef struct branch_entry {
++	Bytecodes::Code	branch_op;
++	void *handler;
++} branch_entry;
++
++#ifdef NOTICE_SAFEPOINTS
++const static branch_entry *safe_branches, *unsafe_branches;
++static void* volatile *opc_dispatch_table;
++
++static void update_table_safe(bool to_safe)
++{
++	void* volatile *disp_table = opc_dispatch_table;
++	const branch_entry *branch_table = to_safe ? safe_branches : unsafe_branches;
++
++	/* ECN: Make sure we dont do this before notice_safe_init called */
++	if (!branch_table) return;
++	while (branch_table->branch_op != Bytecodes::_nop) {
++		disp_table[branch_table->branch_op] = branch_table->handler;
++		branch_table++;
++	}
++}
++#endif
++
++#ifdef NOTICE_SAFEPOINTS
++static void notice_safe_init(void* volatile *disp, const branch_entry *safe, const branch_entry *unsafe)
++{
++	opc_dispatch_table = disp;
++	safe_branches = safe;
++	unsafe_branches = unsafe;
++}
++#endif
++
++#ifndef VM_JVMTI
++
++extern void update_table_opt_safe(bool to_safe);
++
++// ECN: always define notice_safepoints and ignore_safepoints as we have removed
++// definition from cppInterpreter.hpp
++// (unless JVMTI - multiple definition)
++void CppInterpreter::notice_safepoints()
++{
++	if (!_notice_safepoints) {
++		_notice_safepoints = true;
++#ifdef NOTICE_SAFEPOINTS
++		update_table_safe(true);
++#endif
++// ECN: If we have an optimised interpreter then we must update its table
++#ifdef HOTSPOT_OPT
++		update_table_opt_safe(true);
++#endif
++	}
++}
++
++void CppInterpreter::ignore_safepoints()
++{
++	if (_notice_safepoints) {
++		_notice_safepoints = false;
++#ifdef NOTICE_SAFEPOINTS
++		update_table_safe(false);
++#endif
++#ifdef HOTSPOT_OPT
++		update_table_opt_safe(false);
++#endif
++	}
++}
++#endif
++
+ /*
+  * BytecodeInterpreter::run(interpreterState istate)
+  * BytecodeInterpreter::runWithChecks(interpreterState istate)
+@@ -455,7 +554,56 @@
+ #endif
+ 
+ #ifdef USELABELS
+-  const static void* const opclabels_data[256] = {
++#ifdef NOTICE_SAFEPOINTS
++  const static branch_entry safe_table[] = {
++	{	Bytecodes::_ifeq,	&&opc_ifeq	},
++	{	Bytecodes::_ifne,	&&opc_ifne	},
++	{	Bytecodes::_iflt,	&&opc_iflt	},
++	{	Bytecodes::_ifge,	&&opc_ifge	},
++	{	Bytecodes::_ifgt,	&&opc_ifgt	},
++	{	Bytecodes::_ifle,	&&opc_ifle	},
++	{	Bytecodes::_if_icmpeq,	&&opc_if_icmpeq	},
++	{	Bytecodes::_if_icmpne,	&&opc_if_icmpne	},
++	{	Bytecodes::_if_icmplt,	&&opc_if_icmplt	},
++	{	Bytecodes::_if_icmpge,	&&opc_if_icmpge	},
++	{	Bytecodes::_if_icmpgt,	&&opc_if_icmpgt	},
++	{	Bytecodes::_if_icmple,	&&opc_if_icmple	},
++	{	Bytecodes::_if_acmpeq,	&&opc_if_acmpeq	},
++	{	Bytecodes::_if_acmpne,	&&opc_if_acmpne	},
++	{	Bytecodes::_ifnull,	&&opc_ifnull	},
++	{	Bytecodes::_ifnonnull,	&&opc_ifnonnull },
++	{	Bytecodes::_tableswitch,&&opc_tableswitch },
++	{	Bytecodes::_lookupswitch,&&opc_lookupswitch },
++	{	Bytecodes::_goto,	&&opc_goto	},
++	{	Bytecodes::_nop,	0		}
++  };
++  const static branch_entry unsafe_table[] = {
++	{	Bytecodes::_ifeq,	&&opc_ifeq_unsafe	},
++	{	Bytecodes::_ifne,	&&opc_ifne_unsafe	},
++	{	Bytecodes::_iflt,	&&opc_iflt_unsafe	},
++	{	Bytecodes::_ifge,	&&opc_ifge_unsafe	},
++	{	Bytecodes::_ifgt,	&&opc_ifgt_unsafe	},
++	{	Bytecodes::_ifle,	&&opc_ifle_unsafe	},
++	{	Bytecodes::_if_icmpeq,	&&opc_if_icmpeq_unsafe	},
++	{	Bytecodes::_if_icmpne,	&&opc_if_icmpne_unsafe	},
++	{	Bytecodes::_if_icmplt,	&&opc_if_icmplt_unsafe	},
++	{	Bytecodes::_if_icmpge,	&&opc_if_icmpge_unsafe	},
++	{	Bytecodes::_if_icmpgt,	&&opc_if_icmpgt_unsafe	},
++	{	Bytecodes::_if_icmple,	&&opc_if_icmple_unsafe	},
++	{	Bytecodes::_if_acmpeq,	&&opc_if_acmpeq_unsafe	},
++	{	Bytecodes::_if_acmpne,	&&opc_if_acmpne_unsafe	},
++	{	Bytecodes::_ifnull,	&&opc_ifnull_unsafe	},
++	{	Bytecodes::_ifnonnull,	&&opc_ifnonnull_unsafe },
++	{	Bytecodes::_tableswitch,&&opc_tableswitch_unsafe },
++	{	Bytecodes::_lookupswitch,&&opc_lookupswitch_unsafe },
++	{	Bytecodes::_goto,	&&opc_goto_unsafe	},
++	{	Bytecodes::_nop,	0		}
++  };
++  static void* volatile opclabels_data[256] =
++#else
++  const static void* const opclabels_data[256] =
++#endif
++	{
+ /* 0x00 */ &&opc_nop,     &&opc_aconst_null,&&opc_iconst_m1,&&opc_iconst_0,
+ /* 0x04 */ &&opc_iconst_1,&&opc_iconst_2,   &&opc_iconst_3, &&opc_iconst_4,
+ /* 0x08 */ &&opc_iconst_5,&&opc_lconst_0,   &&opc_lconst_1, &&opc_fconst_0,
+@@ -536,7 +684,11 @@
+ /* 0xF8 */ &&opc_default,     &&opc_default,        &&opc_default,      &&opc_default,
+ /* 0xFC */ &&opc_default,     &&opc_default,        &&opc_default,      &&opc_default
+   };
++#ifdef NOTICE_SAFEPOINTS
++  void* volatile *dispatch_table = &opclabels_data[0];
++#else
+   register uintptr_t *dispatch_table = (uintptr_t*)&opclabels_data[0];
++#endif
+ #endif /* USELABELS */
+ 
+ #ifdef ASSERT
+@@ -566,8 +718,15 @@
+       BarrierSet* bs = Universe::heap()->barrier_set();
+       assert(bs->kind() == BarrierSet::CardTableModRef, "Wrong barrier set kind");
+       _byte_map_base = (volatile jbyte*)(((CardTableModRefBS*)bs)->byte_map_base);
++#ifdef NOTICE_SAFEPOINTS
++      notice_safe_init(opclabels_data, safe_table, unsafe_table);
++
++      // ECN: Make sure we are in the correct table state to start with
++      update_table_safe(SafepointSynchronize::is_synchronizing());
++#endif
+       return;
+     }
++
+     break;
+     case method_entry: {
+       THREAD->set_do_not_unlock();
+@@ -856,6 +1015,19 @@
        assert(topOfStack >= istate->stack_limit(), "Stack overrun");
        assert(topOfStack < istate->stack_base(), "Stack underrun");
  
@@ -59,7 +268,7 @@ diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp open
 +  if (!TaggedStackInterpreter && !UseCompiler) {
 +    if (execute_opt[opcode]) {
 +      DECACHE_STATE();
-+      run_opt(istate);
++      if (run_opt(istate)) return;
 +      CACHE_TOS();
 +      CACHE_PC();
 +      opcode = *pc;
@@ -70,9 +279,100 @@ diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp open
  #ifdef USELABELS
        DISPATCH(opcode);
  #else
+@@ -2331,6 +2503,90 @@
+           goto opcode_switch;
+       }
+ 
++#ifdef NOTICE_SAFEPOINTS
++#undef DO_BACKEDGE_CHECKS
++#define DO_BACKEDGE_CHECKS(skip, branch_pc)                                                         \
++    if ((skip) <= 0) {                                                                              \
++      /* ECN: really need UseCompiler to be a compile time constant */				    \
++      if (UseCompiler && UseLoopCounter) {                                                          \
++        bool do_OSR = UseOnStackReplacement;                                                        \
++        BACKEDGE_COUNT->increment();                                                                \
++        if (do_OSR) do_OSR = BACKEDGE_COUNT->reached_InvocationLimit();                             \
++        if (do_OSR) {                                                                               \
++          nmethod*  osr_nmethod;                                                                    \
++          OSR_REQUEST(osr_nmethod, branch_pc);                                                      \
++          if (osr_nmethod != NULL && osr_nmethod->osr_entry_bci() != InvalidOSREntryBci) {          \
++            intptr_t* buf;                                                                          \
++            CALL_VM(buf=SharedRuntime::OSR_migration_begin(THREAD), handle_exception);              \
++            istate->set_msg(do_osr);                                                                \
++            istate->set_osr_buf((address)buf);                                                      \
++            istate->set_osr_entry(osr_nmethod->osr_entry());                                        \
++            return;                                                                                 \
++          }                                                                                         \
++        }											    \
++	/* ECN: Only increment counter if we need it (UseCompiler && UseLoopCounter) */		    \
++        INCR_INVOCATION_COUNT;                                                                      \
++      }  /* UseCompiler ... */                                                                      \
++      /* ECN: remove safepoint checks for unsafe opcodes */					    \
++      /* SAFEPOINT; */                                                                              \
++    }
++
++      COMPARISON_OP(lt_unsafe, <);
++      COMPARISON_OP(gt_unsafe, >);
++      COMPARISON_OP(le_unsafe, <=);
++      COMPARISON_OP(ge_unsafe, >=);
++      COMPARISON_OP2(eq_unsafe, ==);  /* include ref comparison */
++      COMPARISON_OP2(ne_unsafe, !=);  /* include ref comparison */
++      NULL_COMPARISON_OP(null_unsafe);
++      NULL_COMPARISON_NOT_OP(nonnull_unsafe);
++
++      CASE(_goto_unsafe):
++      {
++          int16_t offset = (int16_t)Bytes::get_Java_u2(pc + 1);
++          address branch_pc = pc;
++          UPDATE_PC(offset);
++          DO_BACKEDGE_CHECKS(offset, branch_pc);
++          CONTINUE;
++      }
++
++      CASE(_tableswitch_unsafe): {
++          jint* lpc  = (jint*)VMalignWordUp(pc+1);
++          int32_t  key  = STACK_INT(-1);
++          int32_t  low  = Bytes::get_Java_u4((address)&lpc[1]);
++          int32_t  high = Bytes::get_Java_u4((address)&lpc[2]);
++          int32_t  skip;
++          key -= low;
++          skip = ((uint32_t) key > (uint32_t)(high - low))
++                      ? Bytes::get_Java_u4((address)&lpc[0])
++                      : Bytes::get_Java_u4((address)&lpc[key + 3]);
++          // Does this really need a full backedge check (osr?)
++          address branch_pc = pc;
++          UPDATE_PC_AND_TOS(skip, -1);
++          DO_BACKEDGE_CHECKS(skip, branch_pc);
++          CONTINUE;
++      }
++
++      /* Goto pc whose table entry matches specified key */
++
++      CASE(_lookupswitch_unsafe): {
++          jint* lpc  = (jint*)VMalignWordUp(pc+1);
++          int32_t  key  = STACK_INT(-1);
++          int32_t  skip = Bytes::get_Java_u4((address) lpc); /* default amount */
++          int32_t  npairs = Bytes::get_Java_u4((address) &lpc[1]);
++          while (--npairs >= 0) {
++              lpc += 2;
++              if (key == (int32_t)Bytes::get_Java_u4((address)lpc)) {
++                  skip = Bytes::get_Java_u4((address)&lpc[1]);
++                  break;
++              }
++          }
++          address branch_pc = pc;
++          UPDATE_PC_AND_TOS(skip, -1);
++          DO_BACKEDGE_CHECKS(skip, branch_pc);
++          CONTINUE;
++      }
++#endif
++
+       DEFAULT:
+           fatal2("\t*** Unimplemented opcode: %d = %s\n",
+                  opcode, Bytecodes::name((Bytecodes::Code)opcode));
 diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.hpp openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.hpp
---- openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.hpp	2009-02-16 18:42:28.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.hpp	2009-02-17 10:24:22.000000000 +0000
+--- openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.hpp	2009-04-01 08:09:39.000000000 +0000
++++ openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.hpp	2009-04-03 13:22:17.000000000 +0000
 @@ -496,6 +496,7 @@
  
  // The Interpreter used when
@@ -82,9 +382,9 @@ diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.hpp open
  static void runWithChecks(interpreterState istate);
  static void End_Of_Interpreter(void);
 diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp
---- openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp	1970-01-01 01:00:00.000000000 +0100
-+++ openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp	2009-02-17 10:25:54.000000000 +0000
-@@ -0,0 +1,1282 @@
+--- openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp	1970-01-01 00:00:00.000000000 +0000
++++ openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp	2009-04-03 13:17:29.000000000 +0000
+@@ -0,0 +1,1405 @@
 +/*
 + * Copyright 2002-2008 Sun Microsystems, Inc.  All Rights Reserved.
 + * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS FILE HEADER.
@@ -184,17 +484,14 @@ diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp o
 +    }
 +
 +#define METHOD istate->method()
-+#define INVOCATION_COUNT METHOD->invocation_counter()
 +
 +
-+#define INCR_INVOCATION_COUNT INVOCATION_COUNT->increment()
 +/*
 + * For those opcodes that need to have a GC point on a backwards branch
 + */
 +#define DO_BACKEDGE_CHECKS(skip) {	\
 +	if ((skip) < 0) {		\
 +		SAFEPOINT;		\
-+		INCR_INVOCATION_COUNT;	\
 +	}				\
 +}
 +
@@ -340,6 +637,26 @@ diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp o
 +	0,0,0,0
 +};
 +
++typedef struct branch_entry {
++	Bytecodes::Code	branch_op;
++	void *handler;
++} branch_entry;
++
++const static branch_entry *safe_branches, *unsafe_branches;
++static void **opc_dispatch_table;
++
++void update_table_opt_safe(bool to_safe)
++{
++	void **disp_table = opc_dispatch_table;
++	const branch_entry *branch_table = to_safe ? safe_branches : unsafe_branches;
++
++	if (!branch_table) return;
++	while (branch_table->branch_op != Bytecodes::_nop) {
++		disp_table[branch_table->branch_op] = branch_table->handler;
++		branch_table++;
++	}
++}
++
 +/*
 + * BytecodeInterpreter::run_opt(interpreterState istate)
 + *
@@ -354,7 +671,52 @@ diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp o
 +  register intptr_t*        locals = istate->locals();
 +  register constantPoolCacheOop  cp = istate->constants(); // method()->constants()->cache()
 +
-+  const static void* const opclabels_data[256] = {
++  const static branch_entry safe_table[] = {
++	{	Bytecodes::_ifeq,	&&opc_ifeq	},
++	{	Bytecodes::_ifne,	&&opc_ifne	},
++	{	Bytecodes::_iflt,	&&opc_iflt	},
++	{	Bytecodes::_ifge,	&&opc_ifge	},
++	{	Bytecodes::_ifgt,	&&opc_ifgt	},
++	{	Bytecodes::_ifle,	&&opc_ifle	},
++	{	Bytecodes::_if_icmpeq,	&&opc_if_icmpeq	},
++	{	Bytecodes::_if_icmpne,	&&opc_if_icmpne	},
++	{	Bytecodes::_if_icmplt,	&&opc_if_icmplt	},
++	{	Bytecodes::_if_icmpge,	&&opc_if_icmpge	},
++	{	Bytecodes::_if_icmpgt,	&&opc_if_icmpgt	},
++	{	Bytecodes::_if_icmple,	&&opc_if_icmple	},
++	{	Bytecodes::_if_acmpeq,	&&opc_if_acmpeq	},
++	{	Bytecodes::_if_acmpne,	&&opc_if_acmpne	},
++	{	Bytecodes::_ifnull,	&&opc_ifnull	},
++	{	Bytecodes::_ifnonnull,	&&opc_ifnonnull },
++	{	Bytecodes::_tableswitch,&&opc_tableswitch },
++	{	Bytecodes::_lookupswitch,&&opc_lookupswitch },
++	{	Bytecodes::_goto,	&&opc_goto	},
++	{	Bytecodes::_nop,	0		}
++  };
++  const static branch_entry unsafe_table[] = {
++	{	Bytecodes::_ifeq,	&&opc_ifeq_unsafe	},
++	{	Bytecodes::_ifne,	&&opc_ifne_unsafe	},
++	{	Bytecodes::_iflt,	&&opc_iflt_unsafe	},
++	{	Bytecodes::_ifge,	&&opc_ifge_unsafe	},
++	{	Bytecodes::_ifgt,	&&opc_ifgt_unsafe	},
++	{	Bytecodes::_ifle,	&&opc_ifle_unsafe	},
++	{	Bytecodes::_if_icmpeq,	&&opc_if_icmpeq_unsafe	},
++	{	Bytecodes::_if_icmpne,	&&opc_if_icmpne_unsafe	},
++	{	Bytecodes::_if_icmplt,	&&opc_if_icmplt_unsafe	},
++	{	Bytecodes::_if_icmpge,	&&opc_if_icmpge_unsafe	},
++	{	Bytecodes::_if_icmpgt,	&&opc_if_icmpgt_unsafe	},
++	{	Bytecodes::_if_icmple,	&&opc_if_icmple_unsafe	},
++	{	Bytecodes::_if_acmpeq,	&&opc_if_acmpeq_unsafe	},
++	{	Bytecodes::_if_acmpne,	&&opc_if_acmpne_unsafe	},
++	{	Bytecodes::_ifnull,	&&opc_ifnull_unsafe	},
++	{	Bytecodes::_ifnonnull,	&&opc_ifnonnull_unsafe },
++	{	Bytecodes::_tableswitch,&&opc_tableswitch_unsafe },
++	{	Bytecodes::_lookupswitch,&&opc_lookupswitch_unsafe },
++	{	Bytecodes::_goto,	&&opc_goto_unsafe	},
++	{	Bytecodes::_nop,	0		}
++  };
++
++  static void* opclabels_data[256] = {
 +/* 0x00 */ &&opc_nop,     &&opc_aconst_null,&&opc_iconst_m1,&&opc_iconst_0,
 +/* 0x04 */ &&opc_iconst_1,&&opc_iconst_2,   &&opc_iconst_3, &&opc_iconst_4,
 +/* 0x08 */ &&opc_iconst_5,&&opc_lconst_0,   &&opc_lconst_1, &&opc_fconst_0,
@@ -436,6 +798,13 @@ diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp o
 +/* 0xFC */ &&opc_default,     &&opc_default,        &&opc_default,      &&opc_default
 +  };
 +  register uintptr_t *dispatch_table = (uintptr_t*)&opclabels_data[0];
++
++  if (!opc_dispatch_table) {
++	opc_dispatch_table = opclabels_data;
++	safe_branches = safe_table;
++	unsafe_branches = unsafe_table;
++	update_table_opt_safe(SafepointSynchronize::is_synchronizing());
++  }
 +
 +  opcode = *pc;  /* prefetch first opcode */
 +
@@ -1358,6 +1727,60 @@ diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp o
 +          UPDATE_PC_AND_CONTINUE(0);
 +      }
 +
++#undef DO_BACKEDGE_CHECKS
++#define DO_BACKEDGE_CHECKS(offset) {}
++
++      COMPARISON_OP(lt_unsafe, <);
++      COMPARISON_OP(gt_unsafe, >);
++      COMPARISON_OP(le_unsafe, <=);
++      COMPARISON_OP(ge_unsafe, >=);
++      COMPARISON_OP2(eq_unsafe, ==);  /* include ref comparison */
++      COMPARISON_OP2(ne_unsafe, !=);  /* include ref comparison */
++      NULL_COMPARISON_OP(null_unsafe);
++      NULL_COMPARISON_NOT_OP(nonnull_unsafe);
++
++      }
++
++      /* Goto pc at specified offset in switch table. */
++
++      CASE(_tableswitch_unsafe): {
++          jint* lpc  = (jint*)VMalignWordUp(pc+1);
++          int32_t  key  = STACK_INT(-1);
++          int32_t  low  = Bytes::get_Java_u4((address)&lpc[1]);
++          int32_t  high = Bytes::get_Java_u4((address)&lpc[2]);
++          int32_t  skip;
++          key -= low;
++          skip = ((uint32_t) key > (uint32_t)(high - low))
++                      ? Bytes::get_Java_u4((address)&lpc[0])
++                      : Bytes::get_Java_u4((address)&lpc[key + 3]);
++          // Does this really need a full backedge check (osr?)
++          UPDATE_PC_AND_TOS(skip, -1);
++          CONTINUE;
++      }
++
++      /* Goto pc whose table entry matches specified key */
++
++      CASE(_lookupswitch_unsafe): {
++          jint* lpc  = (jint*)VMalignWordUp(pc+1);
++          int32_t  key  = STACK_INT(-1);
++          int32_t  skip = Bytes::get_Java_u4((address) lpc); /* default amount */
++          int32_t  npairs = Bytes::get_Java_u4((address) &lpc[1]);
++          while (--npairs >= 0) {
++              lpc += 2;
++              if (key == (int32_t)Bytes::get_Java_u4((address)lpc)) {
++                  skip = Bytes::get_Java_u4((address)&lpc[1]);
++                  break;
++              }
++          }
++          UPDATE_PC_AND_TOS(skip, -1);
++          CONTINUE;
++      }
++
++      CASE(_goto_unsafe):
++      {
++          int16_t offset = (int16_t)Bytes::get_Java_u2(pc + 1);
++          UPDATE_PC(offset);
++          CONTINUE;
 +      }
 +
 +  }
@@ -1367,3 +1790,19 @@ diff -ruNE openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreterOpt.cpp o
 +}
 +
 +#endif // CC_INTERP
+diff -ruNE openjdk/hotspot/src/share/vm/interpreter/cppInterpreter.hpp openjdk/hotspot/src/share/vm/interpreter/cppInterpreter.hpp
+--- openjdk/hotspot/src/share/vm/interpreter/cppInterpreter.hpp	2008-11-22 00:11:18.000000000 +0000
++++ openjdk/hotspot/src/share/vm/interpreter/cppInterpreter.hpp	2009-04-03 14:18:20.000000000 +0000
+@@ -59,9 +59,9 @@
+  public:
+ 
+ 
+-  // No displatch table to switch so no need for these to do anything special
+-  static void notice_safepoints() {}
+-  static void ignore_safepoints() {}
++  /* ECN: Definition now in bytecodeInterpreter.cpp */
++  static void notice_safepoints();
++  static void ignore_safepoints();
+ 
+   static address    native_result_to_tosca()                    { return (address)_native_abi_to_tosca; } // aka result handler
+   static address    tosca_result_to_stack()                     { return (address)_tosca_to_stack; }

@@ -65,12 +65,12 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 
 hotspot_archs	= amd64 i386 lpia sparc
 #shark_archs	= 
-no_bootstrap_archs = alpha hppa
+no_bootstrap_archs = alpha
 
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 
-stage1_gcj_archs = amd64 i386 ia64 lpia powerpc m68k mips mipsel sparc s390
-stage1_openjdk_archs = alpha armel hppa
+stage1_gcj_archs = amd64 armel hppa i386 ia64 lpia powerpc m68k mips mipsel sparc s390
+stage1_openjdk_archs = alpha
 stage1_cacao_archs =
 
 cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
@@ -166,11 +166,12 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/jexec.diff \
 	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
 	debian/patches/no-compiler-path.diff \
-	debian/patches/fix-race-cond-print.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \
 	debian/patches/nonreparenting-wm.diff \
+	debian/patches/java-access-bridge-security.patch \
+	debian/patches/accessible-toolkit.patch \
 	debian/patches/default-libpath.diff \
 
 #	debian/patches/gcc-mtune-generic.diff \
@@ -643,8 +644,7 @@ endif
 	test -x /usr/bin/linux32 && linux32 uname -a || true
 	test -x /usr/bin/linux32 &&linux32 /bin/uname -a || true
 
-	patch -p0 < debian/patches/zero-port-opt.diff
-	patch -p0 < debian/patches/zero-port-opt-novfp.diff
+	patch --verbose -p0 < debian/patches/zero-port-opt.diff
 
 	mkdir -p stamps
 	mkdir -p build
@@ -1002,7 +1002,6 @@ clean: debian-clean
 	rm -f buildwatch.pid
 
 	if [ -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ]; then \
-	  patch --verbose -p0 -R < debian/patches/zero-port-opt-novfp.diff; \
 	  patch --verbose -p0 -R < debian/patches/zero-port-opt.diff; \
 	  rm -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S; \
 	fi
@@ -1120,7 +1119,7 @@ endif
 		$(d)/etc/$(jdiralias)/
 
 	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.properties.src \
-		$(d)/etc/$(jdiralias)/fontconfig.properties.src
+		$(d)/etc/$(jdiralias)/fontconfig.properties
 	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.bfc \
 		$(d)/etc/$(jdiralias)/fontconfig.bfc
 

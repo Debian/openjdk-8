@@ -1,7 +1,6 @@
 
 Package: openjdk-6-source-files
 Priority: extra
-Section: devel
 Architecture: all
 Pre-Depends: ${dpkg:Depends}
 Depends: zip, unzip, gawk, pkg-config, procps, ant, @bd_openjdk@ @bd_zero@ @bd_syslibs@ @bd_plugin@ @bd_netx@

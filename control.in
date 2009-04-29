@@ -1,5 +1,5 @@
 Source: @basename@
-Section: devel
+Section: java
 Priority: extra
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
 Uploaders: Michael Koch <konqueror@gmx.de>, Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
@@ -26,7 +26,6 @@ Description: OpenJDK Development Kit (JDK)
 Package: @basename@-jre-headless
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Section: interpreters
 Depends: @basename@-jre-lib (>= @pkg_version@), ca-certificates-java, tzdata-java, rhino, libaccess-bridge-java (>= 1.22), java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}
 Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
@@ -42,7 +41,6 @@ Description: OpenJDK Java runtime, using ${vm:Name} (headless)
 Package: @basename@-jre
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Section: interpreters
 Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}
 Recommends: ${dlopenjre:Recommends}, ${pkg:pulseaudio}, @cjk_fonts@
 Suggests: icedtea6-plugin
@@ -58,7 +56,6 @@ Description: OpenJDK Java runtime, using ${vm:Name}
 Package: @basename@-jre-lib
 Architecture: @lib_arch@
 Pre-Depends: ${dpkg:Depends}
-Section: interpreters
 Depends: @basename@-jre-headless (>= ${base:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
 Description: OpenJDK Java runtime (architecture independent libraries)
@@ -107,6 +104,7 @@ Description: OpenJDK Development Kit (JDK) documentation
 
 Package: @basename@-dbg
 Architecture: any
+Section: debug
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (= @pkg_version@)
 Recommends: @basename@-jre (= @pkg_version@)

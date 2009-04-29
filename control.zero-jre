@@ -2,7 +2,6 @@
 Package: @basename@-jre-zero
 Architecture: @altzero_archs@
 Pre-Depends: ${dpkg:Depends}
-Section: interpreters
 Depends: @basename@-jre-headless (= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
 Description: Alternatve JVM for OpenJDK, using Zero/Shark
  The package provides an alternative runtime using the Zero VM and the 
