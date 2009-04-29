@@ -53,7 +53,7 @@ plugin_name = IcedTeaPlugin.so
 distribution := $(shell lsb_release --id --short)
 distrel := $(shell lsb_release --codename --short)
 
-with_wgy_zenhai = $(if $(filter $(distrel),hardy intrepid jaunty),yes)
+with_wgy_zenhai = $(if $(filter $(distrel),hardy intrepid jaunty karmic),yes)
 
 arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
 archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
@@ -111,12 +111,12 @@ else
   $(error unknown bootstrap method for architecture $(DEB_HOST_ARCH))
 endif
 
-OPENJDK_VERSION = b14
-OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-25_nov_2008-dfsg.tar.gz
+OPENJDK_VERSION = b16
+OPENJDK_SRC_ZIP = openjdk-6-src-$(OPENJDK_VERSION)-13_apr_2009-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
-req_openjdk_bd_ver = 6b11
-req_openjdk_ver = 6b11
+req_openjdk_bd_ver = 6b14
+req_openjdk_ver = 6b14
 
 unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
@@ -129,8 +129,8 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
     export GCC_SUFFIX = -4.2
   endif
 else
-  export GCC_SUFFIX = -4.3
-  export GCJ_SUFFIX = -4.3
+  export GCC_SUFFIX = -4.4
+  export GCJ_SUFFIX = -4.4
 endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
@@ -139,7 +139,7 @@ ifneq (,$(findstring cacao, $(PKGSOURCE)))
   endif
 endif
 
-ifneq (,$(filter $(distrel),jaunty unstable experimental sid))
+ifneq (,$(filter $(distrel),jaunty karmic unstable experimental sid))
   with_pulse = yes
 endif
 
@@ -195,10 +195,11 @@ ifeq ($(distribution),Ubuntu)
   endif
 endif
 
-ifneq (,$(filter $(DEB_HOST_ARCH),armel))
-  DISTRIBUTION_PATCHES += \
-	debian/patches/zero-hotspot-opt.diff
-endif
+# FIXME: temporarily disabled
+#ifneq (,$(filter $(DEB_HOST_ARCH),armel))
+#  DISTRIBUTION_PATCHES += \
+#	debian/patches/zero-hotspot-opt.diff
+#endif
 
 ifneq (,$(findstring cacao, $(PKGSOURCE)))
   DISTRIBUTION_PATCHES += \
@@ -353,8 +354,8 @@ jvmver		= 1.6.0
 shortver	= 6
 jdiralias	= java-$(shortver)-$(origin)
 basedir		= usr/lib/jvm/$(jdiralias)
-jreimg		= openjdk/control/build/linux-$(jvmarch)/j2re-image
-sdkimg		= openjdk/control/build/linux-$(jvmarch)/j2sdk-image
+jreimg		= openjdk/build/linux-$(jvmarch)/j2re-image
+sdkimg		= openjdk/build/linux-$(jvmarch)/j2sdk-image
 security	= etc/$(jdiralias)/security
 
 # (most) jre and jdk tools handled by the alternatives system.
@@ -381,9 +382,15 @@ endif
 bd_bootstrap =
 ifneq (,$(stage1_gcj_archs))
   bd_bootstrap += \
+	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
+  ifneq (,$(filter $(distrel),karmic unstable experimental))
+    bd_bootstrap += \
+	gcj-jdk [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
+  else
+    bd_bootstrap += \
 	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
-	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
 	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
+  endif
 endif
 ifneq (,$(stage1_openjdk_archs))
   bd_bootstrap += \
@@ -399,7 +406,7 @@ bd_gcc = \
 	g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
 ifeq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   bd_gcc = \
-	g++-4.3,
+	g++-4.4,
 endif
 bd_syslibs = \
 	libjpeg62-dev, libpng12-dev, libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev), zlib1g-dev,
@@ -435,7 +442,7 @@ endif
 
 #ifeq ($(with_plugin_pkg),yes)
   bd_plugin = \
-	libgtk2.0-dev, $(if $(filter $(distribution),Debian),$(if $(findstring gcj,$(plugin_name)),iceape-dev,xulrunner-dev (>= 1.9.0)),$(if $(filter $(distrel),hardy intrepid jaunty),xulrunner-1.9-dev,firefox-dev)),
+	libgtk2.0-dev, $(if $(filter $(distribution),Debian),$(if $(findstring gcj,$(plugin_name)),iceape-dev,xulrunner-dev (>= 1.9.0)),$(if $(filter $(distrel),hardy intrepid jaunty karmic),xulrunner-1.9-dev,firefox-dev)),
 #endif
 bd_netx = fastjar (>= 2:0.96-0ubuntu2),
 ifneq (,$(filter $(distrel),lenny sid experimental))
@@ -618,15 +625,6 @@ endif
 
 icedtea-configure: stamps/icedtea-configure
 stamps/icedtea-configure:
-ifeq (0,1)
-	for i in $$(find test/jtreg -name '*.uu'); do \
-	  [ -f $$i ] || continue; \
-	  d=$$(dirname $$i); i=$$(basename $$i .uu); \
-	  rm -f $$d/$$i; \
-	  (cd $$d && uudecode $$i.uu); \
-	done
-endif
-
 	mkdir -p bin
 	( \
 	  echo '#! /bin/sh'; \
@@ -644,7 +642,8 @@ endif
 	test -x /usr/bin/linux32 && linux32 uname -a || true
 	test -x /usr/bin/linux32 &&linux32 /bin/uname -a || true
 
-	patch --verbose -p0 < debian/patches/zero-port-opt.diff
+# FIXME: temporarily disabled
+#	patch --verbose -p0 < debian/patches/zero-port-opt.diff
 
 	mkdir -p stamps
 	mkdir -p build
@@ -683,7 +682,7 @@ ifeq ($(with_check),yes)
       with_jtreg_check = yes
     endif
   else
-    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc s390))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha ia64 mips mipsel powerpc s390))
       with_mauve_check = $(default_vm)
     endif
     ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc s390))
@@ -808,7 +807,7 @@ ALT_ZERO_CONFIGURE_ARGS = --with-openjdk --with-openjdk-home=$(CURDIR)/build/$(s
 			  --with-icedtea --with-icedtea-home=% \
 			  --with-openjdk --with-openjdk-home=% , \
 			  $(CONFIGURE_ARGS))
-alt_zero_dir = $(CURDIR)/build/openjdk/control/build/linux-$(jvmarch)
+alt_zero_dir = $(CURDIR)/build/openjdk/build/linux-$(jvmarch)
 ALT_ZERO_EXTRA_BUILD_ENV = \
 	BUILD_LANGTOOLS=false ALT_LANGTOOLS_DIST=$(alt_zero_dir)/langtools/dist \
 	BUILD_JAXP=false      ALT_JAXP_DIST=$(alt_zero_dir)/jaxp/dist \
@@ -837,7 +836,7 @@ endif
 	fi
 
 	mkdir -p build/$(sdkimg)/jre/lib/$(archdir)
-	cp -a build-zero/openjdk/control/build/linux-$(jvmarch)/hotspot/import/jre/lib/$(archdir)/server \
+	cp -a build-zero/openjdk/build/linux-$(jvmarch)/hotspot/import/jre/lib/$(archdir)/server \
 		build/$(sdkimg)/jre/lib/$(archdir)/zero
 	grep -- '^-zero KNOWN'  build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg \
 	  || printf -- '-zero KNOWN\n' >> build/$(sdkimg)/jre/lib/$(archdir)/jvm.cfg
@@ -1005,19 +1004,6 @@ clean: debian-clean
 	  patch --verbose -p0 -R < debian/patches/zero-port-opt.diff; \
 	  rm -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S; \
 	fi
-
-ifeq (0,1)
-	for i in $$(find test/jtreg -name '*.gif') overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/expresso.mid overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/ding.sf2; do \
-	  [ -f $$i ] || continue; \
-	  if [ -f $$i.uu -a $$i.uu -nt $$i ]; then \
-	    rm -f $$i; \
-	  else \
-	   d=$$(dirname $$i); i=$$(basename $$i); \
-	   (cd $$d && uuencode -m $$i $$i > $$i.uu); \
-	   rm -f $$d/$$i; \
-	  fi; \
-	done
-endif
 
 	dh_clean
 
@@ -1399,11 +1385,14 @@ endif
 	mv $(d_jre)/$(basedir)/jre/bin/javaws $(d_jre)/$(basedir)/jre/bin/javaws.real
 	install -m 755 debian/javaws-wrapper.sh $(d_jre)/$(basedir)/jre/bin/javaws
 
+	: # another jvm symlink
+	ln -sf $(jdiralias) $(d_jrehl)/usr/lib/jvm/java-$(jvmver)-$(origin)
+
 	: # Install stuff to generate font config and timezone files.
 	mkdir -p $(d_lib)/$(basedir)/jre/lib
-	cp -p build/openjdk/control/build/linux-$(jvmarch)/btjars/compilefontconfig.jar \
+	cp -p build/openjdk/build/linux-$(jvmarch)/btjars/compilefontconfig.jar \
 		$(d_lib)/$(basedir)/jre/lib/
-	cp -p build/openjdk/control/build/linux-$(jvmarch)/btjars/javazic.jar \
+	cp -p build/openjdk/build/linux-$(jvmarch)/btjars/javazic.jar \
 		$(d_lib)/$(basedir)/jre/lib/
 
 	: # install lintian overrides
@@ -1428,7 +1417,7 @@ else
 	dh_installchangelogs -p$(p_doc)
 	dh_installdocs -p$(p_doc) 
 	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
-	for i in build/openjdk/control/build/linux-$(jvmarch)/docs/*; do \
+	for i in build/openjdk/build/linux-$(jvmarch)/docs/*; do \
 	  [ -e $$i ] || continue; \
 	  b=$$(basename $$i); \
 	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jre)/; \

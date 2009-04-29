@@ -1,6 +1,6 @@
 --- openjdk/jdk/src/solaris/classes/sun/awt/fontconfigs/linux.fontconfig.Ubuntu.properties.orig	2008-10-12 10:35:09.000000000 +0000
 +++ openjdk/jdk/src/solaris/classes/sun/awt/fontconfigs/linux.fontconfig.Ubuntu.properties 	2009-04-14 09:26:23.000000000 +0200
-@@ -25,106 +25,264 @@
+@@ -25,106 +25,253 @@
  
  # Version
  
@@ -300,17 +300,6 @@
 -sequence.allfonts.EUC-KR=korean,latin-1
 -sequence.allfonts.GB18030=chinese-gb18030,latin-1
 -sequence.fallback=chinese-big5,chinese-gb18030,japanese-x0208,korean
-+# FIXME: why are all the UTF-8 entries needed?
-+# FIXME: fonts are too high, omit these in sequence.allfonts.UTF-8
-+# - much too hight: gujarati, hindi, punjabi
-+# - still too high: tamil
-+sequence.allfonts.UTF-8=latin-1,wqy-zenhei,japanese-vlgothic,japanese-kochi,japanese-sazanami,korean-un,korean-baekmuk,bengali,oriya,telugu
-+sequence.allfonts.UTF-8.ko=latin-1,korean-un,korean-baekmuk
-+sequence.allfonts.UTF-8.ja=latin-1,japanese-vlgothic,japanese-kochi,japanese-sazanami
-+sequence.allfonts.UTF-8.zh.CN=latin-1,umingcn,shanheisun,wqy-zenhei
-+sequence.allfonts.UTF-8.zh.TW=latin-1,umingtw,shanheisun,wqy-zenhei
-+sequence.allfonts.UTF-8.zh.HK=latin-1,uminghk,shanheisun,wqy-zenhei
-+sequence.allfonts.UTF-8.zh.SG=latin-1,umingcn,shanheisun,wqy-zenhei
 +sequence.allfonts.GB18030=latin-1,umingcn,shanheisun,wqy-zenhei
 +sequence.allfonts.GB2312=latin-1,umingcn,shanheisun,wqy-zenhei
 +sequence.allfonts.GBK=latin-1,umingcn,shanheisun,wqy-zenhei
@@ -329,7 +318,7 @@
  
  # Font File Names
  
-@@ -143,8 +301,58 @@
+@@ -143,8 +290,58 @@
  filename.DejaVu_Serif_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-Oblique.ttf
  filename.DejaVu_Serif_Bold_Oblique=/usr/share/fonts/truetype/ttf-dejavu/DejaVuSerif-BoldOblique.ttf
  

@@ -1,9 +1,10 @@
-openjdk-6 (6b14-1.5~pre1-3ubuntu1) karmic; urgency=low
+openjdk-6 (6b16~pre1-0ubuntu1) karmic; urgency=low
 
   * New code drop (b16).
   * Update IcedTea build infrastructure (20090429).
   * Merge changes from 6b14-1.4.1.
   * Fix section names (using the java section).
+  * Remove all UTF-8 sequence definitions from the font configuration.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 29 Apr 2009 11:33:07 +0200
 

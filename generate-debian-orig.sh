@@ -1,5 +1,5 @@
 
-tarball=openjdk-6-src-b16-13_apr_2009.tar.gz
+tarball=openjdk-6-src-b16-13_apr_2009-dfsg.tar.gz
 version=6b16~pre1
 hotspot=hotspot-20081220.tar.gz
 cacaotb=cacao-0.99.4.tar.bz2
