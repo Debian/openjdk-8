@@ -1,3 +1,11 @@
+openjdk-6 (6b16~pre1-0ubuntu2) karmic; urgency=low
+
+  * Update IcedTea build infrastructure (20090503).
+  * Remove build infrastructure to build additional VM's, integrated
+    in IcedTea.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 29 Apr 2009 13:41:37 +0200
+
 openjdk-6 (6b16~pre1-0ubuntu1) karmic; urgency=low
 
   * New code drop (b16).

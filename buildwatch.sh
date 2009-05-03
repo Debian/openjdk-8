@@ -18,7 +18,7 @@ while [ $wait -gt 0 ]; do
 	wait=$maxwait
     fi
 
-    new_quiet=$(ls -l $builddir/openjdk*/control/build/*/tmp/rt-orig.jar $builddir/openjdk*/control/build/*/lib/tools.jar $builddir/openjdk*/control/build/*/lib/ct.sym 2>&1 | md5sum)
+    new_quiet=$(ls -l $builddir/openjdk*/build/*/tmp/rt-orig.jar $builddir/openjdk*/build/*/lib/tools.jar $builddir/openjdk*/build/*/lib/ct.sym 2>&1 | md5sum)
     if [ "$old_quiet" != "$new_quiet" ]; then
 	state="assembling jar file ..."
 	wait=$maxwait
