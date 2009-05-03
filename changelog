@@ -5,6 +5,7 @@ openjdk-6 (6b16~pre1-0ubuntu2) karmic; urgency=low
     in IcedTea.
   * Stop building the openjdk-6-source-files package.
   * README.Debian: Document using the different VM's.
+  * Use GCC-4.3 on sparc, ICE with GCC-4.4.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 29 Apr 2009 13:41:37 +0200
 

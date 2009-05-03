@@ -143,12 +143,16 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc sparc))
     export GCC_SUFFIX = -4.2
   endif
-else ifneq (,$(filter $(distrel),lenny intrepid jaunty karmic))
+else ifneq (,$(filter $(distrel),lenny intrepid jaunty))
   export GCC_SUFFIX = -4.3
   export GCJ_SUFFIX = -4.3
 else
   export GCC_SUFFIX = -4.4
   export GCJ_SUFFIX = -4.4
+  ifneq (,$(filter $(DEB_HOST_ARCH), sparc))
+    export GCC_SUFFIX = -4.3
+    export GCJ_SUFFIX = -4.3
+  endif
 endif
 
 ifneq (,$(filter $(distrel),jaunty karmic unstable experimental sid))
@@ -375,7 +379,7 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
 else ifneq (,$(filter $(distrel),lenny intrepid jaunty))
   bd_gcc = g++-4.3,
 else
-  bd_gcc = g++-4.4,
+  bd_gcc = g++-4.4 [!sparc], g++-4.3 [sparc]
 endif
 bd_syslibs = \
 	libjpeg62-dev, libpng12-dev, libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev), zlib1g-dev,
