@@ -369,7 +369,6 @@ ifneq (,$(stage1_cacao_archs))
   bd_bootstrap += \
 	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
 endif
-bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b14~pre1)$(COMMA) $(p_tar) (<< 6b15)$(COMMA))
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   bd_gcc = g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
@@ -461,7 +460,6 @@ p_demo	= $(basename)-demo
 p_src	= $(basename)-source
 p_doc	= $(basename)-doc
 p_dbg	= $(basename)-dbg
-p_tar	= openjdk-6-source-files
 ifeq ($(plugin_name),gcjwebplugin.so)
   p_plug= icedtea-gcjwebplugin
 else
@@ -479,7 +477,6 @@ d_demo	= debian/$(p_demo)
 d_src	= debian/$(p_src)
 d_doc	= debian/$(p_doc)
 d_dbg	= debian/$(p_dbg)
-d_tar	= debian/$(p_tar)
 d_plug	= debian/$(p_plug)
 
 control_vars = \
@@ -516,7 +513,6 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_netx@/$(bd_netx)/g' \
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	      -e 's/@bd_compress@/$(pkg_compress)/g' \
-	      -e 's/@bd_tarball@/$(bd_tarball)/g' \
 	      -e 's/@bd_cacao@/$(bd_cacao)/g' \
 	      -e 's/@bd_pulsejava@/$(bd_pulsejava)/g' \
 	      -e 's/@bd_systemtap@/$(bd_systemtap)/g' \
@@ -531,7 +527,6 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/control.in \
 	    $(if $(with_plugin_pkg),debian/control.$(plugin_name)) \
-	    $(if $(findstring openjdk-,$(PKGSOURCE)),debian/control.tarball) \
 	    debian/control.cacao-jre \
 	    debian/control.zero-jre \
 		> debian/control
@@ -1280,12 +1275,6 @@ ifeq ($(with_docs),yes)
 	  ln -sf ../$(p_jre)/$$b $(d_doc)/usr/share/doc/$(p_doc)/$$b; \
 	done
 endif
-	dh_installdocs -p$(p_tar)
-	dh_installchangelogs -p$(p_tar)
-	mkdir -p $(d_tar)/usr/src
-	cp -p $(OPENJDK_SRC_ZIP) $(d_tar)/usr/src/
-	cp -p hotspot-*.tar.gz $(d_tar)/usr/src/
-
 	dh_installmenu -i $(nodocs)
 	-dh_icons -i $(nodocs) || dh_iconcache -i $(nodocs)
 #	dh_installdebconf -i $(nodocs)
