@@ -169,13 +169,16 @@ ifneq (,$(filter $(distrel),gutsy feisty edgy dapper hardy intrepid))
 endif
 
 ifeq ($(with_hotspot),original)
+#	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector-original.diff) \
+
   DISTRIBUTION_PATCHES = \
-	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector-original.diff) \
 	debian/patches/ld-symbolic-functions-original.diff \
 	debian/patches/set-exec-name-original.diff
 else
+# FIXME: doesn't seem to be enough, the gcc-*-no-stack-protector patches below are needed.
+#	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector.diff) \
+
   DISTRIBUTION_PATCHES = \
-	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector.diff) \
 	debian/patches/ld-symbolic-functions.diff \
 	debian/patches/set-exec-name.diff \
 	debian/patches/hotspot-warn-no-errformat.diff
@@ -184,7 +187,7 @@ endif
 DISTRIBUTION_PATCHES += \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \
-	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
+	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
 	debian/patches/no-compiler-path.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
