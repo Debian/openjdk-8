@@ -1193,7 +1193,7 @@ diff -ruNE ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ports/hotspot
 +@ --- do_putstatic_dtos -------------------------------------------------
 +	OpcodeEntry	do_putstatic_dtos
 +	PUSHD	dtos
-+	b	do_putstatic_dtos
++	b	do_putstatic_vtos
 +@ --- do_putstatic_vtos -------------------------------------------------
 +	OpcodeEntry	do_putstatic_vtos
 +	POP(tos)
@@ -5374,6 +5374,7 @@ diff -ruNE ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ports/hotspot
 +@	OpcodeEntry	do_invokevirtual_dtos
 +@	OpcodeEntry	do_invokespecial_dtos
 +	OpcodeEntry	do_invokeinterface_dtos
++	OpcodeEntry	do_new_dtos
 +	OpcodeEntry	do_xxxunusedxxx_dtos
 +	OpcodeEntry	do_goto_w_dtos
 +	OpcodeEntry	do_exit_asm_dtos
@@ -5486,7 +5487,6 @@ diff -ruNE ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ports/hotspot
 +@	OpcodeEntry	do_freturn_dtos
 +@	OpcodeEntry	do_areturn_dtos
 +@	OpcodeEntry	do_return_dtos
-+	OpcodeEntry	do_new_dtos
 +	OpcodeEntry	do_newarray_dtos
 +	OpcodeEntry	do_anewarray_dtos
 +	OpcodeEntry	do_arraylength_dtos
