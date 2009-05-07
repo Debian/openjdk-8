@@ -71,8 +71,6 @@ ifneq (,$(findstring cacao shark, $(PKGSOURCE)))
   with_docs = disabled for cacao and shark
 endif
 
-# even if not building the package, we configure for a specific plugin
-# with_plugin_pkg: yes or empty, plugin_name: IcedTeaPlugin.so or gcjwebplugin.so
 with_plugin_pkg = yes
 plugin_name = IcedTeaPlugin.so
 
@@ -311,13 +309,9 @@ ifneq (,$(NJOBS))
 endif
 
 ifeq ($(with_plugin_pkg),yes)
-  ifeq ($(plugin_name),gcjwebplugin.so)
-    CONFIGURE_ARGS += --enable-gcjwebplugin
-  else
-    CONFIGURE_ARGS += --enable-liveconnect
-  endif
+  CONFIGURE_ARGS += --enable-liveconnect
 else
-  CONFIGURE_ARGS += --disable-gcjwebplugin --disable-liveconnect
+  CONFIGURE_ARGS += --disable-liveconnect
 endif
 
 ifeq ($(with_pulse),yes)
@@ -404,10 +398,8 @@ endif
 bd_cacao = libtool,
 bd_cacao += $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.4-1)$(COMMA))
 
-#ifeq ($(with_plugin_pkg),yes)
-  bd_plugin = \
-	libgtk2.0-dev, $(if $(filter $(distribution),Debian),$(if $(findstring gcj,$(plugin_name)),iceape-dev,xulrunner-dev (>= 1.9.0)),$(if $(filter $(distrel),hardy intrepid jaunty karmic),xulrunner-1.9-dev,firefox-dev)),
-#endif
+bd_plugin = \
+  libgtk2.0-dev, $(if $(filter $(distribution),Debian),xulrunner-dev (>= 1.9.0),$(if $(filter $(distrel),hardy intrepid jaunty karmic),xulrunner-1.9-dev,firefox-dev)),
 bd_netx = fastjar (>= 2:0.96-0ubuntu2),
 ifneq (,$(filter $(distrel),lenny sid experimental))
   bd_netx = fastjar (>= 2:0.95-4),
@@ -467,11 +459,7 @@ p_demo	= $(basename)-demo
 p_src	= $(basename)-source
 p_doc	= $(basename)-doc
 p_dbg	= $(basename)-dbg
-ifeq ($(plugin_name),gcjwebplugin.so)
-  p_plug= icedtea-gcjwebplugin
-else
-  p_plug = $(if $(findstring openjdk,$(PKGSOURCE)),icedtea6-plugin,$(basename)-plugin)
-endif
+p_plug = icedtea6-plugin
 
 d	= debian/tmp
 d_jre	= debian/$(p_jre)
@@ -533,7 +521,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/control.in \
-	    $(if $(with_plugin_pkg),debian/control.$(plugin_name)) \
+	    debian/control.plugin \
 	    debian/control.cacao-jre \
 	    debian/control.zero-jre \
 		> debian/control
