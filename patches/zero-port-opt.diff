@@ -20,8 +20,8 @@ diff -ruNE ports/hotspot/build/linux/makefiles/zero.make ports/hotspot/build/lin
  # The copied fdlibm routines in sharedRuntimeTrans.o must not be optimized
 diff -ruNE ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S
 --- ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S	1970-01-01 00:00:00.000000000 +0000
-+++ ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S	2009-04-03 13:58:15.000000000 +0000
-@@ -0,0 +1,6393 @@
++++ ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S	2009-05-08 13:10:20.000000000 +0200
+@@ -0,0 +1,6390 @@
 +#ifdef HOTSPOT_ASM
 +
 +#define opc_fadd	0x62
@@ -3330,24 +3330,21 @@ diff -ruNE ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ports/hotspot
 +	ldr	r2, [itos_table, r3, asl #2]
 +	mov	pc, r2
 +
-+@ --- do_frem_itos -------------------------------------------------
-+	OpcodeEntry	do_frem_itos
-+	PUSH(tos)
 +@ --- do_frem_vtos -------------------------------------------------
 +	OpcodeEntry	do_frem_vtos
-+	flds	s15, [java_stack, #8]
-+	fcvtds	d6, s15
-+	flds	s14, [java_stack, #4]
-+	fmrrd	r0, r1, d6
-+	fcvtds	d6, s14
-+	fmrrd	r2, r3, d6
++	POP(tos)
++@ --- do_frem_itos -------------------------------------------------
++	OpcodeEntry	do_frem_itos
++        bl      __aeabi_f2d(PLT)
++	POP(r2)
++	stmda	java_stack!, {r0, r1}
++	mov	r0, r2
++        bl      __aeabi_f2d(PLT)
++	ldmib	java_stack!, {r2, r3}
 +	bl	fmod(PLT)
++        bl      __aeabi_d2f(PLT)
 +	ldrb	r3, [java_pc, #1]!
-+	fmdrr	d6, r0, r1
-+	fcvtsd	s15, d6
-+	ldr	r2, [vtos_table, r3, asl #2]
-+	fsts	s15, [java_stack, #8]
-+	add	java_stack, java_stack, #4
++	ldr	r2, [itos_table, r3, asl #2]
 +	mov	pc, r2
 +
 +@ --- do_fneg_vtos -------------------------------------------------

@@ -365,6 +365,7 @@ endif
 ifneq (,$(stage1_openjdk_archs))
   bd_bootstrap += \
 	openjdk-6-jdk (>= $(req_openjdk_bd_ver)) [$(strip $(foreach a,$(stage1_openjdk_archs), $(a)))],
+  bd_bootstrap += openjdk-6-jdk (>= 6b16~pre1-0ubuntu2) [armel],
 endif
 ifneq (,$(stage1_cacao_archs))
   bd_bootstrap += \
@@ -657,7 +658,7 @@ endif
 build_stamps = stamps/build
 build_stamps +=  stamps/mauve-check-default stamps/jtreg-check-default
 #build_stamps += $(if $(filter cacao, $(alternate_vms)),stamps/mauve-check-cacao stamps/jtreg-check-cacao)
-#build_stamps += $(if $(filter zero, $(alternate_vms)),stamps/mauve-check-zero stamps/jtreg-check-zero)
+build_stamps += $(if $(filter zero, $(alternate_vms)),stamps/mauve-check-zero stamps/jtreg-check-zero)
 
 build: $(build_stamps)
 	if [ -f buildwatch.pid ]; then \
@@ -825,7 +826,7 @@ ifneq (,$(filter $(VMNAME), $(with_jtreg_check)))
 	fi
 
 	-for i in hotspot langtools jdk; do \
-	  for t in $$(egrep '^(FAILED|Error)' test/check-$$i-$(VMNAME).log | sed 's/.* \(.*\)\.[^.][^.]*$$/\1/'); do \
+	  for t in $$(egrep '^(FAILED|Error)' build/test/check-$$i-$(VMNAME).log | sed 's/.* \(.*\)\.[^.][^.]*$$/\1/'); do \
 	    echo test/$$i/JTwork/$$t.jtr; \
 	  done; \
 	done > build/test/failed_tests-$(VMNAME).list; \

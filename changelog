@@ -1,6 +1,6 @@
 openjdk-6 (6b16~pre1-0ubuntu2) karmic; urgency=low
 
-  * Update IcedTea build infrastructure (20090503).
+  * Update IcedTea build infrastructure (20090510).
   * Remove patches integrated in IcedTea.
   * Remove GCJ Web Plugin support.
   * Remove build infrastructure to build additional VM's, integrated
@@ -10,8 +10,9 @@ openjdk-6 (6b16~pre1-0ubuntu2) karmic; urgency=low
   * Use GCC-4.3 on sparc, ICE with GCC-4.4.
   * Fix problem with the ARM assembler interpreter, when executing a 'new'
     bytecode with a double on the top of the stack (Edward Nevill).
+  * Run the testsuite for the zero build on ix86 architectures.
 
- -- Matthias Klose <doko@ubuntu.com>  Wed, 29 Apr 2009 13:41:37 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 10 May 2009 17:07:02 +0200
 
 openjdk-6 (6b16~pre1-0ubuntu1) karmic; urgency=low
 
