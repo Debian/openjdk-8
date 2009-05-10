@@ -1,5 +1,6 @@
 openjdk-6 (6b16~pre1-0ubuntu2) karmic; urgency=low
 
+  * Update to re-tagged code drop (b16).
   * Update IcedTea build infrastructure (20090510).
   * Remove patches integrated in IcedTea.
   * Remove GCJ Web Plugin support.
