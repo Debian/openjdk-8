@@ -1,4 +1,18 @@
-openjdk-6 (6b16~pre1-0ubuntu2) karmic; urgency=low
+openjdk-6 (6b16~pre2-0ubuntu3) karmic; urgency=low
+
+  * Update IcedTea build infrastructure (20090513).
+  * Fix build failure when xvfb-run doesn't work, trying to access a
+    non-existing directory.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 13 May 2009 23:01:23 +0200
+
+openjdk-6 (6b16~pre2-0ubuntu2) karmic; urgency=low
+
+  * Add libffi-dev as architecture independent build dependency.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 11 May 2009 08:41:42 +0200
+
+openjdk-6 (6b16~pre2-0ubuntu1) karmic; urgency=low
 
   * Update to re-tagged code drop (b16).
   * Update IcedTea build infrastructure (20090510).
@@ -13,7 +27,7 @@ openjdk-6 (6b16~pre1-0ubuntu2) karmic; urgency=low
     bytecode with a double on the top of the stack (Edward Nevill).
   * Run the testsuite for the zero build on ix86 architectures.
 
- -- Matthias Klose <doko@ubuntu.com>  Sun, 10 May 2009 17:07:02 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 10 May 2009 23:37:42 +0200
 
 openjdk-6 (6b16~pre1-0ubuntu1) karmic; urgency=low
 

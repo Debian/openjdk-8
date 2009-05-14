@@ -89,6 +89,7 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 
 hotspot_archs	= amd64 i386 lpia sparc
 shark_archs	= amd64 i386 lpia
+shark_archs	=
 no_bootstrap_archs = alpha armel
 
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
@@ -365,7 +366,6 @@ endif
 ifneq (,$(stage1_openjdk_archs))
   bd_bootstrap += \
 	openjdk-6-jdk (>= $(req_openjdk_bd_ver)) [$(strip $(foreach a,$(stage1_openjdk_archs), $(a)))],
-  bd_bootstrap += openjdk-6-jdk (>= 6b16~pre1-0ubuntu2) [armel],
 endif
 ifneq (,$(stage1_cacao_archs))
   bd_bootstrap += \
@@ -377,7 +377,7 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
 else ifneq (,$(filter $(distrel),lenny intrepid jaunty))
   bd_gcc = g++-4.3,
 else
-  bd_gcc = g++-4.4 [!sparc], g++-4.3 [sparc]
+  bd_gcc = g++-4.4 [!sparc], g++-4.3 [sparc],
 endif
 bd_syslibs = \
 	libjpeg62-dev, libpng12-dev, libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev), zlib1g-dev,
@@ -390,6 +390,8 @@ pkg_ffidev = $(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hard
 
 bd_zero = \
 	$(pkg_ffidev) [$(foreach a,$(hotspot_archs),!$(a))],
+bd_zero = \
+	$(pkg_ffidev),
 
 ifneq (,$(shark_archs))
   bd_zero = $(pkg_ffidev),
@@ -578,6 +580,8 @@ endif
 
 icedtea-configure: stamps/icedtea-configure
 stamps/icedtea-configure:
+	rm -f rt/net/sourceforge/jnlp/runtime/InstallDialog.java
+
 	mkdir -p bin
 	( \
 	  echo '#! /bin/sh'; \
@@ -628,7 +632,8 @@ ifeq ($(with_check),yes)
     ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha ia64 mips mipsel powerpc s390))
       with_mauve_check = $(default_vm)
     endif
-    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc s390))
+    #ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc s390))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha mips mipsel powerpc s390))
       with_jtreg_check = $(default_vm)
     endif
 
@@ -685,11 +690,11 @@ endif
 stamps/xvfb-check:
 	mkdir -p bin
 	echo 'xvfb-run -a -e xvfb-run.log -s "-extension GLX" "$$@"' > bin/my-xvfb-run
-	if ! /bin/sh bin/my-xvfb-run : ; then \
+	if ! /bin/sh bin/my-xvfb-run true ; then \
 	  echo "error running $$(cat bin/my-xvfb-run)"; \
 	  cat xvfb-run.log; \
 	  echo 'xvfb-run -a -e xvfb-run.log -s "$$@"' > bin/my-xvfb-run; \
-	  if ! /bin/sh bin/my-xvfb-run : ; then \
+	  if ! /bin/sh bin/my-xvfb-run true ; then \
 	    echo "error running $$(cat bin/my-xvfb-run)"; \
 	    cat xvfb-run.log; \
 	    rm -f bin/my-xvfb-run; \
@@ -755,7 +760,7 @@ ifneq (,$(filter $(VMNAME), $(with_mauve_check)))
 	else \
 	  echo "mauve testsuite not run for this build (xvfb failures)" \
 	    > build/mauve-$(VMNAME)/mauve_output-$(VMNAME); \
-	  cat xvfb-run.log >> build/mauve/mauve_output-$(VMNAME); \
+	  cat xvfb-run.log >> build/mauve-$(VMNAME)/mauve_output-$(VMNAME); \
 	fi
 	@sleep 5
 else
@@ -795,7 +800,11 @@ ifneq (,$(filter $(VMNAME), $(with_jtreg_check)))
 	@echo "END jtreg"
 
 	for i in check-hotspot.log check-jdk.log check-langtools.log jtreg-summary.log; do \
-	  mv build/test/$$i build/test/$${i%*.log}-$(VMNAME).log; \
+	  if [ -f build/test/$$i ]; then \
+	    mv build/test/$$i build/test/$${i%*.log}-$(VMNAME).log; \
+	  else \
+	    cp jtreg_output-$(VMNAME) build/test/$${i%*.log}-$(VMNAME).log; \
+	  fi; \
 	done
 
 	@echo "BEGIN jtreg-summary-$(VMNAME)"
