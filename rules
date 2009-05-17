@@ -634,11 +634,10 @@ endif
 	touch $@
 
 ifeq ($(with_check),yes)
-    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha ia64 mips mipsel powerpc s390))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc s390))
       with_mauve_check = $(default_vm)
     endif
-    #ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc s390))
-    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha mips mipsel powerpc s390))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc s390))
       with_jtreg_check = $(default_vm)
     endif
 

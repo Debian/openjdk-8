@@ -1,8 +1,8 @@
-openjdk-6 (6b16-1) UNRELEASED; urgency=low
+openjdk-6 (6b16-1) unstable; urgency=low
 
   * Upload to unstable, based in 6b16 and IcedTea 1.5.
 
- -- Matthias Klose <doko@ubuntu.com>  Sun, 17 May 2009 10:09:03 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 17 May 2009 23:02:46 +0200
 
 openjdk-6 (6b16~pre3-0ubuntu1) karmic; urgency=low
 
