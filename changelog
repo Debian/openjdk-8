@@ -1,3 +1,10 @@
+openjdk-6 (6b16~pre3-0ubuntu1) karmic; urgency=low
+
+  * Update to hotspot hs14b15.
+  * Provide symlink for libjava-access-bridge-jni.so. LP: #375347.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 15 May 2009 00:41:24 +0200
+
 openjdk-6 (6b16~pre2-0ubuntu3) karmic; urgency=low
 
   * Update IcedTea build infrastructure (20090513).

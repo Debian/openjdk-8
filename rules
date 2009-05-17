@@ -25,6 +25,11 @@ CHANGELOG_VARS := $(shell dpkg-parsechangelog | sed -n 's/ /_/g;/^[^_]/s/^\([^:]
 PKGSOURCE := $(call vafilt,$(CHANGELOG_VARS),Source)
 PKGVERSION := $(call vafilt,$(CHANGELOG_VARS),Version)
 
+hotspot_archs	= amd64 i386 lpia sparc
+shark_archs	= amd64 i386 lpia
+shark_archs	=
+no_bootstrap_archs = alpha armel
+
 VENDOR		= openjdk
 Vendor		= OpenJDK
 TOP		= usr/lib/jvm
@@ -86,11 +91,6 @@ jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(arch_map))))
 archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(archdir_map))))
-
-hotspot_archs	= amd64 i386 lpia sparc
-shark_archs	= amd64 i386 lpia
-shark_archs	=
-no_bootstrap_archs = alpha armel
 
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 
@@ -156,6 +156,10 @@ endif
 
 ifneq (,$(filter $(distrel),jaunty karmic unstable experimental sid))
   with_pulse = yes
+endif
+
+ifneq (,$(filter $(distrel),karmic))
+  with_jni_bridge = yes
 endif
 
 #ifneq (,$(filter $(distrel),karmic unstable experimental sid))
@@ -498,6 +502,12 @@ ifneq (,$(filter-out $(hotspot_archs), $(cacao_archs)))
   control_vars += '-Vcacao:Recommends=$(p_jrec) (= $${binary:Version})'
 endif
 
+ifeq ($(with_jni_bridge),yes)
+  control_vars += '-Vdep:bridge=libaccess-bridge-java'
+else
+  control_vars += '-Vdep:bridge=libaccess-bridge-java-jni'
+endif
+
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
 	sed \
@@ -803,6 +813,7 @@ ifneq (,$(filter $(VMNAME), $(with_jtreg_check)))
 	  if [ -f build/test/$$i ]; then \
 	    mv build/test/$$i build/test/$${i%*.log}-$(VMNAME).log; \
 	  else \
+	    mkdir -p build/test; \
 	    cp jtreg_output-$(VMNAME) build/test/$${i%*.log}-$(VMNAME).log; \
 	  fi; \
 	done
@@ -1190,7 +1201,11 @@ endif
 
 	: # create links for the gnome accessibility bridge
 	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
-	    >> $(d_jrehl).links
+	    >> $(d_jre).links
+ifeq ($(with_jni_bridge),yes)
+	  echo "usr/lib/jni/libjava-access-bridge-jni.so $(basedir)/jre/lib/ext/libjava-access-bridge-jni.so" \
+	    >> $(d_jre).links
+endif
 
 	: # create links for the config files
 	find $(d_jrehl)/etc/$(jdiralias) -type f ! -name jvm.cfg \
