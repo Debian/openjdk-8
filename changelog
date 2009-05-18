@@ -1,3 +1,9 @@
+openjdk-6 (6b16-2) unstable; urgency=low
+
+  * Add missing build dependency on cacao-source.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 18 May 2009 14:02:59 +0200
+
 openjdk-6 (6b16-1) unstable; urgency=low
 
   * Upload to unstable, based in 6b16 and IcedTea 1.5.
