@@ -499,11 +499,12 @@ ifneq (,$(filter-out $(hotspot_archs), $(cacao_archs)))
   control_vars += '-Vcacao:Recommends=$(p_jrec) (= $${binary:Version})'
 endif
 
-ifeq ($(with_jni_bridge),yes)
-  control_vars += '-Vdep:bridge=libaccess-bridge-java'
-else
-  control_vars += '-Vdep:bridge=libaccess-bridge-java-jni'
-endif
+# FIXME, temporarily disabled
+#ifeq ($(with_jni_bridge),yes)
+#  control_vars += '-Vdep:bridge=libaccess-bridge-java'
+#else
+#  control_vars += '-Vdep:bridge=libaccess-bridge-java-jni'
+#endif
 
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
@@ -1195,13 +1196,14 @@ endif
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_dbg); \
 	) > $(d_dbg).links
 
-	: # create links for the gnome accessibility bridge
-	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
-	    >> $(d_jre).links
-ifeq ($(with_jni_bridge),yes)
-	  echo "usr/lib/jni/libjava-access-bridge-jni.so $(basedir)/jre/lib/ext/libjava-access-bridge-jni.so" \
-	    >> $(d_jre).links
-endif
+# FIXME: temporarily disabled
+#	: # create links for the gnome accessibility bridge
+#	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
+#	    >> $(d_jre).links
+#ifeq ($(with_jni_bridge),yes)
+#	  echo "usr/lib/jni/libjava-access-bridge-jni.so $(basedir)/jre/lib/ext/libjava-access-bridge-jni.so" \
+#	    >> $(d_jre).links
+#endif
 
 	: # create links for the config files
 	find $(d_jrehl)/etc/$(jdiralias) -type f ! -name jvm.cfg \

@@ -1,5 +1,7 @@
 openjdk-6 (6b16-2) unstable; urgency=low
 
+  * Don't install libaccess-bridge-java* symlinks until
+    libaccess-bridge-java-jni is available on all architectures.
   * Add missing build dependency on cacao-source.
 
  -- Matthias Klose <doko@ubuntu.com>  Mon, 18 May 2009 14:02:59 +0200
