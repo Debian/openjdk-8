@@ -1,10 +1,16 @@
+openjdk-7 (7b59-0ubuntu1) karmic; urgency=low
+
+  * Build openjdk-7 snapshot (7b59).
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 26 May 2009 12:17:21 +0200
+
 openjdk-7 (7b40-0ubuntu2) jaunty; urgency=low
 
   * Add build dependency on libxrender-dev.
   * Don't use fastjar on ia64, working around a build failure.
   * Add configury for shark builds.
 
- -- Matthias Klose <doko@ubuntu.com>  Wed, 03 Dec 2008 11:05:34 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 04 Dec 2008 16:26:15 +0100
 
 openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
 

@@ -1,9 +1,9 @@
 
-tarball=openjdk-7-ea-src-b40-20_nov_2008-dfsg.tar.gz
-version=7b40
-cacaotb=cacao-0.99.4~20081010.tar.bz2
+tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz"
+tarballdir=b59
+version=7b59
+cacaotb=cacao-0.99.4.tar.bz2
 base=openjdk-7
-#base=cacao-oj6
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
@@ -32,12 +32,10 @@ else
     mkdir -p $pkgdir.orig
     case "$base" in
       openjdk*)
-	cp -p $tarball $pkgdir.orig/ ;;
-      cacao*)
-	if [ -f $cacaotb ]; then
-	    : # don't include the cacao tarball anymore
-	    #cp -p $cacaotb $pkgdir.orig/
-	fi
+        for i in $tarballs; do
+	    cp -p $tarballdir/$i $pkgdir.orig/
+	done
+	;;
     esac
     tar -c -f - -C $icedtea_checkout . | tar -x -f - -C $pkgdir.orig
     (
