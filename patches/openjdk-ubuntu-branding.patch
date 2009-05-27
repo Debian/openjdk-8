@@ -1,11 +1,11 @@
---- openjdk/hotspot/src/share/vm/runtime/arguments.cpp~	2008-12-02 13:56:41.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/runtime/arguments.cpp	2008-12-02 14:18:07.000000000 +0000
+--- openjdk/hotspot/src/share/vm/runtime/arguments.cpp~	2008-12-17 10:14:03.000000000 +0100
++++ openjdk/hotspot/src/share/vm/runtime/arguments.cpp	2008-12-17 10:16:29.000000000 +0100
 @@ -25,7 +25,7 @@
  #include "incls/_precompiled.incl"
  #include "incls/_arguments.cpp.incl"
  
 -#define DEFAULT_VENDOR_URL_BUG "http://icedtea.classpath.org/bugzilla"
-+#define DEFAULT_VENDOR_URL_BUG "https://bugs.launchpad.net/ubuntu/+source/openjdk-6/"
++#define DEFAULT_VENDOR_URL_BUG "https://bugs.launchpad.net/ubuntu/+source/openjdk-7/"
  #define DEFAULT_JAVA_LAUNCHER  "generic"
  
  char**  Arguments::_jvm_flags_array             = NULL;

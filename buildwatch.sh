@@ -1,5 +1,7 @@
 #! /bin/sh
 
+builddir=$1
+
 echo $$ > buildwatch.pid
 
 maxwait=$(expr 180 \* 60)
@@ -16,14 +18,14 @@ while [ $wait -gt 0 ]; do
 	wait=$maxwait
     fi
 
-    new_quiet=$(ls -l openjdk*/control/build/*/tmp/rt-orig.jar openjdk*/control/build/*/lib/tools.jar openjdk*/control/build/*/lib/ct.sym 2>&1 | md5sum)
+    new_quiet=$(ls -l $builddir/openjdk*/build/*/tmp/rt-orig.jar $builddir/openjdk*/build/*/lib/tools.jar $builddir/openjdk*/build/*/lib/ct.sym 2>&1 | md5sum)
     if [ "$old_quiet" != "$new_quiet" ]; then
 	state="assembling jar file ..."
 	wait=$maxwait
     fi
     old_quiet=$new_quiet
 
-    new_noisy=$(ls -l mauve/mauve_output jtreg_output 2>&1 | md5sum)
+    new_noisy=$(ls -l $builddir/mauve-*/mauve_output* jtreg_output-* 2>&1 | md5sum)
     if [ "$old_noisy" != "$new_noisy" ]; then
 	wait=$maxwait
     elif [ -n "$state" ]; then

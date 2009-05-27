@@ -1,16 +1,16 @@
---- openjdk/jdk/make/common/shared/Platform.gmk.orig	2008-12-02 14:56:37.000000000 +0100
-+++ openjdk/jdk/make/common/shared/Platform.gmk	2008-12-02 15:14:15.000000000 +0100
-@@ -177,7 +177,7 @@
-     REQUIRED_FREE_SPACE=1040000
-   endif
+--- openjdk/jdk/make/common/shared/Platform.gmk.orig	2009-05-26 20:09:44.000000000 +0000
++++ openjdk/jdk/make/common/shared/Platform.gmk	2009-05-26 20:10:18.000000000 +0000
+@@ -144,7 +144,7 @@
+   # Suffix for file bundles used in previous release
+   BUNDLE_FILE_SUFFIX=.tar
    # How much RAM does this machine have:
 -  MB_OF_MEMORY=$(shell /etc/prtconf | fgrep 'Memory size:' | expand | cut -d' ' -f3)
 +  MB_OF_MEMORY := $(shell m=`free -m | fgrep Mem: | sed -e 's@\ \ *@ @g' | cut -d' ' -f2`; if [ "$$m" -lt 384 ]; then echo 384; else echo $$m; fi)
  endif
  
  # Platform settings specific to Linux
---- openjdk/corba/make/common/shared/Platform.gmk.orig	2008-12-02 14:56:37.000000000 +0100
-+++ openjdk/corba/make/common/shared/Platform.gmk	2008-12-02 15:13:23.000000000 +0100
+--- openjdk/corba/make/common/shared/Platform.gmk.orig	2009-05-26 19:50:00.000000000 +0000
++++ openjdk/corba/make/common/shared/Platform.gmk	2009-05-26 19:55:49.000000000 +0000
 @@ -270,7 +270,7 @@
      endif
    endif

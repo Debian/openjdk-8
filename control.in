@@ -1,13 +1,13 @@
 Source: @basename@
-Section: devel
+Section: java
 Priority: extra
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
 Uploaders: Michael Koch <konqueror@gmx.de>, Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
-Build-Depends: debhelper (>= 5), autotools-dev, @bd_compress@, m4, lsb-release, wget, zip, unzip, sharutils, gawk, pkg-config, procps, automake, autoconf, ant, @bd_tarball@ @bd_cacao@ @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_shark@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_pulsejava@ @bd_mauve@
-Standards-Version: 3.8.0
+Build-Depends: debhelper (>= 5), autotools-dev, @bd_compress@, m4, lsb-release, wget, zip, unzip, sharutils, gawk, pkg-config, procps, automake, autoconf, ant, @bd_cacao@ @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_shark@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_pulsejava@ @bd_mauve@
+Standards-Version: 3.8.1
 Homepage: http://openjdk.java.net/
-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~openjdk/openjdk/openjdk6
-Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk6
+Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~openjdk/openjdk/openjdk7
+Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk7
 
 Package: @basename@-jdk
 Architecture: any
@@ -15,7 +15,7 @@ Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre (>= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
 Recommends: libxt-dev
 Suggests: @basename@-demo, @basename@-source, visualvm
-Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk
+Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk, java-compiler
 Description: OpenJDK Development Kit (JDK)
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -26,9 +26,8 @@ Description: OpenJDK Development Kit (JDK)
 Package: @basename@-jre-headless
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Section: interpreters
 Depends: @basename@-jre-lib (>= @pkg_version@), ca-certificates-java, tzdata-java, rhino, libaccess-bridge-java (>= 1.22), java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
-Recommends: ${dlopenjl:Recommends}
+Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}
 Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
 Replaces: @basename@-jre-lib (<< 6b06-0ubuntu11), @basename@-jre (<< 6b09dfsg-0ubuntu2)
@@ -42,11 +41,11 @@ Description: OpenJDK Java runtime, using ${vm:Name} (headless)
 Package: @basename@-jre
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Section: interpreters
-Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}
+Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
 Recommends: ${dlopenjre:Recommends}, ${pkg:pulseaudio}, @cjk_fonts@
 Suggests: icedtea6-plugin
 Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4)
+Replaces: openjdk-6-jre-headless (<< 6b16~pre3)
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
 Description: OpenJDK Java runtime, using ${vm:Name}
  Full Java runtime environment - needed for executing Java GUI and Webstart
@@ -58,7 +57,6 @@ Description: OpenJDK Java runtime, using ${vm:Name}
 Package: @basename@-jre-lib
 Architecture: @lib_arch@
 Pre-Depends: ${dpkg:Depends}
-Section: interpreters
 Depends: @basename@-jre-headless (>= ${base:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
 Description: OpenJDK Java runtime (architecture independent libraries)
@@ -107,6 +105,7 @@ Description: OpenJDK Development Kit (JDK) documentation
 
 Package: @basename@-dbg
 Architecture: any
+Section: debug
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (= @pkg_version@)
 Recommends: @basename@-jre (= @pkg_version@)

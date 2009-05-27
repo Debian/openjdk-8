@@ -1,0 +1,6459 @@
+diff -ruNE ports/hotspot/build/linux/makefiles/zero.make ports/hotspot/build/linux/makefiles/zero.make
+--- ports/hotspot/build/linux/makefiles/zero.make	2009-03-05 14:43:47.000000000 +0000
++++ ports/hotspot/build/linux/makefiles/zero.make	2009-04-03 13:29:53.000000000 +0000
+@@ -23,6 +23,16 @@
+ #
+ #
+ 
++# Not included in includeDB because it has no dependencies
++ifdef ICEDTEA_ZERO_BUILD
++# ECN - For the time being HOTSPOT_OPT only enabled for ARM
++# CFLAGS += -DHOTSPOT_OPT
++ifeq ($(ZERO_LIBARCH),arm)
++Obj_Files += bytecodeInterpreter_arm.o
++CFLAGS += -DHOTSPOT_OPT -DHOTSPOT_ASM -march=armv5t -mtune=cortex-a8 -O2 -falign-functions=32 -falign-loops=8
++endif
++endif
++
+ # The copied fdlibm routines in sharedRuntimeTrig.o must not be optimized
+ OPT_CFLAGS/sharedRuntimeTrig.o = $(OPT_CFLAGS/NOOPT)
+ # The copied fdlibm routines in sharedRuntimeTrans.o must not be optimized
+diff -ruNE ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S
+--- ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S	1970-01-01 00:00:00.000000000 +0000
++++ ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S	2009-05-08 13:10:20.000000000 +0200
+@@ -0,0 +1,6390 @@
++#ifdef HOTSPOT_ASM
++
++#define opc_fadd	0x62
++#define opc_dadd	0x63
++#define opc_fsub	0x66
++#define opc_dsub	0x67
++#define opc_fmul	0x6a
++#define opc_dmul	0x6b
++#define opc_fdiv	0x6e
++#define opc_ddiv	0x6f
++#define opc_i2f		0x86
++#define opc_i2d		0x87
++#define opc_f2d		0x8d
++#define	opc_d2f		0x90
++#define	opc_fcmpl	0x95
++#define opc_fcmpg	0x96
++#define opc_dcmpl	0x97
++#define opc_dcmpg	0x98
++
++#define opc_ifeq	0x99
++#define opc_ifne	0x9a
++#define opc_iflt	0x9b
++#define opc_ifge	0x9c
++#define opc_ifgt	0x9d
++#define opc_ifle	0x9e
++
++#define opc_if_icmpeq	0x9f
++#define opc_if_icmpne	0xa0
++#define opc_if_icmplt	0xa1
++#define opc_if_icmpge	0xa2
++#define opc_if_icmpgt	0xa3
++#define opc_if_icmple	0xa4
++
++#define opc_if_acmpeq	0xa5
++#define opc_if_acmpne	0xa6
++
++#define opc_goto	0xa7
++
++#define opc_tableswitch	0xaa
++#define opc_lookupswitch 0xab
++
++#define opc_getfield		0xb4
++
++#define opc_invokevirtual	0xb6
++#define opc_invokespecial	0xb7
++#define opc_invokestatic	0xb8
++
++#define opc_ifnull	0xc6
++#define opc_ifnonnull	0xc7
++
++#define msg_no_request		0
++#define msg_initialize		1
++#define msg_method_entry	2
++#define msg_method_resume	3
++#define msg_deopt_resume	4
++#define msg_deopt_resume2	5
++#define msg_got_monitors	6
++#define msg_rethrow_exception	7
++#define msg_call_method		8
++#define msg_return_from_method	9
++#define msg_more_monitors	10
++#define msg_throwing_exception	11
++#define msg_popping_frame	12
++#define msg_do_osr		13
++
++#define	methodInterface	24
++#define volatileField	25
++#define vfinalMethod	26
++#define finalField	27
++
++#define ISTATE_JAVA_THREAD	0
++#define	ISTATE_JAVA_PC		4
++#define	ISTATE_JAVA_LOCALS	8
++#define ISTATE_CONSTANT_POOL	12
++#define ISTATE_JAVA_METHOD	16
++#define ISTATE_JAVA_MDX		20
++#define ISTATE_JAVA_STACK	24
++#define ISTATE_JAVA_MSG		28
++
++#define ISTATE_JAVA_CALL_MSG_CALLEE		32
++#define ISTATE_JAVA_CALL_MSG_CALLEE_ENTRY	36
++#define ISTATE_JAVA_CALL_MSG_BCP_ADVANCE	40
++
++#define ISTATE_JAVA_RETURN_KIND			32
++
++#define tos		r0
++#define dtos		d0
++
++#define tos_btos	0
++#define tos_ctos	1
++#define tos_stos	2
++#define tos_itos	3
++#define tos_ltos	4
++#define tos_ftos	5
++#define tos_dtos	6
++#define tos_atos	7
++
++#define java_locals	r4
++#define constant_pool	r5
++#define dtos_table	r6
++#define	java_stack	r7
++#define java_pc		r8
++#define itos_table	r9
++#define istate		r10
++#define vtos_table	r11
++
++#define PUSHNE(Rn)	strne	Rn, [java_stack], #-4
++#define PUSH(Rn)	str	Rn, [java_stack], #-4
++#define POP(Rn)		ldr	Rn, [java_stack, #4]!
++
++#define POPGE(Rn)	ldrge	Rn, [java_stack, #4]!
++
++	.macro	PUSHD	Dn
++	sub	java_stack, java_stack, #8
++	vstr	\Dn, [java_stack, #4]
++	.endm
++
++	.macro	POPD	Dn
++	vldr	\Dn, [java_stack, #4]
++	add	java_stack, java_stack, #8
++	.endm
++
++	.macro	OpcodeEntry	label
++	.global	\label
++\label:
++	.endm
++
++	.arch armv5te
++	.eabi_attribute 27, 3
++	.fpu vfp
++	.eabi_attribute 20, 1
++	.eabi_attribute 21, 1
++	.eabi_attribute 23, 3
++	.eabi_attribute 24, 1
++	.eabi_attribute 25, 1
++	.eabi_attribute 26, 2
++	.eabi_attribute 30, 2
++	.eabi_attribute 18, 4
++
++	.global	__aeabi_idiv
++	.global	__aeabi_ldivmod
++	.global	__aeabi_idivmod
++	.global	__aeabi_ldivmod
++	.global	__aeabi_l2f
++	.global	__aeabi_l2d
++
++@ --- update_table(bool to_safe) --------------------------------------------
++
++	.text
++
++	.global	_Z21update_table_opt_safeb
++	.type	_Z21update_table_opt_safeb, %function
++_Z21update_table_opt_safeb:
++	cmp	r0, #0
++
++@ ECN: A nasty hack here. We want to update the vtos, itos and dtos tables
++@ However, the dtos table only has one entry to be updated (opc_goto).
++@ This is because all other entries (ifeq, icmp_ifeq, tableswitch etc) by definition
++@ do not have a double on top of stack.
++@ dtos entries are also by definition vfp (otherwise we couldn't have a double in d0)
++@ Rather than creating an extra entry in each of the vfp and unsafe tables we
++@ just smash the single opc_goto entry here.
++	adrl	r0, do_goto_dtos_unsafe
++	adrnel	r0, do_goto_dtos
++	ldr	r2, .globals_table_1
++	ldr	r3, .globals_table_1+4
++.LPIC1:
++	add	r2, pc, r2
++	add	r2, r2, r3
++	str	r0, [r2, #opc_goto << 2]
++@ ECN: End nasty hack
++	
++	adr	r0, unsafe_table
++	addne	r0, r0, #safe_table - unsafe_table
++
++do_update_table:
++	ldr	r2, .globals_table_0
++	ldr	r3, .globals_table_0+4
++.LPIC0:
++	add	r2, pc, r2
++	add	r2, r2, r3
++	add	r3, r2, #opclabels_data_itos-opclabels_data_vtos
++
++.update_loop:
++	ldr	r1, [r0], #4
++	cmp	r1, #0
++	ldrne	ip, [r0], #4
++	strne	ip, [r2, r1, lsl #2]
++	ldrne	ip, [r0], #4
++	strne	ip, [r3, r1, lsl #2]
++	bne	.update_loop
++
++	mov	pc, lr
++
++.globals_table_0:
++	.word	_GLOBAL_OFFSET_TABLE_-(.LPIC0+8)
++	.word	opclabels_data_vtos(GOTOFF)
++
++.globals_table_1:
++	.word	_GLOBAL_OFFSET_TABLE_-(.LPIC1+8)
++	.word	opclabels_data_dtos(GOTOFF)
++
++unsafe_table:
++	.word	opc_ifeq,	do_ifeq_vtos_unsafe,	do_ifeq_itos_unsafe
++	.word	opc_ifne,	do_ifne_vtos_unsafe,	do_ifne_itos_unsafe
++	.word	opc_iflt,	do_iflt_vtos_unsafe,	do_iflt_itos_unsafe
++	.word	opc_ifge,	do_ifge_vtos_unsafe,	do_ifge_itos_unsafe
++	.word	opc_ifgt,	do_ifgt_vtos_unsafe,	do_ifgt_itos_unsafe
++	.word	opc_ifle,	do_ifle_vtos_unsafe,	do_ifle_itos_unsafe
++
++	.word	opc_if_icmpeq,	do_if_icmpeq_vtos_unsafe,	do_if_icmpeq_itos_unsafe
++	.word	opc_if_icmpne,	do_if_icmpne_vtos_unsafe,	do_if_icmpne_itos_unsafe
++	.word	opc_if_icmplt,	do_if_icmplt_vtos_unsafe,	do_if_icmplt_itos_unsafe
++	.word	opc_if_icmpge,	do_if_icmpge_vtos_unsafe,	do_if_icmpge_itos_unsafe
++	.word	opc_if_icmpgt,	do_if_icmpgt_vtos_unsafe,	do_if_icmpgt_itos_unsafe
++	.word	opc_if_icmple,	do_if_icmple_vtos_unsafe,	do_if_icmple_itos_unsafe
++	.word	opc_if_acmpeq,	do_if_acmpeq_vtos_unsafe,	do_if_acmpeq_itos_unsafe
++	.word	opc_if_acmpne,	do_if_acmpne_vtos_unsafe,	do_if_acmpne_itos_unsafe
++
++	.word	opc_goto,	do_goto_vtos_unsafe,	do_goto_itos_unsafe
++
++	.word	opc_tableswitch, do_tableswitch_vtos_unsafe,	do_tableswitch_itos_unsafe
++	.word	opc_lookupswitch, do_lookupswitch_vtos_unsafe,	do_lookupswitch_itos_unsafe
++
++	.word	opc_ifnull,	do_ifnull_vtos_unsafe,	do_ifnull_itos_unsafe
++	.word	opc_ifnonnull,	do_ifnonnull_vtos_unsafe,	do_ifnonnull_itos_unsafe
++
++	.word	0
++
++safe_table:
++	.word	opc_ifeq,	do_ifeq_vtos,	do_ifeq_itos
++	.word	opc_ifne,	do_ifne_vtos,	do_ifne_itos
++	.word	opc_iflt,	do_iflt_vtos,	do_iflt_itos
++	.word	opc_ifge,	do_ifge_vtos,	do_ifge_itos
++	.word	opc_ifgt,	do_ifgt_vtos,	do_ifgt_itos
++	.word	opc_ifle,	do_ifle_vtos,	do_ifle_itos
++
++	.word	opc_if_icmpeq,	do_if_icmpeq_vtos,	do_if_icmpeq_itos
++	.word	opc_if_icmpne,	do_if_icmpne_vtos,	do_if_icmpne_itos
++	.word	opc_if_icmplt,	do_if_icmplt_vtos,	do_if_icmplt_itos
++	.word	opc_if_icmpge,	do_if_icmpge_vtos,	do_if_icmpge_itos
++	.word	opc_if_icmpgt,	do_if_icmpgt_vtos,	do_if_icmpgt_itos
++	.word	opc_if_icmple,	do_if_icmple_vtos,	do_if_icmple_itos
++	.word	opc_if_acmpeq,	do_if_acmpeq_vtos,	do_if_acmpeq_itos
++	.word	opc_if_acmpne,	do_if_acmpne_vtos,	do_if_acmpne_itos
++
++	.word	opc_goto,	do_goto_vtos,	do_goto_itos
++
++	.word	opc_tableswitch, do_tableswitch_vtos,	do_tableswitch_itos
++	.word	opc_lookupswitch, do_lookupswitch_vtos,	do_lookupswitch_itos
++
++	.word	opc_ifnull,	do_ifnull_vtos,	do_ifnull_itos
++	.word	opc_ifnonnull,	do_ifnonnull_vtos,	do_ifnonnull_itos
++
++	.word	0
++
++vfp_table:
++	.word	opc_fadd,	do_fadd_vtos_vfp,	do_fadd_itos_vfp
++	.word	opc_dadd,	do_dadd_vtos_vfp,	do_dadd_itos_vfp
++	.word	opc_fsub,	do_fsub_vtos_vfp,	do_fsub_itos_vfp
++	.word	opc_dsub,	do_dsub_vtos_vfp,	do_dsub_itos_vfp
++	.word	opc_fmul,	do_fmul_vtos_vfp,	do_fmul_itos_vfp
++	.word	opc_dmul,	do_dmul_vtos_vfp,	do_dmul_itos_vfp
++	.word	opc_fdiv,	do_fdiv_vtos_vfp,	do_fdiv_itos_vfp
++	.word	opc_ddiv,	do_ddiv_vtos_vfp,	do_ddiv_itos_vfp
++	.word	opc_i2f,	do_i2f_vtos_vfp,	do_i2f_itos_vfp
++	.word	opc_i2d,	do_i2d_vtos_vfp,	do_i2d_itos_vfp
++	.word	opc_f2d,	do_f2d_vtos_vfp,	do_f2d_itos_vfp
++	.word	opc_d2f,	do_d2f_vtos_vfp,	do_d2f_itos_vfp
++	.word	opc_fcmpl,	do_fcmpl_vtos_vfp,	do_fcmpl_itos_vfp
++	.word	opc_fcmpg,	do_fcmpg_vtos_vfp,	do_fcmpg_itos_vfp
++	.word	opc_dcmpl,	do_dcmpl_vtos_vfp,	do_dcmpl_itos_vfp
++	.word	opc_dcmpg,	do_dcmpg_vtos_vfp,	do_dcmpg_itos_vfp
++	.word	0
++
++proc_self_auxv:
++	.ascii	"/proc/self/auxv\000"
++	.align	2
++
++	.global	vfp_init
++	.type	vfp_init, %function
++vfp_init:
++	stmfd	sp!, {r4, r5, lr}
++	sub	sp, sp, #128
++	mov	r4, #0
++	adr	r0, proc_self_auxv
++	mov	r1, #0
++	bl	open
++	subs	r5, r0, #0
++	blt	.exit_vfp_init
++.vfp_init_read_loop:
++	mov	r2, #128
++	mov	r0, r5
++	mov	r1, sp
++	bl	read
++	mov	r2, sp
++	mov	r3, r0, lsr #3
++	b	.vfp_init_1
++.vfp_init_vec_loop:
++	ldmia	r2!, {r1, ip}
++	cmp	r1, #0
++	beq	.fini_vfp_init
++	cmp	r1, #16
++	bne	.vfp_init_1
++	tst	ip, #64
++	movne	r4, #1
++	bne	.fini_vfp_init
++.vfp_init_1:
++	subs	r3, r3, #1
++	bpl	.vfp_init_vec_loop
++	cmp	r0, #128
++	beq	.vfp_init_read_loop
++.fini_vfp_init:
++	mov	r0, r5
++	bl	close
++.exit_vfp_init:
++	movs	r0, r4
++	add	sp, sp, #128
++	ldmfd	sp!, {r4, r5, lr}
++	adrne	r0, vfp_table
++	bne	do_update_table
++	mov	pc, lr
++	.size	vfp_init, .-vfp_init
++
++	.section	.init_array,"aw",%init_array
++	.word	vfp_init(target1)
++
++	.data
++
++opclabels_data_vtos:
++	.word	do_nop_vtos
++	.word	do_aconst_null_vtos
++	.word	do_iconst_m1_vtos
++	.word	do_iconst_0_vtos
++	.word	do_iconst_1_vtos
++	.word	do_iconst_2_vtos
++	.word	do_iconst_3_vtos
++	.word	do_iconst_4_vtos
++	.word	do_iconst_5_vtos
++	.word	do_lconst_0_vtos
++	.word	do_lconst_1_vtos
++	.word	do_fconst_0_vtos
++	.word	do_fconst_1_vtos
++	.word	do_fconst_2_vtos
++	.word	do_dconst_0_vtos
++	.word	do_dconst_1_vtos
++	.word	do_bipush_vtos
++	.word	do_sipush_vtos
++	.word	do_ldc_vtos
++	.word	do_ldc_w_vtos
++	.word	do_ldc2_w_vtos
++	.word	do_iload_vtos
++	.word	do_lload_vtos
++	.word	do_fload_vtos
++	.word	do_dload_vtos
++	.word	do_aload_vtos
++	.word	do_iload_0_vtos
++	.word	do_iload_1_vtos
++	.word	do_iload_2_vtos
++	.word	do_iload_3_vtos
++	.word	do_lload_0_vtos
++	.word	do_lload_1_vtos
++	.word	do_lload_2_vtos
++	.word	do_lload_3_vtos
++	.word	do_fload_0_vtos
++	.word	do_fload_1_vtos
++	.word	do_fload_2_vtos
++	.word	do_fload_3_vtos
++	.word	do_dload_0_vtos
++	.word	do_dload_1_vtos
++	.word	do_dload_2_vtos
++	.word	do_dload_3_vtos
++	.word	do_aload_0_vtos
++	.word	do_aload_1_vtos
++	.word	do_aload_2_vtos
++	.word	do_aload_3_vtos
++	.word	do_iaload_vtos
++	.word	do_laload_vtos
++	.word	do_faload_vtos
++	.word	do_daload_vtos
++	.word	do_aaload_vtos
++	.word	do_baload_vtos
++	.word	do_caload_vtos
++	.word	do_saload_vtos
++	.word	do_istore_vtos
++	.word	do_lstore_vtos
++	.word	do_fstore_vtos
++	.word	do_dstore_vtos
++	.word	do_astore_vtos
++	.word	do_istore_0_vtos
++	.word	do_istore_1_vtos
++	.word	do_istore_2_vtos
++	.word	do_istore_3_vtos
++	.word	do_lstore_0_vtos
++	.word	do_lstore_1_vtos
++	.word	do_lstore_2_vtos
++	.word	do_lstore_3_vtos
++	.word	do_fstore_0_vtos
++	.word	do_fstore_1_vtos
++	.word	do_fstore_2_vtos
++	.word	do_fstore_3_vtos
++	.word	do_dstore_0_vtos
++	.word	do_dstore_1_vtos
++	.word	do_dstore_2_vtos
++	.word	do_dstore_3_vtos
++	.word	do_astore_0_vtos
++	.word	do_astore_1_vtos
++	.word	do_astore_2_vtos
++	.word	do_astore_3_vtos
++	.word	do_iastore_vtos
++	.word	do_lastore_vtos
++	.word	do_fastore_vtos
++	.word	do_dastore_vtos
++	.word	do_aastore_vtos
++	.word	do_bastore_vtos
++	.word	do_castore_vtos
++	.word	do_sastore_vtos
++	.word	do_pop_vtos
++	.word	do_pop2_vtos
++	.word	do_dup_vtos
++	.word	do_dup_x1_vtos
++	.word	do_dup_x2_vtos
++	.word	do_dup2_vtos
++	.word	do_dup2_x1_vtos
++	.word	do_dup2_x2_vtos
++	.word	do_swap_vtos
++	.word	do_iadd_vtos
++	.word	do_ladd_vtos
++	.word	do_fadd_vtos
++	.word	do_dadd_vtos
++	.word	do_isub_vtos
++	.word	do_lsub_vtos
++	.word	do_fsub_vtos
++	.word	do_dsub_vtos
++	.word	do_imul_vtos
++	.word	do_lmul_vtos
++	.word	do_fmul_vtos
++	.word	do_dmul_vtos
++	.word	do_idiv_vtos
++	.word	do_ldiv_vtos
++	.word	do_fdiv_vtos
++	.word	do_ddiv_vtos
++	.word	do_irem_vtos
++	.word	do_lrem_vtos
++	.word	do_frem_vtos
++	.word	do_drem_vtos
++	.word	do_ineg_vtos
++	.word	do_lneg_vtos
++	.word	do_fneg_vtos
++	.word	do_dneg_vtos
++	.word	do_ishl_vtos
++	.word	do_lshl_vtos
++	.word	do_ishr_vtos
++	.word	do_lshr_vtos
++	.word	do_iushr_vtos
++	.word	do_lushr_vtos
++	.word	do_iand_vtos
++	.word	do_land_vtos
++	.word	do_ior_vtos
++	.word	do_lor_vtos
++	.word	do_ixor_vtos
++	.word	do_lxor_vtos
++	.word	do_iinc_vtos
++	.word	do_i2l_vtos
++	.word	do_i2f_vtos
++	.word	do_i2d_vtos
++	.word	do_l2i_vtos
++	.word	do_l2f_vtos
++	.word	do_l2d_vtos
++	.word	do_f2i_vtos
++	.word	do_f2l_vtos
++	.word	do_f2d_vtos
++	.word	do_d2i_vtos
++	.word	do_d2l_vtos
++	.word	do_d2f_vtos
++	.word	do_i2b_vtos
++	.word	do_i2c_vtos
++	.word	do_i2s_vtos
++	.word	do_lcmp_vtos
++	.word	do_fcmpl_vtos
++	.word	do_fcmpg_vtos
++	.word	do_dcmpl_vtos
++	.word	do_dcmpg_vtos
++	.word	do_ifeq_vtos_unsafe
++	.word	do_ifne_vtos_unsafe
++	.word	do_iflt_vtos_unsafe
++	.word	do_ifge_vtos_unsafe
++	.word	do_ifgt_vtos_unsafe
++	.word	do_ifle_vtos_unsafe
++	.word	do_if_icmpeq_vtos_unsafe
++	.word	do_if_icmpne_vtos_unsafe
++	.word	do_if_icmplt_vtos_unsafe
++	.word	do_if_icmpge_vtos_unsafe
++	.word	do_if_icmpgt_vtos_unsafe
++	.word	do_if_icmple_vtos_unsafe
++	.word	do_if_acmpeq_vtos_unsafe
++	.word	do_if_acmpne_vtos_unsafe
++	.word	do_goto_vtos_unsafe
++	.word	do_jsr_vtos
++	.word	do_ret_vtos
++	.word	do_tableswitch_vtos_unsafe
++	.word	do_lookupswitch_vtos_unsafe
++	.word	do_ireturn_vtos
++	.word	do_lreturn_vtos
++	.word	do_freturn_vtos
++	.word	do_dreturn_vtos
++	.word	do_areturn_vtos
++	.word	do_return_vtos
++	.word	do_getstatic_vtos
++	.word	do_putstatic_vtos
++	.word	do_getfield_vtos
++	.word	do_putfield_vtos
++	.word	do_invokevirtual_vtos
++	.word	do_invokespecial_vtos
++	.word	do_invokestatic_vtos
++	.word	do_invokeinterface_vtos
++	.word	do_xxxunusedxxx_vtos
++	.word	do_new_vtos
++	.word	do_newarray_vtos
++	.word	do_anewarray_vtos
++	.word	do_arraylength_vtos
++	.word	do_athrow_vtos
++	.word	do_checkcast_vtos
++	.word	do_instanceof_vtos
++	.word	do_monitorenter_vtos
++	.word	do_monitorexit_vtos
++	.word	do_wide_vtos
++	.word	do_multianewarray_vtos
++	.word	do_ifnull_vtos_unsafe
++	.word	do_ifnonnull_vtos_unsafe
++	.word	do_goto_w_vtos
++	.word	do_jsr_w_vtos
++	.word	do_breakpoint_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++	.word	do_exit_asm_vtos
++opclabels_data_itos:
++	.word	do_nop_itos
++	.word	do_aconst_null_itos
++	.word	do_iconst_m1_itos
++	.word	do_iconst_0_itos
++	.word	do_iconst_1_itos
++	.word	do_iconst_2_itos
++	.word	do_iconst_3_itos
++	.word	do_iconst_4_itos
++	.word	do_iconst_5_itos
++	.word	do_lconst_0_itos
++	.word	do_lconst_1_itos
++	.word	do_fconst_0_itos
++	.word	do_fconst_1_itos
++	.word	do_fconst_2_itos
++	.word	do_dconst_0_itos
++	.word	do_dconst_1_itos
++	.word	do_bipush_itos
++	.word	do_sipush_itos
++	.word	do_ldc_itos
++	.word	do_ldc_w_itos
++	.word	do_ldc2_w_itos
++	.word	do_iload_itos
++	.word	do_lload_itos
++	.word	do_fload_itos
++	.word	do_dload_itos
++	.word	do_aload_itos
++	.word	do_iload_0_itos
++	.word	do_iload_1_itos
++	.word	do_iload_2_itos
++	.word	do_iload_3_itos
++	.word	do_lload_0_itos
++	.word	do_lload_1_itos
++	.word	do_lload_2_itos
++	.word	do_lload_3_itos
++	.word	do_fload_0_itos
++	.word	do_fload_1_itos
++	.word	do_fload_2_itos
++	.word	do_fload_3_itos
++	.word	do_dload_0_itos
++	.word	do_dload_1_itos
++	.word	do_dload_2_itos
++	.word	do_dload_3_itos
++	.word	do_aload_0_itos
++	.word	do_aload_1_itos
++	.word	do_aload_2_itos
++	.word	do_aload_3_itos
++	.word	do_iaload_itos
++	.word	do_laload_itos
++	.word	do_faload_itos
++	.word	do_daload_itos
++	.word	do_aaload_itos
++	.word	do_baload_itos
++	.word	do_caload_itos
++	.word	do_saload_itos
++	.word	do_istore_itos
++	.word	do_lstore_itos
++	.word	do_fstore_itos
++	.word	do_dstore_itos
++	.word	do_astore_itos
++	.word	do_istore_0_itos
++	.word	do_istore_1_itos
++	.word	do_istore_2_itos
++	.word	do_istore_3_itos
++	.word	do_lstore_0_itos
++	.word	do_lstore_1_itos
++	.word	do_lstore_2_itos
++	.word	do_lstore_3_itos
++	.word	do_fstore_0_itos
++	.word	do_fstore_1_itos
++	.word	do_fstore_2_itos
++	.word	do_fstore_3_itos
++	.word	do_dstore_0_itos
++	.word	do_dstore_1_itos
++	.word	do_dstore_2_itos
++	.word	do_dstore_3_itos
++	.word	do_astore_0_itos
++	.word	do_astore_1_itos
++	.word	do_astore_2_itos
++	.word	do_astore_3_itos
++	.word	do_iastore_itos
++	.word	do_lastore_itos
++	.word	do_fastore_itos
++	.word	do_dastore_itos
++	.word	do_aastore_itos
++	.word	do_bastore_itos
++	.word	do_castore_itos
++	.word	do_sastore_itos
++	.word	do_pop_itos
++	.word	do_pop2_itos
++	.word	do_dup_itos
++	.word	do_dup_x1_itos
++	.word	do_dup_x2_itos
++	.word	do_dup2_itos
++	.word	do_dup2_x1_itos
++	.word	do_dup2_x2_itos
++	.word	do_swap_itos
++	.word	do_iadd_itos
++	.word	do_ladd_itos
++	.word	do_fadd_itos
++	.word	do_dadd_itos
++	.word	do_isub_itos
++	.word	do_lsub_itos
++	.word	do_fsub_itos
++	.word	do_dsub_itos
++	.word	do_imul_itos
++	.word	do_lmul_itos
++	.word	do_fmul_itos
++	.word	do_dmul_itos
++	.word	do_idiv_itos
++	.word	do_ldiv_itos
++	.word	do_fdiv_itos
++	.word	do_ddiv_itos
++	.word	do_irem_itos
++	.word	do_lrem_itos
++	.word	do_frem_itos
++	.word	do_drem_itos
++	.word	do_ineg_itos
++	.word	do_lneg_itos
++	.word	do_fneg_itos
++	.word	do_dneg_itos
++	.word	do_ishl_itos
++	.word	do_lshl_itos
++	.word	do_ishr_itos
++	.word	do_lshr_itos
++	.word	do_iushr_itos
++	.word	do_lushr_itos
++	.word	do_iand_itos
++	.word	do_land_itos
++	.word	do_ior_itos
++	.word	do_lor_itos
++	.word	do_ixor_itos
++	.word	do_lxor_itos
++	.word	do_iinc_itos
++	.word	do_i2l_itos
++	.word	do_i2f_itos
++	.word	do_i2d_itos
++	.word	do_l2i_itos
++	.word	do_l2f_itos
++	.word	do_l2d_itos
++	.word	do_f2i_itos
++	.word	do_f2l_itos
++	.word	do_f2d_itos
++	.word	do_d2i_itos
++	.word	do_d2l_itos
++	.word	do_d2f_itos
++	.word	do_i2b_itos
++	.word	do_i2c_itos
++	.word	do_i2s_itos
++	.word	do_lcmp_itos
++	.word	do_fcmpl_itos
++	.word	do_fcmpg_itos
++	.word	do_dcmpl_itos
++	.word	do_dcmpg_itos
++	.word	do_ifeq_itos_unsafe
++	.word	do_ifne_itos_unsafe
++	.word	do_iflt_itos_unsafe
++	.word	do_ifge_itos_unsafe
++	.word	do_ifgt_itos_unsafe
++	.word	do_ifle_itos_unsafe
++	.word	do_if_icmpeq_itos_unsafe
++	.word	do_if_icmpne_itos_unsafe
++	.word	do_if_icmplt_itos_unsafe
++	.word	do_if_icmpge_itos_unsafe
++	.word	do_if_icmpgt_itos_unsafe
++	.word	do_if_icmple_itos_unsafe
++	.word	do_if_acmpeq_itos_unsafe
++	.word	do_if_acmpne_itos_unsafe
++	.word	do_goto_itos_unsafe
++	.word	do_jsr_itos
++	.word	do_ret_itos
++	.word	do_tableswitch_itos_unsafe
++	.word	do_lookupswitch_itos_unsafe
++	.word	do_ireturn_itos
++	.word	do_lreturn_itos
++	.word	do_freturn_itos
++	.word	do_dreturn_itos
++	.word	do_areturn_itos
++	.word	do_return_itos
++	.word	do_getstatic_itos
++	.word	do_putstatic_itos
++	.word	do_getfield_itos
++	.word	do_putfield_itos
++	.word	do_invokevirtual_itos
++	.word	do_invokespecial_itos
++	.word	do_invokestatic_itos
++	.word	do_invokeinterface_itos
++	.word	do_xxxunusedxxx_itos
++	.word	do_new_itos
++	.word	do_newarray_itos
++	.word	do_anewarray_itos
++	.word	do_arraylength_itos
++	.word	do_athrow_itos
++	.word	do_checkcast_itos
++	.word	do_instanceof_itos
++	.word	do_monitorenter_itos
++	.word	do_monitorexit_itos
++	.word	do_wide_itos
++	.word	do_multianewarray_itos
++	.word	do_ifnull_itos_unsafe
++	.word	do_ifnonnull_itos_unsafe
++	.word	do_goto_w_itos
++	.word	do_jsr_w_itos
++	.word	do_breakpoint_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++	.word	do_exit_asm_itos
++opclabels_data_dtos:
++	.word	do_nop_dtos
++	.word	do_aconst_null_dtos
++	.word	do_iconst_m1_dtos
++	.word	do_iconst_0_dtos
++	.word	do_iconst_1_dtos
++	.word	do_iconst_2_dtos
++	.word	do_iconst_3_dtos
++	.word	do_iconst_4_dtos
++	.word	do_iconst_5_dtos
++	.word	do_lconst_0_dtos
++	.word	do_lconst_1_dtos
++	.word	do_fconst_0_dtos
++	.word	do_fconst_1_dtos
++	.word	do_fconst_2_dtos
++	.word	do_dconst_0_dtos
++	.word	do_dconst_1_dtos
++	.word	do_bipush_dtos
++	.word	do_sipush_dtos
++	.word	do_ldc_dtos
++	.word	do_ldc_w_dtos
++	.word	do_ldc2_w_dtos
++	.word	do_iload_dtos
++	.word	do_lload_dtos
++	.word	do_fload_dtos
++	.word	do_dload_dtos
++	.word	do_aload_dtos
++	.word	do_iload_0_dtos
++	.word	do_iload_1_dtos
++	.word	do_iload_2_dtos
++	.word	do_iload_3_dtos
++	.word	do_lload_0_dtos
++	.word	do_lload_1_dtos
++	.word	do_lload_2_dtos
++	.word	do_lload_3_dtos
++	.word	do_fload_0_dtos
++	.word	do_fload_1_dtos
++	.word	do_fload_2_dtos
++	.word	do_fload_3_dtos
++	.word	do_dload_0_dtos
++	.word	do_dload_1_dtos
++	.word	do_dload_2_dtos
++	.word	do_dload_3_dtos
++	.word	do_aload_0_dtos
++	.word	do_aload_1_dtos
++	.word	do_aload_2_dtos
++	.word	do_aload_3_dtos
++	.word	do_iaload_dtos
++	.word	do_laload_dtos
++	.word	do_faload_dtos
++	.word	do_daload_dtos
++	.word	do_aaload_dtos
++	.word	do_baload_dtos
++	.word	do_caload_dtos
++	.word	do_saload_dtos
++	.word	do_istore_dtos
++	.word	do_lstore_dtos
++	.word	do_fstore_dtos
++	.word	do_dstore_dtos
++	.word	do_astore_dtos
++	.word	do_istore_0_dtos
++	.word	do_istore_1_dtos
++	.word	do_istore_2_dtos
++	.word	do_istore_3_dtos
++	.word	do_lstore_0_dtos
++	.word	do_lstore_1_dtos
++	.word	do_lstore_2_dtos
++	.word	do_lstore_3_dtos
++	.word	do_fstore_0_dtos
++	.word	do_fstore_1_dtos
++	.word	do_fstore_2_dtos
++	.word	do_fstore_3_dtos
++	.word	do_dstore_0_dtos
++	.word	do_dstore_1_dtos
++	.word	do_dstore_2_dtos
++	.word	do_dstore_3_dtos
++	.word	do_astore_0_dtos
++	.word	do_astore_1_dtos
++	.word	do_astore_2_dtos
++	.word	do_astore_3_dtos
++	.word	do_iastore_dtos
++	.word	do_lastore_dtos
++	.word	do_fastore_dtos
++	.word	do_dastore_dtos
++	.word	do_aastore_dtos
++	.word	do_bastore_dtos
++	.word	do_castore_dtos
++	.word	do_sastore_dtos
++	.word	do_pop_dtos
++	.word	do_pop2_dtos
++	.word	do_dup_dtos
++	.word	do_dup_x1_dtos
++	.word	do_dup_x2_dtos
++	.word	do_dup2_dtos
++	.word	do_dup2_x1_dtos
++	.word	do_dup2_x2_dtos
++	.word	do_swap_dtos
++	.word	do_iadd_dtos
++	.word	do_ladd_dtos
++	.word	do_fadd_dtos
++	.word	do_dadd_dtos
++	.word	do_isub_dtos
++	.word	do_lsub_dtos
++	.word	do_fsub_dtos
++	.word	do_dsub_dtos
++	.word	do_imul_dtos
++	.word	do_lmul_dtos
++	.word	do_fmul_dtos
++	.word	do_dmul_dtos
++	.word	do_idiv_dtos
++	.word	do_ldiv_dtos
++	.word	do_fdiv_dtos
++	.word	do_ddiv_dtos
++	.word	do_irem_dtos
++	.word	do_lrem_dtos
++	.word	do_frem_dtos
++	.word	do_drem_dtos
++	.word	do_ineg_dtos
++	.word	do_lneg_dtos
++	.word	do_fneg_dtos
++	.word	do_dneg_dtos
++	.word	do_ishl_dtos
++	.word	do_lshl_dtos
++	.word	do_ishr_dtos
++	.word	do_lshr_dtos
++	.word	do_iushr_dtos
++	.word	do_lushr_dtos
++	.word	do_iand_dtos
++	.word	do_land_dtos
++	.word	do_ior_dtos
++	.word	do_lor_dtos
++	.word	do_ixor_dtos
++	.word	do_lxor_dtos
++	.word	do_iinc_dtos
++	.word	do_i2l_dtos
++	.word	do_i2f_dtos
++	.word	do_i2d_dtos
++	.word	do_l2i_dtos
++	.word	do_l2f_dtos
++	.word	do_l2d_dtos
++	.word	do_f2i_dtos
++	.word	do_f2l_dtos
++	.word	do_f2d_dtos
++	.word	do_d2i_dtos
++	.word	do_d2l_dtos
++	.word	do_d2f_dtos
++	.word	do_i2b_dtos
++	.word	do_i2c_dtos
++	.word	do_i2s_dtos
++	.word	do_lcmp_dtos
++	.word	do_fcmpl_dtos
++	.word	do_fcmpg_dtos
++	.word	do_dcmpl_dtos
++	.word	do_dcmpg_dtos
++	.word	do_ifeq_dtos
++	.word	do_ifne_dtos
++	.word	do_iflt_dtos
++	.word	do_ifge_dtos
++	.word	do_ifgt_dtos
++	.word	do_ifle_dtos
++	.word	do_if_icmpeq_dtos
++	.word	do_if_icmpne_dtos
++	.word	do_if_icmplt_dtos
++	.word	do_if_icmpge_dtos
++	.word	do_if_icmpgt_dtos
++	.word	do_if_icmple_dtos
++	.word	do_if_acmpeq_dtos
++	.word	do_if_acmpne_dtos
++	.word	do_goto_dtos
++	.word	do_jsr_dtos
++	.word	do_ret_dtos
++	.word	do_tableswitch_dtos
++	.word	do_lookupswitch_dtos
++	.word	do_ireturn_dtos
++	.word	do_lreturn_dtos
++	.word	do_freturn_dtos
++	.word	do_dreturn_dtos
++	.word	do_areturn_dtos
++	.word	do_return_dtos
++	.word	do_getstatic_dtos
++	.word	do_putstatic_dtos
++	.word	do_getfield_dtos
++	.word	do_putfield_dtos
++	.word	do_invokevirtual_dtos
++	.word	do_invokespecial_dtos
++	.word	do_invokestatic_dtos
++	.word	do_invokeinterface_dtos
++	.word	do_xxxunusedxxx_dtos
++	.word	do_new_dtos
++	.word	do_newarray_dtos
++	.word	do_anewarray_dtos
++	.word	do_arraylength_dtos
++	.word	do_athrow_dtos
++	.word	do_checkcast_dtos
++	.word	do_instanceof_dtos
++	.word	do_monitorenter_dtos
++	.word	do_monitorexit_dtos
++	.word	do_wide_dtos
++	.word	do_multianewarray_dtos
++	.word	do_ifnull_dtos
++	.word	do_ifnonnull_dtos
++	.word	do_goto_w_dtos
++	.word	do_jsr_w_dtos
++	.word	do_breakpoint_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++	.word	do_exit_asm_dtos
++
++@ ---- run_opt --------------------------------------------------------------
++
++	.text
++	.global	_ZN19BytecodeInterpreter7run_optEPS_
++	.type	_ZN19BytecodeInterpreter7run_optEPS_, %function
++_ZN19BytecodeInterpreter7run_optEPS_:
++	@ args = 0, pretend = 0, frame = 40
++	@ frame_needed = 0, uses_anonymous_args = 0
++@ --- run_opt_entry -------------------------------------------------
++	OpcodeEntry	run_opt_entry
++	stmfd	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, lr}
++	mov	istate, r0
++	ldr	java_pc, [istate, #ISTATE_JAVA_PC]
++	ldr	r9, .globals_table
++	ldrb	r2, [java_pc, #0]
++	ldr	java_stack, [istate, #ISTATE_JAVA_STACK]
++.pic_location:
++	add	r9, pc, r9		@ Don't move this instruction from the .pic_location label
++	ldr	r0, .globals_table+4
++	ldr	java_locals, [istate, #ISTATE_JAVA_LOCALS]
++	ldr	constant_pool, [istate, #ISTATE_CONSTANT_POOL]
++	add	vtos_table, r9, r0
++	ldr	r2, [vtos_table, r2, asl #2]
++	add	itos_table, vtos_table, #opclabels_data_itos - opclabels_data_vtos
++	add	dtos_table, vtos_table, #opclabels_data_dtos - opclabels_data_vtos
++	mov	pc, r2
++
++	.align	2
++.globals_table:
++	.word	_GLOBAL_OFFSET_TABLE_-(.pic_location+8)
++	.word	opclabels_data_vtos(GOTOFF)
++
++@ ----- The Bytecode Implementations --------------------------------------
++
++@ --- do_getfield_vtos -------------------------------------------------
++	OpcodeEntry	do_getfield_vtos
++	POP(tos)
++@ --- do_getfield_itos -------------------------------------------------
++	OpcodeEntry	do_getfield_itos
++	ldrb	r3, [java_pc,#1]
++	ldrb	r2, [java_pc,#2]
++	ldrb	ip, [java_pc,#3]!
++	orr	r3, r3, r2, lsl #8
++	add	r1, constant_pool, #16
++	ldr	r3, [r1, r3, lsl #4]!			@ r1 = cache
++	ldr	ip, [itos_table, ip, asl #2]
++	and	r3, r3, #0x00ff0000
++	cmp	r3, #180 << 16
++	bne	.exit_getfield
++	movs	r3, r0
++	beq	.exit_getfield
++	ldr	r2, [r1, #12]
++	ldr	lr, [r1, #8]
++	movs	r2, r2, lsr #29
++	ldrhi	tos, [r3, lr]		@ C = 1, Z = 0 => R2 == 3, 5, 7
++	movhi	pc, ip			@ early exit for word accesses
++	ldreqsb	tos, [r3, lr]		@ Z = 1 => R2 = 0, 1
++	ldrcsh	tos, [r3, lr]		@ C = 1 => R2 = 1 (overwrites previous load)
++	moveq	pc, ip
++	tst	r2, #2
++	addne	r3, r3, lr
++	ldmneia	r3, {r0, r1}		@ 4, 6
++	PUSHNE(r1)
++	movne	pc, ip
++	ldrsh	tos, [r3, lr]		@ 2
++	mov	pc, ip
++
++@ --- do_putstatic_dtos -------------------------------------------------
++	OpcodeEntry	do_putstatic_dtos
++	PUSHD	dtos
++	b	do_putstatic_vtos
++@ --- do_putstatic_vtos -------------------------------------------------
++	OpcodeEntry	do_putstatic_vtos
++	POP(tos)
++@ --- do_putstatic_itos -------------------------------------------------
++	OpcodeEntry	do_putstatic_itos
++	ldrb	r3, [java_pc,#1]
++	ldrb	r2, [java_pc,#2]
++	ldrb	ip, [java_pc,#3]!
++	orr	r3, r3, r2, lsl #8
++	add	r1, constant_pool, #16
++	ldr	r3, [r1, r3, lsl #4]!			@ r1 = cache
++	ldr	ip, [vtos_table, ip, asl #2]
++	and	r3, r3, #0xff000000
++	cmp	r3, #179 << 24
++	bne	.exit_putstatic_1
++	ldr	r3, [r1, #4]				@ r3 = object
++	ldr	r2, [r1, #12]				@ r2 = tos_type
++	ldr	lr, [r1, #8]				@ lr = offset
++	mov	r2, r2, lsr #28
++	cmp	r2, #tos_atos
++	beq	.exit_putstatic_1	@ atos - let main loop handle it
++	cmp	r2, #tos_ltos
++	cmpne	r2, #tos_dtos
++	beq	do_putstatic_1		@ ltos or dtos
++	cmp	r2, #tos_itos
++	strcs	tos, [r3, lr]		@ itos or ftos
++	movcs	pc, ip
++	cmp	r2, #tos_ctos
++	strcsh	tos, [r3, lr]		@ ctos or stos
++	strccb	tos, [r3, lr]		@ btos
++	mov	pc, ip
++do_putstatic_1:
++	POP(r1)
++	add	r3, r3, lr
++	stmia	r3, {r0, r1}
++	mov	pc, ip
++
++@ --- do_putfield_dtos -------------------------------------------------
++	OpcodeEntry	do_putfield_dtos
++	PUSHD	dtos
++	b	do_putfield_vtos
++@ --- do_putfield_vtos -------------------------------------------------
++	OpcodeEntry	do_putfield_vtos
++	POP(tos)
++@ --- do_putfield_itos -------------------------------------------------
++	OpcodeEntry	do_putfield_itos
++	ldrb	r3, [java_pc,#1]
++	ldrb	r2, [java_pc,#2]
++	ldrb	ip, [java_pc,#3]!
++	orr	r3, r3, r2, lsl #8
++	add	r1, constant_pool, #16
++	ldr	r3, [r1, r3, lsl #4]!			@ r1 = cache
++	ldr	ip, [vtos_table, ip, asl #2]
++	and	r3, r3, #0xff000000
++	cmp	r3, #181 << 24
++	bne	.exit_putfield_1
++	ldr	r2, [r1, #12]				@ r2 = tos_type
++	ldr	lr, [r1, #8]				@ lr = offset
++	mov	r2, r2, lsr #28
++	cmp	r2, #tos_atos
++	beq	.exit_putfield_1	@ atos - let main loop handle it
++	cmp	r2, #tos_ltos
++	cmpne	r2, #tos_dtos
++	beq	do_putfield_1		@ ltos or dtos
++	POP(r3)
++	cmp	r3, #0
++	beq	.exit_putfield_2
++	cmp	r2, #tos_itos
++	strcs	tos, [r3, lr]		@ itos or ftos
++	movcs	pc, ip
++	cmp	r2, #tos_ctos
++	strcsh	tos, [r3, lr]		@ ctos or stos
++	strccb	tos, [r3, lr]		@ btos
++	mov	pc, ip
++do_putfield_1:
++	POP(r1)
++	POP(r3)
++	cmp	r3, #0
++	beq	.exit_putfield_3
++	add	r3, r3, lr
++	stmia	r3, {r0, r1}
++	mov	pc, ip
++
++@ --- do_invokestatic_dtos -------------------------------------------------
++	OpcodeEntry	do_invokestatic_dtos
++	PUSHD	dtos
++	b	do_invokestatic_vtos
++@ --- do_invokestatic_itos -------------------------------------------------
++	OpcodeEntry	do_invokestatic_itos
++	PUSH(tos)
++@ --- do_invokestatic_vtos -------------------------------------------------
++	OpcodeEntry	do_invokestatic_vtos
++	ldrb	r3, [java_pc, #2]	@ zero_extendqisi2
++	ldrb	r2, [java_pc, #1]	@ zero_extendqisi2
++	add	r1, constant_pool, #16
++	orr	r2, r2, r3, asl #8
++	ldr	r3, [r1, r2, lsl #4]!
++	and	r3, r3, #0x00ff0000
++	cmp	r3, #opc_invokestatic << 16
++	bne	.exit_asm
++	ldr	r2, [r1, #4]
++	mov	ip, #msg_call_method
++	str	r2, [istate, #ISTATE_JAVA_CALL_MSG_CALLEE]
++	ldr	r3, [r2, #76]
++	str	ip, [istate, #ISTATE_JAVA_MSG]
++	str	r3, [istate, #ISTATE_JAVA_CALL_MSG_CALLEE_ENTRY]
++	mov	r3, #3
++	str	r3, [istate, #ISTATE_JAVA_CALL_MSG_BCP_ADVANCE]
++	str	java_pc, [istate, #ISTATE_JAVA_PC]
++	str	java_stack, [istate, #ISTATE_JAVA_STACK]
++	mov	r0, #1
++	ldmfd	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
++
++@ --- do_invokevirtual_dtos -------------------------------------------------
++	OpcodeEntry	do_invokevirtual_dtos
++	PUSHD	dtos
++	b	do_invokevirtual_vtos
++@ --- do_invokevirtual_itos -------------------------------------------------
++	OpcodeEntry	do_invokevirtual_itos
++	PUSH(tos)
++@ --- do_invokevirtual_vtos -------------------------------------------------
++	OpcodeEntry	do_invokevirtual_vtos
++	ldrb	r3, [java_pc, #2]	@ zero_extendqisi2
++	ldrb	r2, [java_pc, #1]	@ zero_extendqisi2
++	add	r1, constant_pool, #16
++	orr	r2, r2, r3, asl #8
++	ldr	r3, [r1, r2, lsl #4]!
++	and	r3, r3, #0xff000000
++	cmp	r3, #opc_invokevirtual << 24
++	bne	.exit_asm
++	ldr	r3, [r1, #12]
++	and	r2, r3, #255
++	ldr	r2, [java_stack, r2, asl #2]
++	cmp	r2, #0
++	beq	.exit_asm
++	tst	r3, #1 << vfinalMethod
++	ldr	r0, [r1, #8]
++	ldreq	r3, [r2, #4]
++	mov	ip, #msg_call_method
++	addeq	r3, r3, r0, asl #2
++	ldreq	r0, [r3, #304]
++	str	ip, [istate, #ISTATE_JAVA_MSG]
++	ldr	r3, [r0, #76]
++	str	r0, [istate, #ISTATE_JAVA_CALL_MSG_CALLEE]
++	str	r3, [istate, #ISTATE_JAVA_CALL_MSG_CALLEE_ENTRY]
++	str	java_pc, [istate, #ISTATE_JAVA_PC]
++	mov	r3, #3
++	str	r3, [istate, #ISTATE_JAVA_CALL_MSG_BCP_ADVANCE]
++	str	java_stack, [istate, #ISTATE_JAVA_STACK]
++	mov	r0, #1
++	ldmfd	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
++
++@ --- do_invokespecial_dtos -------------------------------------------------
++	OpcodeEntry	do_invokespecial_dtos
++	PUSHD	dtos
++	b	do_invokespecial_vtos
++@ --- do_invokespecial_itos -------------------------------------------------
++	OpcodeEntry	do_invokespecial_itos
++	PUSH(tos)
++@ --- do_invokespecial_vtos -------------------------------------------------
++	OpcodeEntry	do_invokespecial_vtos
++	ldrb	r3, [java_pc, #2]	@ zero_extendqisi2
++	ldrb	r2, [java_pc, #1]	@ zero_extendqisi2
++	add	r1, constant_pool, #16
++	orr	r2, r2, r3, asl #8
++	ldr	r3, [r1, r2, lsl #4]!
++	and	r3, r3, #0x00ff0000
++	cmp	r3, #opc_invokespecial << 24
++	bne	.exit_asm
++	ldr	r3, [r1, #12]
++	and	r2, r3, #255
++	ldr	r2, [java_stack, r2, asl #2]
++	cmp	r2, #0
++	beq	.exit_asm
++	ldr	r2, [r1, #4]
++	mov	ip, #msg_call_method
++	str	r2, [istate, #ISTATE_JAVA_CALL_MSG_CALLEE]
++	ldr	r3, [r2, #76]
++	str	ip, [istate, #ISTATE_JAVA_MSG]
++	str	r3, [istate, #ISTATE_JAVA_CALL_MSG_CALLEE_ENTRY]
++	mov	r3, #3
++	str	r3, [istate, #ISTATE_JAVA_CALL_MSG_BCP_ADVANCE]
++	str	java_pc, [istate, #ISTATE_JAVA_PC]
++	str	java_stack, [istate, #ISTATE_JAVA_STACK]
++	mov	r0, #1
++	ldmfd	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
++
++	OpcodeEntry	do_ireturn_dtos
++	OpcodeEntry	do_lreturn_dtos
++	OpcodeEntry	do_freturn_dtos
++	OpcodeEntry	do_dreturn_dtos
++	OpcodeEntry	do_areturn_dtos
++	OpcodeEntry	do_return_dtos
++	PUSHD	dtos
++	b	do_return_vtos
++	OpcodeEntry	do_ireturn_itos
++	OpcodeEntry	do_lreturn_itos
++	OpcodeEntry	do_freturn_itos
++	OpcodeEntry	do_dreturn_itos
++	OpcodeEntry	do_areturn_itos
++	OpcodeEntry	do_return_itos
++	PUSH(tos)
++	OpcodeEntry	do_ireturn_vtos
++	OpcodeEntry	do_lreturn_vtos
++	OpcodeEntry	do_freturn_vtos
++	OpcodeEntry	do_dreturn_vtos
++	OpcodeEntry	do_areturn_vtos
++	OpcodeEntry	do_return_vtos
++	ldr	r0, [istate, #ISTATE_JAVA_THREAD]
++	ldr	r2, [istate, #52]
++	ldr	ip, [r0, #4]
++	ldr	r3, [istate, #60]
++	cmp	ip, #0
++	bne	.exit_asm
++
++	cmp	r2, r3
++	bcc	.exit_asm		@ CC => r3 > r2 => r2 = end
++
++	ldrb	ip, [java_pc], #1
++	mov	r2, #msg_return_from_method
++	str	java_pc, [istate, #ISTATE_JAVA_PC]
++	str	java_stack, [istate, #ISTATE_JAVA_STACK]
++	str	r2, [istate, #ISTATE_JAVA_MSG]
++	str	ip, [istate, #ISTATE_JAVA_RETURN_KIND]
++	mov	r0, #1
++	ldmfd	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
++
++@ --- do_iload_vtos -------------------------------------------------
++	OpcodeEntry	do_iload_vtos
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	ldr	ip, [itos_table, ip, asl #2]
++	ldr	tos, [java_locals, -r3, asl #2]
++	mov	pc, ip
++
++@ --- do_iload_itos -------------------------------------------------
++	OpcodeEntry	do_iload_itos
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	PUSH(tos)
++	ldr	ip, [itos_table, ip, asl #2]
++	ldr	tos, [java_locals, -r3, asl #2]
++	mov	pc, ip
++
++@ --- do_aload_vtos -------------------------------------------------
++	OpcodeEntry	do_aload_vtos
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	ldr	ip, [itos_table, ip, asl #2]
++	ldr	tos, [java_locals, -r3, asl #2]
++	mov	pc, ip
++
++@ --- do_aload_itos -------------------------------------------------
++	OpcodeEntry	do_aload_itos
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	PUSH(tos)
++	ldr	ip, [itos_table, ip, asl #2]
++	ldr	tos, [java_locals, -r3, asl #2]
++	mov	pc, ip
++
++@ --- do_iconst_1_vtos -------------------------------------------------
++	OpcodeEntry	do_iconst_1_vtos
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #1
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_iconst_1_itos -------------------------------------------------
++	OpcodeEntry	do_iconst_1_itos
++	ldrb	r3, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	tos, #1
++	mov	pc, r2
++
++@ --- do_ifnull_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifnull_vtos_unsafe
++@ --- do_ifeq_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifeq_vtos_unsafe
++
++	POP(tos)
++
++@ --- do_ifnull_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifnull_itos_unsafe
++@ --- do_ifeq_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifeq_itos_unsafe
++
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	tos, #0
++	orreq	ip, ip, r1, lsl #8
++	ldreqb	ip, [java_pc, ip]!
++	ldrneb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_ifnonnull_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifnonnull_vtos_unsafe
++@ --- do_ifne_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifne_vtos_unsafe
++
++	POP(tos)
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	tos, #0
++	orrne	ip, ip, r1, lsl #8
++	ldrneb	ip, [java_pc, ip]!
++	ldreqb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++	OpcodeEntry do_ifnonnull_itos_unsafe
++@ --- do_ifne_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifne_itos_unsafe
++
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	tos, #0
++	orrne	ip, ip, r1, lsl #8
++	ldrneb	ip, [java_pc, ip]!
++	ldreqb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_ifle_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifle_vtos_unsafe
++
++	POP(tos)
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	tos, #0
++	orrle	ip, ip, r1, lsl #8
++	ldrleb	ip, [java_pc, ip]!
++	ldrgtb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_ifle_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifle_itos_unsafe
++
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	tos, #0
++	orrle	ip, ip, r1, lsl #8
++	ldrleb	ip, [java_pc, ip]!
++	ldrgtb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_ifgt_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifgt_vtos_unsafe
++
++	POP(tos)
++
++@ --- do_ifgt_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifgt_itos_unsafe
++
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	tos, #0
++	orrgt	ip, ip, r1, lsl #8
++	ldrgtb	ip, [java_pc, ip]!
++	ldrleb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_ifge_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifge_vtos_unsafe
++
++	POP(tos)
++
++@ --- do_ifge_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_ifge_itos_unsafe
++
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	tos, #0
++	orrge	ip, ip, r1, lsl #8
++	ldrgeb	ip, [java_pc, ip]!
++	ldrltb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_iflt_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_iflt_vtos_unsafe
++
++	POP(tos)
++
++@ --- do_iflt_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_iflt_itos_unsafe
++
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	tos, #0
++	orrlt	ip, ip, r1, lsl #8
++	ldrltb	ip, [java_pc, ip]!
++	ldrgeb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_if_acmpeq_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_acmpeq_vtos_unsafe
++@ --- do_if_icmpeq_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmpeq_vtos_unsafe
++
++	POP(tos)
++
++@ --- do_if_acmpeq_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_acmpeq_itos_unsafe
++@ --- do_if_icmpeq_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmpeq_itos_unsafe
++
++	POP(r3)
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	r3, tos
++	orreq	ip, ip, r1, lsl #8
++	ldreqb	ip, [java_pc, ip]!
++	ldrneb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_if_acmpne_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_acmpne_vtos_unsafe
++@ --- do_if_icmpne_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmpne_vtos_unsafe
++
++	POP(tos)
++
++@ --- do_if_acmpne_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_acmpne_itos_unsafe
++@ --- do_if_icmpne_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmpne_itos_unsafe
++
++	POP(r3)
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	r3, tos
++	orrne	ip, ip, r1, lsl #8
++	ldrneb	ip, [java_pc, ip]!
++	ldreqb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_if_icmplt_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmplt_vtos_unsafe
++
++	POP(tos)
++	POP(r3)
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	r3, tos
++	orrlt	ip, ip, r1, lsl #8
++	ldrltb	ip, [java_pc, ip]!
++	ldrgeb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_if_icmplt_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmplt_itos_unsafe
++
++	POP(r3)
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	r3, tos
++	orrlt	ip, ip, r1, lsl #8
++	ldrltb	ip, [java_pc, ip]!
++	ldrgeb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_if_icmpge_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmpge_vtos_unsafe
++
++	POP(tos)
++
++@ --- do_if_icmpge_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmpge_itos_unsafe
++
++	POP(r3)
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	r3, tos
++	orrge	ip, ip, r1, lsl #8
++	ldrgeb	ip, [java_pc, ip]!
++	ldrltb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_if_icmpgt_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmpgt_vtos_unsafe
++
++	POP(tos)
++
++@ --- do_if_icmpgt_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmpgt_itos_unsafe
++
++	POP(r3)
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	r3, tos
++	orrgt	ip, ip, r1, lsl #8
++	ldrgtb	ip, [java_pc, ip]!
++	ldrleb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_if_icmple_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmple_vtos_unsafe
++
++	POP(tos)
++
++@ --- do_if_icmple_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_if_icmple_itos_unsafe
++
++	POP(r3)
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	cmp	r3, tos
++	orrle	ip, ip, r1, lsl #8
++	ldrleb	ip, [java_pc, ip]!
++	ldrgtb	ip, [java_pc, #3]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_goto_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_goto_itos_unsafe
++
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orr	ip, ip, r1, lsl #8
++	ldrb	ip, [java_pc, ip]!
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_goto_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_goto_vtos_unsafe
++
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orr	ip, ip, r1, lsl #8
++	ldrb	ip, [java_pc, ip]!
++	ldr	ip, [vtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_iload_0_itos -------------------------------------------------
++	OpcodeEntry	do_iload_0_itos
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [itos_table, r2, asl #2]
++	ldr	tos, [java_locals, #0]
++	mov	pc, r2
++
++@ --- do_aload_0_itos -------------------------------------------------
++	OpcodeEntry	do_aload_0_itos
++	PUSH(tos)
++@ --- do_aload_0_vtos -------------------------------------------------
++	OpcodeEntry	do_aload_0_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #0]
++	cmp	r2, #opc_getfield
++	ldrne	pc, [itos_table, r2, asl #2]
++	ldrb	r3, [java_pc,#1]
++	ldrb	r2, [java_pc,#2]
++	ldrb	ip, [java_pc,#3]!
++	orr	r3, r3, r2, lsl #8
++	add	r1, constant_pool, #16
++	ldr	r3, [r1, r3, lsl #4]!			@ r1 = cache
++	ldr	ip, [itos_table, ip, asl #2]
++	and	r3, r3, #0x00ff0000
++	cmp	r3, #180 << 16
++	bne	.exit_getfield
++	movs	r3, r0
++	beq	.exit_getfield
++	ldr	r2, [r1, #12]
++	ldr	lr, [r1, #8]
++	movs	r2, r2, lsr #29
++	ldrhi	tos, [r3, lr]		@ C = 1, Z = 0 => R2 == 3, 5, 7
++	movhi	pc, ip			@ early exit for word accesses
++	ldreqsb	tos, [r3, lr]		@ Z = 1 => R2 = 0, 1
++	ldrcsh	tos, [r3, lr]		@ C = 1 => R2 = 1 (overwrites previous load)
++	moveq	pc, ip
++	tst	r2, #2
++	addne	r3, r3, lr
++	ldmneia	r3, {r0, r1}		@ 4, 6
++	PUSHNE(r1)
++	movne	pc, ip
++	ldrsh	tos, [r3, lr]		@ 2
++	mov	pc, ip
++
++@ --- do_iload_0_vtos -------------------------------------------------
++	OpcodeEntry	do_iload_0_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #0]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_aload_1_itos -------------------------------------------------
++	OpcodeEntry	do_aload_1_itos
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [itos_table, r2, asl #2]
++	ldr	tos, [java_locals, #-4]
++	mov	pc, r2
++
++@ --- do_iload_1_itos -------------------------------------------------
++	OpcodeEntry	do_iload_1_itos
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [itos_table, r2, asl #2]
++	ldr	tos, [java_locals, #-4]
++	mov	pc, r2
++
++@ --- do_aload_1_vtos -------------------------------------------------
++	OpcodeEntry	do_aload_1_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-4]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_iload_1_vtos -------------------------------------------------
++	OpcodeEntry	do_iload_1_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-4]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_aload_2_itos -------------------------------------------------
++	OpcodeEntry	do_aload_2_itos
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [itos_table, r2, asl #2]
++	ldr	tos, [java_locals, #-8]
++	mov	pc, r2
++
++@ --- do_iload_2_itos -------------------------------------------------
++	OpcodeEntry	do_iload_2_itos
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [itos_table, r2, asl #2]
++	ldr	tos, [java_locals, #-8]
++	mov	pc, r2
++
++@ --- do_aload_2_vtos -------------------------------------------------
++	OpcodeEntry	do_aload_2_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-8]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_iload_2_vtos -------------------------------------------------
++	OpcodeEntry	do_iload_2_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-8]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_aload_3_itos -------------------------------------------------
++	OpcodeEntry	do_aload_3_itos
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [itos_table, r2, asl #2]
++	ldr	tos, [java_locals, #-12]
++	mov	pc, r2
++
++@ --- do_iload_3_itos -------------------------------------------------
++	OpcodeEntry	do_iload_3_itos
++	ldrb	r2, [java_pc, #1]!
++	PUSH(tos)
++	ldr	r2, [itos_table, r2, asl #2]
++	ldr	tos, [java_locals, #-12]
++	mov	pc, r2
++
++@ --- do_aload_3_vtos -------------------------------------------------
++	OpcodeEntry	do_aload_3_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-12]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_iload_3_vtos -------------------------------------------------
++	OpcodeEntry	do_iload_3_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-12]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_iaload_vtos -------------------------------------------------
++	OpcodeEntry	do_iaload_vtos
++	POP(tos)
++@ --- do_iaload_itos -------------------------------------------------
++	OpcodeEntry	do_iaload_itos
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	.itos_exit_iaload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	.itos_exit_iaload
++	ldr	ip, [itos_table, ip, asl #2]
++	add	r3, r2, tos, lsl #2
++	ldr	tos, [r3, #12]
++	mov	pc, ip
++
++@ --- do_aaload_vtos -------------------------------------------------
++	OpcodeEntry	do_aaload_vtos
++	POP(tos)
++@ --- do_aaload_itos -------------------------------------------------
++	OpcodeEntry	do_aaload_itos
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	.itos_exit_iaload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	.itos_exit_iaload
++	ldr	ip, [itos_table, ip, asl #2]
++	add	r3, r2, tos, lsl #2
++	ldr	tos, [r3, #12]
++	mov	pc, ip
++
++@ --- do_istore_vtos -------------------------------------------------
++	OpcodeEntry	do_istore_vtos
++	POP(tos)
++@ --- do_istore_itos -------------------------------------------------
++	OpcodeEntry	do_istore_itos
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	ldr	ip, [vtos_table, ip, asl #2]
++	str	tos, [java_locals, -r3, asl #2]
++	mov	pc, ip
++
++@ --- do_istore_0_vtos -------------------------------------------------
++	OpcodeEntry	do_istore_0_vtos
++	POP(tos)
++@ --- do_istore_0_itos -------------------------------------------------
++	OpcodeEntry	do_istore_0_itos
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [vtos_table, r2, asl #2]
++	str	tos, [java_locals, #0]
++	mov	pc, r2
++
++@ --- do_istore_1_vtos -------------------------------------------------
++	OpcodeEntry	do_istore_1_vtos
++	POP(tos)
++@ --- do_istore_1_itos -------------------------------------------------
++	OpcodeEntry	do_istore_1_itos
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [vtos_table, r2, asl #2]
++	str	tos, [java_locals, #-4]
++	mov	pc, r2
++
++@ --- do_istore_2_vtos -------------------------------------------------
++	OpcodeEntry	do_istore_2_vtos
++	POP(tos)
++@ --- do_istore_2_itos -------------------------------------------------
++	OpcodeEntry	do_istore_2_itos
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [vtos_table, r2, asl #2]
++	str	tos, [java_locals, #-8]
++	mov	pc, r2
++
++@ --- do_istore_3_vtos -------------------------------------------------
++	OpcodeEntry	do_istore_3_vtos
++	POP(tos)
++@ --- do_istore_3_itos -------------------------------------------------
++	OpcodeEntry	do_istore_3_itos
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [vtos_table, r2, asl #2]
++	str	tos, [java_locals, #-12]
++	mov	pc, r2
++
++@ --- do_iinc_vtos -------------------------------------------------
++	OpcodeEntry	do_iinc_vtos
++	ldrb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #3]!
++	ldrsb	r1, [java_pc, #-1]
++	ldr	r3, [java_locals, -r2, lsl #2]
++	ldr	ip, [vtos_table, ip, asl #2]
++	add	r3, r3, r1
++	str	r3, [java_locals, -r2, lsl #2]
++	mov	pc, ip
++
++@ --- do_iinc_itos -------------------------------------------------
++	OpcodeEntry	do_iinc_itos
++	ldrb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #3]!
++	ldrsb	r1, [java_pc, #-1]
++	ldr	r3, [java_locals, -r2, lsl #2]
++	ldr	ip, [itos_table, ip, asl #2]
++	add	r3, r3, r1
++	str	r3, [java_locals, -r2, lsl #2]
++	mov	pc, ip
++
++@ --- do_iadd_vtos -------------------------------------------------
++	OpcodeEntry	do_iadd_vtos
++	POP(tos)
++@ --- do_iadd_itos -------------------------------------------------
++	OpcodeEntry	do_iadd_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [itos_table, ip, asl #2]
++	add	r0, r0, r1
++	mov	pc, ip
++
++@ --- do_isub_vtos -------------------------------------------------
++	OpcodeEntry	do_isub_vtos
++	POP(tos)
++@ --- do_isub_itos -------------------------------------------------
++	OpcodeEntry	do_isub_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [itos_table, ip, asl #2]
++	sub	r0, r1, r0
++	mov	pc, ip
++
++@ --- do_iand_vtos -------------------------------------------------
++	OpcodeEntry	do_iand_vtos
++	POP(tos)
++@ --- do_iand_itos -------------------------------------------------
++	OpcodeEntry	do_iand_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [itos_table, ip, asl #2]
++	and	r0, r1, r0
++	mov	pc, ip
++
++@ --- do_ior_vtos -------------------------------------------------
++	OpcodeEntry	do_ior_vtos
++	POP(tos)
++@ --- do_ior_itos -------------------------------------------------
++	OpcodeEntry	do_ior_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [itos_table, ip, asl #2]
++	orr	r0, r1, r0
++	mov	pc, ip
++
++@ --- do_ixor_vtos -------------------------------------------------
++	OpcodeEntry	do_ixor_vtos
++	POP(tos)
++@ --- do_ixor_itos -------------------------------------------------
++	OpcodeEntry	do_ixor_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [itos_table, ip, asl #2]
++	eor	r0, r1, r0
++	mov	pc, ip
++
++@ --- do_aconst_null_itos -------------------------------------------------
++	OpcodeEntry	do_aconst_null_itos
++@ --- do_iconst_0_itos -------------------------------------------------
++	OpcodeEntry	do_iconst_0_itos
++	PUSH(tos)
++@ --- do_aconst_null_vtos -------------------------------------------------
++	OpcodeEntry	do_aconst_null_vtos
++@ --- do_iconst_0_vtos -------------------------------------------------
++	OpcodeEntry	do_iconst_0_vtos
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #0
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_iconst_2_itos -------------------------------------------------
++	OpcodeEntry	do_iconst_2_itos
++	PUSH(tos)
++@ --- do_iconst_2_vtos -------------------------------------------------
++	OpcodeEntry	do_iconst_2_vtos
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #2
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_iconst_3_itos -------------------------------------------------
++	OpcodeEntry	do_iconst_3_itos
++	PUSH(tos)
++@ --- do_iconst_3_vtos -------------------------------------------------
++	OpcodeEntry	do_iconst_3_vtos
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #3
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_iconst_4_itos -------------------------------------------------
++	OpcodeEntry	do_iconst_4_itos
++	PUSH(tos)
++@ --- do_iconst_4_vtos -------------------------------------------------
++	OpcodeEntry	do_iconst_4_vtos
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #4
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_iconst_5_itos -------------------------------------------------
++	OpcodeEntry	do_iconst_5_itos
++	PUSH(tos)
++@ --- do_iconst_5_vtos -------------------------------------------------
++	OpcodeEntry	do_iconst_5_vtos
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #5
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_nop_itos -------------------------------------------------
++	OpcodeEntry	do_nop_itos
++	PUSH(tos)
++@ --- do_nop_vtos -------------------------------------------------
++	OpcodeEntry	do_nop_vtos
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [vtos_table, r3, asl #2]
++	mov	pc, r2
++
++@ ---- INSERT
++
++@ --- do_iconst_m1_itos -------------------------------------------------
++	OpcodeEntry	do_iconst_m1_itos
++	PUSH(tos)
++@ --- do_iconst_m1_vtos -------------------------------------------------
++	OpcodeEntry	do_iconst_m1_vtos
++	ldrb	r3, [java_pc, #1]!
++	mvn	tos, #0
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_fconst_0_itos -------------------------------------------------
++	OpcodeEntry	do_fconst_0_itos
++	PUSH(tos)
++@ --- do_fconst_0_vtos -------------------------------------------------
++	OpcodeEntry	do_fconst_0_vtos
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #0
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_fconst_1_itos -------------------------------------------------
++	OpcodeEntry	do_fconst_1_itos
++	PUSH(tos)
++@ --- do_fconst_1_vtos -------------------------------------------------
++	OpcodeEntry	do_fconst_1_vtos
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #1065353216
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_fconst_2_itos -------------------------------------------------
++	OpcodeEntry	do_fconst_2_itos
++	PUSH(tos)
++@ --- do_fconst_2_vtos -------------------------------------------------
++	OpcodeEntry	do_fconst_2_vtos
++	ldrb	r3, [java_pc, #1]!
++	mov	tos, #1073741824
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_dconst_0_itos -------------------------------------------------
++	OpcodeEntry	do_dconst_0_itos
++@ --- do_lconst_0_itos -------------------------------------------------
++	OpcodeEntry	do_lconst_0_itos
++	PUSH(tos)
++@ --- do_dconst_0_vtos -------------------------------------------------
++	OpcodeEntry	do_dconst_0_vtos
++@ --- do_lconst_0_vtos -------------------------------------------------
++	OpcodeEntry	do_lconst_0_vtos
++	ldrb	r2, [java_pc, #1]!
++	mov	tos, #0
++	ldr	r2, [itos_table, r2, asl #2]
++	PUSH(tos)
++	mov	pc, r2
++
++@ --- do_lconst_1_itos -------------------------------------------------
++	OpcodeEntry	do_lconst_1_itos
++	PUSH(tos)
++@ --- do_lconst_1_vtos -------------------------------------------------
++	OpcodeEntry	do_lconst_1_vtos
++	ldrb	r2, [java_pc, #1]!
++	mov	r0, #1
++	mov	r1, #0
++	ldr	r2, [itos_table, r2, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++@ --- do_dconst_1_itos -------------------------------------------------
++	OpcodeEntry	do_dconst_1_itos
++	PUSH(tos)
++@ --- do_dconst_1_vtos -------------------------------------------------
++	OpcodeEntry	do_dconst_1_vtos
++	ldrb	r2, [java_pc, #1]!
++	mov	r1, #0x3f000000
++	mov	r0, #0
++	ldr	r2, [itos_table, r2, asl #2]
++	orr	r1, r1, #0x00f00000
++	PUSH(r1)
++	mov	pc, r2
++
++@ --- do_bipush_itos -------------------------------------------------
++	OpcodeEntry	do_bipush_itos
++	PUSH(tos)
++@ --- do_bipush_vtos -------------------------------------------------
++	OpcodeEntry	do_bipush_vtos
++	ldrb	r2, [java_pc, #2]!
++	ldrsb	tos, [java_pc, #-1]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_sipush_itos -------------------------------------------------
++	OpcodeEntry	do_sipush_itos
++	PUSH(tos)
++@ --- do_sipush_vtos -------------------------------------------------
++	OpcodeEntry	do_sipush_vtos
++	ldrb	r2, [java_pc, #3]!
++	ldrsb	r0, [java_pc, #-2]
++	ldrb	r1, [java_pc, #-1]
++	ldr	r2, [itos_table, r2, asl #2]
++	orr	tos, r1, r0, lsl #8
++	mov	pc, r2
++
++@ --- do_fload_itos -------------------------------------------------
++	OpcodeEntry	do_fload_itos
++	PUSH(tos)
++@ --- do_fload_vtos -------------------------------------------------
++	OpcodeEntry	do_fload_vtos
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	ldr	ip, [itos_table, ip, asl #2]
++	ldr	tos, [java_locals, -r3, asl #2]
++	mov	pc, ip
++
++@ --- do_dload_itos -------------------------------------------------
++	OpcodeEntry	do_dload_itos
++@ --- do_lload_itos -------------------------------------------------
++	OpcodeEntry	do_lload_itos
++	PUSH(tos)
++@ --- do_dload_vtos -------------------------------------------------
++	OpcodeEntry	do_dload_vtos
++@ --- do_lload_vtos -------------------------------------------------
++	OpcodeEntry	do_lload_vtos
++	ldrb	r3, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]!
++	sub	r3, java_locals, r3, lsl #2
++	ldmda	r3, {r0, r1}
++	ldr	r2, [itos_table, ip, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++@ --- do_fload_0_itos -------------------------------------------------
++	OpcodeEntry	do_fload_0_itos
++	PUSH(tos)
++@ --- do_fload_0_vtos -------------------------------------------------
++	OpcodeEntry	do_fload_0_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #0]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_fload_1_itos -------------------------------------------------
++	OpcodeEntry	do_fload_1_itos
++	PUSH(tos)
++@ --- do_fload_1_vtos -------------------------------------------------
++	OpcodeEntry	do_fload_1_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-4]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_fload_2_itos -------------------------------------------------
++	OpcodeEntry	do_fload_2_itos
++	PUSH(tos)
++@ --- do_fload_2_vtos -------------------------------------------------
++	OpcodeEntry	do_fload_2_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-8]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_fload_3_itos -------------------------------------------------
++	OpcodeEntry	do_fload_3_itos
++	PUSH(tos)
++@ --- do_fload_3_vtos -------------------------------------------------
++	OpcodeEntry	do_fload_3_vtos
++	ldrb	r2, [java_pc, #1]!
++	ldr	tos, [java_locals, #-12]
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_dload_0_itos -------------------------------------------------
++	OpcodeEntry	do_dload_0_itos
++@ --- do_lload_0_itos -------------------------------------------------
++	OpcodeEntry	do_lload_0_itos
++	PUSH(tos)
++@ --- do_dload_0_vtos -------------------------------------------------
++	OpcodeEntry	do_dload_0_vtos
++@ --- do_lload_0_vtos -------------------------------------------------
++	OpcodeEntry	do_lload_0_vtos
++	ldrb	ip, [java_pc, #1]!
++	ldmda	java_locals, {r0-r1}
++	ldr	ip, [itos_table, ip, asl #2]
++	PUSH(r1)
++	mov	pc, ip
++
++@ --- do_dload_1_itos -------------------------------------------------
++	OpcodeEntry	do_dload_1_itos
++@ --- do_lload_1_itos -------------------------------------------------
++	OpcodeEntry	do_lload_1_itos
++	PUSH(tos)
++@ --- do_dload_1_vtos -------------------------------------------------
++	OpcodeEntry	do_dload_1_vtos
++@ --- do_lload_1_vtos -------------------------------------------------
++	OpcodeEntry	do_lload_1_vtos
++	ldrb	ip, [java_pc, #1]!
++	ldmdb	java_locals, {r0-r1}
++	ldr	ip, [itos_table, ip, asl #2]
++	PUSH(r1)
++	mov	pc, ip
++
++@ --- do_dload_2_itos -------------------------------------------------
++	OpcodeEntry	do_dload_2_itos
++@ --- do_lload_2_itos -------------------------------------------------
++	OpcodeEntry	do_lload_2_itos
++	PUSH(tos)
++@ --- do_dload_2_vtos -------------------------------------------------
++	OpcodeEntry	do_dload_2_vtos
++@ --- do_lload_2_vtos -------------------------------------------------
++	OpcodeEntry	do_lload_2_vtos
++	ldrb	ip, [java_pc, #1]!
++	ldr	r2, [java_locals, #-8]
++	ldr	r0, [java_locals, #-12]
++	ldr	ip, [itos_table, ip, asl #2]
++	PUSH(r2)
++	mov	pc, ip
++
++@ --- do_dload_3_itos -------------------------------------------------
++	OpcodeEntry	do_dload_3_itos
++@ --- do_lload_3_itos -------------------------------------------------
++	OpcodeEntry	do_lload_3_itos
++	PUSH(tos)
++@ --- do_dload_3_vtos -------------------------------------------------
++	OpcodeEntry	do_dload_3_vtos
++@ --- do_lload_3_vtos -------------------------------------------------
++	OpcodeEntry	do_lload_3_vtos
++	ldrb	ip, [java_pc, #1]!
++	ldr	r2, [java_locals, #-12]
++	ldr	r0, [java_locals, #-16]
++	ldr	ip, [itos_table, ip, asl #2]
++	PUSH(r2)
++	mov	pc, ip
++
++@ --- do_faload_vtos -------------------------------------------------
++	OpcodeEntry	do_faload_vtos
++	POP(tos)
++@ --- do_faload_itos -------------------------------------------------
++	OpcodeEntry	do_faload_itos
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	.itos_exit_iaload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	.itos_exit_iaload
++	ldr	ip, [itos_table, ip, asl #2]
++	add	r3, r2, tos, lsl #2
++	ldr	tos, [r3, #12]
++	mov	pc, ip
++
++@ --- do_baload_vtos -------------------------------------------------
++	OpcodeEntry	do_baload_vtos
++	POP(tos)
++@ --- do_baload_itos -------------------------------------------------
++	OpcodeEntry	do_baload_itos
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	.itos_exit_iaload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	.itos_exit_iaload
++	ldr	ip, [itos_table, ip, asl #2]
++	add	r3, r2, tos
++	ldrsb	tos, [r3, #12]
++	mov	pc, ip
++
++@ --- do_caload_vtos -------------------------------------------------
++	OpcodeEntry	do_caload_vtos
++	POP(tos)
++@ --- do_caload_itos -------------------------------------------------
++	OpcodeEntry	do_caload_itos
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	.itos_exit_iaload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	.itos_exit_iaload
++	ldr	ip, [itos_table, ip, asl #2]
++	add	r3, r2, tos, lsl #1
++	ldrh	tos, [r3, #12]
++	mov	pc, ip
++
++@ --- do_saload_vtos -------------------------------------------------
++	OpcodeEntry	do_saload_vtos
++	POP(tos)
++@ --- do_saload_itos -------------------------------------------------
++	OpcodeEntry	do_saload_itos
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	.itos_exit_iaload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	.itos_exit_iaload
++	ldr	ip, [itos_table, ip, asl #2]
++	add	r3, r2, tos, lsl #1
++	ldrsh	tos, [r3, #12]
++	mov	pc, ip
++
++@ --- do_daload_vtos -------------------------------------------------
++	OpcodeEntry	do_daload_vtos
++@ --- do_laload_vtos -------------------------------------------------
++	OpcodeEntry	do_laload_vtos
++	POP(tos)
++@ --- do_daload_itos -------------------------------------------------
++	OpcodeEntry	do_daload_itos
++@ --- do_laload_itos -------------------------------------------------
++	OpcodeEntry	do_laload_itos
++	POP(r2)
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	.itos_exit_laload
++	ldr	r3, [r2, #8]
++	cmp	tos, r3
++	bcs	.itos_exit_laload
++	add	r3, r2, tos, asl #3
++	ldr	r2, [r3, #20]
++	ldr	ip, [itos_table, ip, asl #2]
++	ldr	tos, [r3, #16]
++	PUSH(r2)
++	mov	pc, ip
++
++@ --- do_fstore_vtos -------------------------------------------------
++	OpcodeEntry	do_fstore_vtos
++	POP(tos)
++@ --- do_fstore_itos -------------------------------------------------
++	OpcodeEntry	do_fstore_itos
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	ldr	ip, [vtos_table, ip, asl #2]
++	str	tos, [java_locals, -r3, asl #2]
++	mov	pc, ip
++
++@ --- do_dstore_vtos -------------------------------------------------
++	OpcodeEntry	do_dstore_vtos
++@ --- do_lstore_vtos -------------------------------------------------
++	OpcodeEntry	do_lstore_vtos
++	POP(tos)
++@ --- do_dstore_itos -------------------------------------------------
++	OpcodeEntry	do_dstore_itos
++@ --- do_lstore_itos -------------------------------------------------
++	OpcodeEntry	do_lstore_itos
++	ldrb	ip, [java_pc, #2]!
++	ldrb	r3, [java_pc, #-1]
++	POP(r1)
++	ldr	ip, [vtos_table, ip, asl #2]
++	sub	r3, java_locals, r3, lsl #2
++	stmda	r3, {r0, r1}
++	mov	pc, ip
++
++@ --- do_fstore_0_vtos -------------------------------------------------
++	OpcodeEntry	do_fstore_0_vtos
++	POP(tos)
++@ --- do_fstore_0_itos -------------------------------------------------
++	OpcodeEntry	do_fstore_0_itos
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [vtos_table, r2, asl #2]
++	str	tos, [java_locals, #0]
++	mov	pc, r2
++
++@ --- do_fstore_1_vtos -------------------------------------------------
++	OpcodeEntry	do_fstore_1_vtos
++	POP(tos)
++@ --- do_fstore_1_itos -------------------------------------------------
++	OpcodeEntry	do_fstore_1_itos
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [vtos_table, r2, asl #2]
++	str	tos, [java_locals, #-4]
++	mov	pc, r2
++
++@ --- do_fstore_2_vtos -------------------------------------------------
++	OpcodeEntry	do_fstore_2_vtos
++	POP(tos)
++@ --- do_fstore_2_itos -------------------------------------------------
++	OpcodeEntry	do_fstore_2_itos
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [vtos_table, r2, asl #2]
++	str	tos, [java_locals, #-8]
++	mov	pc, r2
++
++@ --- do_fstore_3_vtos -------------------------------------------------
++	OpcodeEntry	do_fstore_3_vtos
++	POP(tos)
++@ --- do_fstore_3_itos -------------------------------------------------
++	OpcodeEntry	do_fstore_3_itos
++	ldrb	r2, [java_pc, #1]!
++	ldr	r2, [vtos_table, r2, asl #2]
++	str	tos, [java_locals, #-12]
++	mov	pc, r2
++
++@ --- do_dstore_0_vtos -------------------------------------------------
++	OpcodeEntry	do_dstore_0_vtos
++@ --- do_lstore_0_vtos -------------------------------------------------
++	OpcodeEntry	do_lstore_0_vtos
++	POP(tos)
++@ --- do_dstore_0_itos -------------------------------------------------
++	OpcodeEntry	do_dstore_0_itos
++@ --- do_lstore_0_itos -------------------------------------------------
++	OpcodeEntry	do_lstore_0_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [vtos_table, ip, asl #2]
++	stmda	java_locals, {r0,r1}
++	mov	pc, ip
++
++@ --- do_dstore_1_vtos -------------------------------------------------
++	OpcodeEntry	do_dstore_1_vtos
++@ --- do_lstore_1_vtos -------------------------------------------------
++	OpcodeEntry	do_lstore_1_vtos
++	POP(tos)
++@ --- do_dstore_1_itos -------------------------------------------------
++	OpcodeEntry	do_dstore_1_itos
++@ --- do_lstore_1_itos -------------------------------------------------
++	OpcodeEntry	do_lstore_1_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [vtos_table, ip, asl #2]
++	stmdb	java_locals, {r0,r1}
++	mov	pc, ip
++
++@ --- do_dstore_2_vtos -------------------------------------------------
++	OpcodeEntry	do_dstore_2_vtos
++@ --- do_lstore_2_vtos -------------------------------------------------
++	OpcodeEntry	do_lstore_2_vtos
++	POP(tos)
++@ --- do_dstore_2_itos -------------------------------------------------
++	OpcodeEntry	do_dstore_2_itos
++@ --- do_lstore_2_itos -------------------------------------------------
++	OpcodeEntry	do_lstore_2_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r3)
++	str	tos, [java_locals, #-12]
++	ldr	ip, [vtos_table, ip, asl #2]
++	str	r3, [java_locals, #-8]
++	mov	pc, ip
++
++@ --- do_dstore_3_vtos -------------------------------------------------
++	OpcodeEntry	do_dstore_3_vtos
++@ --- do_lstore_3_vtos -------------------------------------------------
++	OpcodeEntry	do_lstore_3_vtos
++	POP(tos)
++@ --- do_dstore_3_itos -------------------------------------------------
++	OpcodeEntry	do_dstore_3_itos
++@ --- do_lstore_3_itos -------------------------------------------------
++	OpcodeEntry	do_lstore_3_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r3)
++	str	tos, [java_locals, #-16]
++	ldr	ip, [vtos_table, ip, asl #2]
++	str	r3, [java_locals, #-12]
++	mov	pc, ip
++
++@ --- do_fastore_vtos -------------------------------------------------
++	OpcodeEntry	do_fastore_vtos
++@ --- do_iastore_vtos -------------------------------------------------
++	OpcodeEntry	do_iastore_vtos
++	POP(tos)
++@ --- do_fastore_itos -------------------------------------------------
++	OpcodeEntry	do_fastore_itos
++@ --- do_iastore_itos -------------------------------------------------
++	OpcodeEntry	do_iastore_itos
++	ldmib	java_stack!, {r1, r2}	@ r0 = value@ r1 = index@ r2 = arrayref
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	.itos_exit_iastore
++	ldr	r3, [r2, #8]
++	cmp	r1, r3
++	bcs	.itos_exit_iastore
++	ldr	ip, [vtos_table, ip, asl #2]
++	add	r3, r2, r1, lsl #2
++	str	tos, [r3, #12]
++	mov	pc, ip
++
++@ --- do_bastore_vtos -------------------------------------------------
++	OpcodeEntry	do_bastore_vtos
++	POP(tos)
++@ --- do_bastore_itos -------------------------------------------------
++	OpcodeEntry	do_bastore_itos
++	ldmib	java_stack!, {r1, r2}	@ r0 = value@ r1 = index@ r2 = arrayref
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	.itos_exit_iastore
++	ldr	r3, [r2, #8]
++	cmp	r1, r3
++	bcs	.itos_exit_iastore
++	ldr	ip, [vtos_table, ip, asl #2]
++	add	r3, r2, r1
++	strb	tos, [r3, #12]
++	mov	pc, ip
++
++@ --- do_castore_vtos -------------------------------------------------
++	OpcodeEntry	do_castore_vtos
++@ --- do_sastore_vtos -------------------------------------------------
++	OpcodeEntry	do_sastore_vtos
++	POP(tos)
++@ --- do_castore_itos -------------------------------------------------
++	OpcodeEntry	do_castore_itos
++@ --- do_sastore_itos -------------------------------------------------
++	OpcodeEntry	do_sastore_itos
++	ldmib	java_stack!, {r1, r2}	@ r0 = value@ r1 = index@ r2 = arrayref
++	ldrb	ip, [java_pc, #1]!
++	cmp	r2, #0
++	beq	.itos_exit_iastore
++	ldr	r3, [r2, #8]
++	cmp	r1, r3
++	bcs	.itos_exit_iastore
++	ldr	ip, [vtos_table, ip, asl #2]
++	add	r3, r2, r1, lsl #1
++	strh	tos, [r3, #12]
++	mov	pc, ip
++
++@ --- do_dastore_vtos -------------------------------------------------
++	OpcodeEntry	do_dastore_vtos
++@ --- do_lastore_vtos -------------------------------------------------
++	OpcodeEntry	do_lastore_vtos
++	POP(tos)
++@ --- do_dastore_itos -------------------------------------------------
++	OpcodeEntry	do_dastore_itos
++@ --- do_lastore_itos -------------------------------------------------
++	OpcodeEntry	do_lastore_itos
++	ldmib	java_stack!, {r1, r2, r3} @ r0,r1 = value, r2 = index, r3 = arrayref
++	ldrb	ip, [java_pc, #1]!
++	cmp	r3, #0
++	beq	.itos_exit_lastore
++	ldr	lr, [r3, #8]
++	cmp	r2, lr
++	bcs	.itos_exit_lastore
++	add	r3, r3, r2, lsl #3
++	ldr	ip, [vtos_table, ip, asl #2]
++	str	r0, [r3, #16]
++	str	r1, [r3, #20]
++	mov	pc, ip
++
++@ --- do_pop_vtos -------------------------------------------------
++	OpcodeEntry	do_pop_vtos
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [vtos_table, r3, asl #2]
++	mov	pc, r2
++@ --- do_pop_itos -------------------------------------------------
++	OpcodeEntry	do_pop_itos
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [vtos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_pop2_vtos -------------------------------------------------
++	OpcodeEntry	do_pop2_vtos
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #8
++	ldr	r2, [vtos_table, r3, asl #2]
++	mov	pc, r2
++@ --- do_pop2_itos -------------------------------------------------
++	OpcodeEntry	do_pop2_itos
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [vtos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_dup_vtos -------------------------------------------------
++	OpcodeEntry	do_dup_vtos
++	ldrb	r3, [java_pc, #1]!
++	ldr	r0, [java_stack, #4]
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++@ --- do_dup_itos -------------------------------------------------
++	OpcodeEntry	do_dup_itos
++	ldrb	r3, [java_pc, #1]!
++	str	r0, [java_stack], #-4
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_dup2_vtos -------------------------------------------------
++	OpcodeEntry	do_dup2_vtos
++	ldrb	r3, [java_pc, #1]!
++	ldmib	java_stack, {r0,r1}
++	ldr	r2, [itos_table, r3, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++@ --- do_dup2_itos -------------------------------------------------
++	OpcodeEntry	do_dup2_itos
++	ldrb	r3, [java_pc, #1]!
++	ldr	r1, [java_stack, #4]
++	PUSH(r0)
++	ldr	r2, [itos_table, r3, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++@ --- do_dup_x1_vtos -------------------------------------------------
++	OpcodeEntry	do_dup_x1_vtos
++	ldrb	r3, [java_pc, #1]!
++	ldmib	java_stack!, {r0,r1}
++	ldr	r2, [itos_table, r3, asl #2]
++	PUSH(tos)
++	PUSH(r1)
++	mov	pc, r2
++@ --- do_dup_x1_itos -------------------------------------------------
++	OpcodeEntry	do_dup_x1_itos
++	ldrb	r3, [java_pc, #1]!
++	POP(r1)
++	PUSH(tos)
++	ldr	r2, [itos_table, r3, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++@ --- do_dup_x2_vtos -------------------------------------------------
++	OpcodeEntry	do_dup_x2_vtos
++	POP(tos)
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1,r2}
++	PUSH(tos)
++	ldr	ip, [itos_table, ip, asl #2]
++	stmda	java_stack!, {r1,r2}
++	mov	pc, ip
++@ --- do_dup_x2_itos -------------------------------------------------
++	OpcodeEntry	do_dup_x2_itos
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1,r2}
++	PUSH(tos)
++	ldr	ip, [itos_table, ip, asl #2]
++	stmda	java_stack!, {r1,r2}
++	mov	pc, ip
++
++@ --- do_dup2_x1_vtos -------------------------------------------------
++	OpcodeEntry	do_dup2_x1_vtos
++	POP(tos)
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1,r2}
++	ldr	ip, [itos_table, ip, asl #2]
++	stmda	java_stack!, {r0,r1}
++	stmda	java_stack!, {r1,r2}
++	mov	pc, ip
++@ --- do_dup2_x1_itos -------------------------------------------------
++	OpcodeEntry	do_dup2_x1_itos
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1,r2}
++	ldr	ip, [itos_table, ip, asl #2]
++	stmda	java_stack!, {r0,r1}
++	stmda	java_stack!, {r1,r2}
++	mov	pc, ip
++
++@ --- do_dup2_x2_vtos -------------------------------------------------
++	OpcodeEntry	do_dup2_x2_vtos
++	POP(tos)
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1,r2,r3}
++	ldr	ip, [itos_table, ip, asl #2]
++	stmda	java_stack!, {r0,r1}
++	stmda	java_stack!, {r1,r2,r3}
++	mov	pc, ip
++@ --- do_dup2_x2_itos -------------------------------------------------
++	OpcodeEntry	do_dup2_x2_itos
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1,r2,r3}
++	ldr	ip, [itos_table, ip, asl #2]
++	stmda	java_stack!, {r0,r1}
++	stmda	java_stack!, {r1,r2,r3}
++	mov	pc, ip
++
++@ --- do_swap_vtos -------------------------------------------------
++	OpcodeEntry	do_swap_vtos
++	POP(tos)
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	PUSH(tos)
++	ldr	ip, [itos_table, ip, asl #2]
++	mov	tos, r1
++	mov	pc, ip
++@ --- do_swap_itos -------------------------------------------------
++	OpcodeEntry	do_swap_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	PUSH(tos)
++	ldr	ip, [itos_table, ip, asl #2]
++	mov	tos, r1
++	mov	pc, ip
++
++@ --- do_imul_vtos -------------------------------------------------
++	OpcodeEntry	do_imul_vtos
++	POP(tos)
++@ --- do_imul_itos -------------------------------------------------
++	OpcodeEntry	do_imul_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	ldr	ip, [itos_table, ip, asl #2]
++	mul	r0, r1, r0
++	mov	pc, ip
++
++@ --- do_ladd_vtos -------------------------------------------------
++	OpcodeEntry	do_ladd_vtos
++	POP(tos)
++@ --- do_ladd_itos -------------------------------------------------
++	OpcodeEntry	do_ladd_itos
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1-r3}
++	ldr	ip, [itos_table, ip, asl #2]
++	adds	r0, r0, r2
++	adc	r1, r1, r3
++	PUSH(r1)
++	mov	pc, ip
++
++@ --- do_lsub_vtos -------------------------------------------------
++	OpcodeEntry	do_lsub_vtos
++	POP(tos)
++@ --- do_lsub_itos -------------------------------------------------
++	OpcodeEntry	do_lsub_itos
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1-r3}
++	ldr	ip, [itos_table, ip, asl #2]
++	subs	r0, r2, r0
++	sbc	r1, r3, r1
++	PUSH(r1)
++	mov	pc, ip
++
++@ --- do_lmul_vtos -------------------------------------------------
++	OpcodeEntry	do_lmul_vtos
++	POP(tos)
++@ --- do_lmul_itos -------------------------------------------------
++	OpcodeEntry	do_lmul_itos
++	ldmib	java_stack!, {r1-r3}
++	umull	lr, ip, r2, r0
++	mla	r1, r2, r1, ip
++	ldrb	r2, [java_pc, #1]!
++	mla	r1, r3, r0, r1
++	PUSH(r1)
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	tos, lr
++	mov	pc, r2
++
++@ --- do_land_vtos -------------------------------------------------
++	OpcodeEntry	do_land_vtos
++	POP(tos)
++@ --- do_land_itos -------------------------------------------------
++	OpcodeEntry	do_land_itos
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1-r3}
++	ldr	ip, [itos_table, ip, asl #2]
++	and	r0, r2, r0
++	and	r1, r3, r1
++	PUSH(r1)
++	mov	pc, ip
++
++@ --- do_lor_vtos -------------------------------------------------
++	OpcodeEntry	do_lor_vtos
++	POP(tos)
++@ --- do_lor_itos -------------------------------------------------
++	OpcodeEntry	do_lor_itos
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1-r3}
++	ldr	ip, [itos_table, ip, asl #2]
++	orr	r0, r2, r0
++	orr	r1, r3, r1
++	PUSH(r1)
++	mov	pc, ip
++
++@ --- do_lxor_vtos -------------------------------------------------
++	OpcodeEntry	do_lxor_vtos
++	POP(tos)
++@ --- do_lxor_itos -------------------------------------------------
++	OpcodeEntry	do_lxor_itos
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r1-r3}
++	ldr	ip, [itos_table, ip, asl #2]
++	eor	r0, r2, r0
++	eor	r1, r3, r1
++	PUSH(r1)
++	mov	pc, ip
++
++@ --- do_ineg_vtos -------------------------------------------------
++	OpcodeEntry	do_ineg_vtos
++	POP(tos)
++@ --- do_ineg_itos -------------------------------------------------
++	OpcodeEntry	do_ineg_itos
++	ldrb	r2, [java_pc, #1]!
++	rsb	tos, tos, #0
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_lneg_vtos -------------------------------------------------
++	OpcodeEntry	do_lneg_vtos
++	POP(tos)
++@ --- do_lneg_itos -------------------------------------------------
++	OpcodeEntry	do_lneg_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	rsbs	tos, tos, #0
++	ldr	ip, [itos_table, ip, asl #2]
++	rsc	r1, r1, #0
++	PUSH(r1)
++	mov	pc, ip
++
++@ --- do_ishl_vtos -------------------------------------------------
++	OpcodeEntry	do_ishl_vtos
++	POP(tos)
++@ --- do_ishl_itos -------------------------------------------------
++	OpcodeEntry	do_ishl_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	and	tos, tos, #31
++	ldr	ip, [itos_table, ip, asl #2]
++	mov	tos, r1, lsl r0
++	mov	pc, ip
++
++@ --- do_lshl_vtos -------------------------------------------------
++	OpcodeEntry	do_lshl_vtos
++	POP(tos)
++@ --- do_lshl_itos -------------------------------------------------
++	OpcodeEntry	do_lshl_itos
++        ldrb    ip, [java_pc, #1]!
++        tst     tos, #32
++        and     r2, tos, #31
++	ldmib	java_stack!, {r1,r3}
++	ldr	ip, [itos_table, ip, asl #2]
++        movne   r0, #0
++        movne   r3, r1, lsl r2
++        moveq   r0, r1, lsl r2
++        moveq   r3, r3, lsl r2
++        rsbeq   r2, r2, #32
++        orreq   r3, r3, r1, lsr r2
++	PUSH(r3)
++	mov	pc, ip
++
++@ --- do_ishr_vtos -------------------------------------------------
++	OpcodeEntry	do_ishr_vtos
++	POP(tos)
++@ --- do_ishr_itos -------------------------------------------------
++	OpcodeEntry	do_ishr_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	and	r0, r0, #31
++	ldr	ip, [itos_table, ip, asl #2]
++	mov	tos, r1, asr r0
++	mov	pc, ip
++
++@ --- do_lshr_vtos -------------------------------------------------
++	OpcodeEntry	do_lshr_vtos
++	POP(tos)
++@ --- do_lshr_itos -------------------------------------------------
++	OpcodeEntry	do_lshr_itos
++        ldrb    ip, [java_pc, #1]!
++        tst     tos, #32
++        and     a3, tos, #31
++	ldmib	java_stack!, {a1, a4}
++	ldr	ip, [itos_table, ip, asl #2]
++        movne   a2, a4, asr #31
++        movne   a1, a4, asr a3
++        moveq   a2, a4, asr a3
++        moveq   a1, a1, lsr a3
++        rsbeq   a3, a3, #32
++        orreq   a1, a1, a4, lsl a3
++	PUSH(a2)
++	mov	pc, ip
++
++@ --- do_iushr_vtos -------------------------------------------------
++	OpcodeEntry	do_iushr_vtos
++	POP(tos)
++@ --- do_iushr_itos -------------------------------------------------
++	OpcodeEntry	do_iushr_itos
++	ldrb	ip, [java_pc, #1]!
++	POP(r1)
++	and	r0, r0, #31
++	ldr	ip, [itos_table, ip, asl #2]
++	mov	tos, r1, lsr r0
++	mov	pc, ip
++
++@ --- do_lushr_vtos -------------------------------------------------
++	OpcodeEntry	do_lushr_vtos
++	POP(tos)
++@ --- do_lushr_itos -------------------------------------------------
++	OpcodeEntry	do_lushr_itos
++        ldrb    ip, [java_pc, #1]!
++        tst     tos, #32
++        and     a3, tos, #31
++	ldmib	java_stack!, {a1, a4}
++	ldr	ip, [itos_table, ip, asl #2]
++        movne   a2, #0
++        movne   a1, a4, lsr a3
++        moveq   a2, a4, lsr a3
++        moveq   a1, a1, lsr a3
++        rsbeq   a3, a3, #32
++        orreq   a1, a1, a4, lsl a3
++	PUSH(a2)
++	mov	pc, ip
++
++@ --- do_dcmpl_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_dcmpl_itos_vfp
++	PUSH(tos)
++@ --- do_dcmpl_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_dcmpl_vtos_vfp
++	ldrb	r3, [java_pc, #1]!
++	fldd	d6, [java_stack, #12]
++	fldd	d7, [java_stack, #4]
++	fcmped	d6, d7
++	ldr	r2, [itos_table, r3, asl #2]
++	fmstat
++	mvnmi	tos, #0
++	bmi	do_dcmpl_1_vtos
++	movgt	tos, #1
++	bgt	do_dcmpl_1_vtos
++	fcmpd	d6, d7
++	fmstat
++	moveq	tos, #0
++	mvnne	tos, #0
++do_dcmpl_1_vtos:
++	add	java_stack, java_stack, #16
++	mov	pc, r2
++
++@ --- do_ldiv_itos -------------------------------------------------
++	OpcodeEntry	do_ldiv_itos
++	PUSH(tos)
++@ --- do_ldiv_vtos -------------------------------------------------
++	OpcodeEntry	do_ldiv_vtos
++	ldmib	java_stack!, {r2, r3}
++	ldmib	java_stack!, {r0, r1}
++	orrs	lr, r2, r3
++	beq	.ldiv_0
++	bl	__aeabi_ldivmod(PLT)
++	ldrb	r3, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_lrem_itos -------------------------------------------------
++	OpcodeEntry	do_lrem_itos
++	PUSH(tos)
++@ --- do_lrem_vtos -------------------------------------------------
++	OpcodeEntry	do_lrem_vtos
++	ldmib	java_stack!, {r2, r3}
++	ldmib	java_stack!, {r0, r1}
++	orrs	lr, r2, r3
++	beq	.lrem_0
++	bl	__aeabi_ldivmod(PLT)
++	ldrb	r0, [java_pc, #1]!
++	PUSH(r3)
++	ldr	ip, [itos_table, r0, asl #2]
++	mov	tos, r2
++	mov	pc, ip
++
++@ --- do_dadd_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_dadd_itos_vfp
++	PUSH(tos)
++@ --- do_dadd_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_dadd_vtos_vfp
++	ldrb	r3, [java_pc, #1]!
++	fldd	d7, [java_stack, #12]
++	fldd	d6, [java_stack, #4]
++	ldr	r2, [dtos_table, r3, asl #2]
++	faddd	d0, d7, d6
++	add	java_stack, java_stack, #16
++	mov	pc, r2
++
++@ --- do_fadd_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_fadd_itos_vfp
++	PUSH(tos)
++@ --- do_fadd_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_fadd_vtos_vfp
++	ldrb	r3, [java_pc, #1]!
++	flds	s15, [java_stack, #8]
++	flds	s14, [java_stack, #4]
++	ldr	r2, [vtos_table, r3, asl #2]
++	fadds	s15, s15, s14
++	fsts	s15, [java_stack, #8]
++	add	java_stack, java_stack, #4
++	mov	pc, r2
++
++@ --- do_dsub_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_dsub_itos_vfp
++	PUSH(tos)
++@ --- do_dsub_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_dsub_vtos_vfp
++	ldrb	r3, [java_pc, #1]!
++	fldd	d7, [java_stack, #12]
++	fldd	d6, [java_stack, #4]
++	ldr	r2, [dtos_table, r3, asl #2]
++	fsubd	d0, d7, d6
++	add	java_stack, java_stack, #16
++	mov	pc, r2
++
++@ --- do_getstatic_dtos -------------------------------------------------
++	OpcodeEntry	do_getstatic_dtos
++	PUSHD	dtos
++	b	do_getstatic_vtos
++@ --- do_getstatic_itos -------------------------------------------------
++	OpcodeEntry	do_getstatic_itos
++	PUSH(tos)
++@ --- do_getstatic_vtos -------------------------------------------------
++	OpcodeEntry	do_getstatic_vtos
++	ldrb	r3, [java_pc,#1]
++	ldrb	r2, [java_pc,#2]
++	ldrb	ip, [java_pc,#3]!
++	orr	r3, r3, r2, lsl #8
++	add	r1, constant_pool, #16
++	ldr	r3, [r1, r3, lsl #4]!			@ r1 = cache
++	ldr	ip, [itos_table, ip, asl #2]
++	and	r3, r3, #0x00ff0000
++	cmp	r3, #178 << 16
++	bne	.exit_getstatic
++	ldr	r3, [r1, #4]
++	ldr	r2, [r1, #12]
++	ldr	lr, [r1, #8]
++	movs	r2, r2, lsr #29
++	ldrhi	tos, [r3, lr]		@ C = 1, Z = 0 => R2 == 3, 5, 7
++	movhi	pc, ip			@ early exit for word accesses
++	ldreqsb	tos, [r3, lr]		@ Z = 1 => R2 = 0, 1
++	ldrcsh	tos, [r3, lr]		@ C = 1 => R2 = 1 (overwrites previous load)
++	moveq	pc, ip
++	tst	r2, #2
++	addne	r3, r3, lr
++	ldmneia	r3, {r0, r1}		@ 4, 6
++	PUSHNE(r1)
++	movne	pc, ip
++	ldrsh	tos, [r3, lr]		@ 2
++	mov	pc, ip
++
++@ --- do_arraylength_vtos -------------------------------------------------
++	OpcodeEntry	do_arraylength_vtos
++	POP(tos)
++@ --- do_arraylength_itos -------------------------------------------------
++	OpcodeEntry	do_arraylength_itos
++	ldrb	r2, [java_pc, #1]!
++	cmp	tos, #0
++	beq	.exit_arraylength
++	ldr	r2, [itos_table, r2, asl #2]
++	ldr	tos, [tos, #8]
++	mov	pc, r2
++
++@ --- do_astore_0_itos -------------------------------------------------
++	OpcodeEntry	do_astore_0_itos
++	PUSH(tos)
++@ --- do_astore_0_vtos -------------------------------------------------
++	OpcodeEntry	do_astore_0_vtos
++	mov	r0, java_stack
++	mov	r2, java_locals
++	mov	r3, #0
++	mvn	r1, #0
++	bl	_ZN19BytecodeInterpreter6astoreEPiiS0_i(PLT)
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [vtos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_astore_1_itos -------------------------------------------------
++	OpcodeEntry	do_astore_1_itos
++	PUSH(tos)
++@ --- do_astore_1_vtos -------------------------------------------------
++	OpcodeEntry	do_astore_1_vtos
++	mov	r0, java_stack
++	mov	r2, java_locals
++	mov	r3, #1
++	mvn	r1, #0
++	bl	_ZN19BytecodeInterpreter6astoreEPiiS0_i(PLT)
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [vtos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_astore_2_itos -------------------------------------------------
++	OpcodeEntry	do_astore_2_itos
++	PUSH(tos)
++@ --- do_astore_2_vtos -------------------------------------------------
++	OpcodeEntry	do_astore_2_vtos
++	mov	r0, java_stack
++	mov	r2, java_locals
++	mov	r3, #2
++	mvn	r1, #0
++	bl	_ZN19BytecodeInterpreter6astoreEPiiS0_i(PLT)
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [vtos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_astore_3_itos -------------------------------------------------
++	OpcodeEntry	do_astore_3_itos
++	PUSH(tos)
++@ --- do_astore_3_vtos -------------------------------------------------
++	OpcodeEntry	do_astore_3_vtos
++	mov	r0, java_stack
++	mov	r2, java_locals
++	mov	r3, #3
++	mvn	r1, #0
++	bl	_ZN19BytecodeInterpreter6astoreEPiiS0_i(PLT)
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [vtos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_astore_itos -------------------------------------------------
++	OpcodeEntry	do_astore_itos
++	PUSH(tos)
++@ --- do_astore_vtos -------------------------------------------------
++	OpcodeEntry	do_astore_vtos
++	mov	r0, java_stack
++	ldrb	r3, [java_pc, #1]
++	mov	r2, java_locals
++	mvn	r1, #0
++	bl	_ZN19BytecodeInterpreter6astoreEPiiS0_i(PLT)
++	ldrb	r3, [java_pc, #2]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [vtos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_dcmpg_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_dcmpg_itos_vfp
++	PUSH(tos)
++@ --- do_dcmpg_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_dcmpg_vtos_vfp
++	ldrb	r3, [java_pc, #1]!
++	fldd	d6, [java_stack, #12]
++	fldd	d7, [java_stack, #4]
++	fcmped	d6, d7
++	ldr	r2, [itos_table, r3, asl #2]
++	fmstat
++	mvnmi	tos, #0
++	bmi	do_dcmpg_1_itos
++	movgt	tos, #1
++	bgt	do_dcmpg_1_itos
++	fcmpd	d6, d7
++	fmstat
++	moveq	tos, #0
++	movne	tos, #1
++do_dcmpg_1_itos:
++	add	java_stack, java_stack, #16
++	mov	pc, r2
++
++@ --- do_lcmp_vtos -------------------------------------------------
++	OpcodeEntry	do_lcmp_vtos
++	POP(tos)
++@ --- do_lcmp_itos -------------------------------------------------
++	OpcodeEntry	do_lcmp_itos
++	ldmib	java_stack!, {r1-r3}
++	ldrb	ip, [java_pc, #1]!
++        subs    tos, r2, r0
++        movne   tos, #1
++        sbcs    r3, r3, r1
++	ldr	ip, [itos_table, ip, asl #2]
++        movne   tos, #1
++        rsblt   tos, tos, #0
++	mov	pc, ip
++
++@ --- do_fsub_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_fsub_itos_vfp
++	PUSH(tos)
++@ --- do_fsub_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_fsub_vtos_vfp
++	ldrb	r3, [java_pc, #1]!
++	flds	s15, [java_stack, #8]
++	flds	s14, [java_stack, #4]
++	ldr	r2, [vtos_table, r3, asl #2]
++	fsubs	s15, s15, s14
++	fsts	s15, [java_stack, #8]
++	add	java_stack, java_stack, #4
++	mov	pc, r2
++
++@ --- do_dmul_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_dmul_itos_vfp
++	PUSH(tos)
++@ --- do_dmul_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_dmul_vtos_vfp
++	ldrb	r3, [java_pc, #1]!
++	fldd	d5, [java_stack, #12]
++	fldd	d7, [java_stack, #4]
++	ldr	r2, [dtos_table, r3, asl #2]
++	fmuld	d0, d5, d7
++	add	java_stack, java_stack, #16
++	mov	pc, r2
++
++@ --- do_fmul_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_fmul_itos_vfp
++	PUSH(tos)
++@ --- do_fmul_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_fmul_vtos_vfp
++	ldrb	r3, [java_pc, #1]!
++	flds	s13, [java_stack, #8]
++	flds	s15, [java_stack, #4]
++	ldr	r2, [vtos_table, r3, asl #2]
++	fmuls	s14, s13, s15
++	fsts	s14, [java_stack, #8]
++	add	java_stack, java_stack, #4
++	mov	pc, r2
++
++@ --- do_ddiv_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_ddiv_itos_vfp
++	PUSH(tos)
++@ --- do_ddiv_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_ddiv_vtos_vfp
++	ldrb	r3, [java_pc, #1]!
++	fldd	d5, [java_stack, #12]
++	fldd	d7, [java_stack, #4]
++	ldr	r2, [dtos_table, r3, asl #2]
++	fdivd	d0, d5, d7
++	add	java_stack, java_stack, #16
++	mov	pc, r2
++
++@ --- do_fdiv_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_fdiv_itos_vfp
++	PUSH(tos)
++@ --- do_fdiv_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_fdiv_vtos_vfp
++	ldrb	r3, [java_pc, #1]!
++	flds	s13, [java_stack, #8]
++	flds	s15, [java_stack, #4]
++	ldr	r2, [vtos_table, r3, asl #2]
++	fdivs	s14, s13, s15
++	fsts	s14, [java_stack, #8]
++	add	java_stack, java_stack, #4
++	mov	pc, r2
++
++@ --- do_drem_vtos -------------------------------------------------
++	OpcodeEntry	do_drem_vtos
++	POP(tos)
++@ --- do_drem_itos -------------------------------------------------
++	OpcodeEntry	do_drem_itos
++	mov	r2, tos
++	POP(r3)
++	ldmib	java_stack!, {r0, r1}
++	bl	fmod(PLT)
++	ldrb	r3, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_frem_vtos -------------------------------------------------
++	OpcodeEntry	do_frem_vtos
++	POP(tos)
++@ --- do_frem_itos -------------------------------------------------
++	OpcodeEntry	do_frem_itos
++        bl      __aeabi_f2d(PLT)
++	POP(r2)
++	stmda	java_stack!, {r0, r1}
++	mov	r0, r2
++        bl      __aeabi_f2d(PLT)
++	ldmib	java_stack!, {r2, r3}
++	bl	fmod(PLT)
++        bl      __aeabi_d2f(PLT)
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_fneg_vtos -------------------------------------------------
++	OpcodeEntry	do_fneg_vtos
++	POP(tos)
++@ --- do_fneg_itos -------------------------------------------------
++	OpcodeEntry	do_fneg_itos
++	ldrb	r3, [java_pc, #1]!
++	eor	tos, tos, #0x80000000
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_dneg_vtos -------------------------------------------------
++	OpcodeEntry	do_dneg_vtos
++	POP(tos)
++@ --- do_dneg_itos -------------------------------------------------
++	OpcodeEntry	do_dneg_itos
++	ldrb	r3, [java_pc, #1]!
++	POP(r1)
++	eor	r1, r1, #0x80000000
++	ldr	r2, [itos_table, r3, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++@ --- do_i2f_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_i2f_vtos_vfp
++	POP(tos)
++@ --- do_i2f_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_i2f_itos_vfp
++	ldrb	r3, [java_pc, #1]!
++	fmsr	s12, tos
++	fsitos	s15, s12
++	ldr	r2, [vtos_table, r3, asl #2]
++	fsts	s15, [java_stack]
++	sub	java_stack, java_stack, #4
++	mov	pc, r2
++
++@ --- do_i2l_vtos -------------------------------------------------
++	OpcodeEntry	do_i2l_vtos
++	POP(tos)
++@ --- do_i2l_itos -------------------------------------------------
++	OpcodeEntry	do_i2l_itos
++	ldrb	r2, [java_pc, #1]!
++	mov	r1, tos, asr #31
++	ldr	r2, [itos_table, r2, asl #2]
++	PUSH(r1)
++	mov	pc, r2
++
++@ --- do_i2d_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_i2d_vtos_vfp
++	POP(tos)
++@ --- do_i2d_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_i2d_itos_vfp
++	ldrb	r3, [java_pc, #1]!
++	fmsr	s13, tos
++	fsitod	d0, s13
++	ldr	r2, [dtos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_l2i_vtos -------------------------------------------------
++	OpcodeEntry	do_l2i_vtos
++	POP(tos)
++@ --- do_l2i_itos -------------------------------------------------
++	OpcodeEntry	do_l2i_itos
++	ldrb	r2, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_l2f_vtos -------------------------------------------------
++	OpcodeEntry	do_l2f_vtos
++	POP(tos)
++@ --- do_l2f_itos -------------------------------------------------
++	OpcodeEntry	do_l2f_itos
++	POP(r1)
++	bl	__aeabi_l2f(PLT)
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_l2d_vtos -------------------------------------------------
++	OpcodeEntry	do_l2d_vtos
++	POP(tos)
++@ --- do_l2d_itos -------------------------------------------------
++	OpcodeEntry	do_l2d_itos
++	POP(r1)
++	bl	__aeabi_l2d(PLT)
++	ldrb	r2, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	pc, r2
++
++@ --- do_f2i_vtos -------------------------------------------------
++	OpcodeEntry	do_f2i_vtos
++	POP(tos)
++@ --- do_f2i_itos -------------------------------------------------
++	OpcodeEntry	do_f2i_itos
++	bl	_ZN13SharedRuntime3f2iEf(PLT)
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_f2l_vtos -------------------------------------------------
++	OpcodeEntry	do_f2l_vtos
++	POP(tos)
++@ --- do_f2l_itos -------------------------------------------------
++	OpcodeEntry	do_f2l_itos
++	bl	_ZN13SharedRuntime3f2lEf(PLT)
++	ldrb	r3, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_f2d_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_f2d_itos_vfp
++	PUSH(tos)
++@ --- do_f2d_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_f2d_vtos_vfp
++	flds	s14, [java_stack, #4]
++	fcvtds	d0, s14
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [dtos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_d2i_vtos -------------------------------------------------
++	OpcodeEntry	do_d2i_vtos
++	POP(tos)
++@ --- do_d2i_itos -------------------------------------------------
++	OpcodeEntry	do_d2i_itos
++	POP(r1)
++	bl	_ZN13SharedRuntime3d2iEd(PLT)
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_d2f_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_d2f_itos_vfp
++	PUSH(tos)
++@ --- do_d2f_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_d2f_vtos_vfp
++	fldd	d7, [java_stack, #4]
++	fcvtsd	s14, d7
++	fsts	s14, [java_stack, #8]
++	ldrb	r3, [java_pc, #1]!
++	add	java_stack, java_stack, #4
++	ldr	r2, [vtos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_d2l_vtos -------------------------------------------------
++	OpcodeEntry	do_d2l_vtos
++	POP(tos)
++@ --- do_d2l_itos -------------------------------------------------
++	OpcodeEntry	do_d2l_itos
++	POP(r1)
++	bl	_ZN13SharedRuntime3d2lEd(PLT)
++	ldrb	r3, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_i2b_vtos -------------------------------------------------
++	OpcodeEntry	do_i2b_vtos
++	POP(tos)
++@ --- do_i2b_itos -------------------------------------------------
++	OpcodeEntry	do_i2b_itos
++	ldrb	r2, [java_pc, #1]!
++	mov	tos, tos, asl #24
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	tos, tos, asr #24
++	mov	pc, r2
++
++@ --- do_i2c_vtos -------------------------------------------------
++	OpcodeEntry	do_i2c_vtos
++	POP(tos)
++@ --- do_i2c_itos -------------------------------------------------
++	OpcodeEntry	do_i2c_itos
++	ldrb	r2, [java_pc, #1]!
++	mov	tos, tos, asl #16
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	tos, tos, lsr #16
++	mov	pc, r2
++
++@ --- do_i2s_vtos -------------------------------------------------
++	OpcodeEntry	do_i2s_vtos
++	POP(tos)
++@ --- do_i2s_itos -------------------------------------------------
++	OpcodeEntry	do_i2s_itos
++	ldrb	r2, [java_pc, #1]!
++	mov	tos, tos, asl #16
++	ldr	r2, [itos_table, r2, asl #2]
++	mov	tos, tos, asr #16
++	mov	pc, r2
++
++@ --- do_ldc_itos -------------------------------------------------
++	OpcodeEntry	do_ldc_itos
++	PUSH(tos)
++@ --- do_ldc_vtos -------------------------------------------------
++	OpcodeEntry	do_ldc_vtos
++	ldr	r3, [istate, #ISTATE_JAVA_METHOD]
++	ldrb	r1, [java_pc, #1]
++
++	ldr	r0, [r3, #12]
++	ldr	r2, [r0, #8]
++	add	r2, r2, #12
++	ldrb	r3, [r2, r1]
++
++	cmp	r3, #3			@ int
++	cmpne	r3, #4			@ float
++	cmpne	r3, #8			@ string
++	bne	.exit_asm
++
++	ldrb	ip, [java_pc, #2]!
++	add	r3, r0, r1, lsl #2
++	ldr	tos, [r3, #32]
++	ldr	pc, [itos_table, ip, lsl #2]
++
++@ --- do_ldc_w_itos -------------------------------------------------
++	OpcodeEntry	do_ldc_w_itos
++	PUSH(tos)
++@ --- do_ldc_w_vtos -------------------------------------------------
++	OpcodeEntry	do_ldc_w_vtos
++	ldr	r3, [istate, #ISTATE_JAVA_METHOD]
++	ldrb	r0, [java_pc, #1]
++	ldrb	r2, [java_pc, #2]
++
++	ldr	ip, [r3, #12]
++	orr	r2, r2, r0, asl #8
++	ldr	r1, [ip, #8]
++	add	r1, r1, #12
++	ldrb	r3, [r1, r2]
++
++	cmp	r3, #3			@ int
++	cmpne	r3, #4			@ float
++	cmpne	r3, #8			@ string
++	bne	.exit_asm
++
++	ldrb	r1, [java_pc, #3]!
++	add	r3, ip, r2, lsl #2
++	ldr	tos, [r3, #32]
++	ldr	pc, [itos_table, r1, lsl #2]
++
++@ --- do_ldc2_w_itos -------------------------------------------------
++	OpcodeEntry	do_ldc2_w_itos
++	PUSH(tos)
++@ --- do_ldc2_w_vtos -------------------------------------------------
++	OpcodeEntry	do_ldc2_w_vtos
++	ldr	r3, [istate, #ISTATE_JAVA_METHOD]
++	ldrb	r0, [java_pc, #1]
++	ldrb	r2, [java_pc, #2]
++
++	ldr	ip, [r3, #12]
++	orr	r2, r2, r0, asl #8
++	ldr	r1, [ip, #8]
++	add	r1, r1, #12
++	ldrb	r3, [r1, r2]
++
++	cmp	r3, #5
++	cmpne	r3, #6
++	bne	.exit_asm
++
++	ldrb	r3, [java_pc, #3]!
++	add	ip, ip, r2, lsl #2
++	add	ip, ip, #32
++	ldmia	ip, {r0, r1}
++	PUSH(r1)
++	ldr	pc, [itos_table, r3, lsl #2]
++	
++@ --- do_fcmpl_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_fcmpl_itos_vfp
++	PUSH(tos)
++@ --- do_fcmpl_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_fcmpl_vtos_vfp
++	flds	s14, [java_stack, #8]
++	flds	s15, [java_stack, #4]
++	fcmpes	s14, s15
++	add	java_stack, java_stack, #8
++	fmstat
++	mvnmi	tos, #0
++	bmi	do_fcmpl_1_itos
++	movgt	tos, #1
++	bgt	do_fcmpl_1_itos
++	fcmps	s14, s15
++	fmstat
++	moveq	tos, #0
++	mvnne	tos, #0
++do_fcmpl_1_itos:
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_fcmpg_itos_vfp -------------------------------------------------
++	OpcodeEntry	do_fcmpg_itos_vfp
++	PUSH(tos)
++@ --- do_fcmpg_vtos_vfp -------------------------------------------------
++	OpcodeEntry	do_fcmpg_vtos_vfp
++	flds	s14, [java_stack, #8]
++	flds	s15, [java_stack, #4]
++	fcmpes	s14, s15
++	add	java_stack, java_stack, #8
++	fmstat
++	mvnmi	tos, #0
++	bmi	do_fcmpg_1_itos
++	movgt	tos, #1
++	bgt	do_fcmpg_1_itos
++	fcmps	s14, s15
++	fmstat
++	moveq	tos, #0
++	movne	tos, #1
++do_fcmpg_1_itos:
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++
++@ --- do_tableswitch_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_tableswitch_vtos_unsafe
++do_tableswitch_vtos_unsafe:
++	POP(tos)
++@ --- do_tableswitch_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_tableswitch_itos_unsafe
++do_tableswitch_itos_unsafe:
++	mov	a2, tos
++        bic     a1, java_pc, #3
++        ldr     a4,[a1,#8]
++@       BYTESEX_REVERSE a3, a4, a3
++
++	eor	a3, a4, a4, ror #16
++	bic	a3, a3, #0xff0000
++	mov	a4, a4, ror #8
++	eor	a3, a4, a3, lsr #8
++
++        ldr     a4,[a1,#12]
++@       BYTESEX_REVERSE a4, a4, ip
++
++	eor	ip, a4, a4, ror #16
++	bic	ip, ip, #0xff0000
++	mov	a4, a4, ror #8
++	eor	a4, a4, ip, lsr #8
++
++        sub     a2,a2,a3
++        sub     a4,a4,a3
++        cmp     a4,a2
++        ldrcc   a1,[a1,#4]
++        addcs   a1,a1,a2,LSL #2
++        ldrcs   a1,[a1,#16]
++@       BYTESEX_REVERSE a1, a1, a4
++
++	eor	a4, a1, a1, ror #16
++	bic	a4, a4, #0xff0000
++	mov	a1, a1, ror #8
++	eors	ip, a1, a4, lsr #8
++
++	ldrb	r2, [java_pc, ip]!
++	ldr	pc, [vtos_table, r2, lsl #2]
++
++@ --- do_lookupswitch_vtos_unsafe -------------------------------------------------
++	OpcodeEntry	do_lookupswitch_vtos_unsafe
++do_lookupswitch_vtos_unsafe:
++	POP(tos)
++@ --- do_lookupswitch_itos_unsafe -------------------------------------------------
++	OpcodeEntry	do_lookupswitch_itos_unsafe
++do_lookupswitch_itos_unsafe:
++	mov	a2, tos
++        bic     a1, java_pc, #3
++@       BYTESEX_REVERSE a2, a2, ip
++
++	eor	ip, a2, a2, ror #16
++	bic	ip, ip, #0xff0000
++	mov	a2, a2, ror #8
++	eor	a2, a2, ip, lsr #8
++
++        ldr     a3,[a1,#8]
++@       BYTESEX_REVERSE a3, a3, ip
++
++	eor	ip, a3, a3, ror #16
++	bic	ip, ip, #0xff0000
++	mov	a3, a3, ror #8
++	eor	a3, a3, ip, lsr #8
++
++        subs    a4,a3,#1
++        bmi     .lookupswitch1_unsafe
++        add     a1, a1, #4
++.lookupswitch0_unsafe:
++        ldr      a3,[a1,#8]!
++        cmp     a3,a2
++        beq     .lookupswitch2_unsafe
++        subs    a4,a4,#1
++        bpl     .lookupswitch0_unsafe
++.lookupswitch1_unsafe:
++        bic     a1, java_pc, #3
++.lookupswitch2_unsafe:
++        ldr      a2,[a1,#4]
++@       BYTESEX_REVERSE a2, a2, ip
++
++	eor	ip, a2, a2, ror #16
++	bic	ip, ip, #0xff0000
++	mov	a2, a2, ror #8
++	eors	ip, a2, ip, lsr #8
++
++	ldrb	r2, [java_pc, ip]!
++	ldr	pc, [vtos_table, r2, lsl #2]
++
++@---- DONE TO HERE ---
++
++@ --- run_opt_exit -------------------------------------------------
++	OpcodeEntry	run_opt_exit
++.dtos_exit_dastore:
++	sub	java_pc, java_pc, #1
++	sub	java_stack, java_stack, #8
++	PUSHD	d0
++	b	.exit_asm
++.itos_exit_lastore:
++	sub	java_pc, java_pc, #1
++	sub	java_stack, java_stack, #12
++	PUSH(tos)
++	b	.exit_asm
++
++.itos_exit_iastore:
++	sub	java_pc, java_pc, #1
++	sub	java_stack, java_stack, #8
++	PUSH(tos)
++	b	.exit_asm
++
++.itos_exit_iaload:
++.itos_exit_laload:
++	sub	java_pc, java_pc, #1
++	sub	java_stack, java_stack, #4
++	PUSH(tos)
++	b	.exit_asm
++
++.exit_tableswitch:
++	sub	java_stack, java_stack, #4
++	b	.exit_asm
++.exit_branch1op:
++	sub	java_stack, java_stack, #4
++	sub	java_pc, java_pc, ip
++	b	.exit_asm
++.exit_branch:
++	sub	java_stack, java_stack, #8
++	sub	java_pc, java_pc, ip
++	b	.exit_asm
++.itos_exit_goto:
++	PUSH(tos)
++.vtos_exit_goto:
++	sub	java_pc, java_pc, ip
++	b	.exit_asm
++
++.exit_getstatic:
++	sub	java_pc, java_pc, #3
++	b	.exit_asm
++.exit_putfield_3:
++	PUSH(r3)
++	PUSH(r1)
++	PUSH(tos)
++	sub	java_pc, java_pc, #3
++	b	.exit_asm
++.exit_putfield_2:
++	PUSH(r3)
++.exit_putstatic_1:
++.exit_putfield_1:
++.exit_getfield:
++	PUSH(tos)
++	sub	java_pc, java_pc, #3
++	b	.exit_asm
++.lrem_0:
++.ldiv_0:
++	sub	java_stack, java_stack, #16
++	b	.exit_asm
++.remc_0:
++.divc_0:
++	sub	java_stack, java_stack, #4
++	PUSH(tos)
++	sub	java_pc, java_pc, #1	@ undo autoincrement
++.exit_asm:
++	str	java_pc, [istate, #ISTATE_JAVA_PC]
++	str	java_stack, [istate, #ISTATE_JAVA_STACK]
++	mov	r0, #0
++	ldmfd	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
++.exit_arraylength:
++	PUSH(tos)
++	sub	java_pc, java_pc, #1
++	b	.exit_asm
++
++do_aastore_itos:
++@do_ireturn_itos:
++@do_lreturn_itos:
++@do_freturn_itos:
++@do_dreturn_itos:
++@do_areturn_itos:
++@do_return_itos:
++@do_putstatic_itos:
++@do_putfield_itos:
++@do_invokestatic_itos:
++@do_invokevirtual_itos:
++@do_invokespecial_itos:
++do_invokeinterface_itos:
++do_xxxunusedxxx_itos:
++do_new_itos:
++do_newarray_itos:
++do_anewarray_itos:
++do_athrow_itos:
++do_checkcast_itos:
++do_instanceof_itos:
++do_monitorenter_itos:
++do_monitorexit_itos:
++do_wide_itos:
++do_multianewarray_itos:
++do_goto_w_itos:
++do_jsr_itos:
++do_ret_itos:
++do_jsr_w_itos:
++do_breakpoint_itos:
++do_exit_asm_itos:
++do_ifeq_itos:
++do_ifne_itos:
++do_iflt_itos:
++do_ifge_itos:
++do_ifgt_itos:
++do_ifle_itos:
++do_if_icmpeq_itos:
++do_if_icmpne_itos:
++do_if_icmplt_itos:
++do_if_icmpge_itos:
++do_if_icmpgt_itos:
++do_if_icmple_itos:
++do_if_acmpeq_itos:
++do_if_acmpne_itos:
++do_goto_itos:
++do_tableswitch_itos:
++do_lookupswitch_itos:
++do_ifnull_itos:
++do_ifnonnull_itos:
++	PUSH(tos)
++do_aastore_vtos:
++@do_ireturn_vtos:
++@do_lreturn_vtos:
++@do_freturn_vtos:
++@do_dreturn_vtos:
++@do_areturn_vtos:
++@do_return_vtos:
++@do_putstatic_vtos:
++@do_putfield_vtos:
++@do_invokestatic_vtos:
++@do_invokevirtual_vtos:
++@do_invokespecial_vtos:
++do_invokeinterface_vtos:
++do_xxxunusedxxx_vtos:
++do_new_vtos:
++do_newarray_vtos:
++do_anewarray_vtos:
++do_athrow_vtos:
++do_checkcast_vtos:
++do_instanceof_vtos:
++do_monitorenter_vtos:
++do_monitorexit_vtos:
++do_wide_vtos:
++do_multianewarray_vtos:
++do_goto_w_vtos:
++do_jsr_vtos:
++do_ret_vtos:
++do_jsr_w_vtos:
++do_breakpoint_vtos:
++do_exit_asm_vtos:
++do_ifeq_vtos:
++do_ifne_vtos:
++do_iflt_vtos:
++do_ifge_vtos:
++do_ifgt_vtos:
++do_ifle_vtos:
++do_if_icmpeq_vtos:
++do_if_icmpne_vtos:
++do_if_icmplt_vtos:
++do_if_icmpge_vtos:
++do_if_icmpgt_vtos:
++do_if_icmple_vtos:
++do_if_acmpeq_vtos:
++do_if_acmpne_vtos:
++do_goto_vtos:
++do_tableswitch_vtos:
++do_lookupswitch_vtos:
++do_ifnull_vtos:
++do_ifnonnull_vtos:
++	str	java_pc, [istate, #ISTATE_JAVA_PC]
++	str	java_stack, [istate, #ISTATE_JAVA_STACK]
++	mov	r0, #0
++	ldmfd	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
++
++@ ----- The Bytecode Implementations --------------------------------------
++
++@ --- do_irem -------------------------------------------------
++	OpcodeEntry	do_irem
++do_irem_vtos:
++	POP(tos)
++do_irem_itos:
++	POP(r1)
++	ldrb	lr, [r8, #1]!
++	adr	r3, .rem_table
++	cmp	r0, #0x20
++	ldrcc	r3, [r3, r0, lsl #2]
++	ldr	lr, [vtos_table, lr, asl #2]
++	movcc	pc, r3
++
++        ands    a4, a1, #0x80000000
++        rsbmi   a1, a1, #0
++        eors    ip, a4, a2, ASR #32
++        rsbcs   a2, a2, #0
++	movs	a3, a1
++.r_loop:
++        cmp     a3, a2, LSR #8
++        movls   a3, a3, LSL #8
++        blo     .r_loop
++        cmp     a3, a2, LSR #1
++        bhi     .r_jump7
++        cmp     a3, a2, LSR #2
++        bhi     .r_jump6
++        cmp     a3, a2, LSR #3
++        bhi     .r_jump5
++        cmp     a3, a2, LSR #4
++        bhi     .r_jump4
++        cmp     a3, a2, LSR #5
++        bhi     .r_jump3
++        cmp     a3, a2, LSR #6
++        bhi     .r_jump2
++        cmp     a3, a2, LSR #7
++        bhi     .r_jump1
++.r_loop2:
++@ not executed when falling into .r_loop2
++        movhi   a3, a3, LSR #8
++        cmp     a2, a3, LSL #7
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #7
++        cmp     a2, a3, LSL #6
++.r_jump1:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #6
++        cmp     a2, a3, LSL #5
++.r_jump2:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #5
++        cmp     a2, a3, LSL #4
++.r_jump3:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #4
++        cmp     a2, a3, LSL #3
++.r_jump4:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #3
++        cmp     a2, a3, LSL #2
++.r_jump5:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #2
++        cmp     a2, a3, LSL #1
++.r_jump6:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #1
++.r_jump7:
++        cmp     a2, a3
++        adc     a4, a4, a4
++        subcs   a2, a2, a3
++        cmp     a3, a1
++        bne     .r_loop2
++        movs    ip, ip, lsl #1
++	rsbmi	a2, a2, #0
++	str	a2, [java_stack], #-4
++	mov	pc, lr
++
++.rem_table:
++	.word	.remc_0
++	.word	.remc_1
++	.word	.remc_2
++	.word	.remc_3
++	.word	.remc_4
++	.word	.remc_5
++	.word	.remc_6
++	.word	.remc_7
++	.word	.remc_8
++	.word	.remc_9
++	.word	.remc_10
++	.word	.remc_11
++	.word	.remc_12
++	.word	.remc_13
++	.word	.remc_14
++	.word	.remc_15
++	.word	.remc_16
++	.word	.remc_17
++	.word	.remc_18
++	.word	.remc_19
++	.word	.remc_20
++	.word	.remc_21
++	.word	.remc_22
++	.word	.remc_23
++	.word	.remc_24
++	.word	.remc_25
++	.word	.remc_26
++	.word	.remc_27
++	.word	.remc_28
++	.word	.remc_29
++	.word	.remc_30
++	.word	.remc_31
++
++.remc_1:
++	mov	a1, #0
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_2:
++	add	ip, a2, a2, lsr #31
++        mov	a1, ip, asr #1
++	sub	a1, a2, a1, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_3:
++	ldr	a1, .dc_3
++        smull	a3, a4, a2, a1
++        sub	a1, a4, a2, asr #31
++	add	ip, a1, a1, lsl #1
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_4:
++	movs	ip, a2
++        addmi	ip, ip, #3
++        mov	a1, ip, asr #2
++	sub	a1, a2, a1, lsl #2
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_5:
++	ldr	a1, .dc_5
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #1
++	add	ip, a1, a1, lsl #2
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_6:
++	ldr	a1, .dc_6
++        smull	a3, a4, a2, a1
++        sub	a1, a4, a2, asr #31
++	add	ip, a1, a1, lsl #1
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_7:
++	ldr	a1, .dc_7
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #2
++	rsb	ip, a1, a1, lsl #3
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_8:
++	movs	ip, a2
++        addmi	ip, ip, #7
++        mov	a1, ip, asr #3
++	sub	a1, a2, a1, lsl #3
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_9:
++	ldr	a1, .dc_9
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #1
++	add	ip, a1, a1, lsl #3
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_10:
++	ldr	a1, .dc_10
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #2
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_11:
++	ldr	a1, .dc_11
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #1
++	add	ip, a1, a1, lsl #2
++	add	ip, a1, ip, lsl #1
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_12:
++	ldr	a1, .dc_12
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #1
++	add	ip, a1, a1, lsl #1
++	sub	a1, a2, ip, lsl #2
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_13:
++	ldr	a1, .dc_13
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #1
++	add	ip, a1, ip, lsl #2
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_14:
++	ldr	a1, .dc_14
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #3
++	rsb	ip, a1, a1, lsl #3
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_15:
++	ldr	a1, .dc_15
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #3
++	rsb	ip, a1, a1, lsl #4
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_16:
++	movs	ip, a2
++        addmi	ip, ip, #15
++        mov	a1, ip, asr #4
++	sub	a1, a2, a1, lsl #4
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_17:
++	ldr	a1, .dc_17
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #4
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_18:
++	ldr	a1, .dc_18
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #3
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_19:
++	ldr	a1, .dc_19
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #3
++	add	ip, a1, ip, lsl #1
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_20:
++	ldr	a1, .dc_20
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #2
++	sub	a1, a2, ip, lsl #2
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_21:
++	ldr	a1, .dc_21
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #1
++	rsb	ip, ip, ip, lsl #3
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_22:
++	ldr	a1, .dc_22
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #2
++	add	ip, a1, ip, lsl #1
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_23:
++	ldr	a1, .dc_23
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	add	ip, a1, a1, lsl #1
++	rsb	ip, a1, ip, lsl #3
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_24:
++	ldr	a1, .dc_24
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #2
++	add	ip, a1, a1, lsl #1
++	sub	a1, a2, ip, lsl #3
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_25:
++	ldr	a1, .dc_25
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #2
++	add	ip, ip, ip, lsl #2
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_26:
++	ldr	a1, .dc_26
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #1
++	add	ip, a1, ip, lsl #2
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_27:
++	ldr	a1, .dc_27
++        smull	a3, a4, a2, a1
++        mov	ip, a2, asr #31
++        rsb	a1, ip, a4, asr #3
++	add	ip, a1, a1, lsl #1
++	add	ip, ip, ip, lsl #3
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_28:
++	ldr	a1, .dc_28
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	rsb	ip, a1, a1, lsl #3
++	sub	a1, a2, ip, lsl #2
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_29:
++	ldr	a1, .dc_29
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	rsb	ip, a1, a1, lsl #3
++	add	ip, a1, ip, lsl #2
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_30:
++	ldr	a1, .dc_30
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	rsb	ip, a1, a1, lsl #4
++	sub	a1, a2, ip, lsl #1
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++.remc_31:
++	ldr	a1, .dc_31
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	rsb	ip, a1, a1, lsl #5
++	sub	a1, a2, ip
++	str	a1, [java_stack], #-4
++	mov	pc, lr
++
++@ --- do_idiv -------------------------------------------------
++	OpcodeEntry	do_idiv
++do_idiv_vtos:
++	POP(tos)
++do_idiv_itos:
++	POP(r1)
++	ldrb	lr, [r8, #1]!
++	adr	r3, .div_table
++@	add	r3, vtos_table, #div_table
++	cmp	r0, #0x20
++	ldrcc	r3, [r3, r0, lsl #2]
++	ldr	lr, [vtos_table, lr, asl #2]
++	movcc	pc, r3
++
++        ands    a4, a1, #0x80000000
++        rsbmi   a1, a1, #0
++        eors    ip, a4, a2, ASR #32
++        rsbcs   a2, a2, #0
++	movs	a3, a1
++.s_loop:
++        cmp     a3, a2, LSR #8
++        movls   a3, a3, LSL #8
++        blo     .s_loop
++        cmp     a3, a2, LSR #1
++        bhi     .s_jump7
++        cmp     a3, a2, LSR #2
++        bhi     .s_jump6
++        cmp     a3, a2, LSR #3
++        bhi     .s_jump5
++        cmp     a3, a2, LSR #4
++        bhi     .s_jump4
++        cmp     a3, a2, LSR #5
++        bhi     .s_jump3
++        cmp     a3, a2, LSR #6
++        bhi     .s_jump2
++        cmp     a3, a2, LSR #7
++        bhi     .s_jump1
++.s_loop2:
++@ not executed when falling into .s_loop2
++        movhi   a3, a3, LSR #8
++        cmp     a2, a3, LSL #7
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #7
++        cmp     a2, a3, LSL #6
++.s_jump1:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #6
++        cmp     a2, a3, LSL #5
++.s_jump2:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #5
++        cmp     a2, a3, LSL #4
++.s_jump3:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #4
++        cmp     a2, a3, LSL #3
++.s_jump4:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #3
++        cmp     a2, a3, LSL #2
++.s_jump5:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #2
++        cmp     a2, a3, LSL #1
++.s_jump6:
++        adc     a4, a4, a4
++        subcs   a2, a2, a3, LSL #1
++.s_jump7:
++        cmp     a2, a3
++        adc     a4, a4, a4
++        subcs   a2, a2, a3
++        cmp     a3, a1
++        bne     .s_loop2
++        movs    ip, ip, lsl #1
++	rsbcs	a4, a4, #0
++	str	a4, [java_stack], #-4
++	mov	pc, lr
++
++.div_table:
++	.word	.divc_0
++	.word	.divc_1
++	.word	.divc_2
++	.word	.divc_3
++	.word	.divc_4
++	.word	.divc_5
++	.word	.divc_6
++	.word	.divc_7
++	.word	.divc_8
++	.word	.divc_9
++	.word	.divc_10
++	.word	.divc_11
++	.word	.divc_12
++	.word	.divc_13
++	.word	.divc_14
++	.word	.divc_15
++	.word	.divc_16
++	.word	.divc_17
++	.word	.divc_18
++	.word	.divc_19
++	.word	.divc_20
++	.word	.divc_21
++	.word	.divc_22
++	.word	.divc_23
++	.word	.divc_24
++	.word	.divc_25
++	.word	.divc_26
++	.word	.divc_27
++	.word	.divc_28
++	.word	.divc_29
++	.word	.divc_30
++	.word	.divc_31
++
++.divc_1:
++	str	a2, [java_stack], #-4
++	mov	pc, lr
++.divc_2:
++        add     a2, a2, a2, lsr #31
++        mov     a1, a2, asr #1
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_3:
++	ldr	a1, .dc_3
++        smull	a3, a4, a2, a1
++        sub	a1, a4, a2, asr #31
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_4:
++	movs	a4, a2
++        addmi	a4, a4, #3
++        mov	a1, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_5:
++	ldr	a1, .dc_5
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #1
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_6:
++	ldr	a1, .dc_6
++        smull	a3, a4, a2, a1
++        sub	a1, a4, a2, asr #31
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_7:
++	ldr	a1, .dc_7
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_8:
++	movs	a3, a2
++        addmi	a3, a3, #7
++        mov	a1, a3, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_9:
++	ldr	a1, .dc_9
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #1
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_10:
++	ldr	a1, .dc_10
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_11:
++	ldr	a1, .dc_11
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #1
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_12:
++	ldr	a1, .dc_12
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #1
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_13:
++	ldr	a1, .dc_13
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_14:
++	ldr	a1, .dc_14
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_15:
++	ldr	a1, .dc_15
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_16:
++	movs	a3, a2
++        addmi	a3, a3, #15
++        mov	a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_17:
++	ldr	a1, .dc_17
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_18:
++	ldr	a1, .dc_18
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_19:
++	ldr	a1, .dc_19
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_20:
++	ldr	a1, .dc_20
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_21:
++	ldr	a1, .dc_21
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_22:
++	ldr	a1, .dc_22
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_23:
++	ldr	a1, .dc_23
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_24:
++	ldr	a1, .dc_24
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #2
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_25:
++	ldr	a1, .dc_25
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_26:
++	ldr	a1, .dc_26
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_27:
++	ldr	a1, .dc_27
++        smull	a3, a4, a2, a1
++        mov	a3, a2, asr #31
++        rsb	a1, a3, a4, asr #3
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_28:
++	ldr	a1, .dc_28
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_29:
++	ldr	a1, .dc_29
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_30:
++	ldr	a1, .dc_30
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.divc_31:
++	ldr	a1, .dc_31
++        smull	a3, a4, a2, a1
++        mov	a1, a2, asr #31
++        add	a3, a2, a4
++        rsb	a1, a1, a3, asr #4
++	str	r0, [java_stack], #-4
++	mov	pc, lr
++.dc_7:
++.dc_14:
++	.word     0x92492493
++.dc_15:
++.dc_30:
++	.word     0x88888889
++.dc_23:
++	.word     0xb21642c9
++.dc_28:
++	.word     0x92492493
++.dc_29:
++	.word     0x8d3dcb09
++.dc_31:
++	.word     0x84210843
++.dc_6:
++.dc_12:
++.dc_24:
++	.word     0x2aaaaaab
++.dc_19:
++	.word     0x6bca1af3
++.dc_5:
++.dc_10:
++.dc_20:
++	.word     0x66666667
++.dc_21:
++	.word     0x30c30c31
++.dc_11:
++.dc_22:
++	.word     0x2e8ba2e9
++.dc_26:
++.dc_13:
++	.word     0x4ec4ec4f
++.dc_25:
++	.word     0x51eb851f
++.dc_27:
++	.word     0x4bda12f7
++.dc_3:
++	.word     0x55555556
++.dc_17:
++	.word     0x78787879
++.dc_9:
++.dc_18:
++	.word     0x38e38e39
++
++@ ==== Software floating point operations ====================================
++
++@ --- do_fadd_vtos -------------------------------------------------
++	OpcodeEntry	do_fadd_vtos
++	POP(tos)
++@ --- do_fadd_itos -------------------------------------------------
++	OpcodeEntry	do_fadd_itos
++	POP(r1)
++	bl	__aeabi_fadd(PLT)
++	ldrb	ip, [java_pc, #1]!
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++#ifndef FAST_SW_FP
++@ --- do_dadd_vtos -------------------------------------------------
++	OpcodeEntry	do_dadd_vtos
++	POP(tos)
++@ --- do_dadd_itos -------------------------------------------------
++	OpcodeEntry	do_dadd_itos
++	ldmib	java_stack!, {r1-r3}
++	bl	__aeabi_dadd(PLT)
++	ldrb	ip, [java_pc, #1]!
++	PUSH(r1)
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++#endif
++
++@ --- do_fsub_vtos -------------------------------------------------
++	OpcodeEntry	do_fsub_vtos
++	POP(tos)
++@ --- do_fsub_itos -------------------------------------------------
++	OpcodeEntry	do_fsub_itos
++	POP(r1)				@ Args are in wrong order - so just neg
++	eor	tos, tos, #0x80000000	@ R0 and add - easier than swap
++	bl	__aeabi_fadd(PLT)
++	ldrb	ip, [java_pc, #1]!
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++#ifndef FAST_SW_FP
++@ --- do_dsub_vtos -------------------------------------------------
++	OpcodeEntry	do_dsub_vtos
++	POP(tos)
++@ --- do_dsub_itos -------------------------------------------------
++	OpcodeEntry	do_dsub_itos
++	ldmib	java_stack!, {r1-r3}	@ args in wrong order - easier to
++	eor	r1, r1, #0x80000000	@ just neg rather than swap
++	bl	__aeabi_dadd(PLT)
++	ldrb	ip, [java_pc, #1]!
++	PUSH(r1)
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++#endif
++
++@ --- do_fmul_vtos -------------------------------------------------
++	OpcodeEntry	do_fmul_vtos
++	POP(tos)
++@ --- do_fmul_itos -------------------------------------------------
++	OpcodeEntry	do_fmul_itos
++	POP(r1)
++	bl	__aeabi_fmul(PLT)
++	ldrb	ip, [java_pc, #1]!
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++#ifndef FAST_SW_FP
++@ --- do_dmul_vtos -------------------------------------------------
++	OpcodeEntry	do_dmul_vtos
++	POP(tos)
++@ --- do_dmul_itos -------------------------------------------------
++	OpcodeEntry	do_dmul_itos
++	ldmib	java_stack!, {r1-r3}
++	bl	__aeabi_dmul(PLT)
++	ldrb	ip, [java_pc, #1]!
++	PUSH(r1)
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++#endif
++
++@ --- do_fdiv_vtos -------------------------------------------------
++	OpcodeEntry	do_fdiv_vtos
++	POP(tos)
++@ --- do_fdiv_itos -------------------------------------------------
++	OpcodeEntry	do_fdiv_itos
++	mov	r1, r0
++	POP(tos)
++	bl	__aeabi_fdiv(PLT)
++	ldrb	ip, [java_pc, #1]!
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_ddiv_vtos -------------------------------------------------
++	OpcodeEntry	do_ddiv_vtos
++	POP(tos)
++@ --- do_ddiv_itos -------------------------------------------------
++	OpcodeEntry	do_ddiv_itos
++	mov	r2, r0
++	POP	(r3)
++	ldmib	java_stack!, {r0, r1}
++	bl	__aeabi_ddiv(PLT)
++	ldrb	ip, [java_pc, #1]!
++	PUSH(r1)
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_i2f_vtos -------------------------------------------------
++	OpcodeEntry	do_i2f_vtos
++	POP(tos)
++@ --- do_i2f_itos -------------------------------------------------
++	OpcodeEntry	do_i2f_itos
++	bl	__aeabi_i2f(PLT)
++	ldrb	ip, [java_pc, #1]!
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_i2d_vtos -------------------------------------------------
++	OpcodeEntry	do_i2d_vtos
++	POP(tos)
++@ --- do_i2d_itos -------------------------------------------------
++	OpcodeEntry	do_i2d_itos
++	bl	__aeabi_i2d(PLT)
++	ldrb	ip, [java_pc, #1]!
++	PUSH(r1)
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_f2d_vtos -------------------------------------------------
++	OpcodeEntry	do_f2d_vtos
++	POP(tos)
++@ --- do_f2d_itos -------------------------------------------------
++	OpcodeEntry	do_f2d_itos
++	bl	__aeabi_f2d(PLT)
++	ldrb	ip, [java_pc, #1]!
++	PUSH(r1)
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_d2f_vtos -------------------------------------------------
++	OpcodeEntry	do_d2f_vtos
++	POP(tos)
++@ --- do_d2f_itos -------------------------------------------------
++	OpcodeEntry	do_d2f_itos
++	POP(r1)
++	bl	__aeabi_d2f(PLT)
++	ldrb	ip, [java_pc, #1]!
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_fcmpl_itos -------------------------------------------------
++	OpcodeEntry	do_fcmpl_itos
++	PUSH(tos)
++@ --- do_fcmpl_vtos -------------------------------------------------
++	OpcodeEntry	do_fcmpl_vtos
++	ldmib	java_stack, {r0, r1}
++	bl	__aeabi_fcmpgt(PLT)
++	cmp	r0, #0
++	movne	r0, #-1
++	bne	do_fcmpl_1
++	ldmib	java_stack, {r0, r1}
++	bl	__aeabi_fcmplt(PLT)
++	cmp	r0, #0
++	movne	r0, #1
++	bne	do_fcmpl_1
++	ldmib	java_stack, {r0, r1}
++	bl	__aeabi_fcmpeq(PLT)
++	cmp	r0, #0
++	movne	r0, #0
++	moveq	r0, #-1
++do_fcmpl_1:
++	ldrb	ip, [java_pc, #1]!
++	add	java_stack, java_stack, #8
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_fcmpg_itos -------------------------------------------------
++	OpcodeEntry	do_fcmpg_itos
++	PUSH(tos)
++@ --- do_fcmpg_vtos -------------------------------------------------
++	OpcodeEntry	do_fcmpg_vtos
++	ldmib	java_stack, {r0, r1}
++	bl	__aeabi_fcmpgt(PLT)
++	cmp	r0, #0
++	movne	r0, #-1
++	bne	do_fcmpg_1
++	ldmib	java_stack, {r0, r1}
++	bl	__aeabi_fcmplt(PLT)
++	cmp	r0, #0
++	movne	r0, #1
++	bne	do_fcmpg_1
++	ldmib	java_stack, {r0, r1}
++	bl	__aeabi_fcmpeq(PLT)
++	cmp	r0, #0
++	movne	r0, #0
++	moveq	r0, #1
++do_fcmpg_1:
++	ldrb	ip, [java_pc, #1]!
++	add	java_stack, java_stack, #8
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_dcmpl_itos -------------------------------------------------
++	OpcodeEntry	do_dcmpl_itos
++	PUSH(tos)
++@ --- do_dcmpl_vtos -------------------------------------------------
++	OpcodeEntry	do_dcmpl_vtos
++	ldmib	java_stack, {r0, r1, r2, r3}
++	bl	__aeabi_dcmpgt(PLT)
++	cmp	r0, #0
++	movne	r0, #-1
++	bne	do_dcmpl_1
++	ldmib	java_stack, {r0, r1, r2, r3}
++	bl	__aeabi_dcmplt(PLT)
++	cmp	r0, #0
++	movne	r0, #1
++	bne	do_dcmpl_1
++	ldmib	java_stack, {r0, r1, r2, r3}
++	bl	__aeabi_dcmpeq(PLT)
++	cmp	r0, #0
++	movne	r0, #0
++	moveq	r0, #-1
++do_dcmpl_1:
++	ldrb	ip, [java_pc, #1]!
++	add	java_stack, java_stack, #16
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_dcmpg_itos -------------------------------------------------
++	OpcodeEntry	do_dcmpg_itos
++	PUSH(tos)
++@ --- do_dcmpg_vtos -------------------------------------------------
++	OpcodeEntry	do_dcmpg_vtos
++	ldmib	java_stack, {r0, r1, r2, r3}
++	bl	__aeabi_dcmpgt(PLT)
++	cmp	r0, #0
++	movne	r0, #-1
++	bne	do_dcmpg_1
++	ldmib	java_stack, {r0, r1, r2, r3}
++	bl	__aeabi_dcmplt(PLT)
++	cmp	r0, #0
++	movne	r0, #1
++	bne	do_dcmpg_1
++	ldmib	java_stack, {r0, r1, r2, r3}
++	bl	__aeabi_dcmpeq(PLT)
++	cmp	r0, #0
++	movne	r0, #0
++	moveq	r0, #1
++do_dcmpg_1:
++	ldrb	ip, [java_pc, #1]!
++	add	java_stack, java_stack, #16
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ ==== Double TOS operations ==============================================================
++
++@ --- do_nop_dtos -------------------------------------------------
++	OpcodeEntry	do_nop_dtos
++	PUSHD	dtos
++	b	do_nop_vtos
++@ --- do_aconst_null_dtos -------------------------------------------------
++	OpcodeEntry	do_aconst_null_dtos
++	PUSHD	dtos
++	b	do_aconst_null_vtos
++@ --- do_iconst_m1_dtos -------------------------------------------------
++	OpcodeEntry	do_iconst_m1_dtos
++	PUSHD	dtos
++	b	do_iconst_m1_vtos
++@ --- do_iconst_0_dtos -------------------------------------------------
++	OpcodeEntry	do_iconst_0_dtos
++	PUSHD	dtos
++	b	do_iconst_0_vtos
++@ --- do_iconst_1_dtos -------------------------------------------------
++	OpcodeEntry	do_iconst_1_dtos
++	PUSHD	dtos
++	b	do_iconst_1_vtos
++@ --- do_iconst_2_dtos -------------------------------------------------
++	OpcodeEntry	do_iconst_2_dtos
++	PUSHD	dtos
++	b	do_iconst_2_vtos
++@ --- do_iconst_3_dtos -------------------------------------------------
++	OpcodeEntry	do_iconst_3_dtos
++	PUSHD	dtos
++	b	do_iconst_3_vtos
++@ --- do_iconst_4_dtos -------------------------------------------------
++	OpcodeEntry	do_iconst_4_dtos
++	PUSHD	dtos
++	b	do_iconst_4_vtos
++@ --- do_iconst_5_dtos -------------------------------------------------
++	OpcodeEntry	do_iconst_5_dtos
++	PUSHD	dtos
++	b	do_iconst_5_vtos
++@ --- do_lconst_0_dtos -------------------------------------------------
++	OpcodeEntry	do_lconst_0_dtos
++	PUSHD	dtos
++	b	do_lconst_0_vtos
++@ --- do_lconst_1_dtos -------------------------------------------------
++	OpcodeEntry	do_lconst_1_dtos
++	PUSHD	dtos
++	b	do_lconst_1_vtos
++@ --- do_fconst_0_dtos -------------------------------------------------
++	OpcodeEntry	do_fconst_0_dtos
++	PUSHD	dtos
++	b	do_fconst_0_vtos
++@ --- do_fconst_1_dtos -------------------------------------------------
++	OpcodeEntry	do_fconst_1_dtos
++	PUSHD	dtos
++	b	do_fconst_1_vtos
++@ --- do_fconst_2_dtos -------------------------------------------------
++	OpcodeEntry	do_fconst_2_dtos
++	PUSHD	dtos
++	b	do_fconst_2_vtos
++@ --- do_dconst_0_dtos -------------------------------------------------
++	OpcodeEntry	do_dconst_0_dtos
++	PUSHD	dtos
++	b	do_dconst_0_vtos
++@ --- do_dconst_1_dtos -------------------------------------------------
++	OpcodeEntry	do_dconst_1_dtos
++	PUSHD	dtos
++	b	do_dconst_1_vtos
++@ --- do_bipush_dtos -------------------------------------------------
++	OpcodeEntry	do_bipush_dtos
++	PUSHD	dtos
++	b	do_bipush_vtos
++@ --- do_sipush_dtos -------------------------------------------------
++	OpcodeEntry	do_sipush_dtos
++	PUSHD	dtos
++	b	do_sipush_vtos
++@ --- do_ldc_dtos -------------------------------------------------
++	OpcodeEntry	do_ldc_dtos
++	PUSHD	dtos
++	b	do_ldc_vtos
++@ --- do_ldc_w_dtos -------------------------------------------------
++	OpcodeEntry	do_ldc_w_dtos
++	PUSHD	dtos
++	b	do_ldc_w_vtos
++@ --- do_ldc2_w_dtos -------------------------------------------------
++	OpcodeEntry	do_ldc2_w_dtos
++	PUSHD	dtos
++	b	do_ldc2_w_vtos
++@ --- do_iload_dtos -------------------------------------------------
++	OpcodeEntry	do_iload_dtos
++	PUSHD	dtos
++	b	do_iload_vtos
++@ --- do_lload_dtos -------------------------------------------------
++	OpcodeEntry	do_lload_dtos
++	PUSHD	dtos
++	b	do_lload_vtos
++@ --- do_fload_dtos -------------------------------------------------
++	OpcodeEntry	do_fload_dtos
++	PUSHD	dtos
++	b	do_fload_vtos
++@ --- do_dload_dtos -------------------------------------------------
++	OpcodeEntry	do_dload_dtos
++	PUSHD	dtos
++	b	do_dload_vtos
++@ --- do_aload_dtos -------------------------------------------------
++	OpcodeEntry	do_aload_dtos
++	PUSHD	dtos
++	b	do_aload_vtos
++@ --- do_iload_0_dtos -------------------------------------------------
++	OpcodeEntry	do_iload_0_dtos
++	PUSHD	dtos
++	b	do_iload_0_vtos
++@ --- do_iload_1_dtos -------------------------------------------------
++	OpcodeEntry	do_iload_1_dtos
++	PUSHD	dtos
++	b	do_iload_1_vtos
++@ --- do_iload_2_dtos -------------------------------------------------
++	OpcodeEntry	do_iload_2_dtos
++	PUSHD	dtos
++	b	do_iload_2_vtos
++@ --- do_iload_3_dtos -------------------------------------------------
++	OpcodeEntry	do_iload_3_dtos
++	PUSHD	dtos
++	b	do_iload_3_vtos
++@ --- do_lload_0_dtos -------------------------------------------------
++	OpcodeEntry	do_lload_0_dtos
++	PUSHD	dtos
++	b	do_lload_0_vtos
++@ --- do_lload_1_dtos -------------------------------------------------
++	OpcodeEntry	do_lload_1_dtos
++	PUSHD	dtos
++	b	do_lload_1_vtos
++@ --- do_lload_2_dtos -------------------------------------------------
++	OpcodeEntry	do_lload_2_dtos
++	PUSHD	dtos
++	b	do_lload_2_vtos
++@ --- do_lload_3_dtos -------------------------------------------------
++	OpcodeEntry	do_lload_3_dtos
++	PUSHD	dtos
++	b	do_lload_3_vtos
++@ --- do_fload_0_dtos -------------------------------------------------
++	OpcodeEntry	do_fload_0_dtos
++	PUSHD	dtos
++	b	do_fload_0_vtos
++@ --- do_fload_1_dtos -------------------------------------------------
++	OpcodeEntry	do_fload_1_dtos
++	PUSHD	dtos
++	b	do_fload_1_vtos
++@ --- do_fload_2_dtos -------------------------------------------------
++	OpcodeEntry	do_fload_2_dtos
++	PUSHD	dtos
++	b	do_fload_2_vtos
++@ --- do_fload_3_dtos -------------------------------------------------
++	OpcodeEntry	do_fload_3_dtos
++	PUSHD	dtos
++	b	do_fload_3_vtos
++@ --- do_dload_0_dtos -------------------------------------------------
++	OpcodeEntry	do_dload_0_dtos
++	PUSHD	dtos
++	b	do_dload_0_vtos
++@ --- do_dload_1_dtos -------------------------------------------------
++	OpcodeEntry	do_dload_1_dtos
++	PUSHD	dtos
++	b	do_dload_1_vtos
++@ --- do_dload_2_dtos -------------------------------------------------
++	OpcodeEntry	do_dload_2_dtos
++	PUSHD	dtos
++	b	do_dload_2_vtos
++@ --- do_dload_3_dtos -------------------------------------------------
++	OpcodeEntry	do_dload_3_dtos
++	PUSHD	dtos
++	b	do_dload_3_vtos
++@ --- do_aload_0_dtos -------------------------------------------------
++	OpcodeEntry	do_aload_0_dtos
++	PUSHD	dtos
++	b	do_aload_0_vtos
++@ --- do_aload_1_dtos -------------------------------------------------
++	OpcodeEntry	do_aload_1_dtos
++	PUSHD	dtos
++	b	do_aload_1_vtos
++@ --- do_aload_2_dtos -------------------------------------------------
++	OpcodeEntry	do_aload_2_dtos
++	PUSHD	dtos
++	b	do_aload_2_vtos
++@ --- do_aload_3_dtos -------------------------------------------------
++	OpcodeEntry	do_aload_3_dtos
++	PUSHD	dtos
++	b	do_aload_3_vtos
++@ --- do_iaload_dtos -------------------------------------------------
++	OpcodeEntry	do_iaload_dtos
++	PUSHD	dtos
++	b	do_iaload_vtos
++@ --- do_laload_dtos -------------------------------------------------
++	OpcodeEntry	do_laload_dtos
++	PUSHD	dtos
++	b	do_laload_vtos
++@ --- do_faload_dtos -------------------------------------------------
++	OpcodeEntry	do_faload_dtos
++	PUSHD	dtos
++	b	do_faload_vtos
++@ --- do_daload_dtos -------------------------------------------------
++	OpcodeEntry	do_daload_dtos
++	PUSHD	dtos
++	b	do_daload_vtos
++@ --- do_aaload_dtos -------------------------------------------------
++	OpcodeEntry	do_aaload_dtos
++	PUSHD	dtos
++	b	do_aaload_vtos
++@ --- do_baload_dtos -------------------------------------------------
++	OpcodeEntry	do_baload_dtos
++	PUSHD	dtos
++	b	do_baload_vtos
++@ --- do_caload_dtos -------------------------------------------------
++	OpcodeEntry	do_caload_dtos
++	PUSHD	dtos
++	b	do_caload_vtos
++@ --- do_saload_dtos -------------------------------------------------
++	OpcodeEntry	do_saload_dtos
++	PUSHD	dtos
++	b	do_saload_vtos
++@ --- do_dstore_dtos -------------------------------------------------
++	OpcodeEntry	do_dstore_dtos
++	ldrb	r3, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]!
++	sub	r3, java_locals, r3, lsl #2
++	ldr	ip, [vtos_table, ip, asl #2]
++	vstr	d0, [r3, #-4]
++	mov	pc, ip
++@ --- do_dstore_0_dtos -------------------------------------------------
++	OpcodeEntry	do_dstore_0_dtos
++	ldrb	ip, [java_pc, #1]!
++	vstr	d0, [java_locals, #-4]
++	ldr	ip, [vtos_table, ip, asl #2]
++	mov	pc, ip
++@ --- do_dstore_1_dtos -------------------------------------------------
++	OpcodeEntry	do_dstore_1_dtos
++	ldrb	ip, [java_pc, #1]!
++	vstr	d0, [java_locals, #-8]
++	ldr	ip, [vtos_table, ip, asl #2]
++	mov	pc, ip
++@ --- do_dstore_2_dtos -------------------------------------------------
++	OpcodeEntry	do_dstore_2_dtos
++	ldrb	ip, [java_pc, #1]!
++	vstr	d0, [java_locals, #-12]
++	ldr	ip, [vtos_table, ip, asl #2]
++	mov	pc, ip
++@ --- do_dstore_3_dtos -------------------------------------------------
++	OpcodeEntry	do_dstore_3_dtos
++	ldrb	ip, [java_pc, #1]!
++	vstr	d0, [java_locals, #-16]
++	ldr	ip, [vtos_table, ip, asl #2]
++	mov	pc, ip
++@ --- do_dastore_dtos -------------------------------------------------
++	OpcodeEntry	do_dastore_dtos
++	ldmib	java_stack!, {r2, r3} @ d0 = value, r2 = index, r3 = arrayref
++	ldrb	ip, [java_pc, #1]!
++	cmp	r3, #0
++	beq	.dtos_exit_dastore
++	ldr	lr, [r3, #8]
++	cmp	r2, lr
++	bcs	.dtos_exit_dastore
++	add	r3, r3, r2, lsl #3
++	ldr	ip, [vtos_table, ip, asl #2]
++	vstr	d0, [r3, #16]
++	mov	pc, ip
++@ --- do_pop2_dtos -------------------------------------------------
++	OpcodeEntry	do_pop2_dtos
++	ldrb	ip, [java_pc, #1]!
++	ldr	ip, [vtos_table, ip, asl #2]
++	mov	pc, ip
++
++@ ECN: Questionable here, in dup2, dup2_x1 and dup2_x2 whether we should keep
++@ the double in dtos, or push it for 'free'. It depends what happens next.
++@ Id it is a double operation we win. If we end up pushing it anyway then we
++@ lose as we have done 2 FP stores.
++@ --- do_dup2_dtos -------------------------------------------------
++	OpcodeEntry	do_dup2_dtos
++	ldrb	ip, [java_pc, #1]!
++	PUSHD	dtos
++	ldr	ip, [dtos_table, ip, asl #2]
++	mov	pc, ip
++@ --- do_dup2_x1_dtos -------------------------------------------------
++	OpcodeEntry	do_dup2_x1_dtos
++	ldrb	ip, [java_pc, #1]!
++	POP(tos)
++	PUSHD	dtos
++	ldr	ip, [dtos_table, ip, asl #2]
++	PUSH(tos)
++	mov	pc, ip
++@ --- do_dup2_x2_dtos -------------------------------------------------
++	OpcodeEntry	do_dup2_x2_dtos
++	ldrb	ip, [java_pc, #1]!
++	ldmib	java_stack!, {r0,r1}
++	ldr	ip, [dtos_table, ip, asl #2]
++	PUSHD	dtos
++	stmda	java_stack!, {r0,r1}
++	mov	pc, ip
++@ --- do_dadd_dtos -------------------------------------------------
++	OpcodeEntry	do_dadd_dtos
++	ldrb	r3, [java_pc, #1]!
++	POPD	d1
++	ldr	r2, [dtos_table, r3, asl #2]
++	faddd	d0, d1, d0
++	mov	pc, r2
++@ --- do_dsub_dtos -------------------------------------------------
++	OpcodeEntry	do_dsub_dtos
++	ldrb	r3, [java_pc, #1]!
++	POPD	d1
++	ldr	r2, [dtos_table, r3, asl #2]
++	fsubd	d0, d1, d0
++	mov	pc, r2
++@ --- do_dmul_dtos -------------------------------------------------
++	OpcodeEntry	do_dmul_dtos
++	ldrb	r3, [java_pc, #1]!
++	POPD	d1
++	ldr	r2, [dtos_table, r3, asl #2]
++	fmuld	d0, d1, d0
++	mov	pc, r2
++@ --- do_ddiv_dtos -------------------------------------------------
++	OpcodeEntry	do_ddiv_dtos
++	ldrb	r3, [java_pc, #1]!
++	POPD	d1
++	ldr	r2, [dtos_table, r3, asl #2]
++	fdivd	d0, d1, d0
++	mov	pc, r2
++@ --- do_drem_dtos -------------------------------------------------
++	OpcodeEntry	do_drem_dtos
++	vmov	r2, r3, dtos
++	ldmib	java_stack!, {r0, r1}
++	bl	fmod(PLT)
++	ldrb	r3, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++@ --- do_dneg_dtos -------------------------------------------------
++	OpcodeEntry	do_dneg_dtos
++	ldrb	r3, [java_pc, #1]!
++	fnegd	dtos, dtos
++	ldr	r2, [dtos_table, r3, asl #2]
++	mov	pc, r2
++@ --- do_iinc_dtos -------------------------------------------------
++	OpcodeEntry	do_iinc_dtos
++	ldrb	r2, [java_pc, #1]
++	ldrb	ip, [java_pc, #3]!
++	ldrsb	r1, [java_pc, #-1]
++	ldr	r3, [java_locals, -r2, lsl #2]
++	ldr	ip, [dtos_table, ip, asl #2]
++	add	r3, r3, r1
++	str	r3, [java_locals, -r2, lsl #2]
++	mov	pc, ip
++@ --- do_d2i_dtos -------------------------------------------------
++	OpcodeEntry	do_d2i_dtos
++	vmov	r0, r1, dtos
++	bl	_ZN13SharedRuntime3d2iEd(PLT)
++	ldrb	r3, [java_pc, #1]!
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++@ --- do_d2l_dtos -------------------------------------------------
++	OpcodeEntry	do_d2l_dtos
++	vmov	r0, r1, dtos
++	bl	_ZN13SharedRuntime3d2lEd(PLT)
++	ldrb	r3, [java_pc, #1]!
++	PUSH(r1)
++	ldr	r2, [itos_table, r3, asl #2]
++	mov	pc, r2
++@ --- do_d2f_dtos -------------------------------------------------
++	OpcodeEntry	do_d2f_dtos
++	ldrb	r3, [java_pc, #1]!
++	fcvtsd	s14, dtos
++	ldr	r2, [itos_table, r3, asl #2]
++	vmov	r0, s14
++	mov	pc, r2
++@ --- do_dcmpl_dtos -------------------------------------------------
++	OpcodeEntry	do_dcmpl_dtos
++	ldrb	r3, [java_pc, #1]!
++	POPD	d1
++	fcmped	d1, dtos
++	ldr	r2, [itos_table, r3, asl #2]
++	fmstat
++	mvnmi	tos, #0
++	movmi	pc, r2
++	movgt	tos, #1
++	movgt	pc, r2
++	fcmpd	d1, dtos
++	fmstat
++	moveq	tos, #0
++	mvnne	tos, #0
++	mov	pc, r2
++@ --- do_dcmpg_dtos -------------------------------------------------
++	OpcodeEntry	do_dcmpg_dtos
++	ldrb	r3, [java_pc, #1]!
++	POPD	d1
++	fcmped	d1, dtos
++	ldr	r2, [itos_table, r3, asl #2]
++	fmstat
++	mvnmi	tos, #0
++	movmi	pc, r2
++	movgt	tos, #1
++	movgt	pc, r2
++	fcmpd	d1, dtos
++	fmstat
++	moveq	tos, #0
++	movne	tos, #1
++	mov	pc, r2
++@ --- do_goto_dtos -------------------------------------------------
++	OpcodeEntry	do_goto_dtos_unsafe
++	ldrsb	r1, [java_pc, #1]
++	ldrb	ip, [java_pc, #2]
++	orr	ip, ip, r1, lsl #8
++	ldrb	ip, [java_pc, ip]!
++	ldr	ip, [dtos_table, ip, lsl #2]
++	mov	pc, ip
++
++@ --- do_exit_asm_dtos -------------------------------------------------
++	OpcodeEntry	do_goto_dtos
++	OpcodeEntry	do_jsr_dtos
++	OpcodeEntry	do_ret_dtos
++@	OpcodeEntry	do_dreturn_dtos
++@	OpcodeEntry	do_putstatic_dtos
++@	OpcodeEntry	do_putfield_dtos
++@	OpcodeEntry	do_invokestatic_dtos
++@	OpcodeEntry	do_invokevirtual_dtos
++@	OpcodeEntry	do_invokespecial_dtos
++	OpcodeEntry	do_invokeinterface_dtos
++	OpcodeEntry	do_new_dtos
++	OpcodeEntry	do_xxxunusedxxx_dtos
++	OpcodeEntry	do_goto_w_dtos
++	OpcodeEntry	do_exit_asm_dtos
++	OpcodeEntry	do_breakpoint_dtos
++	OpcodeEntry	do_jsr_w_dtos
++	OpcodeEntry	do_wide_dtos
++	PUSHD	dtos
++	str	java_pc, [istate, #ISTATE_JAVA_PC]
++	str	java_stack, [istate, #ISTATE_JAVA_STACK]
++	mov	r0, #0
++	ldmfd	sp!, {r4, r5, r6, r7, r8, r9, sl, fp, pc}
++
++@ ECN: These opcodes should never happen - we make sure they dont!
++
++	OpcodeEntry	do_istore_dtos
++	OpcodeEntry	do_lstore_dtos
++	OpcodeEntry	do_fstore_dtos
++	OpcodeEntry	do_astore_dtos
++	OpcodeEntry	do_istore_0_dtos
++	OpcodeEntry	do_istore_1_dtos
++	OpcodeEntry	do_istore_2_dtos
++	OpcodeEntry	do_istore_3_dtos
++	OpcodeEntry	do_lstore_0_dtos
++	OpcodeEntry	do_lstore_1_dtos
++	OpcodeEntry	do_lstore_2_dtos
++	OpcodeEntry	do_lstore_3_dtos
++	OpcodeEntry	do_fstore_0_dtos
++	OpcodeEntry	do_fstore_1_dtos
++	OpcodeEntry	do_fstore_2_dtos
++	OpcodeEntry	do_fstore_3_dtos
++	OpcodeEntry	do_astore_0_dtos
++	OpcodeEntry	do_astore_1_dtos
++	OpcodeEntry	do_astore_2_dtos
++	OpcodeEntry	do_astore_3_dtos
++	OpcodeEntry	do_iastore_dtos
++	OpcodeEntry	do_lastore_dtos
++	OpcodeEntry	do_fastore_dtos
++	OpcodeEntry	do_aastore_dtos
++	OpcodeEntry	do_bastore_dtos
++	OpcodeEntry	do_castore_dtos
++	OpcodeEntry	do_sastore_dtos
++	OpcodeEntry	do_pop_dtos
++	OpcodeEntry	do_dup_dtos
++	OpcodeEntry	do_dup_x1_dtos
++	OpcodeEntry	do_dup_x2_dtos
++	OpcodeEntry	do_swap_dtos
++	OpcodeEntry	do_iadd_dtos
++	OpcodeEntry	do_ladd_dtos
++	OpcodeEntry	do_fadd_dtos
++	OpcodeEntry	do_isub_dtos
++	OpcodeEntry	do_lsub_dtos
++	OpcodeEntry	do_fsub_dtos
++	OpcodeEntry	do_imul_dtos
++	OpcodeEntry	do_lmul_dtos
++	OpcodeEntry	do_fmul_dtos
++	OpcodeEntry	do_idiv_dtos
++	OpcodeEntry	do_ldiv_dtos
++	OpcodeEntry	do_fdiv_dtos
++	OpcodeEntry	do_irem_dtos
++	OpcodeEntry	do_lrem_dtos
++	OpcodeEntry	do_frem_dtos
++	OpcodeEntry	do_ineg_dtos
++	OpcodeEntry	do_lneg_dtos
++	OpcodeEntry	do_fneg_dtos
++	OpcodeEntry	do_ishl_dtos
++	OpcodeEntry	do_lshl_dtos
++	OpcodeEntry	do_ishr_dtos
++	OpcodeEntry	do_lshr_dtos
++	OpcodeEntry	do_iushr_dtos
++	OpcodeEntry	do_lushr_dtos
++	OpcodeEntry	do_iand_dtos
++	OpcodeEntry	do_land_dtos
++	OpcodeEntry	do_ior_dtos
++	OpcodeEntry	do_lor_dtos
++	OpcodeEntry	do_ixor_dtos
++	OpcodeEntry	do_lxor_dtos
++	OpcodeEntry	do_i2l_dtos
++	OpcodeEntry	do_i2f_dtos
++	OpcodeEntry	do_i2d_dtos
++	OpcodeEntry	do_l2i_dtos
++	OpcodeEntry	do_l2f_dtos
++	OpcodeEntry	do_l2d_dtos
++	OpcodeEntry	do_f2i_dtos
++	OpcodeEntry	do_f2l_dtos
++	OpcodeEntry	do_f2d_dtos
++	OpcodeEntry	do_i2b_dtos
++	OpcodeEntry	do_i2c_dtos
++	OpcodeEntry	do_i2s_dtos
++	OpcodeEntry	do_lcmp_dtos
++	OpcodeEntry	do_fcmpl_dtos
++	OpcodeEntry	do_fcmpg_dtos
++	OpcodeEntry	do_ifeq_dtos
++	OpcodeEntry	do_ifne_dtos
++	OpcodeEntry	do_iflt_dtos
++	OpcodeEntry	do_ifge_dtos
++	OpcodeEntry	do_ifgt_dtos
++	OpcodeEntry	do_ifle_dtos
++	OpcodeEntry	do_if_icmpeq_dtos
++	OpcodeEntry	do_if_icmpne_dtos
++	OpcodeEntry	do_if_icmplt_dtos
++	OpcodeEntry	do_if_icmpge_dtos
++	OpcodeEntry	do_if_icmpgt_dtos
++	OpcodeEntry	do_if_icmple_dtos
++	OpcodeEntry	do_if_acmpeq_dtos
++	OpcodeEntry	do_if_acmpne_dtos
++	OpcodeEntry	do_tableswitch_dtos
++	OpcodeEntry	do_lookupswitch_dtos
++@	OpcodeEntry	do_ireturn_dtos
++@	OpcodeEntry	do_lreturn_dtos
++@	OpcodeEntry	do_freturn_dtos
++@	OpcodeEntry	do_areturn_dtos
++@	OpcodeEntry	do_return_dtos
++	OpcodeEntry	do_newarray_dtos
++	OpcodeEntry	do_anewarray_dtos
++	OpcodeEntry	do_arraylength_dtos
++	OpcodeEntry	do_athrow_dtos
++	OpcodeEntry	do_checkcast_dtos
++	OpcodeEntry	do_instanceof_dtos
++	OpcodeEntry	do_monitorenter_dtos
++	OpcodeEntry	do_monitorexit_dtos
++	OpcodeEntry	do_multianewarray_dtos
++	OpcodeEntry	do_ifnull_dtos
++	OpcodeEntry	do_ifnonnull_dtos
++	OpcodeEntry	do_getfield_dtos
++
++	mov	r0, #1
++	str	r0, [r0, -r0]
++
++#ifdef FAST_SW_FP
++
++@ ==== Fast SW FP emulation ===============================================================
++
++#define al		r0
++#define ah		r1
++#define bl		r2
++#define bh		r3
++#define tmp		r6
++#define sh		r12
++#define ex_add		r14
++
++@ TOS = TOSM1 + TOS
++@ What we actually do is TOS = TOS + TOSM1
++@ --- do_dadd_vtos -------------------------------------------------
++	OpcodeEntry	do_dadd_vtos
++	POP(al)
++@ --- do_dadd_itos -------------------------------------------------
++	OpcodeEntry	do_dadd_itos
++	ldmib	java_stack!, {ah, bl, bh}
++	mov	tmp, #0xff000000
++	orr	tmp, tmp, #0x00e00000
++        bics    ex_add, tmp, ah, LSL #1
++        bicnes  ex_add, tmp, bh, LSL #1
++        beq     dadd_naninf
++        teq     ah, bh
++        eormi   bh, bh, #1 << 31
++        bmi     _dsub1
++_dadd1:
++        subs    ex_add, al, bl
++        sbcs    sh, ah, bh
++        bhs     dadd_swapped
++        adds    bl, bl, ex_add
++        adc     bh, bh, sh
++        subs    al, al, ex_add
++        sbc     ah, ah, sh
++dadd_swapped:
++        mov     ex_add, ah, LSR #20
++        sub     sh, ex_add, bh, LSR #20
++        tst     tmp, bh, LSL #1
++        beq     dadd_uncommon
++        bic     ah, ah, ex_add, LSL #20
++        bic     bh, bh, tmp
++        orr     bh, bh, #1 << 20
++dadd_doadd:
++        rsbs    tmp, sh, #32
++        blo     dadd_bigshift
++dadd_smallshift:
++        adds    al, al, bl, LSR sh
++        adc     ah, ah, bh, LSR sh
++        adds    al, al, bh, LSL tmp
++        adcs    ah, ah, #0
++        cmp     ah, #1 << 20
++        bhs     dadd_carry
++        add     ah, ah, ex_add, LSL #20     @ add exponent
++dadd_nocarry:
++        movs    bl, bl, LSL tmp         @ round and sticky bits
++	bpl	dadd_exit
++        adds    al, al, #1
++        movccs  bl, bl, LSL #1          @ is sticky bit zero?
++	bne	dadd_exit
++dadd_roundeven:
++        cmp     al, #0
++        bicne   al, al, #1              @ RTE if carry didn't occur
++        adceq   ah, ah, #0              @ increment high word if it did
++dadd_check_overflow_inx:
++        mov     bh, ah, LSL #1
++        cmp     bh, #0xFFE00000
++	blo	dadd_exit
++        subhs   ah, ah, #3<<29          @ bias exponent
++	b	return_double_Inf
++dadd_bigshift:
++        cmp     bl, #1
++        adc     bl, bh, bh
++        sub     sh, sh, #32             @ nonzero
++        rsbs    tmp, sh, #31            @ sets C if within a word
++        movlo   tmp, #0                 @ C clear if sh > 31
++        addhss  al, al, bh, LSR sh
++        adc     ah, ah, ex_add, LSL #20
++        cmp     ex_add, ah, LSR #20
++        beq     dadd_nocarry
++        sub     ah, ah, ex_add, LSL #20
++dadd_carry:
++        add     ah, ah, #1 << 20
++        movs    ah, ah, LSR #1
++        add     ah, ah, ex_add, LSL #20
++        movs    al, al, RRX
++        bcc     dadd_check_overflow_exact
++        adcs    al, al, #0
++        movccs  tmp, bl, LSL tmp    @EQ = round to even
++        bne     dadd_check_overflow_exact
++        b       dadd_roundeven
++dadd_rnearup_carry:
++        adds    al, al, #1
++        movccs  bl, bl, LSL #1          @ is sticky bit zero?
++        bne     dadd_check_overflow_inx
++        b       dadd_roundeven
++dadd_check_overflow_exact:
++        mov     bh, ah, LSL #1
++        cmp     bh, #0xFFE00000
++	blo	dadd_exit
++        sub     ah, ah, #3<<29          @ bias exponent
++
++return_double_Inf:
++	and	a3, ah, #0x80000000
++return_double_Inf_1:
++	mov	al, #0
++	mov	ah, #0x7f000000
++	orr	ah, ah, #0x00f00000
++	orr	ah,ah,a3
++dadd_exit:
++	ldrb	ip, [java_pc, #1]!
++	PUSH(ah)
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++
++dadd_uncommon:
++        orrs    tmp, bl, bh, LSL #1     @ Is b zero or denormal?
++        beq     dadd_bzero
++        movs    tmp, ex_add, LSL #21
++        bic     ah, ah, ex_add, LSL #20
++        bicne   bh, bh, #1 << 31
++        subne   sh, sh, #1              @ adjust exponent to fake exp_b = 1
++        bne     dadd_doadd    
++        adds    al, al, bl
++        adc     ah, ah, bh
++        b       daddsub_denorm
++dadd_bzero:
++        movs    tmp, ex_add, LSL #21        @ is a denormal?
++	bne	dadd_exit
++        orrs    tmp, al, ah, LSL #1     @ a zero?
++	beq	dadd_exit
++        b       daddsub_denorm
++
++dadd_naninf:
++        cmp     al, #1                  @ sets C if al!=0
++        adc     ex_add, ah, ah
++        cmp     bl, #1
++        adc     sh, bh, bh
++        cmp     ex_add, tmp                 @ HI if a is NaN
++        cmpls   sh, tmp                 @ HI if either is NaN
++        bhi     return_double_NaN
++        cmp     ex_add, sh
++        beq     dadd_twoinf
++        cmp     ex_add, tmp                 @ EQ if a is Inf
++        movne   ah, bh
++        movne   al, bl
++	b	dadd_exit
++dadd_twoinf:
++        teq     ah, bh
++	bpl	dadd_exit
++	b	return_double_NaN
++
++@ ECN: load 1st arg off stack and do a reverse subtract
++@ ECN: We want TOSM1 - TOS, but args end up in wrong order so do rsb
++@ --- do_dsub_vtos -------------------------------------------------
++	OpcodeEntry	do_dsub_vtos
++	POP(al)
++@ --- do_dsub_itos -------------------------------------------------
++	OpcodeEntry	do_dsub_itos
++	ldmib	java_stack, {ah, bl, bh}
++        mov     tmp, #0xff000000
++        orr     tmp, tmp, #0x00e00000
++        bics    ex_add, tmp, ah, LSL #1
++        bicnes  ex_add, tmp, bh, LSL #1
++        beq     drsb_naninf
++	teq	ah, bh
++	eor	ah, ah, #1 << 31
++	bmi	_dadd1
++	eor	bh, bh, #1 << 31
++_dsub1:
++        subs    ex_add, al, bl
++        sbcs    sh, ah, bh
++        bhs     dsub_swapped
++dsub_do_swap:
++        eor     sh, sh, #1 << 31        @ negate a and b as a - b == -b - -a
++        adds    bl, bl, ex_add
++        adc     bh, bh, sh
++        subs    al, al, ex_add
++        sbc     ah, ah, sh
++dsub_swapped:
++        mov     ex_add, ah, LSR #20
++        sub     sh, ex_add, bh, LSR #20
++        tst     tmp, bh, LSL #1
++        beq     dsub_uncommon
++        bic     ah, ah, ex_add, LSL #20
++        bic     bh, bh, tmp, ASR #1
++        rsbs    bl, bl, #0
++        rsc     bh, bh, tmp, ASR #1     @ 0xffe00000 >> 1 = -(1 << 20)
++dsub_dosub:
++        rsbs    tmp, sh, #32
++        blo     dsub_bigshift
++dsub_smallshift:
++        adds    al, al, bl, LSR sh
++        adc     ah, ah, bh, ASR sh
++        adds    al, al, bh, LSL tmp
++        adcs    ah, ah, #0
++        bmi     dsub_borrow
++dsub_noborrow:
++        add     ah, ah, ex_add, LSL #20
++        movs    bl, bl, LSL tmp
++dsub_dorounding:
++	bpl	dsub_exit
++        adds    al, al, #1              @ Z flag set if carry to high word
++        cmpne   bl, #0x80000000         @ check we don't have to round to even
++	bne	dsub_exit
++        cmp     al, #0
++        addeq   ah, ah, #1
++        bicne   al, al, #1
++	b	dsub_exit
++dsub_bigshift:
++        cmp     bl, #1
++        adc     bl, bh, bh 
++        sub     sh, sh, #32
++        rsbs    tmp, sh, #31
++        blo     dsub_hugeshift
++        adds    al, al, bh, ASR sh
++        adcs    ah, ah, #-1
++        bpl     dsub_noborrow
++dsub_borrow:
++        add     tmp, tmp, #1
++        movs    tmp, bl, LSL tmp
++        adcs    al, al, al              @ shift al,ah left including guard bit
++        adc     ah, ah, ah
++        add     sh, ah, ex_add, LSL #21     @ ah = 0xFFE00000 + fraction. Adding
++        movs    sh, sh, LSR #21         @ C-bit is clear if bit 20 of ah
++        bls     dsub_renormalize        @   clear, so 2 bits or more
++        add     ah, ah, ex_add, LSL #20
++        adds    al, al, tmp, LSR #31    @ C and Z flag are set if carry over
++        cmpcc   tmp, #0x80000000        @ check that we don't have to round
++	bne	dsub_exit
++        cmp     al, #0
++        addeq   ah, ah, #1
++        bicne   al, al, #1
++	b	dsub_exit
++dsub_renormalize:
++        bcs     dsub_ex_one
++        adds    ah, ah, #1 << 21
++        cmpeq   al, #0
++        beq     dsub_retzero            @ go and deal with it, if so
++        mov     sh, ex_add, LSR #11
++        bic     ex_add, ex_add, #1 << 11
++        sub     ex_add, ex_add, #2        @ for leading bit
++dsub_renormloop:                 @ TODO: add loop for 8 bit per cycle renorm
++        adds    al, al, al
++        adc     ah, ah, ah
++        sub     ex_add, ex_add, #1
++        tst     ah, #1 << 20
++        beq     dsub_renormloop
++        add     ah, ah, sh, LSL #31 
++        add     ah, ah, ex_add, LSL #20
++        cmp     ex_add, #0
++	bgt	dsub_exit
++        add     ah, ah, #3 << 29        @ bias exponent
++        @ Rounding direction indicator is zero (denormal results are exact)
++	mov	ip, #0
++        b       __dunder
++dsub_hugeshift:
++dsub_return:
++        add     ah, ah, ex_add, LSL #20
++dsub_return1:
++dsub_exit:
++	ldrb	ip, [java_pc, #1]!
++	PUSH(ah)
++	ldr	ip, [itos_table, ip, lsl #2]
++	mov	pc, ip
++dsub_ex_one:    @ underflow when ex = 1 - shift back to denorm
++        movs    ah, ah, ASR #1
++        mov     al, al, RRX
++        add     ah, ah, ex_add, LSL #20
++        b       dsub_denorm
++dsub_uncommon:
++        orrs    tmp, bl, bh, LSL #12    @ is b zero or denorm?
++        beq     dsub_bzero
++        movs    tmp, ex_add, LSL #21
++        bic     ah, ah, ex_add, LSL #20
++        beq     dsub_both_denorm
++        bic     bh, bh, #1 << 31
++        sub     sh, sh, #1
++        rsbs    bl, bl,#0
++        rsc     bh, bh,#0
++        b       dsub_dosub    
++dsub_both_denorm:
++        subs    al, al, bl
++        sbc     ah, ah, bh
++        b       dsub_denorm
++dsub_bzero:
++        orrs    tmp, al, ah, LSL #1
++        bne     dsub_denorm             @ return a@ but it might be denormal
++dsub_retzero:
++        mov     ah, #0                  @ clear sign bit (al is already 0)
++	b	dsub_exit
++dsub_denorm:
++daddsub_denorm:
++        movs    bl, ah, LSL #1          @ discard sign bit
++        tsteq   al, al                  @ do we have a zero?
++        beq     dsub_retzero            @ yes@ go and ensure the right sign
++	b	dsub_exit
++drsb_naninf:
++        @ Handle NaNs and infinities in reverse subtraction. We
++        @ just swap the operands and go to dsub_naninf.
++        eor     ah, ah, bh
++        eor     al, al, bl
++        eor     bh, bh, ah
++        eor     bl, bl, al
++        eor     ah, ah, bh
++        eor     al, al, bl
++dsub_naninf:
++        cmp     al, #1                  @ sets C if al!=0
++        adc     ex_add, ah, ah
++        cmp     bl, #1
++        adc     sh, bh, bh
++        cmp     ex_add, tmp                 @ HI if a is NaN
++        cmpls   sh, tmp                 @ HI if either is NaN
++        bhi     return_double_NaN
++        cmp     ex_add, sh
++        beq     dsub_twoinf
++        cmp     ex_add, tmp                 @ EQ if a is Inf
++        eorne   ah, bh, #0x80000000
++        movne   al, bl
++	b	dsub_exit
++dsub_twoinf:
++        teq     ah, bh
++	bmi	dsub_exit
++
++return_double_NaN:
++	and	a3, ah, #0x80000000
++	mov	al, #0
++	mov	ah, #0x7f000000
++	orr	ah, ah, #0x00f80000
++	orr	ah,ah,a3
++	b	dsub_exit
++
++@ === underflow handler ================================================
++
++#define	INX_pos	30
++#define INX_bit (1<<30)
++
++#define exp	r2
++#define temp	r3
++
++__dunder:
++        tst     ah, ah
++        orrmi   ip, ip, #1<<16
++        mov     temp, #0x600
++        mov     exp, ah, LSR #20      @ find the exponent
++        add     temp, temp, #1
++        bic     ah, ah, exp, LSL #20 @ remove exponent from mantissa
++        bic     exp, exp, #0x800        @ lose the sign bit
++        sub     exp, temp, exp
++        orr     ah, ah, #1<<20      @ put on mantissa leading bit
++        cmp     exp, #53
++        bhi     dunder_stickyonly
++        beq     dunder_roundbit
++        cmp     exp, #21
++        blo     dunder_hiword
++        subs    exp, exp, #32
++        bls     dunder_hiloword
++dunder_loloword:
++        rsb     temp, exp, #32
++        cmp     al, #0
++        mov     al, ah, LSR exp
++        mov     exp, ah, LSL temp
++        orrne   exp, exp, #1
++        mov     ah, #0
++        b       dunder_round
++dunder_hiloword:
++        rsb     temp, exp, #0
++        add     exp, exp, #32
++        mov     ah, ah, LSL temp
++        orr     ah, ah, al, LSR exp
++        mov     exp, al, LSL temp
++        mov     al, ah
++        mov     ah, #0
++        b       dunder_round
++dunder_hiword:
++        rsb     temp, exp, #32
++        mov     tmp, al, LSL temp
++        mov     temp, ah, LSL temp
++        orr     al, temp, al, LSR exp
++        mov     ah, ah, LSR exp
++        mov     exp, tmp
++        b       dunder_round
++dunder_roundbit:
++        orrs    exp, al, ah, LSL #12
++        mov     al, #0
++        mov     ah, #0
++        mov     exp, #0x80000000
++        addne   exp, exp, #1
++        b       dunder_round
++dunder_stickyonly:
++        mov     exp, #1
++        mov     ah, #0
++        mov     al, #0
++dunder_round:
++        tst     ip, #1<<16
++        bic     ip, ip, #1<<16
++        orrne   ah, ah, #0x80000000
++        tst     exp, exp
++	beq	dsub_exit
++        movs    exp, exp, LSL #1        @ round bit in C, sticky in ~Z
++        bcc     dunder_rerounded        @ if no round bit, we're done
++        beq     dunder_roundeven        @ RTE is tricky due to rerounding
++dunder_roundup:
++        adds    al, al, #1          @ round up
++        adc     ah, ah, #0
++dunder_rerounded:
++	b	dsub_exit
++dunder_roundeven:
++        movs    exp, ip, ASR #INX_pos   @ get -1, 0, +1 from direction bits
++        bmi     dunder_roundup          @ if -1, round up unconditionally
++        bne     dunder_rerounded        @ if +1, round down unconditionally
++        adds    al, al, #1          @ round up ...
++        adc     ah, ah, #0
++        bic     al, al, #1          @ ... and then to even
++        b       dunder_rerounded
++
++@ === MULTIPLY Double ===================================================
++
++#define ex_m		r14
++#define uh		r12
++#define ul		r4
++#define rs		r4
++#define th		r5
++#define tl		r6
++
++@ --- do_dmul_vtos -------------------------------------------------
++	OpcodeEntry	do_dmul_vtos
++	POP(al)
++@ --- do_dmul_itos -------------------------------------------------
++	OpcodeEntry	do_dmul_itos
++	ldmib	java_stack!, {ah, bl, bh}
++	stmdb	sp!, {r4, r5}
++	mov	tmp, #0x7f00000
++	orr	tmp, tmp, #0x00f0000
++        bics    ex_m, tmp, ah, LSR #4     @ test for Infs or NaNs
++        bicnes  ex_m, tmp, bh, LSR #4
++        beq     dmul_naninf
++        and     ex_m, tmp, ah, LSR #4     @ get exponent of a
++        eor     th, ah, bh              @ compute sign of result
++        orr     ex_m, ex_m, th, LSR #31     @   and save it at bottom of ex
++        ands    th, tmp, bh, LSR #4     @ get exponent of b, and test
++        tstne   ah, tmp, LSL #4         @   for zeros/denorms ...
++        beq     dmul_zerodenorm         @   go and renormalise if we got any
++dmul_normalised:
++        add     ex_m, ex_m, th              @ calculate exponent of result
++        sub     ex_m, ex_m, #0x3FC0000      @ rebias exponent mostly
++        bic     ah, ah, tmp, LSL #5     @ clear sign and all but lo bit of exp
++        bic     bh, bh, tmp, LSL #5
++        orr     ah, ah, #1<<20          @ set leading bit on mantissa
++        orr     bh, bh, #1<<20          @ set leading bit on mantissa
++dmul_mantmul:
++        umull   ul, uh, ah, bl
++        umull   tl, th, al, bh
++        adds    tl, tl, ul
++        adcs    th, th, uh              @ carry from here is used below
++        umull   ul, uh, ah, bh          @ uh:ul is top part
++        adc     bh, uh, #0              @ get carry from above addition
++        umull   ah, uh, al, bl          @ uh:ah is bottom part
++        adds    tl, tl, uh
++        adcs    th, th, ul
++        adcs    bh, bh, #0
++        tst     ah, ah
++        orrne   tl, tl, #1              @ don't lose sticky bit
++        mov     bl, #-4
++        mov     uh, #32-12              @ uh will be corresponding right shift
++        cmp     bh, #0x200              @ C set if it's 11 bits
++        adc     uh, uh, #0
++        adc     bl, bl, ex_m, ASR #16     @ increment exponent correspondingly
++        rsb     ul, uh, #32             @ ul is left shift
++        mov     ah, bh, LSL ul
++        mov     al, th, LSL ul
++        orr     ah, ah, th, LSR uh
++        orr     al, al, tl, LSR uh
++        add     ah, ah, bl, LSL #20 @ put exponent back on (may wrap
++        eor     ah, ah, ex_m, LSL #31 @ put sign back on (with EOR so that
++        movs    rs, tl, LSL ul          @ compute the round word
++        beq     dmul_exact
++        movs    uh, rs, LSL #1          @ rs is already in place
++        movcc   rs, #-INX_bit           @ direction indicator: rounded down
++        bcc     dmul_rounded
++        orreq   bh, bh, #1<<31          @ save the round-to-even bit
++        adcs    al, al, #0          @ round up if necessary
++        adc     ah, ah, #0
++        mov     rs, #INX_bit            @ direction indicator: rounded up
++        tst     al, bh, LSR #31       @ does RTE do anything?
++        bic     al, al, bh, LSR #31 @ perform RTE
++        movne   rs, #-INX_bit           @ if RTE had effect, we rounded down
++dmul_exact:
++dmul_rounded:
++        teq     ah, ex_m, LSL #31       @ do the signs agree?
++        ldr     uh, =0x7FF00000         @ even if so, need to test exp 0/7FF
++        bmi     dmul_outflow            @ if not, UFL or OFL
++        tst     ah, uh
++        bicnes  uh, uh, ah            @ is exp 0 or 7FF?
++        beq     dmul_outflow
++dmul_exit:
++	ldrb	ip, [java_pc, #1]!
++	ldmia	sp!, {r4, r5}
++	ldr	ip, [itos_table, ip, lsl #2]
++	PUSH(ah)
++	mov	pc, ip
++
++dmul_rdirect:
++        movs    ul, ex_m, LSL #31         @ put sign bit in N
++        tstpl   uh, #2 << 22        @ if +ve: EQ iff round up. Keeps PL
++        tstmi   uh, #1 << 22         @ if -ve: EQ iff round up.
++        moveq   rs, #INX_bit            @ rounded up
++        movne   rs, #-INX_bit           @ rounded down
++        addeqs  al, al, #1          @ may set C
++        adc     ah, ah, #0
++        b       dmul_rounded
++
++dmul_outflow:
++        cmp     ex_m, #0x400<<16          @ Which ballpark are we in?
++        addle   ah, ah, #0x60000000 @ Bias up if underflow
++        subge   ah, ah, #0x60000000 @ Bias down if overflow
++	mov	ip, rs
++	ldmia	sp!, {r4, r5}
++        ble     __dunder                @ underflow
++	b	return_double_Inf
++
++dmul_zerodenorm:
++        orrs    ul, al, ah, LSL #1      @ is a zero?
++        orrnes  ul, bl, bh, LSL #1      @ or is b zero?
++        beq     dmul_zero               @ Return zero if so
++
++        tst     th, th                  @ is b denormal?
++        beq     dmul_renorm_op2
++dmul_done_op2:
++        bics    ul, ex_m, #1              @ is a denormal? (careful of sign bit)
++        beq     dmul_renorm_op1
++        b       dmul_normalised
++dmul_zero:
++        mov     al, #0                  @ clear low word
++        mov     ah, ex_m, LSL #31         @ get sign of result and clear hi word
++	b	dmul_exit
++
++dmul_renorm_op1:
++        add     ex_m, ex_m, #1<<16          @ correct the exponent
++        bic     ah, ah, #0x80000000       @ this will get in our way
++        orrs    tl, ah, al, LSR #12    @ is highest set bit in low twelve?
++        moveq   al, al, LSL #20         @ if so, move it up
++        subeq   ex_m, ex_m, #20<<16       @ and adjust exponent
++        tst     ah, ah                  @ is highest set bit in low word?
++        moveq   ah, al, LSR #12         @ if so, move up by 20
++        moveq   al, al, LSL #20
++        subeq   ex_m, ex_m, #20<<16       @ and adjust exponent
++        mov     ul, #0                 @ shift of top word
++        movs    tl, ah, LSR #(21-16)   @ is highest set bit within 16 of top?
++        moveq   ah, ah, LSL #16         @ if not, move up
++        addeq   ul, ul, #16           @ and adjust exponent
++        movs    tl, ah, LSR #(21-8)   @ is highest set bit within 8 of top?
++        moveq   ah, ah, LSL #8         @ if not, move up
++        addeq   ul, ul, #8           @ and adjust exponent
++        movs    tl, ah, LSR #(21-4)   @ is highest set bit within 4 of top?
++        moveq   ah, ah, LSL #4         @ if not, move up
++        addeq   ul, ul, #4           @ and adjust exponent
++        movs    tl, ah, LSR #(21-2)   @ is highest set bit within 2 of top?
++        moveq   ah, ah, LSL #2         @ if not, move up
++        addeq   ul, ul, #2           @ and adjust exponent
++        movs    tl, ah, LSR #(21-1)   @ is highest set bit within 1 of top?
++        moveq   ah, ah, LSL #1         @ if not, move up
++        addeq   ul, ul, #1           @ and adjust exponent
++
++        sub     ex_m, ex_m, ul, LSL #16  @ calculate final pseudo exponent
++        mov     tl, al, LSL ul        @ shift low word up by same amout
++        rsb     ul, ul, #32           @ compute reverse shift for al
++        orr     ah, ah, al, LSR ul     @ put in high end of low word
++        mov     al, tl
++
++@ ECN: Reload tmp
++	mov	tmp, #0x7f00000
++	orr	tmp, tmp, #0x00f0000
++
++        b       dmul_normalised
++
++dmul_renorm_op2:
++        add     th, th, #1<<16          @ correct the exponent
++        bic     bh, bh, #0x80000000       @ this will get in our way
++        orrs    tl, bh, bl, LSR #12    @ is highest set bit in low twelve?
++        moveq   bl, bl, LSL #20         @ if so, move it up
++        subeq   th, th, #20<<16       @ and adjust exponent
++        tst     bh, bh                  @ is highest set bit in low word?
++        moveq   bh, bl, LSR #12         @ if so, move up by 20
++        moveq   bl, bl, LSL #20
++        subeq   th, th, #20<<16       @ and adjust exponent
++        mov     ul, #0                 @ shift of top word
++        movs    tl, bh, LSR #(21-16)   @ is highest set bit within 16 of top?
++        moveq   bh, bh, LSL #16         @ if not, move up
++        addeq   ul, ul, #16           @ and adjust exponent
++        movs    tl, bh, LSR #(21-8)   @ is highest set bit within 8 of top?
++        moveq   bh, bh, LSL #8         @ if not, move up
++        addeq   ul, ul, #8           @ and adjust exponent
++        movs    tl, bh, LSR #(21-4)   @ is highest set bit within 4 of top?
++        moveq   bh, bh, LSL #4         @ if not, move up
++        addeq   ul, ul, #4           @ and adjust exponent
++        movs    tl, bh, LSR #(21-2)   @ is highest set bit within 2 of top?
++        moveq   bh, bh, LSL #2         @ if not, move up
++        addeq   ul, ul, #2           @ and adjust exponent
++        movs    tl, bh, LSR #(21-1)   @ is highest set bit within 1 of top?
++        moveq   bh, bh, LSL #1         @ if not, move up
++        addeq   ul, ul, #1           @ and adjust exponent
++
++        sub     th, th, ul, LSL #16  @ calculate final pseudo exponent
++        mov     tl, bl, LSL ul        @ shift low word up by same amout
++        rsb     ul, ul, #32           @ compute reverse shift for bl
++        orr     bh, bh, bl, LSR ul     @ put in high end of low word
++        mov     bl, tl
++
++@ ECN: Reload tmp
++	mov	tmp, #0x7f00000
++	orr	tmp, tmp, #0x00f0000
++
++        b       dmul_done_op2
++
++dmul_naninf:
++        mov     uh, ah, LSL #1          @ discard sign bit on a
++        mov     ul, bh, LSL #1          @ and on b
++        cmp     uh, tmp, LSL #5         @ HI if ah shows a to be NaN
++        cmpeq   al, #0                  @ now HI if a is NaN
++        cmpls   ul, tmp, LSL #5         @ another chance to set HI ...
++        cmpeq   bl, #0                  @  ... if b is NaN
++        bhi     dmul_ivo
++        orrs    ul, al, ah, LSL #1      @ is a zero?
++        orrnes  ul, bl, bh, LSL #1      @ or is b zero?
++        beq     dmul_ivo
++        eor     ah, ah, bh
++        mov     al, #0
++        and     ah, ah, #0x80000000
++        orr     ah, ah, tmp, LSL #4
++	b	dmul_exit
++
++dmul_ivo:
++	ldmia	sp!, {r4, r5}
++	b	return_double_NaN
++
++#endif
++
++	.align	2
++	.size	_ZN19BytecodeInterpreter7run_optEPS_, .-_ZN19BytecodeInterpreter7run_optEPS_
++
++
++	.section	.data.rel.ro.local,"aw",%progbits
++	.align	2
++
++	.global	execute_opt
++	.section	.rodata
++	.type	execute_opt, %object
++	.size	execute_opt, 256
++execute_opt:
++	.byte	1	@ nop		0x00
++	.byte	1	@ aconst_null
++	.byte	1	@ iconst_m1
++	.byte	1	@ iconst_0
++	.byte	1	@ iconst_1
++	.byte	1	@ iconst_2
++	.byte	1	@ iconst_3
++	.byte	1	@ iconst_4
++	.byte	1	@ iconst_5
++	.byte	1	@ lconst_0
++	.byte	1	@ lconst_1
++	.byte	1	@ fconst_0
++	.byte	1	@ fconst_1
++	.byte	1	@ fconst_2
++	.byte	1	@ dconst_0
++	.byte	1	@ dconst_1
++	.byte	1	@ 0x10
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x20
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x30
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x40
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x50
++	.byte	1
++	.byte	1
++	.byte	0
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x60
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x70
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x80
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0x90
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1	@ 0xA0
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	0	@ jsr
++	.byte	0	@ ret
++	.byte	1
++	.byte	1
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0	@ 0xB0
++	.byte	0
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	1
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	1
++	.byte	0
++	.byte	0	@ 0xC0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	1
++	.byte	1
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0	@ 0xD0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0	@ 0xE0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0	@ 0xF0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++	.byte	0
++
++	.ident	"GCC: (Debian 4.3.2-1.1) 4.3.2"
++	.section	.note.GNU-stack,"",%progbits
++
++#endif
+diff -ruNE ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp
+--- ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp	2009-03-05 14:43:47.000000000 +0000
++++ ports/hotspot/src/cpu/zero/vm/bytes_zero.hpp	2009-04-03 13:32:49.000000000 +0000
+@@ -40,10 +40,14 @@
+   // platform-specific byte ordering.
+ #ifdef VM_LITTLE_ENDIAN
+   static inline u2   get_native_u2(address p){
++#ifdef HOTSPOT_OPT
++    return ( u2(p[1]) << 8 ) | ( u2(p[0])      );
++#else
+     return (intptr_t(p) & 1) == 0
+              ?   *(u2*)p
+              :   ( u2(p[1]) << 8 )
+                | ( u2(p[0])      );
++#endif
+   }
+ 
+   static inline u4   get_native_u4(address p) {
+@@ -135,10 +139,14 @@
+   }
+ #else
+   static inline u2   get_native_u2(address p){
++#ifdef HOTSPOT_OPT
++    return ( u2(p[0]) << 8 ) | ( u2(p[1])      );
++#else
+     return (intptr_t(p) & 1) == 0
+              ?   *(u2*)p
+              :   ( u2(p[0]) << 8 )
+                | ( u2(p[1])      );
++#endif
+   }
+ 
+   static inline u4   get_native_u4(address p) {
+@@ -237,7 +245,11 @@
+   // Byte-order reversal is needed
+   static inline u2 get_Java_u2(address p)
+   {
++#ifdef HOTSPOT_OPT
++    return ( u2(p[0]) << 8 ) | ( u2(p[1])      );
++#else
+     return swap_u2(get_native_u2(p));
++#endif
+   }
+   static inline u4 get_Java_u4(address p)
+   {

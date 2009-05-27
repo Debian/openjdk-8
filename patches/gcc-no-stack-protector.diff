@@ -4,7 +4,7 @@
  CFLAGS += -fno-exceptions
  CFLAGS += -D_REENTRANT
  CFLAGS += -fcheck-new
-+CFLAGS += -fno-stack-protector
++CFLAGS += -fno-stack-protector -U_FORTIFY_SOURCE
  
  # Always generate full debuginfo on Linux.  It'll be in a separate
  # debuginfo package when building RPMs.
@@ -14,7 +14,7 @@
    LDFLAGS_COMMON        += $(LDFLAGS_COMMON_$(ARCH))
  endif
  
-+CFLAGS_REQUIRED         += -fno-stack-protector
++CFLAGS_REQUIRED         += -fno-stack-protector -U_FORTIFY_SOURCE
 +
  #
  # Selection of warning messages
@@ -25,7 +25,7 @@
    LDFLAGS_COMMON        += $(LDFLAGS_COMMON_$(ARCH))
  endif
  
-+CFLAGS_REQUIRED         += -fno-stack-protector
++CFLAGS_REQUIRED         += -fno-stack-protector -U_FORTIFY_SOURCE
 +
  # Add in platform specific optimizations for all opt levels
  CC_HIGHEST_OPT += $(_OPT_$(ARCH))

@@ -70,6 +70,7 @@ rm -rf \
 
 # binary files
 rm -f \
+<<<<<<< TREE
   $jdkdir/test/sun/net/idn/*.spp
 
 rm -f \
@@ -92,6 +93,30 @@ rm -f \
   $jdkdir/test/java/util/Locale/data/deflocale.sol10 \
   $jdkdir/test/java/util/Locale/data/deflocale.winvista \
   $jdkdir/test/java/util/Locale/data/deflocale.winxp \
+=======
+  openjdk/jdk/test/sun/net/idn/*.spp
+
+rm -f \
+  openjdk/jdk/test/java/nio/channels/spi/SelectorProvider/inheritedChannel/lib/linux-i586/libLauncher.so \
+  openjdk/jdk/test/java/nio/channels/spi/SelectorProvider/inheritedChannel/lib/solaris-i586/libLauncher.so \
+  openjdk/jdk/test/java/nio/channels/spi/SelectorProvider/inheritedChannel/lib/solaris-sparc/libLauncher.so \
+  openjdk/jdk/test/java/nio/channels/spi/SelectorProvider/inheritedChannel/lib/solaris-sparcv9/libLauncher.so \
+  openjdk/jdk/test/tools/launcher/lib/i386/lib32/lib32/liblibrary.so \
+  openjdk/jdk/test/tools/launcher/lib/i386/lib32/liblibrary.so \
+  openjdk/jdk/test/tools/launcher/lib/sparc/lib32/lib32/liblibrary.so \
+  openjdk/jdk/test/tools/launcher/lib/sparc/lib32/liblibrary.so \
+  openjdk/jdk/test/tools/launcher/lib/sparc/lib64/lib64/liblibrary.so \
+  openjdk/jdk/test/tools/launcher/lib/sparc/lib64/liblibrary.so
+
+rm -f \
+  openjdk/jdk/test/java/util/Locale/data/deflocale.exe \
+  openjdk/jdk/test/java/util/Locale/data/deflocale.jds3 \
+  openjdk/jdk/test/java/util/Locale/data/deflocale.rhel4 \
+  openjdk/jdk/test/java/util/Locale/data/deflocale.sh \
+  openjdk/jdk/test/java/util/Locale/data/deflocale.sol10 \
+  openjdk/jdk/test/java/util/Locale/data/deflocale.winvista \
+  openjdk/jdk/test/java/util/Locale/data/deflocale.winxp \
+>>>>>>> MERGE-SOURCE
 
 # TODO
 #$ find $jdkdir -name '*.jar' -o -name '*.class'|grep -v test

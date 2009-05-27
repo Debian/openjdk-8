@@ -1,0 +1,66 @@
+--- openjdk/hotspot/src/os/linux/launcher/java.c~	2008-11-22 01:11:18.000000000 +0100
++++ openjdk/hotspot/src/os/linux/launcher/java.c	2008-12-17 09:43:09.000000000 +0100
+@@ -1653,7 +1653,7 @@
+ ReadKnownVMs(const char *jrepath, char * arch, jboolean speculative)
+ {
+     FILE *jvmCfg;
+-    char jvmCfgName[MAXPATHLEN+20];
++    char jvmCfgName[MAXPATHLEN+30];
+     char line[MAXPATHLEN+20];
+     int cnt = 0;
+     int lineno = 0;
+@@ -1674,6 +1674,10 @@
+ 
+     jvmCfg = fopen(jvmCfgName, "r");
+     if (jvmCfg == NULL) {
++      strcat(jvmCfgName, "-default");
++      jvmCfg = fopen(jvmCfgName, "r");
++    }
++    if (jvmCfg == NULL) {
+       if (!speculative) {
+         ReportErrorMessage2("Error: could not open `%s'", jvmCfgName,
+                             JNI_TRUE);
+--- openjdk/hotspot/src/os/solaris/launcher/java.c~	2008-11-22 01:11:18.000000000 +0100
++++ openjdk/hotspot/src/os/solaris/launcher/java.c	2008-12-17 09:43:09.000000000 +0100
+@@ -1653,7 +1653,7 @@
+ ReadKnownVMs(const char *jrepath, char * arch, jboolean speculative)
+ {
+     FILE *jvmCfg;
+-    char jvmCfgName[MAXPATHLEN+20];
++    char jvmCfgName[MAXPATHLEN+30];
+     char line[MAXPATHLEN+20];
+     int cnt = 0;
+     int lineno = 0;
+@@ -1674,6 +1674,10 @@
+ 
+     jvmCfg = fopen(jvmCfgName, "r");
+     if (jvmCfg == NULL) {
++      strcat(jvmCfgName, "-default");
++      jvmCfg = fopen(jvmCfgName, "r");
++    }
++    if (jvmCfg == NULL) {
+       if (!speculative) {
+         ReportErrorMessage2("Error: could not open `%s'", jvmCfgName,
+                             JNI_TRUE);
+--- openjdk/jdk/src/share/bin/java.c.orig	2009-05-26 19:50:04.000000000 +0000
++++ openjdk/jdk/src/share/bin/java.c	2009-05-26 20:00:47.000000000 +0000
+@@ -1595,7 +1595,7 @@
+ ReadKnownVMs(const char *jrepath, const char * arch, jboolean speculative)
+ {
+     FILE *jvmCfg;
+-    char jvmCfgName[MAXPATHLEN+20];
++    char jvmCfgName[MAXPATHLEN+30];
+     char line[MAXPATHLEN+20];
+     int cnt = 0;
+     int lineno = 0;
+@@ -1616,6 +1616,10 @@
+ 
+     jvmCfg = fopen(jvmCfgName, "r");
+     if (jvmCfg == NULL) {
++      strcat(jvmCfgName, "-default");
++      jvmCfg = fopen(jvmCfgName, "r");
++    }
++    if (jvmCfg == NULL) {
+       if (!speculative) {
+         JLI_ReportErrorMessage(CFG_ERROR6, jvmCfgName);
+         exit(1);

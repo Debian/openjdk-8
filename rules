@@ -16,7 +16,7 @@ DEB_BUILD_GNU_TYPE	?= $(call vafilt,$(DPKG_VARS),DEB_BUILD_GNU_TYPE)
 DEB_HOST_ARCH		?= $(call vafilt,$(DPKG_VARS),DEB_HOST_ARCH)
 
 # don't use it on 64bit archs
-ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 ppc64 s390x))
+ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 hppa ppc64 s390x))
   PATH := $(CURDIR)/bin:$(PATH)
   export PATH
 endif
@@ -25,8 +25,39 @@ CHANGELOG_VARS := $(shell dpkg-parsechangelog | sed -n 's/ /_/g;/^[^_]/s/^\([^:]
 PKGSOURCE := $(call vafilt,$(CHANGELOG_VARS),Source)
 PKGVERSION := $(call vafilt,$(CHANGELOG_VARS),Version)
 
+hotspot_archs	= amd64 i386 lpia sparc
+shark_archs	= amd64 i386 lpia
+shark_archs	=
+no_bootstrap_archs = alpha armel
+
+VENDOR		= openjdk
+Vendor		= OpenJDK
+TOP		= usr/lib/jvm
+jdirname	= java-$(shortver)-$(origin)
+origin		= openjdk
+basename	= openjdk-$(shortver)
+ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+  priority	= 1061
+  vm_name	= Hotspot JIT
+else ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
+  priority	= 1055
+  vm_name	= Hotspot Shark
+else
+  priority	= 1053
+  vm_name	= Hotspot Zero
+endif
+p_lib_arch	= all
+jvmver		= 1.7.0
+shortver	= 7
+jdiralias	= java-$(shortver)-$(origin)
+basedir		= usr/lib/jvm/$(jdiralias)
+jreimg		= openjdk/build/linux-$(jvmarch)/j2re-image
+sdkimg		= openjdk/build/linux-$(jvmarch)/j2sdk-image
+security	= etc/$(jdiralias)/security
+
 # Support parallel=<n> in DEB_BUILD_OPTIONS (see #209008)
 COMMA=,
+SPACE = $(EMPTY) $(EMPTY)
 ifneq (,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
   NJOBS = $(subst parallel=,,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
   HOTSPOT_BUILD_JOBS = $(NJOBS)
@@ -41,41 +72,47 @@ endif
 
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
 with_docs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),,yes)
-ifneq (,$(findstring cacao, $(PKGSOURCE)))
-  with_docs = disabled for cacao
+ifneq (,$(findstring cacao shark, $(PKGSOURCE)))
+  with_docs = disabled for cacao and shark
 endif
 
-# even if not building the package, we configure for a specific plugin
-# with_plugin_pkg: yes or empty, plugin_name: IcedTeaPlugin.so
 with_plugin_pkg = yes
 plugin_name = IcedTeaPlugin.so
 
 distribution := $(shell lsb_release --id --short)
 distrel := $(shell lsb_release --codename --short)
 
-with_wgy_zenhai = $(if $(filter $(distrel),hardy intrepid jaunty),yes)
+with_wgy_zenhai = $(if $(filter $(distrel),hardy intrepid jaunty karmic squeeze sid),yes)
 
-arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
-archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
+arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
+archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
 
 jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(arch_map))))
 archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(archdir_map))))
 
-hotspot_archs	= amd64 i386 lpia sparc
-hotspot_archs	= amd64 lpia sparc
-shark_archs	= i386
-no_bootstrap_archs = alpha hppa
+default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 
-stage1_gcj_archs =
-stage1_openjdk_archs = alpha amd64 armel i386 ia64 lpia powerpc m68k mips mipsel sparc s390
+#stage1_openjdk_archs = alpha amd64 armel i386 ia64 lpia powerpc m68k mips mipsel sparc s390
+#stage1_gcj_archs = amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sparc s390
+stage1_gcj_archs = hppa ia64 powerpc m68k mips mipsel sparc s390
+stage1_openjdk_archs = alpha amd64 armel i386 lpia
 stage1_cacao_archs =
 
-ifneq (,$(findstring cacao, $(PKGSOURCE)))
-  stage1_gcj_archs = armel ia64 m68k mips mipsel s390
-  stage1_openjdk_archs = amd64 i386 lpia sparc
-  stage1_cacao_archs = alpha powerpc
+cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
+altzero_archs = $(filter-out sparc, $(hotspot_archs))
+altzero_archs =
+
+ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
+  alternate_vms += cacao
+endif
+ifneq (,$(filter $(DEB_HOST_ARCH), $(altzero_archs)))
+  ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
+    alternate_vms += shark
+  else
+    alternate_vms += zero
+  endif
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
@@ -91,12 +128,12 @@ else
   $(error unknown bootstrap method for architecture $(DEB_HOST_ARCH))
 endif
 
-OPENJDK_VERSION = b40
+OPENJDK_VERSION = b59
 OPENJDK_SRC_ZIP = openjdk-7-ea-src-$(OPENJDK_VERSION)-20_nov_2008-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
-req_openjdk_bd_ver = 6b11
-req_openjdk_ver = 6b40
+req_openjdk_bd_ver = 6b14
+req_openjdk_ver = 7b59
 
 unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
@@ -108,33 +145,63 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc sparc))
     export GCC_SUFFIX = -4.2
   endif
-else
+else ifneq (,$(filter $(distrel),lenny intrepid jaunty squeeze sid))
   export GCC_SUFFIX = -4.3
   export GCJ_SUFFIX = -4.3
-endif
-
-ifneq (,$(findstring cacao, $(PKGSOURCE)))
-  ifneq (,$(filter $(DEB_HOST_ARCH), ia64 sparc))
-    $(error cacao-is not ported for ia64-linux and sparc-linux)
+else
+  export GCC_SUFFIX = -4.4
+  export GCJ_SUFFIX = -4.4
+  ifneq (,$(filter $(DEB_HOST_ARCH), sparc))
+    export GCC_SUFFIX = -4.3
+    export GCJ_SUFFIX = -4.3
   endif
 endif
 
-ifneq (,$(filter $(distrel),jaunty))
+ifneq (,$(filter $(distrel),jaunty karmic unstable experimental sid))
   with_pulse = yes
 endif
 
-DISTRIBUTION_PATCHES = \
-	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector.diff) \
+ifneq (,$(filter $(distrel),karmic sid squeeze))
+  with_jni_bridge = yes
+endif
+
+#ifneq (,$(filter $(distrel),karmic unstable experimental sid))
+#  with_systemtap = yes
+#endif
+
+with_hotspot = new
+ifneq (,$(filter $(distrel),gutsy feisty edgy dapper hardy intrepid))
+  with_hotspot = original
+endif
+
+ifeq ($(with_hotspot),original)
+#	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector-original.diff) \
+
+  DISTRIBUTION_PATCHES = \
+	debian/patches/ld-symbolic-functions-original.diff \
+	debian/patches/set-exec-name-original.diff
+else
+# FIXME: doesn't seem to be enough, the gcc-*-no-stack-protector patches below are needed.
+#	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector.diff) \
+
+  DISTRIBUTION_PATCHES = \
 	debian/patches/ld-symbolic-functions.diff \
 	debian/patches/set-exec-name.diff \
+	debian/patches/hotspot-warn-no-errformat.diff
+endif
+
+DISTRIBUTION_PATCHES += \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \
-	debian/patches/fontconfig-$(if $(with_wgy_zenhai),wqy-zenhei,arphic-uming).diff \
+	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
 	debian/patches/no-compiler-path.diff \
-	debian/patches/fix-race-cond-print.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
-	debian/patches/hotspot-warn-no-errformat.diff \
+	debian/patches/default-jvm-cfg.diff \
+	debian/patches/nonreparenting-wm.diff \
+	debian/patches/java-access-bridge-security.patch \
+	debian/patches/accessible-toolkit.patch \
+	debian/patches/default-libpath.diff \
 
 #	debian/patches/gcc-mtune-generic.diff \
 
@@ -145,13 +212,23 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
 endif
 
 ifeq ($(distribution),Ubuntu)
-  DISTRIBUTION_PATCHES += debian/patches/openjdk-ubuntu-branding.patch
+  DISTRIBUTION_PATCHES += \
+	debian/patches/openjdk-ubuntu-branding.patch \
+	debian/patches/gcc-jdk-no-stack-protector.diff
+  ifeq ($(with_hotspot),original)
+    DISTRIBUTION_PATCHES += \
+	debian/patches/gcc-hotspot-no-stack-protector-original.diff
+  else
+    DISTRIBUTION_PATCHES += \
+	debian/patches/gcc-hotspot-no-stack-protector.diff
+  endif
 endif
 
-ifneq (,$(findstring cacao, $(PKGSOURCE)))
-  DISTRIBUTION_PATCHES += \
-	debian/patches/cacao-no-mmap-first-page.diff
-endif
+# FIXME: temporarily disabled
+#ifneq (,$(filter $(DEB_HOST_ARCH),armel))
+#  DISTRIBUTION_PATCHES += \
+#	debian/patches/zero-hotspot-opt.diff
+#endif
 
 export DISTRIBUTION_PATCHES
 
@@ -161,8 +238,7 @@ ifeq ($(STAGE1_JAVA),gcj)
 	--with-ecj=/usr/bin/ecj \
 	--with-java=$(STAGE1_HOME)/bin/java \
 	--with-javah=/usr/bin/gjavah$(GCJ_SUFFIX) \
-	--with-rmic=/usr/bin/grmic$(GCJ_SUFFIX) \
-	--with-libgcj-jar=/usr/share/java/libgcj$(GCJ_SUFFIX).jar
+	--with-rmic=/usr/bin/grmic$(GCJ_SUFFIX)
   ifeq (,$(filter ia64, $(DEB_HOST_ARCH)))
     CONFIGURE_ARGS += \
 	--with-jar=/usr/bin/fastjar
@@ -186,44 +262,52 @@ CONFIGURE_ARGS += --with-pkgversion="$(PKGVERSION)"
 # see http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=217
 # only use it for zero ports except powerpc (which we assume as
 # fast enough to build.
-ifneq (,$(findstring openjdk, $(PKGSOURCE)))
-  ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) ia64 powerpc))
-    CONFIGURE_ARGS += --with-alt-jar=/usr/bin/fastjar
-  endif
+ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) ia64 powerpc))
+  CONFIGURE_ARGS += --with-alt-jar=/usr/bin/fastjar
 endif
 
 CONFIGURE_ARGS += \
 	--with-xalan2-jar=/usr/share/java/xalan2.jar \
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-rhino=/usr/share/java/js.jar \
-	--with-openjdk-src-zip=$(firstword $(wildcard $(OPENJDK_SRC_ZIP) /usr/src/$(OPENJDK_SRC_ZIP)))
+	--with-openjdk-src-zip=$(CURDIR)/openjdk.tar.gz \
+	--with-hotspot-src-zip=$(CURDIR)/hotspot.tar.gz \
+	--with-corba-src-zip=$(CURDIR)/corba.tar.gz \
+	--with-jaxp-src-zip=$(CURDIR)/jaxp.tar.gz \
+	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
+	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
+	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz
 
-ifneq (,$(findstring cacao, $(PKGSOURCE)))
+#CONFIGURE_ARGS += --disable-nimbus --disable-nimbus-generation
+
+ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
   CONFIGURE_ARGS += \
-	--enable-cacao \
 	--with-cacao-src-zip=$(firstword $(wildcard $(CURDIR)/cacao-*.tar.* /usr/src/cacao-*.tar.*))
-  ifneq (,$(filter $(DEB_HOST_ARCH), arm armel))
+  ifneq (,$(filter $(DEB_HOST_ARCH), armel))
     EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS='--enable-softfloat --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
   else
     EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS='--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
   endif
-else
-  ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
-    CONFIGURE_ARGS += --enable-zero
-    ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
-      CONFIGURE_ARGS += --enable-shark
-    endif
-  else
-    CONFIGURE_ARGS += --with-hotspot-build
-  endif
-  ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
-    EXTRA_BUILD_ENV = LIBFFI_LIBS=-lffi_pic
+endif
+
+ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+  CONFIGURE_ARGS += --enable-zero
+  ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
+    CONFIGURE_ARGS += --enable-shark
   endif
 endif
 
+ifeq ($(with_hotspot),original)
+  CONFIGURE_ARGS += --without-hotspot-build
+else
+  CONFIGURE_ARGS += --with-hotspot-build
+endif
+
+EXTRA_BUILD_ENV += LIBFFI_LIBS=-lffi_pic
+
 # assume we don't build binary indep packages on these architectures
 ifeq ($(with_docs),yes)
-  ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel hppa ia64 lpia m68k mips mipsel powerpc s390 sparc))
+  ifeq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
     CONFIGURE_ARGS += --disable-docs
   endif
 else
@@ -244,42 +328,19 @@ ifeq ($(with_pulse),yes)
   CONFIGURE_ARGS += --enable-pulse-java
 endif
 
-CONFIGURE_ARGS += --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
-
-VENDOR		:= openjdk
-Vendor		:= OpenJDK
-
-TOP		= usr/lib/jvm
-jdirname	= java-$(shortver)-$(origin)
-ifneq (,$(findstring cacao, $(PKGSOURCE)))
-  origin	= cacao
-  basename	= cacao-oj$(shortver)
-  priority	= 1059
-  p_lib_arch	= any
-  vm_name	= CacaoVM JIT
-else
-  origin	= openjdk
-  basename	= openjdk-$(shortver)
-  ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
-    priority	= 1061
-    vm_name	= Hotspot JIT
-  else
-    priority	= 1057
-    vm_name	= Hotspot Zero
-  endif
-  p_lib_arch	= all
+ifeq ($(with_systemtap),yes)
+  CONFIGURE_ARGS += --enable-systemtap --with-abs-install-dir=/$(basedir)
 endif
-jvmver		= 1.7.0
-shortver	= 7
-jdiralias	= java-$(shortver)-$(origin)
-basedir		= usr/lib/jvm/$(jdiralias)
-jreimg		= openjdk/build/linux-$(jvmarch)/j2re-image
-sdkimg		= openjdk/build/linux-$(jvmarch)/j2sdk-image
-security	= etc/$(jdiralias)/security
+
+ifneq (,$(alternate_vms))
+  CONFIGURE_ARGS += --with-additional-vms=$(subst $(SPACE),$(COMMA),$(alternate_vms))
+endif
+
+CONFIGURE_ARGS += --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
 
 # (most) jre and jdk tools handled by the alternatives system.
 # dups in heimdal-clients, krb5-user: kinit, klist, ktab, no alternatives
-all_jre_tools	= $(notdir $(wildcard $(jreimg)/bin/*))
+all_jre_tools	= $(notdir $(wildcard build/$(jreimg)/bin/*))
 jre_tools	= $(filter javaws pluginappletviewer policytool, $(all_jre_tools))
 jre_hl_tools	:= $(filter-out $(jre_tools), $(all_jre_tools))
 
@@ -287,7 +348,7 @@ corba_tools	= orbd servertool tnameserv
 jre_hl_tools_alt= $(filter-out $(corba_tools), $(jre_hl_tools)) $(corba_tools)
 jre_tools_alt	= $(filter-out kinit klist ktab, $(jre_tools))
 
-all_jdk_tools	= $(notdir $(wildcard $(sdkimg)/bin/*))
+all_jdk_tools	= $(notdir $(wildcard build/$(sdkimg)/bin/*))
 jdk_tools	= $(filter-out $(all_jre_tools), $(all_jdk_tools))
 jdk_tools_alt	= $(filter-out java-rmi.cgi, $(jdk_tools))
 
@@ -301,9 +362,15 @@ endif
 bd_bootstrap =
 ifneq (,$(stage1_gcj_archs))
   bd_bootstrap += \
+	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
+  ifneq (,$(filter $(distrel),karmic unstable experimental))
+    bd_bootstrap += \
+	gcj-jdk [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
+  else
+    bd_bootstrap += \
 	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
-	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
 	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
+  endif
 endif
 ifneq (,$(stage1_openjdk_archs))
   bd_bootstrap += \
@@ -313,14 +380,13 @@ ifneq (,$(stage1_cacao_archs))
   bd_bootstrap += \
 	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
 endif
-bd_tarball = $(if $(findstring openjdk, $(PKGSOURCE)),,$(p_tar) (>= 6b40)$(COMMA) $(p_tar) (<< 6b41)$(COMMA))
-bd_cacao = libtool,
-bd_cacao = $(if $(findstring cacao, $(PKGSOURCE)),cacao-source (>= 0.99.4~20081012)$(COMMA))
-bd_gcc = \
-	g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
-ifeq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
-  bd_gcc = \
-	g++-4.3,
+
+ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
+  bd_gcc = g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
+else ifneq (,$(filter $(distrel),lenny intrepid jaunty squeeze sid))
+  bd_gcc = g++-4.3,
+else
+  bd_gcc = g++-4.4 [!sparc], g++-4.3 [sparc],
 endif
 bd_syslibs = \
 	libjpeg62-dev, libpng12-dev, libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev), zlib1g-dev,
@@ -329,15 +395,28 @@ bd_openjdk = \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2-dev,libcups2-dev), \
 	libasound2-dev, libfreetype6-dev, \
 	libxalan2-java, rhino, liblcms1-dev, libxinerama-dev,
+bd_openjdk += \
+	libxpp3-java, libjibx-java,
+
+pkg_ffidev = $(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev)
+
 bd_zero = \
-	$(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev) [$(foreach a,$(hotspot_archs),!$(a))],
-bd_shark = \
-	llvm-dev (>= 2.4) [$(foreach a,$(shark_archs),$(a))],
-bd_shark =
-#ifeq ($(with_plugin_pkg),yes)
-  bd_plugin = \
-	libgtk2.0-dev, $(if $(filter $(distribution),Debian),$(if $(findstring gcj,$(plugin_name)),iceape-dev,xulrunner-dev (>= 1.9.0)),$(if $(filter $(distrel),hardy intrepid jaunty),xulrunner-1.9-dev,firefox-dev)),
-#endif
+	$(pkg_ffidev) [$(foreach a,$(hotspot_archs),!$(a))],
+bd_zero = \
+	$(pkg_ffidev),
+
+ifneq (,$(shark_archs))
+  bd_zero = $(pkg_ffidev),
+  bd_shark = llvm-dev (>= 2.5) [$(foreach a,$(shark_archs),$(a))],
+endif
+
+bd_cacao = libtool,
+ifneq ($(distribution),Ubuntu)
+  bd_cacao += cacao-source (>= 0.99.4-1),
+endif
+
+bd_plugin = \
+  libgtk2.0-dev, $(if $(filter $(distribution),Debian),xulrunner-dev (>= 1.9.0),$(if $(filter $(distrel),hardy intrepid jaunty karmic),xulrunner-1.9-dev,firefox-dev)),
 bd_netx = fastjar (>= 2:0.96-0ubuntu2),
 ifneq (,$(filter $(distrel),lenny sid experimental))
   bd_netx = fastjar (>= 2:0.95-4),
@@ -351,18 +430,25 @@ pkg_pulseaudio = pulseaudio (>= 0.9.12)
 ifeq ($(with_pulse),yes)
   bd_pulsejava = libpulse-dev (>= 0.9.12), $(pkg_pulseaudio),
 endif
+ifeq ($(with_systemtap),yes)
+  bd_systemtap = systemtap-sdt-dev,
+endif
 
 dlopen_hl_depends = \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2,libcups2), \
-	liblcms1
+	liblcms1, libjpeg62
 dlopen_hl_recommends = \
 dlopen_jre_depends = \
 	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
 	libxrandr2, libxinerama1, libgl1-mesa-glx
 dlopen_jre_recommends =
 
-browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
-browser_plugin_dirs = xulrunner-addons
+ifeq ($(distribution),Ubuntu)
+  browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
+  browser_plugin_dirs = xulrunner-addons
+else
+  browser_plugin_dirs = mozilla
+endif
 
 ifneq (,$(filter $(distrel),etch dapper feisty))
   core_fonts = ttf-dejavu
@@ -382,25 +468,27 @@ endif
 
 p_jre	= $(basename)-jre
 p_jrehl	= $(basename)-jre-headless
+p_jrec	= icedtea-$(shortver)-jre-cacao
+p_jrez	= $(basename)-jre-zero
 p_lib	= $(basename)-jre-lib
 p_jdk	= $(basename)-jdk
 p_demo	= $(basename)-demo
 p_src	= $(basename)-source
 p_doc	= $(basename)-doc
 p_dbg	= $(basename)-dbg
-p_tar	= openjdk-$(shortver)-source-files
-p_plug = $(if $(findstring openjdk,$(PKGSOURCE)),icedtea$(shortver)-plugin,$(basename)-plugin)
+p_plug = icedtea7-plugin
 
 d	= debian/tmp
 d_jre	= debian/$(p_jre)
 d_jrehl	= debian/$(p_jrehl)
+d_jrec	= debian/$(p_jrec)
+d_jrez	= debian/$(p_jrez)
 d_lib	= debian/$(p_lib)
 d_jdk	= debian/$(p_jdk)
 d_demo	= debian/$(p_demo)
 d_src	= debian/$(p_src)
 d_doc	= debian/$(p_doc)
 d_dbg	= debian/$(p_dbg)
-d_tar	= debian/$(p_tar)
 d_plug	= debian/$(p_plug)
 
 control_vars = \
@@ -420,6 +508,17 @@ else ifeq ($(pkg_compress),bzip2)
   control_vars += '-Vdpkg:Depends=dpkg (>= 1.10.24)'
 endif
 
+ifneq (,$(filter-out $(hotspot_archs), $(cacao_archs)))
+  control_vars += '-Vcacao:Recommends=$(p_jrec) (= $${binary:Version})'
+endif
+
+# FIXME, temporarily disabled
+#ifeq ($(with_jni_bridge),yes)
+#  control_vars += '-Vdep:bridge=libaccess-bridge-java'
+#else
+#  control_vars += '-Vdep:bridge=libaccess-bridge-java-jni'
+#endif
+
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
 	sed \
@@ -433,18 +532,22 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_netx@/$(bd_netx)/g' \
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	      -e 's/@bd_compress@/$(pkg_compress)/g' \
-	      -e 's/@bd_tarball@/$(bd_tarball)/g' \
 	      -e 's/@bd_cacao@/$(bd_cacao)/g' \
 	      -e 's/@bd_pulsejava@/$(bd_pulsejava)/g' \
+	      -e 's/@bd_systemtap@/$(bd_systemtap)/g' \
 	      -e 's/@bd_shark@/$(bd_shark)/g' \
 	      -e 's/@core_fonts@/$(core_fonts)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	      -e 's/@pkg_plugin@/$(p_plug)/g' \
+	      -e 's/@cacao_archs@/$(cacao_archs)/g' \
+	      -e 's/@hotspot_archs@/$(hotspot_archs)/g' \
+	      -e 's/@altzero_archs@/$(altzero_archs)/g' \
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/control.in \
-	    $(if $(with_plugin_pkg),debian/control.$(plugin_name)) \
-	    $(if $(findstring openjdk-,$(PKGSOURCE)),debian/control.tarball) \
+	    debian/control.plugin \
+	    $(if $(cacao_archs), debian/control.cacao-jre) \
+	    $(if $(altzero_archs), debian/control.zero-jre) \
 		> debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
@@ -498,14 +601,7 @@ endif
 
 icedtea-configure: stamps/icedtea-configure
 stamps/icedtea-configure:
-ifeq (0,1)
-	for i in $$(find test/jtreg -name '*.uu'); do \
-	  [ -f $$i ] || continue; \
-	  d=$$(dirname $$i); i=$$(basename $$i .uu); \
-	  rm -f $$d/$$i; \
-	  (cd $$d && uudecode $$i.uu); \
-	done
-endif
+	rm -f rt/net/sourceforge/jnlp/runtime/InstallDialog.java
 
 	mkdir -p bin
 	( \
@@ -524,57 +620,72 @@ endif
 	test -x /usr/bin/linux32 && linux32 uname -a || true
 	test -x /usr/bin/linux32 &&linux32 /bin/uname -a || true
 
+# FIXME: temporarily disabled
+#	patch --verbose -p0 < debian/patches/zero-port-opt.diff
+
 	mkdir -p stamps
+	mkdir -p build
 	chmod +x configure
-	$(EXTRA_BUILD_ENV) ./configure $(CONFIGURE_ARGS)
+	cd build && $(EXTRA_BUILD_ENV) ../configure $(CONFIGURE_ARGS)
 	touch $@
 
-unpack: stamps/backup-generated stamps/unpack
-stamps/unpack: stamps/icedtea-configure stamps/backup-generated
-	$(MAKE) stamps/extract.stamp
+unpack: stamps/unpack
+stamps/unpack: stamps/icedtea-configure
+	$(MAKE) -C build stamps/extract.stamp
+ifeq ($(STAGE1_JAVA),gcj)
+#	$(MAKE) -C build stamps/extract-ecj.stamp
+endif
 	touch $@
 
 dist-openjdk: $(OPENJDK_SRC_ZIP)
 	@echo "downloading openjdk source from hg to create zipfile: $(OPENJDK_SRC_ZIP)"
-	$(MAKE) $@
-
-stamps/backup-generated: stamps/icedtea-configure
-	if [ -f generated.tar ]; then \
-	  echo >&2 "backup of generated files already exists"; \
-	  exit 2; \
-	fi
-	tar cf generated.tar generated
-	touch $@
+	$(MAKE) -C build $@
 
 patch: stamps/patch
 stamps/patch: stamps/unpack
 ifeq ($(STAGE1_JAVA),gcj)
-	$(MAKE) stamps/patch-ecj.stamp
+	$(MAKE) -C build stamps/patch-ecj.stamp
 endif
-	$(MAKE) stamps/patch.stamp
+	$(MAKE) -C build stamps/patch.stamp
 	touch $@
 
 ifeq ($(with_check),yes)
-  ifneq (,$(findstring cacao, $(PKGSOURCE)))
-    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
-      # only activate after testing; problems on s390
-      with_mauve_check = yes
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc s390))
+      with_mauve_check = $(default_vm)
     endif
-    ifneq (,$(filter $(DEB_HOST_ARCH), alpha amd64 armel i386 lpia mips mipsel powerpc s390))
-      # only activate after testing; hangs several tests.
-      with_jtreg_check = yes
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc s390))
+      with_jtreg_check = $(default_vm)
     endif
-  else
-    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
-      with_mauve_check = yes
+
+    ifneq (,$(filter cacao, $(alternate_vms)))
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc sparc))
+        # only activate after testing; problems on s390
+        with_mauve_check += cacao
+      endif
+      ifneq (,$(filter $(DEB_HOST_ARCH), alpha amd64 armel i386 lpia mips mipsel powerpc s390))
+        # only activate after testing; hangs several tests.
+        with_jtreg_check += cacao
+      endif
     endif
-    ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia sparc))
-      with_jtreg_check = yes
+
+    ifneq (,$(filter zero, $(alternate_vms)))
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
+        # only activate after testing
+        with_mauve_check += zero
+      endif
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
+        # only activate after testing; hangs several tests.
+        with_jtreg_check += zero
+      endif
     endif
-  endif
 endif
 
-build: stamps/build stamps/mauve-check stamps/jtreg-check
+build_stamps = stamps/build
+build_stamps +=  stamps/mauve-check-default stamps/jtreg-check-default
+#build_stamps += $(if $(filter cacao, $(alternate_vms)),stamps/mauve-check-cacao stamps/jtreg-check-cacao)
+build_stamps += $(if $(filter zero, $(alternate_vms)),stamps/mauve-check-zero stamps/jtreg-check-zero)
+
+build: $(build_stamps)
 	if [ -f buildwatch.pid ]; then \
 	  pid=$$(cat buildwatch.pid); \
 	  kill -1 $$pid || :; sleep 1; kill -9 $$pid || :; \
@@ -583,19 +694,27 @@ build: stamps/build stamps/mauve-check stamps/jtreg-check
 
 stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel hppa ia64 m68k mips mipsel powerpc s390 sparc))
-	sh -c 'sh debian/buildwatch.sh &'
+	sh -c 'sh debian/buildwatch.sh $(CURDIR)/build &'
 endif
-	$(EXTRA_BUILD_ENV) $(MAKE) $(build_target)
+	if $(EXTRA_BUILD_ENV) $(MAKE) -C build $(build_target); then \
+	  : ; \
+	else \
+	  if [ -f buildwatch.pid ]; then \
+	    pid=$$(cat buildwatch.pid); \
+	    kill -1 $$pid || :; sleep 1; kill -9 $$pid || :; \
+	  fi; \
+	  false; \
+	fi
 	touch $@
 
 stamps/xvfb-check:
 	mkdir -p bin
 	echo 'xvfb-run -a -e xvfb-run.log -s "-extension GLX" "$$@"' > bin/my-xvfb-run
-	if ! /bin/sh bin/my-xvfb-run : ; then \
+	if ! /bin/sh bin/my-xvfb-run true ; then \
 	  echo "error running $$(cat bin/my-xvfb-run)"; \
 	  cat xvfb-run.log; \
 	  echo 'xvfb-run -a -e xvfb-run.log -s "$$@"' > bin/my-xvfb-run; \
-	  if ! /bin/sh bin/my-xvfb-run : ; then \
+	  if ! /bin/sh bin/my-xvfb-run true ; then \
 	    echo "error running $$(cat bin/my-xvfb-run)"; \
 	    cat xvfb-run.log; \
 	    rm -f bin/my-xvfb-run; \
@@ -606,61 +725,112 @@ stamps/xvfb-check:
 	fi
 	touch $@
 
+stamps/mauve-check-default: stamps/build stamps/xvfb-check
+	$(MAKE) -f debian/rules mauve-run-check VMNAME=$(default_vm) VMARGS=
+	touch $@
+
+stamps/mauve-check-cacao: stamps/xvfb-check
+	$(MAKE) -f debian/rules mauve-run-check VMNAME=cacao VMARGS='-vmarg -cacao'
+	touch $@
+
+stamps/mauve-check-zero: stamps/xvfb-check
+	$(MAKE) -f debian/rules mauve-run-check VMNAME=zero VMARGS='-vmarg -zero'
+	touch $@
+
 stamps/mauve-build: stamps/build
-	rm -rf mauve
-	mkdir -p mauve
+	rm -rf build/mauve
+	mkdir -p build/mauve
 ifeq ($(with_mauve_check),yes)
-	tar xf /usr/src/mauve.tar.gz
-	cd mauve \
+	tar -x -C build -f /usr/src/mauve.tar.gz
+	cd build/mauve \
 	    && aclocal \
 	    && automake \
 	    && autoconf \
-	    && PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH ./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
-	PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH $(MAKE) -C mauve
+	    && PATH=$(CURDIR)/build/$(sdkimg)/bin:$$PATH \
+		./configure --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
+	PATH=$(CURDIR)/build/$(sdkimg)/bin:$$PATH $(MAKE) -C build/mauve
 endif
 	touch $@
 
 stamps/mauve-check: stamps/build stamps/mauve-build stamps/xvfb-check
-ifeq ($(with_mauve_check),yes)
+
+mauve-run-check:
+	rm -rf build/mauve build/mauve-$(VMNAME)
+ifneq (,$(filter $(VMNAME), $(with_mauve_check)))
+	tar -x -C build -f /usr/src/mauve.tar.gz
+	mv build/mauve build/mauve-$(VMNAME)
+	cd build/mauve-$(VMNAME) \
+	    && aclocal \
+	    && automake \
+	    && autoconf \
+	    && PATH=$(CURDIR)/build/$(sdkimg)/bin:$$PATH ./configure \
+		--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
+	PATH=$(CURDIR)/build/$(sdkimg)/bin:$$PATH $(MAKE) -C build/mauve-$(VMNAME)
+
 	if [ -f bin/my-xvfb-run ]; then \
-	  cd mauve && \
-	    JAVA_HOME=$(CURDIR)/$(sdkimg) \
-	    PATH=$(CURDIR)/$(sdkimg)/bin:$$PATH \
+	  cd build/mauve-$(VMNAME) && \
+	    JAVA_HOME=$(CURDIR)/build/$(sdkimg) \
+	    PATH=$(CURDIR)/build/$(sdkimg)/bin:$$PATH \
 		/bin/sh $(CURDIR)/bin/my-xvfb-run java Harness \
-		    -vm $(CURDIR)/$(sdkimg)/bin/java \
+		    -vm $(CURDIR)/build/$(sdkimg)/bin/java \
+		    $(VMARGS) \
 		    -file $(CURDIR)/debian/mauve_tests \
 		    -timeout 30000 2>&1 \
-		| tee mauve_output; \
+		| tee mauve_output-$(VMNAME); \
 	else \
-	  echo "mauve testsuite not run for this build (xvfb failures)" > mauve/mauve_output; \
-	  cat xvfb-run.log >> mauve/mauve_output; \
+	  echo "mauve testsuite not run for this build (xvfb failures)" \
+	    > build/mauve-$(VMNAME)/mauve_output-$(VMNAME); \
+	  cat xvfb-run.log >> build/mauve-$(VMNAME)/mauve_output-$(VMNAME); \
 	fi
 	@sleep 5
 else
-	echo "mauve testsuite not run for this build" > mauve/mauve_output
+	mkdir -p build/mauve-$(VMNAME)
+	echo "mauve testsuite not run for this build" \
+	  > build/mauve-$(VMNAME)/mauve_output-$(VMNAME)
 endif
-	touch $@
 
 jtreg_processes = ps x -ww -o pid,ppid,args \
 	| awk '$$2 == 1 && $$3 ~ /^$(subst /,\/,/scratch)/' \
-	| sed 's,$(CURDIR)/$(sdkimg),<sdkimg>,g;s,$(CURDIR),<pwd>,g'
+	| sed 's,$(CURDIR)/build/$(sdkimg),<sdkimg>,g;s,$(CURDIR),<pwd>,g'
 jtreg_pids = ps x --no-headers -ww -o pid,ppid,args \
-	| awk '$$2 == 1 && $$3 ~ /^$(subst /,\/,$(CURDIR)/$(sdkimg))/ {print $$1}'
+	| awk '$$2 == 1 && $$3 ~ /^$(subst /,\/,$(CURDIR)/build/$(sdkimg))/ {print $$1}'
 
-stamps/jtreg-check: stamps/build stamps/xvfb-check
-ifeq ($(with_jtreg_check),yes)
+stamps/jtreg-check-default: stamps/build stamps/xvfb-check
+	$(MAKE) -f debian/rules jtreg-run-check VMNAME=$(default_vm) VMARGS=
+	touch $@
+
+stamps/jtreg-check-cacao: stamps/build stamps/xvfb-check
+	$(MAKE) -f debian/rules jtreg-run-check VMNAME=cacao VMARGS='-vmoption:-cacao'
+	touch $@
+
+stamps/jtreg-check-zero: stamps/build stamps/xvfb-check
+	$(MAKE) -f debian/rules jtreg-run-check VMNAME=zero VMARGS='-vmoption:-zero'
+	touch $@
+
+jtreg-run-check:
+ifneq (,$(filter $(VMNAME), $(with_jtreg_check)))
 	@echo "BEGIN jtreg"
 	if [ -f bin/my-xvfb-run ]; then \
-	  /bin/sh bin/my-xvfb-run $(MAKE) -j $(NJOBS) -k jtregcheck 2>&1 | tee jtreg_output; \
+	  /bin/sh bin/my-xvfb-run $(MAKE) -C build -k jtregcheck ICEDTEA_JTREG_OPTIONS='$(VMARGS)' \
+		2>&1 | tee jtreg_output-$(VMNAME); \
 	else \
-	  echo "jtreg harness not run for this build" > jtreg_output; \
-	  cat xvfb-run.log >> jtreg_output; \
+	  echo "jtreg harness not run for this build" > jtreg_output-$(VMNAME); \
+	  cat xvfb-run.log >> jtreg_output-$(VMNAME); \
 	fi
 	@echo "END jtreg"
 
-	@echo "BEGIN jtreg-summary"
-	-cat test/jtreg-summary.log
-	@echo "END jtreg-summary"
+	for i in check-hotspot.log check-jdk.log check-langtools.log jtreg-summary.log; do \
+	  if [ -f build/test/$$i ]; then \
+	    mv build/test/$$i build/test/$${i%*.log}-$(VMNAME).log; \
+	  else \
+	    mkdir -p build/test; \
+	    cp jtreg_output-$(VMNAME) build/test/$${i%*.log}-$(VMNAME).log; \
+	  fi; \
+	done
+
+	@echo "BEGIN jtreg-summary-$(VMNAME)"
+	-cat build/test/jtreg-summary-$(VMNAME).log
+	@echo "END jtreg-summary-$(VMNAME)"
 
 	: # kill testsuite processes still hanging
 	@pids=$$($(jtreg_pids)); \
@@ -684,41 +854,30 @@ ifeq ($(with_jtreg_check),yes)
 	  echo "leftover processes..."; \
 	  $(jtreg_processes); \
 	fi
+
+	-for i in hotspot langtools jdk; do \
+	  for t in $$(egrep '^(FAILED|Error)' build/test/check-$$i-$(VMNAME).log | sed 's/.* \(.*\)\.[^.][^.]*$$/\1/'); do \
+	    echo test/$$i/JTwork/$$t.jtr; \
+	  done; \
+	done > build/test/failed_tests-$(VMNAME).list; \
+	tar -C build -c -z -f build/test/failed_tests-$(VMNAME).tar.gz -T build/test/failed_tests-$(VMNAME).list
 else
-	echo "jtreg harness not run for this build" > jtreg_output
+	echo "jtreg harness not run for this build" > jtreg_output-$(VMNAME)
 endif
-	touch $@
 
 clean: debian-clean
 	dh_testdir
 	dh_testroot
-	rm -rf stamps
-	[ ! -f Makefile ] || $(MAKE) distclean
-	rm -rf openjdk openjdk-ecj
-	rm -f generated/sun/awt/X11/generator/sizer.{32,64}
+	rm -rf stamps build build-*
 	rm -rf autom4te.cache
-	rm -rf mauve
 	rm -rf bin
-	rm -f jtreg_output xvfb-run.log
+	rm -f jtreg_output* xvfb-run.log
 	rm -f buildwatch.pid
-	if [ -f generated.tar ]; then \
-	  rm -rf generated; \
-	  tar xf generated.tar; \
-	  rm -f generated.tar; \
-	fi
 
-ifeq (0,1)
-	for i in $$(find test/jtreg -name '*.gif') overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/expresso.mid overlays/openjdk/jdk/test/com/sun/media/sound/SoftSynthesizer/ding.sf2; do \
-	  [ -f $$i ] || continue; \
-	  if [ -f $$i.uu -a $$i.uu -nt $$i ]; then \
-	    rm -f $$i; \
-	  else \
-	   d=$$(dirname $$i); i=$$(basename $$i); \
-	   (cd $$d && uuencode -m $$i $$i > $$i.uu); \
-	   rm -f $$d/$$i; \
-	  fi; \
-	done
-endif
+	if [ -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ]; then \
+	  patch --verbose -p0 -R < debian/patches/zero-port-opt.diff; \
+	  rm -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S; \
+	fi
 
 	dh_clean
 
@@ -745,13 +904,12 @@ install: packaging-files
 
 	: # install into temporary location
 	mkdir -p $(d)/$(basedir)
-	cp -a $(sdkimg)/* $(d)/$(basedir)/
-	cp -a $(jreimg)/man $(d)/$(basedir)/jre/
+	cp -a build/$(sdkimg)/* $(d)/$(basedir)/
+	cp -a build/$(jreimg)/man $(d)/$(basedir)/jre/
 	chmod -R u+w $(d)
 
-	: # specific to OpenJDK7, or missing explicitely?
-	cp -p openjdk/jdk/src/share/lib/management/snmp.acl.template \
-		debian/tmp/usr/lib/jvm/java-7-openjdk/jre/lib/management/
+	: # install default jvm config file
+	cp debian/jvm.cfg-default $(d)/$(basedir)/jre/lib/$(archdir)/
 
 	: # add extra symlinks for header files
 	ln -sf linux/jni_md.h $(d)/$(basedir)/include/jni_md.h
@@ -821,7 +979,7 @@ endif
 		$(d)/etc/$(jdiralias)/
 
 	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.properties.src \
-		$(d)/etc/$(jdiralias)/fontconfig.properties.src
+		$(d)/etc/$(jdiralias)/fontconfig.properties
 	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.bfc \
 		$(d)/etc/$(jdiralias)/fontconfig.bfc
 
@@ -876,6 +1034,8 @@ endif
 	  case "$$i" in \
 	    */$(plugin_name)) continue;; \
 	    */libsplashscreen.so|*/libjsoundalsa.so|$(if $(with_pulse),*/libpulse-java.so|)*/xawt) echo $$i >> ../$(p_jre).install;; \
+	    */cacao) echo $$i >> ../$(p_jrec).install;; \
+	    */zero) echo $$i >> ../$(p_jrez).install;; \
 	    *) echo $$i >> ../$(p_jrehl).install; \
 	  esac; \
 	done
@@ -1003,7 +1163,7 @@ endif
 
 	: # install icons
 	for i in 16 24 32 48; do \
-	  install -D -m 644 -p openjdk/jdk/src/solaris/classes/sun/awt/X11/java-icon$${i}.png \
+	  install -D -m 644 -p build/openjdk/jdk/src/solaris/classes/sun/awt/X11/java-icon$${i}.png \
 	    $(d_jre)/usr/share/icons/hicolor/$${i}x$${i}/apps/$(basename).png; \
 	done
 
@@ -1012,6 +1172,13 @@ endif
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jrehl); \
 	  echo usr/share/doc/$(p_jre) $(basedir)/docs; \
 	) > $(d_jrehl).links
+
+ifneq (,$(filter zero, $(alternate_vms)))
+	: # create docdir symlinks for $(p_jrez)
+	( \
+	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jrez); \
+	) > $(d_jrez).links
+endif
 
 	: # create docdir symlinks for $(p_src)
 	( \
@@ -1035,14 +1202,19 @@ endif
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_lib); \
 	) > $(d_lib).links
 
-	: # create docdir symlinks for $(p_jdk)
+	: # create docdir symlinks for $(p_dbg)
 	( \
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_dbg); \
 	) > $(d_dbg).links
 
-	: # create links for the gnome accessibility bridge
-	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
-	    >> $(d_jrehl).links
+# FIXME: temporarily disabled
+#	: # create links for the gnome accessibility bridge
+#	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
+#	    >> $(d_jre).links
+#ifeq ($(with_jni_bridge),yes)
+#	  echo "usr/lib/jni/libjava-access-bridge-jni.so $(basedir)/jre/lib/ext/libjava-access-bridge-jni.so" \
+#	    >> $(d_jre).links
+#endif
 
 	: # create links for the config files
 	find $(d_jrehl)/etc/$(jdiralias) -type f ! -name jvm.cfg \
@@ -1090,11 +1262,20 @@ endif
 	mv $(d_jre)/$(basedir)/jre/bin/javaws $(d_jre)/$(basedir)/jre/bin/javaws.real
 	install -m 755 debian/javaws-wrapper.sh $(d_jre)/$(basedir)/jre/bin/javaws
 
+	: # another jvm symlink
+	ln -sf $(jdiralias) $(d_jrehl)/usr/lib/jvm/java-$(jvmver)-$(origin)
+
+ifeq ($(with_systemtap),yes)
+	: # systemtap support
+	mkdir -p $(d_jrehl)/usr/share/systemtap/tapset
+	cp -p build/tapset/hotspot.stp $(d_jrehl)/usr/share/systemtap/tapset/
+endif
+
 	: # Install stuff to generate font config and timezone files.
 	mkdir -p $(d_lib)/$(basedir)/jre/lib
-	cp -p openjdk/build/linux-$(jvmarch)/btjars/compilefontconfig.jar \
+	cp -p build/openjdk/build/linux-$(jvmarch)/btjars/compilefontconfig.jar \
 		$(d_lib)/$(basedir)/jre/lib/
-	cp -p openjdk/build/linux-$(jvmarch)/btjars/javazic.jar \
+	cp -p build/openjdk/build/linux-$(jvmarch)/btjars/javazic.jar \
 		$(d_lib)/$(basedir)/jre/lib/
 
 	: # install lintian overrides
@@ -1105,31 +1286,24 @@ endif
 
 nodocs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),-N$(p_doc))
 nodemo = $(if $(findstring cacao, $(PKGSOURCE)),-N$(p_demo))
+nojrec = $(if $(filter cacao, $(alternate_vms)),,-N$(p_jrec))
+nojrez = $(if $(filter zero, $(alternate_vms)),,-N$(p_jrez))
 
 # Build architecture independant packages
 binary-indep: build install
 	dh_testdir
 	dh_testroot
-ifneq (,$(findstring cacao, $(PKGSOURCE)))
-	: # not building any binary-indep packages for cacao
-else
-  ifeq ($(with_docs),yes)
+ifeq ($(with_docs),yes)
 	dh_installchangelogs -p$(p_doc)
 	dh_installdocs -p$(p_doc) 
 	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
-	for i in openjdk/build/linux-$(jvmarch)/docs/*; do \
+	for i in build/openjdk/build/linux-$(jvmarch)/docs/*; do \
 	  [ -e $$i ] || continue; \
 	  b=$$(basename $$i); \
 	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jre)/; \
 	  ln -sf ../$(p_jre)/$$b $(d_doc)/usr/share/doc/$(p_doc)/$$b; \
 	done
-  endif
-  ifneq (,$(findstring openjdk-, $(PKGSOURCE)))
-	dh_installdocs -p$(p_tar)
-	dh_installchangelogs -p$(p_tar)
-	mkdir -p $(d_tar)/usr/src
-	cp -p $(OPENJDK_SRC_ZIP) $(d_tar)/usr/src/
-  endif
+endif
 	dh_installmenu -i $(nodocs)
 	-dh_icons -i $(nodocs) || dh_iconcache -i $(nodocs)
 #	dh_installdebconf -i $(nodocs)
@@ -1140,7 +1314,6 @@ else
 	dh_gencontrol -i $(nodocs) -- $(control_vars)
 	dh_md5sums -i $(nodocs)
 	dh_builddeb -i $(nodocs) $(bd_options)
-endif
 
 absarchdir = $(CURDIR)/$(d_jrehl)/$(basedir)/jre/lib/$(archdir)
 shlibdeps_ld_path =$(absarchdir):$(absarchdir)/client:$(absarchdir)/server:$(absarchdir)/native_threads
@@ -1160,25 +1333,52 @@ binary-arch: build install
 	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
 	done
 	mkdir -p $(d_jdk)/usr/share/doc/$(p_jre)
-	cp mauve/mauve_output $(d_jdk)/usr/share/doc/$(p_jre)/mauve_output.log
-	cp jtreg_output $(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output.log
-	-cp test/jtreg-summary.log $(d_jdk)/usr/share/doc/$(p_jre)/
+	cp build/mauve-$(default_vm)/mauve_output-$(default_vm) \
+		$(d_jdk)/usr/share/doc/$(p_jre)/mauve_output-$(default_vm).log
+	cp jtreg_output-$(default_vm) \
+		$(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output-$(default_vm).log
+	-cp build/test/jtreg-summary-$(default_vm).log build/test/check-*-$(default_vm).log \
+		$(d_jdk)/usr/share/doc/$(p_jre)/
+	-cp build/test/failed_tests-$(default_vm).tar.gz $(d_jdk)/usr/share/doc/$(p_jre)/
 
-	dh_installmenu -s $(nodemo)
-	-dh_icons -s $(nodemo) || dh_iconcache -s $(nodemo)
-#	dh_installdebconf -s $(nodemo)
-	dh_link -s $(nodemo)
-	dh_strip -s $(nodemo) --dbg-package=$(p_dbg)
-	dh_compress -s $(nodemo)
-	dh_fixperms -s $(nodemo)
+ifneq (,$(filter cacao, $(alternate_vms)))
+	dh_installchangelogs -p$(p_jrec)
+	dh_installdocs -p$(p_jrec)
+	mkdir -p $(d_jrec)/usr/share/doc/$(p_jre)
+	-cp build/mauve-cacao/mauve_output-cacao \
+		$(d_jrec)/usr/share/doc/$(p_jre)/mauve_output-cacao.log
+	-cp jtreg_output-cacao \
+		$(d_jrec)/usr/share/doc/$(p_jre)/jtreg_output-cacao.log
+	-cp build/test/jtreg-summary-cacao.log build/test/check-*-cacao.log \
+		$(d_jrec)/usr/share/doc/$(p_jre)/
+	-cp build/test/failed_tests-cacao.tar.gz $(d_jrec)/usr/share/doc/$(p_jre)/
+endif
+ifneq (,$(filter zero, $(alternate_vms)))
+	mkdir -p $(d_jrez)/usr/share/doc/$(p_jre)
+	-cp build/mauve-zero/mauve_output-zero \
+		$(d_jrez)/usr/share/doc/$(p_jre)/mauve_output-zero.log
+	-cp jtreg_output-zero \
+		$(d_jrez)/usr/share/doc/$(p_jre)/jtreg_output-zero.log
+	-cp build/test/jtreg-summary-zero.log build/test/check-*-zero.log \
+		$(d_jrez)/usr/share/doc/$(p_jre)/
+	-cp build/test/failed_tests-zero.tar.gz $(d_jrez)/usr/share/doc/$(p_jre)/
+endif
+	dh_desktop -s $(nodemo) $(nojrec) $(nojrez)
+	dh_installmenu -s $(nodemo) $(nojrec) $(nojrez)
+	-dh_icons -s $(nodemo) $(nojrec) $(nojrez) || dh_iconcache -s $(nodemo) $(nojrec) $(nojrez)
+#	dh_installdebconf -s $(nodemo) $(nojrec) $(nojrez)
+	dh_link -s $(nodemo) $(nojrec) $(nojrez)
+	dh_strip -s $(nodemo) $(nojrec) $(nojrez) --dbg-package=$(p_dbg)
+	dh_compress -s $(nodemo) $(nojrec) $(nojrez)
+	dh_fixperms -s $(nodemo) $(nojrec) $(nojrez)
 	dh_makeshlibs -p$(p_jrehl) -p$(p_jre)
-	dh_shlibdeps -s $(nodemo) -L $(p_jrehl) \
+	dh_shlibdeps -s $(nodemo) $(nojrec) $(nojrez) -L $(p_jrehl) \
 		-l$(shlibdeps_ld_path) \
 		--
-	dh_installdeb -s $(nodemo)
-	dh_gencontrol -s $(nodemo) -- $(control_vars)
-	dh_md5sums -s $(nodemo)
-	dh_builddeb -s $(nodemo) #$(bd_options)
+	dh_installdeb -s $(nodemo) $(nojrec) $(nojrez)
+	dh_gencontrol -s $(nodemo) $(nojrec) $(nojrez) -- $(control_vars)
+	dh_md5sums -s $(nodemo) $(nojrec) $(nojrez)
+	dh_builddeb -s $(nodemo) $(nojrec) $(nojrez) #$(bd_options)
 
 binary: binary-arch binary-indep
 .PHONY: build clean binary-indep binary-arch binary install

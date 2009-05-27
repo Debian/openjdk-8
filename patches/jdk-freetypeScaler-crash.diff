@@ -24,23 +24,21 @@ Summary: NewGlobalRef/DeleteGlobalRef as needed.
 Reviewed-by:
 Contributed-by: yamauchi@google.com
 
-diff --git a/make/sun/font/mapfile-vers.openjdk b/jdk/make/sun/font/mapfile-vers.openjdk
---- openjdk/jdk/make/sun/font/mapfile-vers.openjdk
-+++ openjdk/jdk/make/sun/font/mapfile-vers.openjdk
+--- openjdk/jdk/make/sun/font/mapfile-vers.openjdk.orig	2009-05-21 13:48:03.000000000 +0000
++++ openjdk/jdk/make/sun/font/mapfile-vers.openjdk	2009-05-26 19:53:17.000000000 +0000
 @@ -29,6 +29,7 @@
-
+ 
  SUNWprivate_1.1 {
  	global:
 +                JNI_OnLoad;
                  getSunFontIDs;
-                 newLayoutTableCache;
+                 newLayoutTableCache; 
                  freeLayoutTableCache;
-diff --git a/src/share/native/sun/font/freetypeScaler.c b/src/share/native/sun/font/freetypeScaler.c
---- openjdk/jdk/src/share/native/sun/font/freetypeScaler.c
-+++ openjdk/jdk/src/share/native/sun/font/freetypeScaler.c
+--- openjdk/jdk/src/share/native/sun/font/freetypeScaler.c.orig	2009-05-21 13:48:03.000000000 +0000
++++ openjdk/jdk/src/share/native/sun/font/freetypeScaler.c	2009-05-26 19:53:17.000000000 +0000
 @@ -48,16 +48,6 @@
  #define  ROUND(x) ((int) (x+0.5))
-
+ 
  typedef struct {
 -    /* Important note:
 -         JNI forbids sharing same env between different threads.
@@ -58,7 +56,7 @@ diff --git a/src/share/native/sun/font/freetypeScaler.c b/src/share/native/sun/f
 @@ -90,6 +80,13 @@
  void z_error(char *s) {}
  #endif
-
+ 
 +static JavaVM* jvm = NULL;
 +
 +JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved) {
@@ -67,23 +65,23 @@ diff --git a/src/share/native/sun/font/freetypeScaler.c b/src/share/native/sun/f
 +}
 +
  /**************** Error handling utilities *****************/
-
+ 
  static jmethodID invalidateScalerMID;
-@@ -107,6 +104,10 @@
-
+@@ -108,6 +105,10 @@
      FT_Done_Face(scalerInfo->face);
      FT_Done_FreeType(scalerInfo->library);
-+
+ 
 +    if (scalerInfo->font2D != NULL) {
 +        (*env)->DeleteGlobalRef(env, scalerInfo->font2D);
 +    }
-
++
      if (scalerInfo->directBuffer != NULL) {
          (*env)->DeleteGlobalRef(env, scalerInfo->directBuffer);
+     }
 @@ -131,10 +132,9 @@
-
+ 
  #define FILEDATACACHESIZE 1024
-
+ 
 -/* NB: is it ever called? */
  static void CloseTTFontFileFunc(FT_Stream stream) {
 +    JNIEnv* env = (JNIEnv*) JNU_GetEnv(jvm, JNI_VERSION_1_2);
@@ -101,11 +99,11 @@ diff --git a/src/share/native/sun/font/freetypeScaler.c b/src/share/native/sun/f
 -    JNIEnv* env = scalerInfo->env;
      jobject bBuffer;
      int bread = 0;
-
+ 
 @@ -245,8 +245,7 @@
      if (scalerInfo == NULL)
          return 0;
-
+ 
 -    scalerInfo->env = env;
 -    scalerInfo->font2D = font2D;
 +    scalerInfo->font2D = (*env)->NewGlobalRef(env, font2D);
@@ -131,12 +129,13 @@ diff --git a/src/share/native/sun/font/freetypeScaler.c b/src/share/native/sun/f
 @@ -391,8 +392,10 @@
                            FTScalerContext *context) {
      int errCode = 0;
-
+ 
 -    scalerInfo->env = env;
 -    scalerInfo->font2D = font2D;
 +    if (scalerInfo->font2D != NULL) {
 +        (*env)->DeleteGlobalRef(env, scalerInfo->font2D);
 +    }
 +    scalerInfo->font2D = (*env)->NewGlobalRef(env, font2D);
-
-     FT_Set_Transform(scalerInfo->face, &context->transform, NULL);
+ 
+     if (context != NULL) {
+         FT_Set_Transform(scalerInfo->face, &context->transform, NULL);

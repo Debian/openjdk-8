@@ -1,8 +1,9 @@
-openjdk-7 (7b59-0ubuntu1) karmic; urgency=low
+openjdk-7 (7b59-0ubuntu1~ppa1) karmic; urgency=low
 
   * Build openjdk-7 snapshot (7b59).
+  * Merge debian packaging r205:362 from openjdk-6.
 
- -- Matthias Klose <doko@ubuntu.com>  Tue, 26 May 2009 12:17:21 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 27 May 2009 12:09:16 +0200
 
 openjdk-7 (7b40-0ubuntu2) jaunty; urgency=low
 
@@ -18,6 +19,411 @@ openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
   * Update packaging for openjdk-7.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 14:27:03 +0100
+
+openjdk-6 (6b16-2) unstable; urgency=low
+
+  * Don't install libaccess-bridge-java* symlinks until
+    libaccess-bridge-java-jni is available on all architectures.
+  * Add missing build dependency on cacao-source.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 18 May 2009 14:02:59 +0200
+
+openjdk-6 (6b16-1) unstable; urgency=low
+
+  * Upload to unstable, based in 6b16 and IcedTea 1.5.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 17 May 2009 23:02:46 +0200
+
+openjdk-6 (6b16~pre3-0ubuntu1) karmic; urgency=low
+
+  * Update to hotspot hs14b15.
+  * Provide symlink for libjava-access-bridge-jni.so. LP: #375347.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 15 May 2009 00:41:24 +0200
+
+openjdk-6 (6b16~pre2-0ubuntu3) karmic; urgency=low
+
+  * Update IcedTea build infrastructure (20090513).
+  * Fix build failure when xvfb-run doesn't work, trying to access a
+    non-existing directory.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 13 May 2009 23:01:23 +0200
+
+openjdk-6 (6b16~pre2-0ubuntu2) karmic; urgency=low
+
+  * Add libffi-dev as architecture independent build dependency.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 11 May 2009 08:41:42 +0200
+
+openjdk-6 (6b16~pre2-0ubuntu1) karmic; urgency=low
+
+  * Update to re-tagged code drop (b16).
+  * Update IcedTea build infrastructure (20090510).
+  * Remove patches integrated in IcedTea.
+  * Remove GCJ Web Plugin support.
+  * Remove build infrastructure to build additional VM's, integrated
+    in IcedTea.
+  * Stop building the openjdk-6-source-files package.
+  * README.Debian: Document using the different VM's.
+  * Use GCC-4.3 on sparc, ICE with GCC-4.4.
+  * Fix problem with the ARM assembler interpreter, when executing a 'new'
+    bytecode with a double on the top of the stack (Edward Nevill).
+  * Run the testsuite for the zero build on ix86 architectures.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 10 May 2009 23:37:42 +0200
+
+openjdk-6 (6b16~pre1-0ubuntu1) karmic; urgency=low
+
+  * New code drop (b16).
+  * Update IcedTea build infrastructure (20090429).
+  * Merge changes from 6b14-1.4.1.
+  * Fix section names (using the java section).
+  * Remove all UTF-8 sequence definitions from the font configuration.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 29 Apr 2009 11:33:07 +0200
+
+openjdk-6 (6b14-1.4.1-0ubuntu9) jaunty; urgency=low
+
+  * Reenable the testsuite (revert the change in last upload).
+  * Apply fix for the ARM bytecode interpreter (Edward Nevill).
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 18 Apr 2009 11:24:27 +0200
+
+openjdk-6 (6b14-1.4.1-0ubuntu7) jaunty; urgency=low
+
+  * Don't use some indian fonts with diverging font metrics for the
+    latin-1.UTF-8 encoding. LP: #289784.
+  * Disable running the testsuite for this build (no code changes compared
+    to the previous upload).
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 14 Apr 2009 11:46:25 +0200
+
+openjdk-6 (6b14-1.4.1-0ubuntu6) jaunty; urgency=low
+
+  * Fix native2ascii jdk test case, which let the jdk testsuite fail.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 10 Apr 2009 11:58:44 +0200
+
+openjdk-6 (6b14-1.4.1-0ubuntu5) jaunty; urgency=low
+
+  [Matthias Klose]
+  * Update to the final CACAO 0.99.4 release.
+  * Security Vulnerability Fixes for OpenJDK:
+    - 6522586: Enforce limits on Font creation.
+    - 6536193: flaw in UTF8XmlOutput.
+    - 6610888: Potential use of cleared of incorrect acc in JMX Monitor.
+    - 6610896: JMX Monitor handles thread groups incorrectly.
+    - 6630639: lightweight HttpServer leaks file descriptors on no-data
+      connections.
+    - 6632886: Font.createFont can be persuaded to leak temporary files.
+    - 6636360: compiler/6595044/Main.java test fails with 64bit java on
+      solaris-sparcv9 with SIGSEGV.
+    - 6652463: MediaSize constructors allow to redefine the mapping of
+      standard MediaSizeName values.
+    - 6652929: Font.createFont(int,File) trusts File.getPath.
+    - 6656633: getNotificationInfo methods static mutable (findbugs).
+    - 6658158: Mutable statics in SAAJ (findbugs).
+    - 6658163: txw2.DatatypeWriter.BUILDIN is a mutable static (findbugs).
+    - 6691246: Thread context class loader can be set using JMX remote
+      ClientNotifForwarded.
+    - 6717680: LdapCtx does not close the connection if initialization fails.
+    - 6721651: Security problem with out-of-the-box management.
+    - 6737315: LDAP serialized data vulnerability.
+    - 6792554: Java JAR Pack200 header checks are insufficent.
+    - 6804996: JWS PNG Decoding Integer Overflow [V-flrhat2ln8].
+    - 6804997: JWS GIF Decoding Heap Corruption [V-r687oxuocp].
+    - 6804998: JRE GIF Decoding Heap Corruption [V-y6g5jlm8e1].
+  * Add security patch for the lcms library.
+  * Add accessibility patches java-access-bridge-security.patch and
+    accessible-toolkit.patch.
+  * Merge fixes for testsuite failures from the IcedTea6 branch.
+  * Merge the proxy support for the plugin  from the IcedTea6 branch.
+  * Merge http://icedtea.classpath.org/hg/release/icedtea6-1.4.1/rev/546ef0cdee06
+    (TJ). LP: #344705.
+  * Add a Xb-Npp-Description for the IcedTea plugin. LP: #272010.
+
+  [Edward Nevill]
+  * Put VFP back in - selects VFP / novfp autmatically
+  * More assembler optimisations
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 09 Apr 2009 14:14:12 +0200
+
+openjdk-6 (6b14-1.4.1-0ubuntu4) jaunty; urgency=low
+
+  * Disable the additional zero JVM on sparc.
+  * patches/hotspot/default/icedtea-includedb.patch: Add missing include in
+    openjdk/hotspot/src/share/vm/includeDB_core.
+  * Fix build failure of the zero VM on lpia with a fixed GCC.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 13 Mar 2009 16:39:27 +0100
+
+openjdk-6 (6b14-1.4.1-0ubuntu3) jaunty; urgency=low
+
+  * Build the Zero/Shark VM as an additional JVM (call as `java -zero').
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 07 Mar 2009 20:54:28 +0100
+
+openjdk-6 (6b14-1.4.1-0ubuntu2) jaunty; urgency=low
+
+  * Fix zero-port-opt patching (build failure on armel).
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 05 Mar 2009 18:19:18 +0100
+
+openjdk-6 (6b14-1.4.1-0ubuntu1) jaunty; urgency=low
+
+  * Update IcedTea to the 1.4.1 release.
+  * Build the Cacao VM as an additional JVM (call as `java -cacao').
+  * Build in separate build directory.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 05 Mar 2009 15:16:02 +0100
+
+openjdk-6 (6b14-1.5~pre1-5) unstable; urgency=low
+
+  * Fix build failure on armel.
+  * Require the final cacao-0.99.4 release.
+  * Add /usr/lib/jni to the library path. Closes: #517338.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 17 Mar 2009 09:37:20 +0100
+
+openjdk-6 (6b14-1.5~pre1-4) unstable; urgency=low
+
+  * Disable the additional zero JVM on sparc.
+  * Fix casts in hotspot on s390. Closes: #518823.
+  * Add special flags for javac on s390 to work around a VM problem with bad
+    code generation during inlining.
+  * Run the testsuites for the default VM on all architectures.
+  * Update IcedTea (20090314).
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 14 Mar 2009 18:29:49 +0100
+
+openjdk-6 (6b14-1.5~pre1-3) unstable; urgency=low
+
+  * Don't configure the additional zero JVM with --enable-shark, currently
+    fails to build.
+  * Don't build the JDK when building the additional zero JVM.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 07 Mar 2009 21:11:16 +0100
+
+openjdk-6 (6b14-1.5~pre1-2) experimental; urgency=low
+
+  * Build the Zero/Shark VM as an additional JVM (call as `java -zero').
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 06 Mar 2009 11:16:07 +0100
+
+openjdk-6 (6b14-1.5~pre1-0ubuntu1) jaunty; urgency=low
+
+  * Update hotspot to 14.0-b10.
+  * Update IcedTea (20090305).
+  * Build the Cacao VM as an additional JVM (call as `java -cacao').
+  * Build in separate build directory.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 05 Mar 2009 15:16:02 +0100
+
+openjdk-6 (6b14-0ubuntu17) jaunty; urgency=low
+
+  [ Edward Nevill ]
+  * Remove VFP from asm loop
+  * Disble the mauve testsuite for armel.
+
+  [Matthias Klose]
+  * Update IcedTea (20090302).
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 02 Mar 2009 16:18:01 +0100
+
+openjdk-6 (6b14-0ubuntu16) jaunty; urgency=low
+
+  * Regenerate auto files.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 18 Feb 2009 15:20:10 +0100
+
+openjdk-6 (6b14-0ubuntu15) jaunty; urgency=low
+
+  [ Edward Nevill ]
+  * Added ARM assembler interpreter loop
+  * mauve and jtreg removed again for alpha release
+
+  [Matthias Klose]
+  * Update IcedTea (20090218).
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 18 Feb 2009 13:35:02 +0100
+
+openjdk-6 (6b14-0ubuntu14) jaunty; urgency=low
+
+  * Configure with --disable-nio2 on armel as well.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 13 Feb 2009 10:13:55 +0100
+
+openjdk-6 (6b14-0ubuntu13) jaunty; urgency=low
+
+  * Really configure with --disable-nio2.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 12 Feb 2009 17:26:43 +0100
+
+openjdk-6 (6b14-0ubuntu12) jaunty; urgency=low
+
+  * Configure with --disable-nio2.
+  * Run mauve and jtreg testsuites on armel.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 11 Feb 2009 13:00:15 +0100
+
+openjdk-6 (6b14-0ubuntu11) jaunty; urgency=low
+
+  [Edward Nevill]
+  * Performance improvements for the zero build (currently applied
+    on armel only).
+
+  [Matthias Klose]
+  * Update IcedTea (20090210).
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 10 Feb 2009 15:29:22 +0100
+
+openjdk-6 (6b14-0ubuntu10) jaunty; urgency=low
+
+  * Explicitely remove PulseAudioMuteControl.java.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 26 Jan 2009 22:09:21 +0100
+
+openjdk-6 (6b14-0ubuntu9.1) jaunty; urgency=low
+
+  * Test build.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 25 Jan 2009 17:03:51 +0100
+
+openjdk-6 (6b14-0ubuntu9) jaunty; urgency=low
+
+  * Update IcedTea build infrastructure (20090125).
+  * Run the jtreg testsuite for cacao builds, save all test logs.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 25 Jan 2009 15:40:52 +0100
+
+openjdk-6 (6b14-0ubuntu8) jaunty; urgency=low
+
+  * Fix merge error, don't apply patches twice.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 19 Jan 2009 01:15:19 +0100
+
+openjdk-6 (6b14-0ubuntu7) jaunty; urgency=low
+
+  * debian/rules: Call dh_desktop. LP: #309999.
+  * Add dependency on libjpeg62 for the -headless package. LP: #318383.
+  * Test some jtreg tests which fail in samevm mode in a separate VM.
+  * Build all with -fno-stack-protector -U_FORTIFY_SOURCE.
+  * Include jtr files of failed tests in the -jdk package.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 19 Jan 2009 00:23:22 +0100
+
+openjdk-6 (6b14-0ubuntu6) jaunty; urgency=low
+
+  * The -source package now contains all source files. Closes: #504568.
+  * The 6b14 build fixes the following security related issues (sun bug number,
+    CVE, description):
+    - 6588160, CVE-2008-5348: jaas krb5 client leaks OS-level UDP sockets.
+    - 6497740, CVE-2009-5349: Limit the size of RSA public keys.
+    - 6484091, CVE-2008-5350: FileSystemView leaks directory info.
+    - 4486841, CVE-2008-5351: UTF-8 decoder needed adhere to Unicode 3.0.1
+      fixes.
+    - 6755943, CVE-2008-5352: JAR decompression should enforce stricter header
+      checks.
+    - 6734167, CVE-2008-5353: Calendar.readObject allows elevation of
+      privileges.
+    - 6733959, CVE-2008-5354: Insufficient checks for "Main-Class" manifest
+      entry in JAR files
+    - 6751322, CVE-2008-5356: Sun Java JRE TrueType Font Parsing Heap Overflow.
+    - 6733336, CVE-2008-5357: Crash on malformed font.
+    - 6766136, CVE-2008-5358: corrupted gif image may cause crash in java
+      splashscreen library.
+    - 6726779, CVE-2008-5359: ConvolveOp on USHORT raster can cause the JVM
+      crash.
+    - 6721753, CVE-2008-5360: File.createTempFile produces guessable file names.
+    - 6592792: Add com.sun.xml.internal to the "package.access" property in
+         $JAVA_HOME/lib/security/java.security.
+  * Regenerate the control file.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 13 Jan 2009 15:04:36 +0100
+
+openjdk-6 (6b14-0ubuntu2~ppa1) intrepid; urgency=low
+
+  * Upload to the OpenJDK PPA for intrepid.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 13 Jan 2009 13:28:38 +0100
+
+openjdk-6 (6b14-0ubuntu5) jaunty; urgency=low
+
+  * Update IcedTea build infrastructure (20090113).
+  * Rebuild with updated nss/nspr packages.
+  * Update debug patches.
+  * debian/patches/nonreparenting-wm.diff: If the _JAVA_AWT_WM_NONREPARENTING
+    environment variable is set, disable all workarounds causing blank windows
+    in non-reparentizing window managers (Bernhard R. Link). Closes: #508650.
+  * Fix location of plugin for Debian. Closes: #505726.
+  * Let the -jdk package provide java-compiler. Closes: #507641.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 13 Jan 2009 10:18:44 +0100
+
+openjdk-6 (6b14-0ubuntu4) jaunty; urgency=low
+
+  * Use a default jvm.cfg not only for java, but for all jdk tools.
+    LP: #288616.
+  * Update IcedTea build infrastructure (20081223).
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 23 Dec 2008 09:24:23 +0100
+
+openjdk-6 (6b14-0ubuntu3) jaunty; urgency=low
+
+  * Update IcedTea build infrastructure (20081217).
+  * Add support for PARISC.
+  * Use a default jvm.cfg if the jvm.cfg doesn't yet exist after unpacking
+    the runtime package. LP: #288616.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 17 Dec 2008 09:58:26 +0100
+
+openjdk-6 (6b14~pre1-0ubuntu2) jaunty; urgency=low
+
+  * Install hotspot tarball in -source-files package.
+  * Fix build failure on sparc.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 05 Dec 2008 09:43:51 +0100
+
+openjdk-6 (6b14~pre1-0ubuntu1) jaunty; urgency=low
+
+  * New code drop (b14).
+  * Update IcedTea build infrastructure (20081204).
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 04 Dec 2008 11:40:56 +0100
+
+openjdk-6 (6b13~pre2-0ubuntu2) jaunty; urgency=low
+
+  * Update IcedTea build infrastructure (20081203).
+    - Fix build failures on zero based architectures.
+  * Add build dependency on libxrender-dev.
+  * Don't use fastjar on ia64, working around a build failure.
+  * Add configury for shark builds.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 04 Dec 2008 16:26:15 +0100
+
+openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
+
+  * Build openjdk-7 snapshot (7b40).
+  * Update packaging for openjdk-7.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 14:27:03 +0100
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 03 Dec 2008 18:43:23 +0100
+
+openjdk-6 (6b13~pre2-0ubuntu1) jaunty; urgency=low
+
+  * Update IcedTea build infrastructure (20081202).
+    - Add Dec 3 OpenJDK security patches
+  * Build with --with-hotspot-build, update patches for this config.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 03 Dec 2008 01:05:54 +0100
+
+openjdk-6 (6b13~pre1-0ubuntu4) jaunty; urgency=low
+
+  * Update IcedTea build infrastructure (20081122).
+    - Fixes for the IcedTeaPlugin. LP: #300254.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 22 Nov 2008 10:42:10 +0100
 
 openjdk-6 (6b13~pre1-0ubuntu3) jaunty; urgency=low
 

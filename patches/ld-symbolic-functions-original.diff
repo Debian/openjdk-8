@@ -20,17 +20,16 @@
  
  test.o: test.c
  	$(GCC) -c -o test.o -g -D_GNU_SOURCE -D_$(ARCH)_ $(if $(filter $(ARCH),alpha),,-D$(ARCH)) $(INCLUDES) test.c
---- openjdk/hotspot/make/linux/makefiles/gcc.make.orig	2008-07-26 23:40:27.464474601 +0200
-+++ openjdk/hotspot/make/linux/makefiles/gcc.make	2008-07-26 23:42:08.776002862 +0200
-@@ -150,6 +150,7 @@
+--- openjdk/hotspot/build/linux/makefiles/gcc.make.orig	2008-07-26 23:40:27.464474601 +0200
++++ openjdk/hotspot/build/linux/makefiles/gcc.make	2008-07-26 23:42:08.776002862 +0200
+@@ -142,6 +142,7 @@
  
  # Enable linker optimization
  LFLAGS += -Xlinker -O1
 +LFLAGS += -Wl,-Bsymbolic-functions
  
- # If this is a --hash-style=gnu system, use --hash-style=both
- #   The gnu .hash section won't work on some Linux systems like SuSE 10.
-
+ # Use $(MAPFLAG:FILENAME=real_file_name) to specify a map file.
+ MAPFLAG = -Xlinker --version-script=FILENAME
 --- openjdk/jdk/make/common/Defs-linux.gmk.orig	2008-07-26 23:40:27.444474299 +0200
 +++ openjdk/jdk/make/common/Defs-linux.gmk	2008-07-26 23:42:08.776002862 +0200
 @@ -215,7 +215,7 @@

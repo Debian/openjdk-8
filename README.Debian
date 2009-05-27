@@ -1,5 +1,28 @@
-openjdk-6 for Debian
---------------------
+openjdk-6 for Debian/Ubuntu
+---------------------------
+
+The OpenJDK build is configured --with-additional-vms to build with
+different virtual machines.  The original implementation of the hotspot
+VM is only available on the amd64, i386, lpia and sparc architectures.
+Other VM's are CACAO, providing a just in time compiler on several
+architectures (although the VM implementation is incomplete), and Zero,
+providing a byte code interpreter for every architecture.  On some
+architectures Zero is built with JIT support using shark (still considered
+experimental).
+
+To use a different VM other than the default, use
+
+	java -cacao|-zero
+
+or for the java tools, use
+
+	<tool name> -J-cacao|-J-zero.
+
+To change the default permanently, edit /etc/java-6-openjdk/jvm.cfg.
+
+The CACAO VM can be found in the icedtea-6-jre-cacao package, the Zero/Shark
+VM can be found in the openjdk-6-jre-zero package (on the architectures
+where the Hotspot VM is available).
 
 Please look for further documentation in the directory
 /usr/share/doc/openjdk-6-jre/ .
@@ -10,4 +33,5 @@ into your webserver setup manually if you need it. It is not activated
 automatically.
 
 
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 03 May 2009 13:58:10 +0200
  -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 11:46:53 +0200
