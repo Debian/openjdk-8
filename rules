@@ -94,7 +94,7 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 
-#stage1_openjdk_archs = alpha amd64 armel i386 ia64 lpia powerpc m68k mips mipsel sparc s390
+#stage1_openjdk_archs = alpha armel ia64 powerpc m68k mips mipsel sparc s390
 #stage1_gcj_archs = amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sparc s390
 stage1_gcj_archs = hppa ia64 powerpc m68k mips mipsel sparc s390
 stage1_openjdk_archs = alpha amd64 armel i386 lpia
@@ -102,7 +102,6 @@ stage1_cacao_archs =
 
 cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
 altzero_archs = $(filter-out sparc, $(hotspot_archs))
-altzero_archs =
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
   alternate_vms += cacao

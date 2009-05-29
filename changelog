@@ -1,3 +1,11 @@
+openjdk-7 (7b59-1.10-0ubuntu1~karmic-ppa1) karmic; urgency=low
+
+  * Reenable the build of zero.
+  * Reapply fontconfig patch.
+  * Apply icedtea-cacao-no-mmap-first-page patch.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 29 May 2009 10:19:26 +0200
+
 openjdk-7 (7b59-0ubuntu1~ppa1) karmic; urgency=low
 
   * Build openjdk-7 snapshot (7b59).

@@ -149,3 +149,15 @@ Description: Alternatve JVM for OpenJDK, using Cacao
  powerpc and s390.
  .
  The VM is started with the option `-cacao'. See the README.Debian for details.
+
+Package: openjdk-7-jre-zero
+Architecture: amd64 i386 lpia
+Pre-Depends: ${dpkg:Depends}
+Depends: openjdk-7-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Alternatve JVM for OpenJDK, using Zero/Shark
+ The package provides an alternative runtime using the Zero VM and the 
+ Shark Just In Time Compiler (JIT).  Built on architectures in addition
+ to the Hotspot VM as a debugging aid for those architectures which don't
+ have a Hotspot VM.
+ .
+ The VM is started with the option `-zero'. See the README.Debian for details.
