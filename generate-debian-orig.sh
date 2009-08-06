@@ -1,7 +1,7 @@
 
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz"
-tarballdir=b59
-version=7b59
+tarballdir=b66
+version=7b66
 cacaotb=cacao-0.99.4.tar.bz2
 base=openjdk-7
 pkgdir=$base-$version

@@ -1,4 +1,4 @@
-openjdk-7 (7b59-1.10-0ubuntu1~karmic-ppa1) karmic; urgency=low
+openjdk-7 (7b59-0ubuntu1) karmic; urgency=low
 
   * Reenable the build of zero.
   * Reapply fontconfig patch.
