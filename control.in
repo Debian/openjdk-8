@@ -3,8 +3,8 @@ Section: java
 Priority: extra
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
 Uploaders: Michael Koch <konqueror@gmx.de>, Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
-Build-Depends: debhelper (>= 5), autotools-dev, @bd_compress@, m4, lsb-release, wget, zip, unzip, sharutils, gawk, pkg-config, procps, automake, autoconf, ant, @bd_cacao@ @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_shark@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_pulsejava@ @bd_mauve@
-Standards-Version: 3.8.1
+Build-Depends: debhelper (>= 5), autotools-dev, @bd_compress@, m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, automake, autoconf, ant, @bd_cacao@ @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_shark@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_pulsejava@ @bd_mauve@
+Standards-Version: 3.8.2
 Homepage: http://openjdk.java.net/
 Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~openjdk/openjdk/openjdk7
 Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk7
@@ -26,7 +26,7 @@ Description: OpenJDK Development Kit (JDK)
 Package: @basename@-jre-headless
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre-lib (>= @pkg_version@), ca-certificates-java, tzdata-java, rhino, libaccess-bridge-java (>= 1.22), java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre-lib (>= @pkg_version@), ca-certificates-java, tzdata-java, rhino, java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}
 Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-virtual-machine, java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless
@@ -42,7 +42,7 @@ Package: @basename@-jre
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
-Recommends: ${dlopenjre:Recommends}, ${pkg:pulseaudio}, @cjk_fonts@
+Recommends: ${dlopenjre:Recommends}, ${pkg:pulseaudio}
 Suggests: icedtea6-plugin
 Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4)
 Replaces: openjdk-6-jre-headless (<< 6b16~pre3)

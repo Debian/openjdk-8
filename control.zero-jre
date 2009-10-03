@@ -3,7 +3,7 @@ Package: @basename@-jre-zero
 Architecture: @altzero_archs@
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
-Description: Alternatve JVM for OpenJDK, using Zero/Shark
+Description: Alternative JVM for OpenJDK, using Zero/Shark
  The package provides an alternative runtime using the Zero VM and the 
  Shark Just In Time Compiler (JIT).  Built on architectures in addition
  to the Hotspot VM as a debugging aid for those architectures which don't

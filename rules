@@ -27,7 +27,6 @@ PKGVERSION := $(call vafilt,$(CHANGELOG_VARS),Version)
 
 hotspot_archs	= amd64 i386 lpia sparc
 shark_archs	= amd64 i386 lpia
-shark_archs	=
 no_bootstrap_archs = alpha armel
 
 VENDOR		= openjdk
@@ -100,6 +99,11 @@ stage1_gcj_archs = hppa ia64 powerpc m68k mips mipsel sparc s390
 stage1_openjdk_archs = alpha amd64 armel i386 lpia
 stage1_cacao_archs =
 
+# FIXME: broken with ecj-3.5
+stage1_gcj_archs =
+stage1_openjdk_archs = alpha armel amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sparc s390
+
+# FIXME cacao doesn't build with 7
 cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
 altzero_archs = $(filter-out sparc, $(hotspot_archs))
 
@@ -144,16 +148,12 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc sparc))
     export GCC_SUFFIX = -4.2
   endif
-else ifneq (,$(filter $(distrel),lenny intrepid jaunty squeeze sid))
+else ifneq (,$(filter $(distrel),lenny intrepid jaunty))
   export GCC_SUFFIX = -4.3
   export GCJ_SUFFIX = -4.3
 else
   export GCC_SUFFIX = -4.4
   export GCJ_SUFFIX = -4.4
-  ifneq (,$(filter $(DEB_HOST_ARCH), sparc))
-    export GCC_SUFFIX = -4.3
-    export GCJ_SUFFIX = -4.3
-  endif
 endif
 
 ifneq (,$(filter $(distrel),jaunty karmic unstable experimental sid))
@@ -223,21 +223,23 @@ ifeq ($(distribution),Ubuntu)
   endif
 endif
 
-# FIXME: temporarily disabled
+# FIXME zero-opt
 #ifneq (,$(filter $(DEB_HOST_ARCH),armel))
 #  DISTRIBUTION_PATCHES += \
-#	debian/patches/zero-hotspot-opt.diff
+#	debian/patches/zero-notice-safepoints.diff
 #endif
 
 export DISTRIBUTION_PATCHES
 
 ifeq ($(STAGE1_JAVA),gcj)
   CONFIGURE_ARGS = \
-	--with-gcj-home=$(STAGE1_HOME) \
+	--with-jdk-home=$(STAGE1_HOME) \
 	--with-ecj=/usr/bin/ecj \
 	--with-java=$(STAGE1_HOME)/bin/java \
 	--with-javah=/usr/bin/gjavah$(GCJ_SUFFIX) \
 	--with-rmic=/usr/bin/grmic$(GCJ_SUFFIX)
+  # not explicitely needed, using gcj implies a bootstrap
+  CONFIGURE_ARGS += --enable-bootstrap
   ifeq (,$(filter ia64, $(DEB_HOST_ARCH)))
     CONFIGURE_ARGS += \
 	--with-jar=/usr/bin/fastjar
@@ -245,13 +247,13 @@ ifeq ($(STAGE1_JAVA),gcj)
   build_target = icedtea-against-icedtea
 else ifeq ($(STAGE1_JAVA),openjdk)
   CONFIGURE_ARGS = \
-	--with-icedtea \
-	--with-icedtea-home=$(STAGE1_HOME)
+	--with-jdk-home=$(STAGE1_HOME)
+  # needed, --enable-bootstrap and openjdk as stage1 are incompatible
+  CONFIGURE_ARGS += --disable-bootstrap
   build_target = #icedtea-against-icedtea
 else ifeq ($(STAGE1_JAVA),cacao)
   CONFIGURE_ARGS = \
-	--with-icedtea \
-	--with-icedtea-home=$(STAGE1_HOME)
+	--with-jdk-home=$(STAGE1_HOME)
   build_target = #icedtea-against-icedtea
 endif
 
@@ -265,10 +267,12 @@ ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) ia64 powerpc))
   CONFIGURE_ARGS += --with-alt-jar=/usr/bin/fastjar
 endif
 
+#CONFIGURE_ARGS += \
+#	--with-xalan2-jar=/usr/share/java/xalan2.jar \
+#	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
+#	--with-rhino=/usr/share/java/js.jar
+
 CONFIGURE_ARGS += \
-	--with-xalan2-jar=/usr/share/java/xalan2.jar \
-	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
-	--with-rhino=/usr/share/java/js.jar \
 	--with-openjdk-src-zip=$(CURDIR)/openjdk.tar.gz \
 	--with-hotspot-src-zip=$(CURDIR)/hotspot.tar.gz \
 	--with-corba-src-zip=$(CURDIR)/corba.tar.gz \
@@ -318,9 +322,9 @@ ifneq (,$(NJOBS))
 endif
 
 ifeq ($(with_plugin_pkg),yes)
-  CONFIGURE_ARGS += --enable-liveconnect
+  CONFIGURE_ARGS += --enable-plugin
 else
-  CONFIGURE_ARGS += --disable-liveconnect
+  CONFIGURE_ARGS += --disable-plugin
 endif
 
 ifeq ($(with_pulse),yes)
@@ -385,7 +389,7 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
 else ifneq (,$(filter $(distrel),lenny intrepid jaunty squeeze sid))
   bd_gcc = g++-4.3,
 else
-  bd_gcc = g++-4.4 [!sparc], g++-4.3 [sparc],
+  bd_gcc = g++-4.4 (>= 4.4.1),
 endif
 bd_syslibs = \
 	libjpeg62-dev, libpng12-dev, libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev), zlib1g-dev,
@@ -409,13 +413,19 @@ ifneq (,$(shark_archs))
   bd_shark = llvm-dev (>= 2.5) [$(foreach a,$(shark_archs),$(a))],
 endif
 
-bd_cacao = libtool,
-ifneq ($(distribution),Ubuntu)
-  bd_cacao += cacao-source (>= 0.99.4-1),
-endif
+bd_cacao = libtool, cacao-source (>= 0.99.4-1),
 
-bd_plugin = \
-  libgtk2.0-dev, $(if $(filter $(distribution),Debian),xulrunner-dev (>= 1.9.0),$(if $(filter $(distrel),hardy intrepid jaunty karmic),xulrunner-1.9-dev,firefox-dev)),
+ifeq ($(distribution),Debian)
+  bd_plugin = xulrunner-dev (>= 1.9.0),
+else
+  ifneq (,$(filter $(distrel),karmic))
+    bd_plugin = xulrunner-dev (>= 1.9.1),
+  else ifneq (,$(filter $(distrel),hardy intrepid jaunty))
+    bd_plugin = xulrunner-1.9-dev,
+  else
+    bd_plugin = firefox-dev,
+  endif
+endif
 bd_netx = fastjar (>= 2:0.96-0ubuntu2),
 ifneq (,$(filter $(distrel),lenny sid experimental))
   bd_netx = fastjar (>= 2:0.95-4),
@@ -443,8 +453,11 @@ dlopen_jre_depends = \
 dlopen_jre_recommends =
 
 ifeq ($(distribution),Ubuntu)
-  browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
-  browser_plugin_dirs = xulrunner-addons
+  ifneq (,$(filter $(distrel),karmic))
+    browser_plugin_dirs = mozilla
+  else
+    browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
+  endif
 else
   browser_plugin_dirs = mozilla
 endif
@@ -511,12 +524,11 @@ ifneq (,$(filter-out $(hotspot_archs), $(cacao_archs)))
   control_vars += '-Vcacao:Recommends=$(p_jrec) (= $${binary:Version})'
 endif
 
-# FIXME, temporarily disabled
-#ifeq ($(with_jni_bridge),yes)
-#  control_vars += '-Vdep:bridge=libaccess-bridge-java'
-#else
-#  control_vars += '-Vdep:bridge=libaccess-bridge-java-jni'
-#endif
+ifeq ($(with_jni_bridge),yes)
+  control_vars += '-Vdep:bridge=libaccess-bridge-java'
+else
+  control_vars += '-Vdep:bridge=libaccess-bridge-java-jni'
+endif
 
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
@@ -613,14 +625,10 @@ stamps/icedtea-configure:
 	) > bin/uname
 	chmod +x bin/uname
 
-	echo "UNAME checks"
-	uname -a
-	/bin/uname -a
-	test -x /usr/bin/linux32 && linux32 uname -a || true
-	test -x /usr/bin/linux32 &&linux32 /bin/uname -a || true
-
-# FIXME: temporarily disabled
-#	patch --verbose -p0 < debian/patches/zero-port-opt.diff
+# FIXME zero-opt
+#	patch --verbose -p0 < debian/patches/zero-asm-port.diff
+#	patch --verbose -p0 < debian/patches/zero-asm-newfiles.diff
+#	patch --verbose -p0 < debian/patches/zero-asm-armv4.diff
 
 	mkdir -p stamps
 	mkdir -p build
@@ -677,6 +685,13 @@ ifeq ($(with_check),yes)
         with_jtreg_check += zero
       endif
     endif
+endif
+
+ifneq (,$(filter $(DEB_HOST_ARCH), alpha armel ia64 mips mipsel powerpc s390))
+  JTREG_OPTIONS = -timeout:3
+endif
+ifneq (,$(filter $(DEB_HOST_ARCH), armel))
+  JTREG_OPTIONS += -Xmx256M -vmoption:-Xmx256M
 endif
 
 build_stamps = stamps/build
@@ -810,7 +825,7 @@ jtreg-run-check:
 ifneq (,$(filter $(VMNAME), $(with_jtreg_check)))
 	@echo "BEGIN jtreg"
 	if [ -f bin/my-xvfb-run ]; then \
-	  /bin/sh bin/my-xvfb-run $(MAKE) -C build -k jtregcheck ICEDTEA_JTREG_OPTIONS='$(VMARGS)' \
+	  /bin/sh bin/my-xvfb-run $(MAKE) -C build -k jtregcheck ICEDTEA_JTREG_OPTIONS='$(VMARGS) $(JTREG_OPTIONS)' \
 		2>&1 | tee jtreg_output-$(VMNAME); \
 	else \
 	  echo "jtreg harness not run for this build" > jtreg_output-$(VMNAME); \
@@ -873,10 +888,16 @@ clean: debian-clean
 	rm -f jtreg_output* xvfb-run.log
 	rm -f buildwatch.pid
 
-	if [ -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S ]; then \
-	  patch --verbose -p0 -R < debian/patches/zero-port-opt.diff; \
-	  rm -f ports/hotspot/src/cpu/zero/vm/bytecodeInterpreter_arm.S; \
-	fi
+# FIXME zero-opt
+#	if [ -f ports/hotspot/src/cpu/zero/vm/cppInterpreter_arm.S ]; then \
+#	  patch --verbose -p0 -R < debian/patches/zero-asm-armv4.diff; \
+#	  patch --verbose -p0 -R < debian/patches/zero-asm-newfiles.diff; \
+#	  patch --verbose -p0 -R < debian/patches/zero-asm-port.diff; \
+#	  rm -f ports/hotspot/src/cpu/zero/vm/cppInterpreter_asm.S; \
+#	  rm -f ports/hotspot/src/cpu/zero/vm/bytecodes.s; \
+#	  rm -f ports/hotspot/src/cpu/zero/vm/bc.def; \
+#	  rm -f ports/hotspot/src/cpu/zero/vm/mkbc.c; \
+#	fi
 
 	dh_clean
 
@@ -1206,14 +1227,13 @@ endif
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_dbg); \
 	) > $(d_dbg).links
 
-# FIXME: temporarily disabled
-#	: # create links for the gnome accessibility bridge
-#	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
-#	    >> $(d_jre).links
-#ifeq ($(with_jni_bridge),yes)
-#	  echo "usr/lib/jni/libjava-access-bridge-jni.so $(basedir)/jre/lib/ext/libjava-access-bridge-jni.so" \
-#	    >> $(d_jre).links
-#endif
+	: # create links for the gnome accessibility bridge
+	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
+	    >> $(d_jre).links
+ifeq ($(with_jni_bridge),yes)
+	  echo "usr/lib/jni/libjava-access-bridge-jni.so $(basedir)/jre/lib/ext/libjava-access-bridge-jni.so" \
+	    >> $(d_jre).links
+endif
 
 	: # create links for the config files
 	find $(d_jrehl)/etc/$(jdiralias) -type f ! -name jvm.cfg \
@@ -1284,9 +1304,8 @@ endif
 	done
 
 nodocs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),-N$(p_doc))
-nodemo = $(if $(findstring cacao, $(PKGSOURCE)),-N$(p_demo))
 nojrec = $(if $(filter cacao, $(alternate_vms)),,-N$(p_jrec))
-nojrez = $(if $(filter zero, $(alternate_vms)),,-N$(p_jrez))
+nojrez = $(if $(filter shark zero, $(alternate_vms)),,-N$(p_jrez))
 
 # Build architecture independant packages
 binary-indep: build install

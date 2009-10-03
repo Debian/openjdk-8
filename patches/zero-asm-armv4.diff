@@ -1,0 +1,114 @@
+--- ports/hotspot/src/cpu/zero/vm/cppInterpreter_arm.S	2009-07-13 08:00:23.000000000 +0000
++++ ports/hotspot/src/cpu/zero/vm/cppInterpreter_arm.S	2009-07-13 08:30:13.000000000 +0000
+@@ -3,6 +3,8 @@
+ //#define UNALIGNED_ACCESS
+ //#define B14
+ 
++#define ARMv4
++
+ #define GCC_VERSION (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__)
+ 
+ // ECN: DOH!!! gcc 4.4 has changed the name mangling scheme!!!
+@@ -343,7 +345,48 @@
+ #define FFI_TYPE_SINT64		12
+ #define FFI_TYPE_POINTER	14
+ 
++	.macro	_BLX	reg
++#ifdef ARMv4
++	mov	lr, pc
++	mov	pc, \reg
++#else
++	blx	\reg
++#endif
++	.endm
++#define blx _BLX
++
++	.macro	_BX	reg
++#ifdef ARMv4
++	mov	pc, \reg
++#else
++	bx	\reg
++#endif
++	.endm
++#define bx _BX
++
++	.macro	_BXEQ	reg
++#ifdef ARMv4
++	moveq	pc, \reg
++#else
++	bxeq	\reg
++#endif
++	.endm
++#define bxeq _BXEQ
++
++	.macro	_BXNE	reg
++#ifdef ARMv4
++	movne	pc, \reg
++#else
++	bxne	\reg
++#endif
++	.endm
++#define bxne _BXNE
++
++#ifdef ARMv4
++	.arch armv4
++#else
+ 	.arch armv7-a
++#endif
+ 	.fpu softvfp
+ 	.eabi_attribute 20, 1
+ 	.eabi_attribute 21, 1
+@@ -3236,7 +3279,7 @@
+ 	adrl	ip, dispatch_init_adcon
+ 	rsb	r3, r0, r3
+ 	rsb	r2, r1, r2
+-	ldrd	r0, [ip]
++	ldmia	ip, {r0, r1}
+ 	rsb	r3, r3, sp
+ 	cmp	r2, #4096
+ 	cmpge	r3, #32768
+@@ -3578,7 +3621,7 @@
+ 	adrl	ip, dispatch_init_adcon
+ 	stmfd	sp!, {regset, lr}
+ 	mov	tmp2, r0
+-	ldrd	r0, [ip]
++	ldmia	ip, {r0, r1}
+ 	sub	sp, sp, #220
+ 
+ 	mov	istate, #ISTATE_THREAD
+@@ -3668,7 +3711,7 @@
+ 	adrl	ip, dispatch_init_adcon
+ 	stmfd	sp!, {r3, r4, r5, r7, r9, r10, r11, lr}
+ @---
+-	ldrd	dispatch, [ip]
++	ldmia	ip, {dispatch, r7}
+ 	mov	r11, r0
+ 	ldrh	r1, [r11, #42]
+ 	add	dispatch, dispatch, ip
+@@ -5391,7 +5434,7 @@
+ 	.type	_ZN14CppInterpreter17ignore_safepointsEv, %function
+ _ZN14CppInterpreter17ignore_safepointsEv:
+ 	adrl	ip, dispatch_init_adcon
+-	ldrd	r2, [ip]
++	ldmia	ip, {r2, r3}
+ 	add	r2, r2, ip
+ 	add	ip, r3, r2
+ 	ldr	r2, [ip, #AbstractInterpreter_notice_safepoints-XXX]
+@@ -5415,7 +5458,7 @@
+ 	.type	_ZN14CppInterpreter17notice_safepointsEv, %function
+ _ZN14CppInterpreter17notice_safepointsEv:
+ 	adrl	ip, dispatch_init_adcon
+-	ldrd	r2, [ip]
++	ldmia	ip, {r2, r3}
+ 	add	r2, r2, ip
+ 	add	ip, r3, r2
+ 	ldr	r2, [ip, #AbstractInterpreter_notice_safepoints-XXX]
+@@ -5438,7 +5481,7 @@
+ 
+ bci_init:
+ 	adr	r3, dispatch_init_adcon
+-	ldrd	r0, [r3]
++	ldmia	r3, {r0, r1}
+ 	add	r0, r0, r3
+ 	add	r1, r1, r0
+ 	adr	r2, adcon_init_table

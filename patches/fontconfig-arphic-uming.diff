@@ -20,7 +20,7 @@
 -dialog.plain.japanese-x0208=Kochi Gothic
 -dialog.plain.korean=Baekmuk Dotum
 +dialog.plain.latin-1.motif=LuxiSans-Regular
-+dialog.plain.japanese-x0208=-ipamona-uigothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++dialog.plain.japanese-x0208=-vlgothic-gothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +dialog.plain.korean=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
 +dialog.plain.korean.motif=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -28,7 +28,7 @@
 -dialog.bold.japanese-x0208=Kochi Gothic
 -dialog.bold.korean=Baekmuk Dotum
 +dialog.bold.latin-1.motif=LuxiSans-Bold
-+dialog.bold.japanese-x0208=-ipamona-uigothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++dialog.bold.japanese-x0208=-vlgothic-gothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +dialog.bold.korean=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
 +dialog.bold.korean.motif=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -36,7 +36,7 @@
 -dialog.italic.japanese-x0208=Kochi Gothic
 -dialog.italic.korean=Baekmuk Dotum
 +dialog.italic.latin-1.motif=LuxiSans-Oblique
-+dialog.italic.japanese-x0208=-ipamona-uigothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++dialog.italic.japanese-x0208=-vlgothic-gothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +dialog.italic.korean=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
 +dialog.italic.korean.motif=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -45,7 +45,7 @@
 -dialog.bolditalic.korean=Baekmuk Dotum
 -
 +dialog.bolditalic.latin-1.motif=LuxiSans-BoldOblique
-+dialog.bolditalic.japanese-x0208=-ipamona-uigothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++dialog.bolditalic.japanese-x0208=-vlgothic-gothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +dialog.bolditalic.korean=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
 +dialog.bolditalic.korean.motif=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -53,7 +53,7 @@
 -sansserif.plain.japanese-x0208=Kochi Gothic
 -sansserif.plain.korean=Baekmuk Dotum
 +sansserif.plain.latin-1.motif=LuxiSans-Regular
-+sansserif.plain.japanese-x0208=-ipamona-uigothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++sansserif.plain.japanese-x0208=-vlgothic-gothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +sansserif.plain.korean=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
 +sansserif.plain.korean.motif=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -61,7 +61,7 @@
 -sansserif.bold.japanese-x0208=Kochi Gothic
 -sansserif.bold.korean=Baekmuk Dotum
 +sansserif.bold.latin-1.motif=LuxiSans-Bold
-+sansserif.bold.japanese-x0208=-ipamona-uigothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++sansserif.bold.japanese-x0208=-vlgothic-gothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +sansserif.bold.korean=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
 +sansserif.bold.korean.motif=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -69,7 +69,7 @@
 -sansserif.italic.japanese-x0208=Kochi Gothic
 -sansserif.italic.korean=Baekmuk Dotum
 +sansserif.italic.latin-1.motif=LuxiSans-Oblique
-+sansserif.italic.japanese-x0208=-ipamona-uigothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++sansserif.italic.japanese-x0208=-vlgothic-gothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +sansserif.italic.korean=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
 +sansserif.italic.korean.motif=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -78,7 +78,7 @@
 -sansserif.bolditalic.korean=Baekmuk Dotum
 -
 +sansserif.bolditalic.latin-1.motif=LuxiSans-BoldOblique
-+sansserif.bolditalic.japanese-x0208=-ipamona-uigothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++sansserif.bolditalic.japanese-x0208=-vlgothic-gothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +sansserif.bolditalic.korean=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
 +sansserif.bolditalic.korean.motif=-misc-baekmuk gulim-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -86,7 +86,7 @@
 -serif.plain.japanese-x0208=Kochi Mincho
 -serif.plain.korean=Baekmuk Batang
 +serif.plain.latin-1.motif=LuxiSerif-Regular
-+serif.plain.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++serif.plain.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +serif.plain.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +serif.plain.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -94,7 +94,7 @@
 -serif.bold.japanese-x0208=Kochi Mincho
 -serif.bold.korean=Baekmuk Batang
 +serif.bold.latin-1.motif=LuxiSerif-Bold
-+serif.bold.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++serif.bold.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +serif.bold.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +serif.bold.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -102,7 +102,7 @@
 -serif.italic.japanese-x0208=Kochi Mincho
 -serif.italic.korean=Baekmuk Batang
 +serif.italic.latin-1.motif=LuxiSerif-Oblique
-+serif.italic.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++serif.italic.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +serif.italic.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +serif.italic.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -111,7 +111,7 @@
 -serif.bolditalic.korean=Baekmuk Batang
 -
 +serif.bolditalic.latin-1.motif=LuxiSerif-BoldOblique
-+serif.bolditalic.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++serif.bolditalic.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +serif.bolditalic.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +serif.bolditalic.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -119,7 +119,7 @@
 -monospaced.plain.japanese-x0208=Kochi Gothic
 -monospaced.plain.korean=Baekmuk Dotum
 +monospaced.plain.latin-1.motif=LuxiMono-Regular
-+monospaced.plain.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++monospaced.plain.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +monospaced.plain.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +monospaced.plain.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -127,7 +127,7 @@
 -monospaced.bold.japanese-x0208=Kochi Gothic
 -monospaced.bold.korean=Baekmuk Dotum
 +monospaced.bold.latin-1.motif=LuxiMono-Bold
-+monospaced.bold.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++monospaced.bold.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +monospaced.bold.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +monospaced.bold.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -135,7 +135,7 @@
 -monospaced.italic.japanese-x0208=Kochi Gothic
 -monospaced.italic.korean=Baekmuk Dotum
 +monospaced.italic.latin-1.motif=LuxiMono-Oblique
-+monospaced.italic.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++monospaced.italic.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +monospaced.italic.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +monospaced.italic.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -144,7 +144,7 @@
 -monospaced.bolditalic.korean=Baekmuk Dotum
 -
 +monospaced.bolditalic.latin-1.motif=LuxiMono-BoldOblique
-+monospaced.bolditalic.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++monospaced.bolditalic.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +monospaced.bolditalic.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +monospaced.bolditalic.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -152,7 +152,7 @@
 -dialoginput.plain.japanese-x0208=Kochi Gothic
 -dialoginput.plain.korean=Baekmuk Dotum
 +dialoginput.plain.latin-1.motif=LuxiMono-Regular
-+dialoginput.plain.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++dialoginput.plain.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +dialoginput.plain.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +dialoginput.plain.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -160,7 +160,7 @@
 -dialoginput.bold.japanese-x0208=Kochi Gothic
 -dialoginput.bold.korean=Baekmuk Dotum
 +dialoginput.bold.latin-1.motif=LuxiMono-Bold
-+dialoginput.bold.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++dialoginput.bold.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +dialoginput.bold.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +dialoginput.bold.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -168,7 +168,7 @@
 -dialoginput.italic.japanese-x0208=Kochi Gothic
 -dialoginput.italic.korean=Baekmuk Dotum
 +dialoginput.italic.latin-1.motif=LuxiMono-Oblique
-+dialoginput.italic.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++dialoginput.italic.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +dialoginput.italic.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +dialoginput.italic.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -179,7 +179,7 @@
 -allfonts.chinese-big5=AR PL ZenKai Uni
 -allfonts.chinese-gb18030=AR PL ZenKai Uni
 +dialoginput.bolditalic.latin-1.motif=LuxiMono-BoldOblique
-+dialoginput.bolditalic.japanese-x0208=-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
++dialoginput.bolditalic.japanese-x0208=-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0
 +dialoginput.bolditalic.korean=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
 +dialoginput.bolditalic.korean.motif=-misc-baekmuk batang-medium-r-normal--*-%d-*-*-c-*-*-*
  
@@ -221,8 +221,8 @@
 +filename.-misc-ar_pl_shanheisun_uni-medium-r-normal--*-*-*-*-p-*-iso10646-1=/usr/share/fonts/truetype/arphic/uming.ttf
 +filename.-misc-baekmuk_batang-medium-r-normal--*-%d-*-*-c-*-*-*=/usr/share/fonts/truetype/baekmuk/batang.ttf
 +filename.-misc-baekmuk_gulim-medium-r-normal--*-%d-*-*-c-*-*-*=/usr/share/fonts/truetype/baekmuk/gulim.ttf
-+filename.-ipamona-uigothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0=/usr/share/fonts/truetype/ipamona/ipagui-mona.ttf
-+filename.-ipamona-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0=/usr/share/fonts/truetype/ipamona/ipamp-mona.ttf
++filename.-vlgothic-gothic-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0=/usr/share/fonts/truetype/vlgothic/VL-Gothic-Regular.ttf
++filename.-sazanami-mincho-medium-r-normal--*-%d-*-*-c-*-jisx0208.1983-0=/usr/share/fonts/truetype/sazanami/sazanami-mincho.ttf
 +
 +filename.LuxiSans-Regular=/usr/share/fonts/truetype/ttf-xfree86-nonfree/luxisr.ttf
 +filename.LuxiSans-Bold=/usr/share/fonts/truetype/ttf-xfree86-nonfree/luxisb.ttf
@@ -240,5 +240,5 @@
 +# AWT X11 font paths
 +awtfontpath.latin-1=/usr/share/fonts/X11/Type1
 +awtfontpath.chinese-gb18030=/usr/share/fonts/truetype/arphic
-+awtfontpath.japanese-x0208=/usr/share/fonts/truetype/ipamona/
++awtfontpath.japanese-x0208=/usr/share/fonts/truetype/vlgothic
 +awtfontpath.korean=/usr/share/fonts/truetype/baekmuk

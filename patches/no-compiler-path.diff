@@ -1,5 +1,5 @@
---- openjdk/corba/make/common/shared/Compiler-gcc.gmk~	2008-05-14 18:10:07.782578279 +0200
-+++ openjdk/corba/make/common/shared/Compiler-gcc.gmk	2008-05-14 18:15:42.217623155 +0200
+--- openjdk/corba/make/common/shared/Compiler-gcc.gmk~	2009-08-06 13:06:18.000000000 +0200
++++ openjdk/corba/make/common/shared/Compiler-gcc.gmk	2009-08-06 13:08:25.000000000 +0200
 @@ -58,17 +58,17 @@
  ifeq ($(PLATFORM), linux)
  
@@ -20,11 +20,11 @@
 -    CXX            = $(COMPILER_PATH)g++$(GCC_SUFFIX)
 +    CXX            = g++$(GCC_SUFFIX)
    endif
-   ifdef ICEDTEA_ZERO_BUILD
+   ifeq ($(ZERO_BUILD), true)
      # zero
---- openjdk/jdk/make/common/shared/Compiler-gcc.gmk~	2008-05-14 18:17:30.669259124 +0200
-+++ openjdk/jdk/make/common/shared/Compiler-gcc.gmk	2008-05-14 18:58:41.196526465 +0200
-@@ -58,17 +58,17 @@
+--- openjdk/jdk/make/common/shared/Compiler-gcc.gmk~	2009-08-06 13:06:23.000000000 +0200
++++ openjdk/jdk/make/common/shared/Compiler-gcc.gmk	2009-08-06 13:09:47.000000000 +0200
+@@ -54,17 +54,17 @@
  ifeq ($(PLATFORM), linux)
  
    # Settings specific to Linux
@@ -44,5 +44,5 @@
 -    CXX            = $(COMPILER_PATH)g++$(GCC_SUFFIX)
 +    CXX            = g++$(GCC_SUFFIX)
    endif
-   ifdef ICEDTEA_ZERO_BUILD
+   ifdef ZERO_BUILD
      # zero

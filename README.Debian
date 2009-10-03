@@ -18,6 +18,10 @@ or for the java tools, use
 
 	<tool name> -J-cacao|-J-zero.
 
+The zero build on the ix86 architectures is built with shark (just in time
+compiler); to use the zero build without shark support, use the `-Xint'
+option to operate in interpreted-only mode.
+
 To change the default permanently, edit /etc/java-6-openjdk/jvm.cfg.
 
 The CACAO VM can be found in the icedtea-6-jre-cacao package, the Zero/Shark
