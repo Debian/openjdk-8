@@ -2,9 +2,9 @@ Source: openjdk-7
 Section: java
 Priority: extra
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
-Uploaders: Michael Koch <konqueror@gmx.de>, Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
-Build-Depends: debhelper (>= 5), autotools-dev, lzma, m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, automake, autoconf, ant, libtool, cacao-source (>= 0.99.4-1), g++-4.4 (>= 4.4.1),  openjdk-6-jdk (>= 6b14) [alpha armel amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sparc s390], libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, libfreetype6-dev, libxalan2-java, rhino, liblcms1-dev, libxinerama-dev, libxpp3-java, libjibx-java, libffi-dev, llvm-dev (>= 2.5) [amd64 i386 lpia], libjpeg62-dev, libpng12-dev, libgif-dev, zlib1g-dev, xulrunner-dev (>= 1.9.1), fastjar (>= 2:0.96-0ubuntu2), libpulse-dev (>= 0.9.12), pulseaudio (>= 0.9.12), mauve, xvfb, autoconf, automake, xauth, xfonts-base
-Standards-Version: 3.8.2
+Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
+Build-Depends: debhelper (>= 5), autotools-dev, lzma, m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, automake, autoconf, ant, libtool, cacao-source (>= 0.99.4-1), g++-4.4 (>= 4.4.1),  ecj-gcj [hppa ia64 powerpc m68k mips mipsel sparc s390], gcj-jdk [hppa ia64 powerpc m68k mips mipsel sparc s390], openjdk-6-jdk (>= 6b14) [alpha amd64 armel i386 lpia], libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, libfreetype6-dev, libgtk2.0-dev, libxalan2-java, rhino, liblcms1-dev, libxinerama-dev, libffi-dev, llvm-dev (>= 2.5) [amd64 i386 lpia], libjpeg62-dev, libpng12-dev, libgif-dev, zlib1g-dev, xulrunner-dev (>= 1.9.1), fastjar (>= 2:0.96-0ubuntu2), libpulse-dev (>= 0.9.12), libnss3-dev (>= 3.12.3),  mauve, xvfb, autoconf, automake, xauth, xfonts-base
+Standards-Version: 3.8.3
 Homepage: http://openjdk.java.net/
 Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~openjdk/openjdk/openjdk7
 Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk7
@@ -42,8 +42,8 @@ Package: openjdk-7-jre
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (>= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
-Recommends: ${dlopenjre:Recommends}, ${pkg:pulseaudio}
-Suggests: icedtea6-plugin
+Recommends: ${dlopenjre:Recommends}
+Suggests: icedtea6-plugin, ${pkg:pulseaudio}
 Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4)
 Replaces: openjdk-6-jre-headless (<< 6b16~pre3)
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
@@ -119,13 +119,14 @@ Description: Java runtime based on OpenJDK (debugging symbols)
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
 
-Package: icedtea7-plugin
+Package: icedtea-7-plugin
 Section: web
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
-Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4)
-Replaces: icedtea-gcjwebplugin, openjdk-7-jre (<< 6b12)
+Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4), icedtea7-plugin
+Replaces: icedtea-gcjwebplugin, openjdk-7-jre (<< 6b12), icedtea7-plugin
+Provides: icedtea7-plugin
 Xb-Npp-Description: IcedTea7 Java Web Browser Plugin (execution of applets on web pages)
 Xb-Npp-Applications: ec8030f7-c20a-464f-9b0e-13a3a9e97384, 92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a, aa5ca914-c309-495d-91cf-3141bbb04115
 Xb-Npp-Name: The IcedTea Web Browser Plugin
@@ -137,14 +138,15 @@ Description: web browser plugin based on OpenJDK and IcedTea to execute Java app
  .
  Icedtea is a temporary fork of OpenJDK
 
-Package: openjdk-7-jre-zero
-Architecture: amd64 i386 lpia
+Package: icedtea-7-jre-cacao
+Architecture: alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
-Description: Alternative JVM for OpenJDK, using Zero/Shark
- The package provides an alternative runtime using the Zero VM and the 
- Shark Just In Time Compiler (JIT).  Built on architectures in addition
- to the Hotspot VM as a debugging aid for those architectures which don't
- have a Hotspot VM.
+Provides: icedtea6-jre-cacao
+Description: Alternative JVM for OpenJDK, using Cacao
+ The package provides an alternative runtime using the Cacao VM and the 
+ Cacao Just In Time Compiler (JIT).  This is a somewhat faster alternative
+ than the Zero port on architectures like alpha, armel, m68k, mips, mipsel,
+ powerpc and s390.
  .
- The VM is started with the option `-zero'. See the README.Debian for details.
+ The VM is started with the option `-cacao'. See the README.Debian for details.

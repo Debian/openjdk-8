@@ -1,3 +1,11 @@
+openjdk-7 (7b72-0ubuntu1~ppa1) karmic; urgency=low
+
+  * Build openjdk-7 snapshot (7b72).
+  * Merge debian packaging r371:391 from openjdk-6.
+  * Disable the zero build for now.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 03 Oct 2009 16:35:27 +0200
+
 openjdk-7 (7b66-0ubuntu1~ppa1) karmic; urgency=low
 
   * Build openjdk-7 snapshot (7b66).
@@ -34,6 +42,89 @@ openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
   * Update packaging for openjdk-7.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 14:27:03 +0100
+
+openjdk-6 (6b16-1.6.1-1ubuntu2) karmic; urgency=low
+
+  * Support PKCS11 cryptography via NSS, now allowing import of all
+    certificates from ca-certificates.
+  * Remove Michael Koch from uploaders, request by himself.
+  * Add the doc dir symlink for openjdk-6-jre-zero when the package
+    is built with shark support.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 28 Sep 2009 21:55:08 +0200
+
+openjdk-6 (6b16-1.6.1-1ubuntu1) karmic; urgency=low
+
+  * Fix dependency on the java bridge packages.
+  * debian/rules: Conditionalize stuff so that the recent release
+    is never mentioned.
+  * Remove obsolete patches in debian/patches.
+  * Rebuild on armel to fix up libffi for the soft float abi.
+  * For jaunty builds, fix IcedTeaPlugin failure to start with xulrunner 1.9.1
+    (LP: #359407).
+    - debian/patches/icedtea-plugin-use-runtime-nsIProcess-IID.diff: Add.
+    - debian/rules: Apply it for jaunty builds.
+  * Use pulseaudio as default serviceprovider for
+    javax.sound.midi.MidiSystem and javax.sound.sampled.AudioSystem.
+    LP: #407299.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 26 Sep 2009 16:01:48 +0200
+
+openjdk-6 (6b16-1.6.1-1) unstable; urgency=low
+
+  * Upload to Debian unstable.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 15 Sep 2009 02:17:03 +0200
+
+openjdk-6 (6b16-1.6.1-0ubuntu1) karmic; urgency=low
+
+  * Update IcedTea6 to the 1.6.1 release.
+  * Work around GCC PR target/41327, build the JDK on s390 with -O2.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 10 Sep 2009 01:55:08 +0200
+
+openjdk-6 (6b16-1.6-1) unstable; urgency=low
+
+  * Update IcedTea6 to the 1.6 release.
+  * Fix GCC build dependencies.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 09 Sep 2009 22:18:38 +0200
+
+openjdk-6 (6b16-1.6~pre2-1) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 28 Aug 2009 19:04:31 +0200
+
+openjdk-6 (6b16-1.6~pre2-0ubuntu1) karmic; urgency=low
+
+  * Update IcedTea from the 1.6 release branch:
+    - Fix buffer overflow in debugger's socket handler (Kees Cook).
+      https://bugs.openjdk.java.net/show_bug.cgi?id=100103. LP: #409736.
+    - plugin fixes.
+  * Move the pulseaudio recommendation to a suggestion, don't build-depend
+    on pulseaudio. Closes: #539394. LP: #361408.
+  * Build for armv6 (on armel).
+
+  [ Kees Cook ]
+  * debian/rules: Re-enable fortification and stack protector
+    (LP: #330713).
+  * Adding stack markings to the x86 assembly for not using executable
+    stack. LP: #419018.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 28 Aug 2009 18:51:34 +0200
+
+openjdk-6 (6b16-1.6~pre1-0ubuntu1) karmic; urgency=low
+
+  * Test build (icedtea6-1.6 release branch).
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 21 Aug 2009 19:44:42 +0200
+
+openjdk-6 (6b16~pre5-0ubuntu2) karmic; urgency=low
+
+  * Add explicit build dependency on libgtk2.0-dev.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 06 Aug 2009 11:39:14 +0200
 
 openjdk-6 (6b16~pre5-0ubuntu1) karmic; urgency=low
 
@@ -508,8 +599,6 @@ openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
   * Update packaging for openjdk-7.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 14:27:03 +0100
-
- -- Matthias Klose <doko@ubuntu.com>  Wed, 03 Dec 2008 18:43:23 +0100
 
 openjdk-6 (6b13~pre2-0ubuntu1) jaunty; urgency=low
 

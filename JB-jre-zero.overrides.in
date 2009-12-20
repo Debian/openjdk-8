@@ -1,0 +1,2 @@
+# the doc directory and the symlink are in @basename@-jre-headless
+@basename@-jre-zero binary: no-copyright-file

@@ -1,0 +1,25 @@
+--- openjdk/jdk/src/share/lib/sound.properties~	2009-09-26 16:30:26.000000000 +0200
++++ openjdk/jdk/src/share/lib/sound.properties	2009-09-26 16:36:26.000000000 +0200
+@@ -38,12 +38,14 @@
+ # javax.sound.midi.Receiver=com.sun.media.sound.MidiProvider#SunMIDI1
+ #
+ 
+-# javax.sound.sampled.Clip=org.classpath.icedtea.pulseaudio.PulseAudioMixerProvider
+-# javax.sound.sampled.Port=org.classpath.icedtea.pulseaudio.PulseAudioMixerProvider
+-# javax.sound.sampled.SourceDataLine=org.classpath.icedtea.pulseaudio.PulseAudioMixerProvider
+-# javax.sound.sampled.TargetDataLine=org.classpath.icedtea.pulseaudio.PulseAudioMixerProvider
++# OpenJDK on Ubuntu is configured to use PulseAudio by default
++javax.sound.sampled.Clip=org.classpath.icedtea.pulseaudio.PulseAudioMixerProvider
++javax.sound.sampled.Port=org.classpath.icedtea.pulseaudio.PulseAudioMixerProvider
++javax.sound.sampled.SourceDataLine=org.classpath.icedtea.pulseaudio.PulseAudioMixerProvider
++javax.sound.sampled.TargetDataLine=org.classpath.icedtea.pulseaudio.PulseAudioMixerProvider
+ 
+-javax.sound.sampled.Clip=com.sun.media.sound.DirectAudioDeviceProvider
+-javax.sound.sampled.Port=com.sun.media.sound.PortMixerProvider
+-javax.sound.sampled.SourceDataLine=com.sun.media.sound.DirectAudioDeviceProvider
+-javax.sound.sampled.TargetDataLine=com.sun.media.sound.DirectAudioDeviceProvider
++# PulseAudio not running? Please give feedback on LP: #407299.
++#javax.sound.sampled.Clip=com.sun.media.sound.DirectAudioDeviceProvider
++#javax.sound.sampled.Port=com.sun.media.sound.PortMixerProvider
++#javax.sound.sampled.SourceDataLine=com.sun.media.sound.DirectAudioDeviceProvider
++#javax.sound.sampled.TargetDataLine=com.sun.media.sound.DirectAudioDeviceProvider

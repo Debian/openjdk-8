@@ -25,8 +25,14 @@ CHANGELOG_VARS := $(shell dpkg-parsechangelog | sed -n 's/ /_/g;/^[^_]/s/^\([^:]
 PKGSOURCE := $(call vafilt,$(CHANGELOG_VARS),Source)
 PKGVERSION := $(call vafilt,$(CHANGELOG_VARS),Version)
 
+distribution := $(shell lsb_release --id --short)
+distrel := $(shell lsb_release --codename --short)
+
 hotspot_archs	= amd64 i386 lpia sparc
-shark_archs	= amd64 i386 lpia
+# requires llvm; llvm in jaunty is recent enough, but in universe
+ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
+  shark_archs	= amd64 i386 lpia
+endif
 no_bootstrap_archs = alpha armel
 
 VENDOR		= openjdk
@@ -78,10 +84,7 @@ endif
 with_plugin_pkg = yes
 plugin_name = IcedTeaPlugin.so
 
-distribution := $(shell lsb_release --id --short)
-distrel := $(shell lsb_release --codename --short)
-
-with_wgy_zenhai = $(if $(filter $(distrel),hardy intrepid jaunty karmic squeeze sid),yes)
+with_wgy_zenhai = $(if $(filter $(distrel),lenny gutsy feisty edgy dapper),,yes)
 
 arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
 archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc sparc=sparc s390=s390 ia64=ia64
@@ -99,13 +102,11 @@ stage1_gcj_archs = hppa ia64 powerpc m68k mips mipsel sparc s390
 stage1_openjdk_archs = alpha amd64 armel i386 lpia
 stage1_cacao_archs =
 
-# FIXME: broken with ecj-3.5
-stage1_gcj_archs =
-stage1_openjdk_archs = alpha armel amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sparc s390
-
 # FIXME cacao doesn't build with 7
 cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
 altzero_archs = $(filter-out sparc, $(hotspot_archs))
+# FIXME: currently doesn't work
+altzero_archs =
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
   alternate_vms += cacao
@@ -156,40 +157,35 @@ else
   export GCJ_SUFFIX = -4.4
 endif
 
-ifneq (,$(filter $(distrel),jaunty karmic unstable experimental sid))
+ifeq ($(distribution),Ubuntu)
+  OPT_CFLAGS/cppInterpreter_arm.o = $(if $(filter $(distrel),jaunty),-march=armv5,-march=armv6) -mtune=cortex-a8 -O2 -falign-functions=64 -falign-loops=8 -g0
+else
+  OPT_CFLAGS/cppInterpreter_arm.o = -O2 -falign-functions=32 -falign-loops=8 -g0
+endif
+export OPT_CFLAGS/cppInterpreter_arm.o
+
+ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
   with_pulse = yes
 endif
 
-ifneq (,$(filter $(distrel),karmic sid squeeze))
+ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
   with_jni_bridge = yes
 endif
 
-#ifneq (,$(filter $(distrel),karmic unstable experimental sid))
+ifeq (,$(filter $(distrel),dapper))
+  with_nss = yes
+endif
+
+#ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
 #  with_systemtap = yes
 #endif
 
 with_hotspot = new
-ifneq (,$(filter $(distrel),gutsy feisty edgy dapper hardy intrepid))
-  with_hotspot = original
-endif
-
-ifeq ($(with_hotspot),original)
-#	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector-original.diff) \
-
-  DISTRIBUTION_PATCHES = \
-	debian/patches/ld-symbolic-functions-original.diff \
-	debian/patches/set-exec-name-original.diff
-else
-# FIXME: doesn't seem to be enough, the gcc-*-no-stack-protector patches below are needed.
-#	$(if $(filter $(distribution),Ubuntu),debian/patches/gcc-no-stack-protector.diff) \
-
-  DISTRIBUTION_PATCHES = \
-	debian/patches/ld-symbolic-functions.diff \
-	debian/patches/set-exec-name.diff \
-	debian/patches/hotspot-warn-no-errformat.diff
-endif
 
 DISTRIBUTION_PATCHES += \
+	debian/patches/ld-symbolic-functions.diff \
+	debian/patches/set-exec-name.diff \
+	debian/patches/hotspot-warn-no-errformat.diff \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \
 	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -201,6 +197,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/java-access-bridge-security.patch \
 	debian/patches/accessible-toolkit.patch \
 	debian/patches/default-libpath.diff \
+	debian/patches/icedtea-gcc-stack-markings.patch \
 
 #	debian/patches/gcc-mtune-generic.diff \
 
@@ -208,26 +205,23 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   DISTRIBUTION_PATCHES += \
 	$(if $(filter $(DEB_HOST_ARCH), amd64), debian/patches/gcc-jdk-opt-O2.diff) \
 	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff)
+else ifeq ($(DEB_HOST_ARCH),s390)
+  # GCC PR target/41327
+  DISTRIBUTION_PATCHES += debian/patches/gcc-jdk-opt-O2.diff
 endif
 
 ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += \
-	debian/patches/openjdk-ubuntu-branding.patch \
-	debian/patches/gcc-jdk-no-stack-protector.diff
-  ifeq ($(with_hotspot),original)
-    DISTRIBUTION_PATCHES += \
-	debian/patches/gcc-hotspot-no-stack-protector-original.diff
-  else
-    DISTRIBUTION_PATCHES += \
-	debian/patches/gcc-hotspot-no-stack-protector.diff
-  endif
+	debian/patches/openjdk-ubuntu-branding.patch
 endif
 
-# FIXME zero-opt
-#ifneq (,$(filter $(DEB_HOST_ARCH),armel))
-#  DISTRIBUTION_PATCHES += \
-#	debian/patches/zero-notice-safepoints.diff
-#endif
+ifeq ($(with_pulse),yes)
+  # only in karmic and later the default
+  ifeq (,$(filter $(distrel), lenny squeeze sid jaunty intrepid hardy gutsy feisty edgy dapper))
+    DISTRIBUTION_PATCHES += \
+	debian/patches/jdk-pulseaudio-default.diff
+  endif
+endif
 
 export DISTRIBUTION_PATCHES
 
@@ -281,8 +275,6 @@ CONFIGURE_ARGS += \
 	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
 	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz
 
-#CONFIGURE_ARGS += --disable-nimbus --disable-nimbus-generation
-
 ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
   CONFIGURE_ARGS += \
 	--with-cacao-src-zip=$(firstword $(wildcard $(CURDIR)/cacao-*.tar.* /usr/src/cacao-*.tar.*))
@@ -331,6 +323,14 @@ ifeq ($(with_pulse),yes)
   CONFIGURE_ARGS += --enable-pulse-java
 endif
 
+ifeq ($(with_nss),yes)
+  CONFIGURE_ARGS += --enable-nss
+endif
+
+ifeq ($(with_systemtap),yes)
+  CONFIGURE_ARGS += --enable-systemtap --with-abs-install-dir=/$(basedir)
+endif
+
 ifeq ($(with_systemtap),yes)
   CONFIGURE_ARGS += --enable-systemtap --with-abs-install-dir=/$(basedir)
 endif
@@ -366,7 +366,7 @@ bd_bootstrap =
 ifneq (,$(stage1_gcj_archs))
   bd_bootstrap += \
 	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
-  ifneq (,$(filter $(distrel),karmic unstable experimental))
+  ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
     bd_bootstrap += \
 	gcj-jdk [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
   else
@@ -386,7 +386,7 @@ endif
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   bd_gcc = g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
-else ifneq (,$(filter $(distrel),lenny intrepid jaunty squeeze sid))
+else ifneq (,$(filter $(distrel),lenny intrepid jaunty))
   bd_gcc = g++-4.3,
 else
   bd_gcc = g++-4.4 (>= 4.4.1),
@@ -396,10 +396,8 @@ bd_syslibs = \
 bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2-dev,libcups2-dev), \
-	libasound2-dev, libfreetype6-dev, \
+	libasound2-dev, libfreetype6-dev, libgtk2.0-dev, \
 	libxalan2-java, rhino, liblcms1-dev, libxinerama-dev,
-bd_openjdk += \
-	libxpp3-java, libjibx-java,
 
 pkg_ffidev = $(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev)
 
@@ -413,31 +411,32 @@ ifneq (,$(shark_archs))
   bd_shark = llvm-dev (>= 2.5) [$(foreach a,$(shark_archs),$(a))],
 endif
 
-bd_cacao = libtool, cacao-source (>= 0.99.4-1),
+bd_cacao = libtool, cacao-source (>= 0.99.4~),
 
 ifeq ($(distribution),Debian)
   bd_plugin = xulrunner-dev (>= 1.9.0),
 else
-  ifneq (,$(filter $(distrel),karmic))
-    bd_plugin = xulrunner-dev (>= 1.9.1),
+  ifneq (,$(filter $(distrel),gutsy feisty edgy dapper))
+    bd_plugin = firefox-dev,
   else ifneq (,$(filter $(distrel),hardy intrepid jaunty))
     bd_plugin = xulrunner-1.9-dev,
   else
-    bd_plugin = firefox-dev,
+    bd_plugin = xulrunner-dev (>= 1.9.1),
   endif
 endif
 bd_netx = fastjar (>= 2:0.96-0ubuntu2),
-ifneq (,$(filter $(distrel),lenny sid experimental))
+ifneq (,$(filter $(distrel),lenny))
   bd_netx = fastjar (>= 2:0.95-4),
-endif
-ifneq (,$(filter $(distrel),hardy))
+else ifneq (,$(filter $(distrel),hardy))
   bd_netx = fastjar (>= 2:0.95-1ubuntu2),
 endif
 bd_mauve = mauve, xvfb, autoconf, automake, xauth, xfonts-base
 bd_compress = $(pkg_compress),
-pkg_pulseaudio = pulseaudio (>= 0.9.12)
 ifeq ($(with_pulse),yes)
-  bd_pulsejava = libpulse-dev (>= 0.9.12), $(pkg_pulseaudio),
+  bd_pulsejava = libpulse-dev (>= 0.9.12),
+endif
+ifeq ($(with_nss),yes)
+  bd_nss = libnss3-dev (>= 3.12.3),
 endif
 ifeq ($(with_systemtap),yes)
   bd_systemtap = systemtap-sdt-dev,
@@ -446,6 +445,9 @@ endif
 dlopen_hl_depends = \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2,libcups2), \
 	liblcms1, libjpeg62
+ifeq ($(with_nss),yes)
+  dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
+endif
 dlopen_hl_recommends = \
 dlopen_jre_depends = \
 	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
@@ -453,16 +455,17 @@ dlopen_jre_depends = \
 dlopen_jre_recommends =
 
 ifeq ($(distribution),Ubuntu)
-  ifneq (,$(filter $(distrel),karmic))
-    browser_plugin_dirs = mozilla
-  else
+  ifneq (,$(filter $(distrel),jaunty intrepid hardy gutsy feisty edgy dapper))
+    # FIXME: check for every release ...
     browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
+  else
+    browser_plugin_dirs = mozilla
   endif
 else
   browser_plugin_dirs = mozilla
 endif
 
-ifneq (,$(filter $(distrel),etch dapper feisty))
+ifneq (,$(filter $(distrel),etch dapper edgy feisty))
   core_fonts = ttf-dejavu
 else
   core_fonts = ttf-dejavu-core
@@ -471,7 +474,7 @@ cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
 cjk_fonts += ttf-kochi-gothic | ttf-sazanami-gothic,
 cjk_fonts += ttf-kochi-mincho | ttf-sazanami-mincho,
 cjk_fonts += $(if $(with_wgy_zenhai),ttf-wqy-zenhei,ttf-arphic-uming),
-ifneq (,$(filter $(distrel),lenny sid))
+ifneq (,$(filter $(distrel),lenny squeeze sid experimental))
   cjk_fonts += ttf-indic-fonts,
 else
   cjk_fonts += ttf-indic-fonts-core, ttf-telugu-fonts, ttf-oriya-fonts,
@@ -488,7 +491,7 @@ p_demo	= $(basename)-demo
 p_src	= $(basename)-source
 p_doc	= $(basename)-doc
 p_dbg	= $(basename)-dbg
-p_plug = icedtea7-plugin
+p_plug = icedtea-7-plugin
 
 d	= debian/tmp
 d_jre	= debian/$(p_jre)
@@ -525,9 +528,9 @@ ifneq (,$(filter-out $(hotspot_archs), $(cacao_archs)))
 endif
 
 ifeq ($(with_jni_bridge),yes)
-  control_vars += '-Vdep:bridge=libaccess-bridge-java'
-else
   control_vars += '-Vdep:bridge=libaccess-bridge-java-jni'
+else
+  control_vars += '-Vdep:bridge=libaccess-bridge-java'
 endif
 
 debian/control: debian/control.in debian/rules
@@ -545,6 +548,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_compress@/$(pkg_compress)/g' \
 	      -e 's/@bd_cacao@/$(bd_cacao)/g' \
 	      -e 's/@bd_pulsejava@/$(bd_pulsejava)/g' \
+	      -e 's/@bd_nss@/$(bd_nss)/g' \
 	      -e 's/@bd_systemtap@/$(bd_systemtap)/g' \
 	      -e 's/@bd_shark@/$(bd_shark)/g' \
 	      -e 's/@core_fonts@/$(core_fonts)/g' \
@@ -625,11 +629,6 @@ stamps/icedtea-configure:
 	) > bin/uname
 	chmod +x bin/uname
 
-# FIXME zero-opt
-#	patch --verbose -p0 < debian/patches/zero-asm-port.diff
-#	patch --verbose -p0 < debian/patches/zero-asm-newfiles.diff
-#	patch --verbose -p0 < debian/patches/zero-asm-armv4.diff
-
 	mkdir -p stamps
 	mkdir -p build
 	chmod +x configure
@@ -697,7 +696,9 @@ endif
 build_stamps = stamps/build
 build_stamps +=  stamps/mauve-check-default stamps/jtreg-check-default
 #build_stamps += $(if $(filter cacao, $(alternate_vms)),stamps/mauve-check-cacao stamps/jtreg-check-cacao)
-build_stamps += $(if $(filter zero, $(alternate_vms)),stamps/mauve-check-zero stamps/jtreg-check-zero)
+ifeq (,$(filter $(distrel),lenny hardy gutsy feisty edgy dapper))
+  build_stamps += $(if $(filter zero, $(alternate_vms)),stamps/mauve-check-zero stamps/jtreg-check-zero)
+endif
 
 build: $(build_stamps)
 	if [ -f buildwatch.pid ]; then \
@@ -888,17 +889,6 @@ clean: debian-clean
 	rm -f jtreg_output* xvfb-run.log
 	rm -f buildwatch.pid
 
-# FIXME zero-opt
-#	if [ -f ports/hotspot/src/cpu/zero/vm/cppInterpreter_arm.S ]; then \
-#	  patch --verbose -p0 -R < debian/patches/zero-asm-armv4.diff; \
-#	  patch --verbose -p0 -R < debian/patches/zero-asm-newfiles.diff; \
-#	  patch --verbose -p0 -R < debian/patches/zero-asm-port.diff; \
-#	  rm -f ports/hotspot/src/cpu/zero/vm/cppInterpreter_asm.S; \
-#	  rm -f ports/hotspot/src/cpu/zero/vm/bytecodes.s; \
-#	  rm -f ports/hotspot/src/cpu/zero/vm/bc.def; \
-#	  rm -f ports/hotspot/src/cpu/zero/vm/mkbc.c; \
-#	fi
-
 	dh_clean
 
 debian-clean:
@@ -913,7 +903,7 @@ debian-clean:
 	  case "$$f2" in debian/control) continue; esac; \
 	  rm -f $$f2; \
 	done
-	rm -f debian/*.install debian/*.links
+	rm -f debian/*.install debian/*.links debian/*.debhelper.log
 
 install: packaging-files
 	dh_testdir
@@ -1010,7 +1000,9 @@ endif
 	: # remove empty directories
 	rmdir $(d)/$(basedir)/jre/lib/management
 	rmdir $(d)/$(basedir)/jre/lib/applet
+ifneq ($(with_nss),yes)
 	rmdir $(d)/$(basedir)/jre/lib/security
+endif
 
 	: # TODO: why do we provide a custom font.properties.ja?
 	: # cp -p debian/font.properties.ja $(d_jbin)/etc/$(jdiralias)/.
@@ -1030,6 +1022,10 @@ endif
 	  echo '$(basedir)/man/ja'; \
 	  echo '$(basedir)/bin/java-rmi.cgi'; \
 	) > debian/$(p_jrehl).install
+ifeq ($(with_nss),yes)
+	echo '$(basedir)/jre/lib/security/nss.cfg' \
+		>> debian/$(p_jrehl).install
+endif
 	$(RM) debian/$(p_jre).install
 
 	cd $(CURDIR)/$(d); \
@@ -1066,7 +1062,7 @@ endif
 	  echo '$(basedir)/jre/THIRD_PARTY_README'; \
 	  cd $(d); \
 	  for i in $(basedir)/jre/lib/*; do \
-	    case "$$i" in */$(archdir)|*/jexec|*/rt.jar) continue; esac; \
+	    case "$$i" in */$(archdir)|*/jexec|*/rt.jar|*/security) continue; esac; \
 	    echo $$i; \
 	  done; \
 	) > debian/$(p_lib).install
@@ -1193,7 +1189,7 @@ endif
 	  echo usr/share/doc/$(p_jre) $(basedir)/docs; \
 	) > $(d_jrehl).links
 
-ifneq (,$(filter zero, $(alternate_vms)))
+ifneq (,$(filter shark zero, $(alternate_vms)))
 	: # create docdir symlinks for $(p_jrez)
 	( \
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jrez); \
