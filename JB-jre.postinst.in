@@ -13,6 +13,11 @@ jre_tools='@jre_tools@'
 
 case "$1" in
 configure)
+    if [ -d /usr/share/doc/@basename@-jre ] && [ ! -h /usr/share/doc/@basename@-jre ]; then
+	rm -rf /usr/share/doc/@basename@-jre
+	ln -sf @basename@-jre-headless /usr/share/doc/@basename@-jre;
+    fi
+
     for i in $jre_tools; do
 	unset slave1 slave2 || true
         if [ -e $mandir/man1/$i.$srcext ]; then

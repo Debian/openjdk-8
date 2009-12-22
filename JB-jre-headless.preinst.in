@@ -1,0 +1,9 @@
+#! /bin/sh
+
+set -e
+
+if [ -h /usr/share/doc/@basename@-jre-headless ]; then
+	rm -f /usr/share/doc/@basename@-jre-headless
+fi
+
+#DEBHELPER#

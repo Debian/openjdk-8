@@ -97,25 +97,30 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 
 #stage1_openjdk_archs = alpha armel ia64 powerpc m68k mips mipsel sparc s390
-#stage1_gcj_archs = amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sparc s390
-stage1_gcj_archs = hppa ia64 powerpc m68k mips mipsel sparc s390
+stage1_gcj_archs = amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sparc s390
+#stage1_gcj_archs = amd64 hppa ia64 lpia powerpc m68k mips mipsel sparc s390
 stage1_openjdk_archs = alpha amd64 armel i386 lpia
 stage1_cacao_archs =
 
-# FIXME cacao doesn't build with 7
+# FIXME cacao doesn't build with 7, when not using gcj for stage1
 cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
-altzero_archs = $(filter-out sparc, $(hotspot_archs))
-# FIXME: currently doesn't work
-altzero_archs =
+cacao_archs = alpha amd64 i386 lpia powerpc m68k mips mipsel s390
+# requires patched llvm-2.6
+ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
+  altshark_archs = armel powerpc
+endif
+altzero_archs = $(filter-out sparc, $(hotspot_archs)) $(altshark_archs)
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
   alternate_vms += cacao
 endif
 ifneq (,$(filter $(DEB_HOST_ARCH), $(altzero_archs)))
-  ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
+  ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs) $(altshark_archs)))
     alternate_vms += shark
+    zero_dir = shark
   else
     alternate_vms += zero
+    zero_dir = zero
   endif
 endif
 
@@ -132,12 +137,12 @@ else
   $(error unknown bootstrap method for architecture $(DEB_HOST_ARCH))
 endif
 
-OPENJDK_VERSION = b59
+OPENJDK_VERSION = b77
 OPENJDK_SRC_ZIP = openjdk-7-ea-src-$(OPENJDK_VERSION)-20_nov_2008-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
 req_openjdk_bd_ver = 6b14
-req_openjdk_ver = 7b59
+req_openjdk_ver = 7b77
 
 unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
@@ -196,8 +201,14 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/nonreparenting-wm.diff \
 	debian/patches/java-access-bridge-security.patch \
 	debian/patches/accessible-toolkit.patch \
-	debian/patches/default-libpath.diff \
-	debian/patches/icedtea-gcc-stack-markings.patch \
+	debian/patches/hotspot-include-fixes.patch \
+	debian/patches/hotspot-sparc-fix.diff \
+
+ifeq ($(with_hotspot),original)
+  DISTRIBUTION_PATCHES += debian/patches/default-libpath-original.diff
+else
+  DISTRIBUTION_PATCHES += debian/patches/default-libpath.diff
+endif
 
 #	debian/patches/gcc-mtune-generic.diff \
 
@@ -238,7 +249,7 @@ ifeq ($(STAGE1_JAVA),gcj)
     CONFIGURE_ARGS += \
 	--with-jar=/usr/bin/fastjar
   endif
-  build_target = icedtea-against-icedtea
+  build_target = #icedtea-against-icedtea
 else ifeq ($(STAGE1_JAVA),openjdk)
   CONFIGURE_ARGS = \
 	--with-jdk-home=$(STAGE1_HOME)
@@ -273,7 +284,10 @@ CONFIGURE_ARGS += \
 	--with-jaxp-src-zip=$(CURDIR)/jaxp.tar.gz \
 	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
 	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
-	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz
+	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz \
+	--with-jaxp-drop-zip=$(CURDIR)/jdk7-jaxp-m5.zip \
+	--with-jaf-drop-zip=$(CURDIR)/jdk7-jaf-2009_08_28.zip \
+	--with-jaxws-drop-zip=$(CURDIR)/jdk7-jaxws-2009_09_28.zip
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
   CONFIGURE_ARGS += \
@@ -290,12 +304,6 @@ ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
   ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
     CONFIGURE_ARGS += --enable-shark
   endif
-endif
-
-ifeq ($(with_hotspot),original)
-  CONFIGURE_ARGS += --without-hotspot-build
-else
-  CONFIGURE_ARGS += --with-hotspot-build
 endif
 
 EXTRA_BUILD_ENV += LIBFFI_LIBS=-lffi_pic
@@ -408,13 +416,17 @@ bd_zero = \
 
 ifneq (,$(shark_archs))
   bd_zero = $(pkg_ffidev),
-  bd_shark = llvm-dev (>= 2.5) [$(foreach a,$(shark_archs),$(a))],
+  bd_shark = llvm-dev (>= 2.5) [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
 endif
 
 bd_cacao = libtool, cacao-source (>= 0.99.4~),
 
 ifeq ($(distribution),Debian)
-  bd_plugin = xulrunner-dev (>= 1.9.0),
+  ifneq (,$(filter $(distrel),lenny))
+    bd_plugin = xulrunner-dev (>= 1.9.0),
+  else
+    bd_plugin = xulrunner-dev (>= 1.9.1.3-3),
+  endif
 else
   ifneq (,$(filter $(distrel),gutsy feisty edgy dapper))
     bd_plugin = firefox-dev,
@@ -533,6 +545,17 @@ else
   control_vars += '-Vdep:bridge=libaccess-bridge-java'
 endif
 
+ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+  ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
+    control_vars += '-Vdefaultvm:Provides=$(p_jre)-zero, $(p_jre)-shark'
+  else
+    control_vars += '-Vdefaultvm:Provides=$(p_jre)-zero'
+  endif
+endif
+ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs) $(altshark_archs)))
+  control_vars += '-Vzerovm:Provides=$(p_jre)-shark'
+endif
+
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
 	sed \
@@ -558,6 +581,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@hotspot_archs@/$(hotspot_archs)/g' \
 	      -e 's/@altzero_archs@/$(altzero_archs)/g' \
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
+	      -e 's,@pkg_sversion@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${source:Version}),g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/control.in \
 	    debian/control.plugin \
@@ -616,8 +640,6 @@ endif
 
 icedtea-configure: stamps/icedtea-configure
 stamps/icedtea-configure:
-	rm -f rt/net/sourceforge/jnlp/runtime/InstallDialog.java
-
 	mkdir -p bin
 	( \
 	  echo '#! /bin/sh'; \
@@ -637,9 +659,9 @@ stamps/icedtea-configure:
 
 unpack: stamps/unpack
 stamps/unpack: stamps/icedtea-configure
-	$(MAKE) -C build stamps/extract.stamp
+	$(EXTRA_BUILD_ENV) $(MAKE) -C build stamps/extract.stamp
 ifeq ($(STAGE1_JAVA),gcj)
-#	$(MAKE) -C build stamps/extract-ecj.stamp
+#	$(EXTRA_BUILD_ENV) $(MAKE) -C build stamps/extract-ecj.stamp
 endif
 	touch $@
 
@@ -650,9 +672,9 @@ dist-openjdk: $(OPENJDK_SRC_ZIP)
 patch: stamps/patch
 stamps/patch: stamps/unpack
 ifeq ($(STAGE1_JAVA),gcj)
-	$(MAKE) -C build stamps/patch-ecj.stamp
+	$(EXTRA_BUILD_ENV) $(MAKE) -C build stamps/patch-boot.stamp
 endif
-	$(MAKE) -C build stamps/patch.stamp
+	$(EXTRA_BUILD_ENV) $(MAKE) -C build stamps/patch.stamp
 	touch $@
 
 ifeq ($(with_check),yes)
@@ -1051,7 +1073,7 @@ endif
 	    */$(plugin_name)) continue;; \
 	    */libsplashscreen.so|*/libjsoundalsa.so|$(if $(with_pulse),*/libpulse-java.so|)*/xawt) echo $$i >> ../$(p_jre).install;; \
 	    */cacao) echo $$i >> ../$(p_jrec).install;; \
-	    */zero) echo $$i >> ../$(p_jrez).install;; \
+	    */zero|*/shark) echo $$i >> ../$(p_jrez).install;; \
 	    *) echo $$i >> ../$(p_jrehl).install; \
 	  esac; \
 	done
@@ -1101,26 +1123,26 @@ endif
 	) > debian/$(p_src).install
 
 	: # move demos and samples, create symlinks for $(p_demo)
-	mkdir -p $(d)/usr/share/doc/$(p_jre)/demo
+	mkdir -p $(d)/usr/share/doc/$(p_jrehl)/demo
 	for i in $(d)/$(basedir)/demo/*; do \
 	  b=$$(basename $$i); \
 	  case "$$i" in \
 	    */jvmti) \
-	      echo $(basedir)/demo/$$b usr/share/doc/$(p_jre)/demo/$$b >> $(d_demo).links;; \
+	      echo $(basedir)/demo/$$b usr/share/doc/$(p_jrehl)/demo/$$b >> $(d_demo).links;; \
 	    *) \
-	      mv $$i $(d)/usr/share/doc/$(p_jre)/demo/$$b; \
-	      echo usr/share/doc/$(p_jre)/demo/$$b $(basedir)/demo/$$b >> $(d_demo).links;; \
+	      mv $$i $(d)/usr/share/doc/$(p_jrehl)/demo/$$b; \
+	      echo usr/share/doc/$(p_jrehl)/demo/$$b $(basedir)/demo/$$b >> $(d_demo).links;; \
 	  esac; \
 	done
-	mv $(d)/$(basedir)/sample $(d)/usr/share/doc/$(p_jre)/examples
-	echo usr/share/doc/$(p_jre)/examples $(basedir)/sample >> $(d_demo).links
+	mv $(d)/$(basedir)/sample $(d)/usr/share/doc/$(p_jrehl)/examples
+	echo usr/share/doc/$(p_jrehl)/examples $(basedir)/sample >> $(d_demo).links
 	echo usr/share/doc/$(p_jre) usr/share/doc/$(p_demo) >> $(d_demo).links
 
 	: # $(p_demo).install
 	( \
 	  echo '$(basedir)/demo'; \
-	  echo 'usr/share/doc/$(p_jre)/examples'; \
-	  echo 'usr/share/doc/$(p_jre)/demo'; \
+	  echo 'usr/share/doc/$(p_jrehl)/examples'; \
+	  echo 'usr/share/doc/$(p_jrehl)/demo'; \
 	) > debian/$(p_demo).install
 
 	dh_install --sourcedir=debian/tmp --fail-missing -XLICENSE
@@ -1145,7 +1167,7 @@ endif
 # 'make Emacs Makefile mode happy
 
 	dh_installdirs -p$(p_jrehl) \
-		usr/share/doc/$(p_jre) \
+		usr/share/doc/$(p_jrehl) \
 		usr/share/binfmts
 
 	dh_installdirs -p$(p_jre) \
@@ -1185,14 +1207,18 @@ endif
 
 	: # create docdir symlinks for $(p_jrehl)
 	( \
-	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jrehl); \
-	  echo usr/share/doc/$(p_jre) $(basedir)/docs; \
+	  echo usr/share/doc/$(p_jrehl) $(basedir)/docs; \
 	) > $(d_jrehl).links
+
+	: # create docdir symlinks for $(p_jre)
+	( \
+	  echo usr/share/doc/$(p_jrehl) usr/share/doc/$(p_jre); \
+	) > $(d_jre).links
 
 ifneq (,$(filter shark zero, $(alternate_vms)))
 	: # create docdir symlinks for $(p_jrez)
 	( \
-	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jrez); \
+	  echo usr/share/doc/$(p_jrehl) usr/share/doc/$(p_jrez); \
 	) > $(d_jrez).links
 endif
 
@@ -1215,12 +1241,12 @@ endif
 
 	: # create docdir symlinks for $(p_lib)
 	( \
-	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_lib); \
+	  echo usr/share/doc/$(p_jrehl) usr/share/doc/$(p_lib); \
 	) > $(d_lib).links
 
 	: # create docdir symlinks for $(p_dbg)
 	( \
-	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_dbg); \
+	  echo usr/share/doc/$(p_jrehl) usr/share/doc/$(p_dbg); \
 	) > $(d_dbg).links
 
 	: # create links for the gnome accessibility bridge
@@ -1309,13 +1335,13 @@ binary-indep: build install
 	dh_testroot
 ifeq ($(with_docs),yes)
 	dh_installchangelogs -p$(p_doc)
-	dh_installdocs -p$(p_doc) 
-	mkdir -p $(d_doc)/usr/share/doc/$(p_jre)
+	dh_installdocs -p$(p_doc)
+	mkdir -p $(d_doc)/usr/share/doc/$(p_jrehl)
 	for i in build/openjdk/build/linux-$(jvmarch)/docs/*; do \
 	  [ -e $$i ] || continue; \
 	  b=$$(basename $$i); \
-	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jre)/; \
-	  ln -sf ../$(p_jre)/$$b $(d_doc)/usr/share/doc/$(p_doc)/$$b; \
+	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jrehl)/; \
+	  ln -sf ../$(p_jrehl)/$$b $(d_doc)/usr/share/doc/$(p_doc)/$$b; \
 	done
 endif
 	dh_installmenu -i $(nodocs)
@@ -1341,41 +1367,39 @@ binary-arch: build install
 		debian/JAVA_HOME \
 		debian/README.alternatives \
 		debian/README.Debian
-	mv $(d_jrehl)/usr/share/doc/$(p_jrehl)/* $(d_jrehl)/usr/share/doc/$(p_jre)
-	rm -rf $(d_jrehl)/usr/share/doc/$(p_jrehl)
 	for i in AUTHORS NEWS README; do \
-	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jre)/$$i.IcedTea; \
+	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jrehl)/$$i.IcedTea; \
 	done
-	mkdir -p $(d_jdk)/usr/share/doc/$(p_jre)
+	mkdir -p $(d_jdk)/usr/share/doc/$(p_jrehl)
 	cp build/mauve-$(default_vm)/mauve_output-$(default_vm) \
-		$(d_jdk)/usr/share/doc/$(p_jre)/mauve_output-$(default_vm).log
+		$(d_jdk)/usr/share/doc/$(p_jrehl)/mauve_output-$(default_vm).log
 	cp jtreg_output-$(default_vm) \
-		$(d_jdk)/usr/share/doc/$(p_jre)/jtreg_output-$(default_vm).log
+		$(d_jdk)/usr/share/doc/$(p_jrehl)/jtreg_output-$(default_vm).log
 	-cp build/test/jtreg-summary-$(default_vm).log build/test/check-*-$(default_vm).log \
-		$(d_jdk)/usr/share/doc/$(p_jre)/
-	-cp build/test/failed_tests-$(default_vm).tar.gz $(d_jdk)/usr/share/doc/$(p_jre)/
+		$(d_jdk)/usr/share/doc/$(p_jrehl)/
+	-cp build/test/failed_tests-$(default_vm).tar.gz $(d_jdk)/usr/share/doc/$(p_jrehl)/
 
 ifneq (,$(filter cacao, $(alternate_vms)))
 	dh_installchangelogs -p$(p_jrec)
 	dh_installdocs -p$(p_jrec)
-	mkdir -p $(d_jrec)/usr/share/doc/$(p_jre)
+	mkdir -p $(d_jrec)/usr/share/doc/$(p_jrehl)
 	-cp build/mauve-cacao/mauve_output-cacao \
-		$(d_jrec)/usr/share/doc/$(p_jre)/mauve_output-cacao.log
+		$(d_jrec)/usr/share/doc/$(p_jrehl)/mauve_output-cacao.log
 	-cp jtreg_output-cacao \
-		$(d_jrec)/usr/share/doc/$(p_jre)/jtreg_output-cacao.log
+		$(d_jrec)/usr/share/doc/$(p_jrehl)/jtreg_output-cacao.log
 	-cp build/test/jtreg-summary-cacao.log build/test/check-*-cacao.log \
-		$(d_jrec)/usr/share/doc/$(p_jre)/
-	-cp build/test/failed_tests-cacao.tar.gz $(d_jrec)/usr/share/doc/$(p_jre)/
+		$(d_jrec)/usr/share/doc/$(p_jrehl)/
+	-cp build/test/failed_tests-cacao.tar.gz $(d_jrec)/usr/share/doc/$(p_jrehl)/
 endif
 ifneq (,$(filter zero, $(alternate_vms)))
-	mkdir -p $(d_jrez)/usr/share/doc/$(p_jre)
+	mkdir -p $(d_jrez)/usr/share/doc/$(p_jrehl)
 	-cp build/mauve-zero/mauve_output-zero \
-		$(d_jrez)/usr/share/doc/$(p_jre)/mauve_output-zero.log
+		$(d_jrez)/usr/share/doc/$(p_jrehl)/mauve_output-zero.log
 	-cp jtreg_output-zero \
-		$(d_jrez)/usr/share/doc/$(p_jre)/jtreg_output-zero.log
+		$(d_jrez)/usr/share/doc/$(p_jrehl)/jtreg_output-zero.log
 	-cp build/test/jtreg-summary-zero.log build/test/check-*-zero.log \
-		$(d_jrez)/usr/share/doc/$(p_jre)/
-	-cp build/test/failed_tests-zero.tar.gz $(d_jrez)/usr/share/doc/$(p_jre)/
+		$(d_jrez)/usr/share/doc/$(p_jrehl)/
+	-cp build/test/failed_tests-zero.tar.gz $(d_jrez)/usr/share/doc/$(p_jrehl)/
 endif
 	dh_desktop -s $(nodemo) $(nojrec) $(nojrez)
 	dh_installmenu -s $(nodemo) $(nojrec) $(nojrez)

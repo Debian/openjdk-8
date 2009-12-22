@@ -9,3 +9,4 @@ Type=Application
 Icon=@basename@
 Categories=Application;Network;
 MimeType=application/x-java-jnlp-file;
+NoDisplay=true

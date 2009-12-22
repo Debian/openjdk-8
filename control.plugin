@@ -2,6 +2,7 @@
 Package: @pkg_plugin@
 Section: web
 Architecture: any
+Priority: optional
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4), icedtea7-plugin

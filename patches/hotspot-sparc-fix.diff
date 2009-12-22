@@ -1,0 +1,19 @@
+--- openjdk/hotspot/src/os_cpu/linux_sparc/vm/vm_version_linux_sparc.cpp.orig	2009-10-14 17:13:15.000000000 +0000
++++ openjdk/hotspot/src/os_cpu/linux_sparc/vm/vm_version_linux_sparc.cpp	2009-11-02 13:15:17.000000000 +0000
+@@ -27,6 +27,7 @@
+ 
+ static bool detect_niagara() {
+   char cpu[128];
++  char *buf = cpu;
+   bool rv = false;
+ 
+   FILE* fp = fopen("/proc/cpuinfo", "r");
+@@ -35,7 +36,7 @@
+   }
+ 
+   while (!feof(fp)) {
+-    if (fscanf(fp, "cpu\t\t: %100[^\n]", &cpu) == 1) {
++    if (fscanf(fp, "cpu\t\t: %100[^\n]", buf) == 1) {
+       if (strstr(cpu, "Niagara") != NULL) {
+         rv = true;
+       }

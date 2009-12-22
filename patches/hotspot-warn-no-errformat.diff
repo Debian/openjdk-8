@@ -1,5 +1,5 @@
---- openjdk/hotspot/make/solaris/makefiles/gcc.make~	2008-11-20 09:40:58.000000000 +0100
-+++ openjdk/hotspot/make/solaris/makefiles/gcc.make	2008-12-02 16:00:57.000000000 +0100
+--- openjdk/hotspot/make/solaris/makefiles/gcc.make~	2009-10-02 23:16:39.000000000 +0200
++++ openjdk/hotspot/make/solaris/makefiles/gcc.make	2009-10-22 07:05:58.000000000 +0200
 @@ -109,7 +109,7 @@
  
  
@@ -9,9 +9,9 @@
  # Enable these warnings. See 'info gcc' about details on these options
  ADDITIONAL_WARNINGS = -Wpointer-arith -Wconversion -Wsign-compare 
  CFLAGS_WARN/DEFAULT = $(WARNINGS_ARE_ERRORS) $(ADDITIONAL_WARNINGS) 
---- openjdk/hotspot/make/linux/makefiles/gcc.make~	2008-12-02 15:43:00.000000000 +0100
-+++ openjdk/hotspot/make/linux/makefiles/gcc.make	2008-12-02 16:00:47.000000000 +0100
-@@ -99,7 +99,7 @@
+--- openjdk/hotspot/make/linux/makefiles/gcc.make~	2009-10-22 06:58:44.000000000 +0200
++++ openjdk/hotspot/make/linux/makefiles/gcc.make	2009-10-22 07:06:00.000000000 +0200
+@@ -98,7 +98,7 @@
  endif
  
  # Compiler warnings are treated as errors

@@ -1,5 +1,5 @@
---- openjdk/corba/make/common/shared/Compiler-gcc.gmk~	2009-08-06 13:06:18.000000000 +0200
-+++ openjdk/corba/make/common/shared/Compiler-gcc.gmk	2009-08-06 13:08:25.000000000 +0200
+--- openjdk/corba/make/common/shared/Compiler-gcc.gmk.orig	2009-12-20 23:22:36.000000000 +0100
++++ openjdk/corba/make/common/shared/Compiler-gcc.gmk	2009-12-20 23:38:24.000000000 +0100
 @@ -58,17 +58,17 @@
  ifeq ($(PLATFORM), linux)
  
@@ -22,8 +22,8 @@
    endif
    ifeq ($(ZERO_BUILD), true)
      # zero
---- openjdk/jdk/make/common/shared/Compiler-gcc.gmk~	2009-08-06 13:06:23.000000000 +0200
-+++ openjdk/jdk/make/common/shared/Compiler-gcc.gmk	2009-08-06 13:09:47.000000000 +0200
+--- openjdk/jdk/make/common/shared/Compiler-gcc.gmk.orig	2009-12-20 23:22:47.000000000 +0100
++++ openjdk/jdk/make/common/shared/Compiler-gcc.gmk	2009-12-20 23:38:24.000000000 +0100
 @@ -54,17 +54,17 @@
  ifeq ($(PLATFORM), linux)
  
@@ -44,5 +44,5 @@
 -    CXX            = $(COMPILER_PATH)g++$(GCC_SUFFIX)
 +    CXX            = g++$(GCC_SUFFIX)
    endif
-   ifdef ZERO_BUILD
-     # zero
+   ifeq ($(ARCH), alpha)
+     # alpha

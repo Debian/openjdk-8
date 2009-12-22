@@ -3,5 +3,5 @@
 # information.
 @basename@-jre binary: binary-or-shlib-defines-rpath
 
-# the doc directory and the symlink are in @basename@-jre-headless
-@basename@-jre binary: no-copyright-file
+# the interpreter is in the -headless package
+@basename@-jre binary: desktop-command-not-in-package

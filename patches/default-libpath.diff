@@ -1,5 +1,5 @@
---- openjdk/hotspot/src/os/linux/vm/os_linux.cpp~	2009-05-26 20:04:19.000000000 +0000
-+++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2009-05-26 20:05:35.000000000 +0000
+--- openjdk/hotspot/src/os/linux/vm/os_linux.cpp~	2009-10-22 07:08:23.000000000 +0200
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2009-10-22 07:13:14.000000000 +0200
 @@ -281,11 +281,7 @@
   *        ...
   *        7: The default directories, normally /lib and /usr/lib.
@@ -9,7 +9,7 @@
 -#else
 -#define DEFAULT_LIBPATH "/lib:/usr/lib"
 -#endif
-+#define DEFAULT_LIBPATH "/usr/lib/jni:/lib:/usr/lib"
++#define DEFAULT_LIBPATH	"/usr/lib/jni:/lib:/usr/lib"
  
  #define EXTENSIONS_DIR  "/lib/ext"
  #define ENDORSED_DIR    "/lib/endorsed"

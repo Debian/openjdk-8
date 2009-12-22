@@ -1,0 +1,10 @@
+--- openjdk/hotspot/src/share/vm/includeDB_core~	2009-10-29 11:37:30.000000000 +0100
++++ openjdk/hotspot/src/share/vm/includeDB_core	2009-10-30 11:14:33.000000000 +0100
+@@ -2942,6 +2942,7 @@
+ mutex_<os_family>.inline.hpp            thread_<os_family>.inline.hpp
+ 
+ nativeInst_<arch>.cpp                   assembler_<arch>.inline.hpp
++nativeInst_<arch>.cpp                   cppInterpreter.hpp
+ nativeInst_<arch>.cpp                   handles.hpp
+ nativeInst_<arch>.cpp                   nativeInst_<arch>.hpp
+ nativeInst_<arch>.cpp                   oop.inline.hpp
