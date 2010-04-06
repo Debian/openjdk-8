@@ -98,13 +98,14 @@ default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 
 #stage1_openjdk_archs = alpha armel ia64 powerpc m68k mips mipsel sparc s390
 stage1_gcj_archs = amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sparc s390
+stage1_gcj_archs = amd64 hppa ia64 lpia powerpc m68k mips mipsel sparc s390
 #stage1_gcj_archs = amd64 hppa ia64 lpia powerpc m68k mips mipsel sparc s390
 stage1_openjdk_archs = alpha amd64 armel i386 lpia
 stage1_cacao_archs =
 
 # FIXME cacao doesn't build with 7, when not using gcj for stage1
 cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
-cacao_archs = alpha amd64 i386 lpia powerpc m68k mips mipsel s390
+cacao_archs = alpha amd64 lpia powerpc m68k mips mipsel s390
 # requires patched llvm-2.6
 ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
   altshark_archs = armel powerpc

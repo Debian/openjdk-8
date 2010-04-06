@@ -1,3 +1,9 @@
+openjdk-7 (7b77-1) UNRELEASED; urgency=low
+
+  * 
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 28 Dec 2009 15:43:10 +0100
+
 openjdk-7 (7b77-0ubuntu1~ppa1) lucid; urgency=low
 
   * Build openjdk-7 snapshot (7b77).
