@@ -1,5 +1,5 @@
---- openjdk/hotspot/build/linux/makefiles/gcc.make~	2007-11-29 12:38:22.578339247 +0100
-+++ openjdk/hotspot/build/linux/makefiles/gcc.make	2007-11-29 12:42:28.742052571 +0100
+--- openjdk/hotspot/make/linux/makefiles/gcc.make~	2007-11-29 12:38:22.578339247 +0100
++++ openjdk/hotspot/make/linux/makefiles/gcc.make	2007-11-29 12:42:28.742052571 +0100
 @@ -103,7 +103,7 @@
  CFLAGS_WARN/BYFILE = $(CFLAGS_WARN/$@)$(CFLAGS_WARN/DEFAULT$(CFLAGS_WARN/$@)) 
  

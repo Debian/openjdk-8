@@ -6,6 +6,14 @@ priority=@priority@
 browser_dirs="@browser_dirs@"
 PLUGIN=@plugin_name@
 PLUGINPTH=/@basediralias@/jre/lib/@archdir@/$PLUGIN
+NPPLUGINPTH=/@basediralias@/jre/lib/@archdir@/IcedTeaNPPlugin.so
+LAST_NPP_VERSION=@last_npp_version@
+
+# IcedTeaPlugin -> IcedTeaNPPlugin update
+plugin_update=
+if [ -n "$LAST_NPP_VERSION" ] && [ "$1" = configure ] && [ -n "$2" ]; then
+  plugin_update=$(dpkg --compare-versions "$2" lt "$lAST_NPP_VERSION" && echo yes || echo no)
+fi
 
 for browser_dir in $browser_dirs; do
     if [ $browser_dir = xulrunner-addons ]; then
@@ -13,6 +21,13 @@ for browser_dir in $browser_dirs; do
     else
         browser=$browser_dir
     fi
+
+    if [ "$plugin_update" = yes ]; then
+	update-alternatives --quiet --remove \
+	$browser-javaplugin.so \
+	$NPPLUGINPTH || true
+    fi
+
     update-alternatives --quiet --install \
 	/usr/lib/$browser_dir/plugins/libjavaplugin.so \
 	$browser-javaplugin.so \

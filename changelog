@@ -1,8 +1,10 @@
-openjdk-7 (7b77-1) UNRELEASED; urgency=low
+openjdk-7 (7b84-1~ppa1) UNRELEASED; urgency=low
 
-  * 
+  * Merge debian packaging r403:430 from openjdk-6.
+  * Add myself to Uploaders.
+  * Build openjdk-7 snapshot (7b84)
 
- -- Matthias Klose <doko@ubuntu.com>  Mon, 28 Dec 2009 15:43:10 +0100
+ -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 06 Apr 2010 22:11:31 +0200
 
 openjdk-7 (7b77-0ubuntu1~ppa1) lucid; urgency=low
 
@@ -55,6 +57,230 @@ openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
   * Update packaging for openjdk-7.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 14:27:03 +0100
+
+openjdk-6 (6b18~pre4-1ubuntu2) UNRELEASED; urgency=low
+
+  * Fix builds on Ubuntu/dapper and Debian/lenny.
+  * On hppa, configure --without-rhino --disable-plugin.
+  * Fix Hitachi SH configury. Closes: #575346.
+  * Start a window manager when running the tests. Prefer metacity,
+    as more tests pass with it.
+  * Let XToolkit.isTraySupported() return true, if Compiz is running.
+    Works around sun#6438179. LP: #300948.
+  * Make <java_home>/jre/lib/security/nss.cfg a config file.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 05 Apr 2010 14:04:48 +0200
+
+openjdk-6 (6b18~pre4-1ubuntu1) lucid; urgency=low
+
+  * Build-depend on xulrunner-1.9.2-dev instead of xulrunner-dev,
+    unexpectedly demoted to universe.
+  * icedtea6-plugin: Hardcode dependency on xulrunner-1.9.2. No way
+    to do better? See #552780.
+  * Fix builds on Ubuntu hardy.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 31 Mar 2010 22:21:49 +0200
+
+openjdk-6 (6b18~pre4-1) unstable; urgency=high
+
+  * Upload to unstable.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 31 Mar 2010 16:35:18 +0200
+
+openjdk-6 (6b18~pre4-0ubuntu2) lucid; urgency=low
+
+  * Fix typo in NPPlugin code. LP: #552287.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 31 Mar 2010 10:41:11 +0200
+
+openjdk-6 (6b18~pre4-0ubuntu1) lucid; urgency=low
+
+  [ Matthias Klose ]
+  * Update IcedTea6 form the 1.8 branch.
+  * SECURITY UPDATE: multiple upstream vulnerabilities. Upstream fixes:
+    - (CVE-2010-0837): JAR "unpack200" must verify input parameters (6902299).
+    - (CVE-2010-0845): No ClassCastException for HashAttributeSet constructors
+      if run with -Xcomp (6894807).
+    - (CVE-2010-0838): CMM readMabCurveData Buffer Overflow Vulnerability
+      (6899653).
+    - (CVE-2010-0082): Loader-constraint table allows arrays instead of
+      only the base-classes (6626217).
+    - (CVE-2010-0095): Subclasses of InetAddress may incorrectly interpret
+      network addresses (6893954) [ZDI-CAN-603].
+    - (CVE-2010-0085): File TOCTOU deserialization vulnerability (6736390).
+    - (CVE-2010-0091): Unsigned applet can retrieve the dragged information
+      before drop action occurs (6887703).
+    - (CVE-2010-0088): Inflater/Deflater clone issues (6745393).
+    - (CVE-2010-0084): Policy/PolicyFile leak dynamic ProtectionDomains
+      (6633872).
+    - (CVE-2010-0092): AtomicReferenceArray causes SIGSEGV -> SEGV_MAPERR
+      error (6888149).
+    - (CVE-2010-0094): Deserialization of RMIConnectionImpl objects should
+      enforce stricter checks (6893947) [ZDI-CAN-588].
+    - (CVE-2010-0093): System.arraycopy unable to reference elements
+      beyond Integer.MAX_VALUE bytes (6892265).
+    - (CVE-2010-0840): Applet Trusted Methods Chaining Privilege Escalation
+      Vulnerability (6904691).
+    - (CVE-2010-0848): AWT Library Invalid Index Vulnerability (6914823).
+    - (CVE-2010-0847): ImagingLib arbitrary code execution vulnerability
+      (6914866).
+    - (CVE-2009-3555): TLS: MITM attacks via session renegotiation.
+    - 6639665: ThreadGroup finalizer allows creation of false root
+      ThreadGroups.
+    - 6898622: ObjectIdentifer.equals is not capable of detecting incorrectly.
+      encoded CommonName OIDs.
+    - 6910590: Application can modify command array in ProcessBuilder.
+    - 6909597: JPEGImageReader stepX Integer Overflow Vulnerability.
+    - 6932480: Crash in CompilerThread/Parser. Unloaded array klass?
+    - 6898739: TLS renegotiation issue.
+
+  [ Torsten Werner ]
+  * Switch off IPV6_V6ONLY for IN6_IS_ADDR_UNSPECIFIED addresses, too.
+    (Closes: #575163)
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 31 Mar 2010 02:34:04 +0200
+
+openjdk-6 (6b18~pre3-1) unstable; urgency=low
+
+  [ Matthias Klose ]
+  * Update IcedTea build infrastructure (20100321).
+  * Update support for SH4 (Nobuhiro Iwamatsu).
+  * Handle renaming of the plugin name.
+
+  [ Torsten Werner ]
+  * Improve patch for IPv4 mapped IPv6 addresses even more.
+    (Closes: #573742)
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 21 Mar 2010 22:52:12 +0100
+
+openjdk-6 (6b18~pre2-1ubuntu2) lucid; urgency=low
+
+  * Fix build failure on ARM.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 12 Mar 2010 15:19:13 +0100
+
+openjdk-6 (6b18~pre2-1ubuntu1) lucid; urgency=low
+
+  * Upload to lucid.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 10 Mar 2010 23:34:57 +0100
+
+openjdk-6 (6b18~pre2-1) unstable; urgency=low
+
+  * Update IcedTea build infrastructure (20100310).
+  * Disable building the plugin the plugin on alpha (borked xulrunner
+    packaging using binary indep packages).
+  * Use a two stage build on alpha.
+  * Add note about the reparenting WM workaround. Closes: #573026.
+  * Prefer Sazanami instead of Kochi for Japanese fonts (Hideki Yamane).
+    Closes: #572511.
+  * openjdk-6-doc: Don't compress package-list files. Closes: #567899.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 10 Mar 2010 11:19:19 +0100
+
+openjdk-6 (6b18~pre1-4) unstable; urgency=low
+
+  * Improve patch for IPv4 mapped IPv6 addresses.
+
+ -- Torsten Werner <twerner@debian.org>  Sun, 07 Mar 2010 01:14:36 +0100
+
+openjdk-6 (6b18~pre1-3) unstable; urgency=low
+
+  * Add a patch for improved handling of IPv4 mapped IPv6 addresses.
+    (Closes: #560056, #561930, #563699, #563946)
+
+ -- Torsten Werner <twerner@debian.org>  Tue, 02 Mar 2010 23:46:57 +0100
+
+openjdk-6 (6b18~pre1-2) unstable; urgency=low
+
+  * Change Build-Depends: ant1.7-optional because of a bus error in gij.
+
+ -- Torsten Werner <twerner@debian.org>  Mon, 01 Mar 2010 07:17:16 +0100
+
+openjdk-6 (6b18~pre1-1ubuntu1) lucid; urgency=low
+
+  * Ignore error code running ant -diagnostics.
+  * Build-depend on ant-optional.
+  * Disable the cacao build on armel, fails to build with the non
+    bootstrap build.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 20 Feb 2010 15:36:06 +0100
+
+openjdk-6 (6b18~pre1-1) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 19 Feb 2010 21:52:32 +0100
+
+openjdk-6 (6b18~pre1-0ubuntu1) lucid; urgency=low
+
+  * New Openjdk6 b18 source code drop.
+  * Use mangled copy of rhino. Closes: #512970. LP: #255149.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 19 Feb 2010 18:17:23 +0100
+
+openjdk-6 (6b17-1.7-1ubuntu1) lucid; urgency=low
+
+  * ARM Thumb2 updates.
+  * Test build using Hotspt hs14 on ix86.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 31 Jan 2010 21:56:59 +0100
+
+openjdk-6 (6b18~pre1-1) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 19 Feb 2010 21:52:32 +0100
+
+openjdk-6 (6b18~pre1-0ubuntu1) lucid; urgency=low
+
+  * New Openjdk6 b18 source code drop.
+  * Use mangled copy of rhino. Closes: #512970. LP: #255149.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 19 Feb 2010 18:17:23 +0100
+
+openjdk-6 (6b17-1.7-1ubuntu1) lucid; urgency=low
+
+  * ARM Thumb2 updates.
+  * Test build using Hotspt hs14 on ix86.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 31 Jan 2010 21:56:59 +0100
+
+openjdk-6 (6b17-1.7-1) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 27 Jan 2010 23:44:47 +0100
+
+openjdk-6 (6b17-1.7-0ubuntu1) lucid; urgency=low
+
+  * IcedTea6 1.7 release.
+  * Don't try to load libjpeg7; still building with libjpeg62. Closes: #563999.
+  * Run the testsuite on sh4.
+  * Ubuntu only: Implement an execute bit checker for the Non-Exec Policy
+    - debian/JB-java.desktop.in: update mime handler to use new launcher.
+  * armel: Apply the thumb2 patches from the trunk, plus proposed patches
+    for the trunk.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 27 Jan 2010 22:48:24 +0100
+
+openjdk-6 (6b17-0ubuntu1) lucid; urgency=low
+
+  * Build from the IcedTea6-1.7 branch.
+  * Don't build the plugin on sparc64.
+  * Enable the NPPlugin.
+  * Add support for SH4 (Nobuhiro Iwamatsu).
+  * Fix crash in the ARM assembler interpreter (Edward Nevill).
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 06 Jan 2010 15:52:50 +0100
+
+openjdk-6 (6b17~pre3-1ubuntu2) lucid; urgency=low
+
+  * Update IcedTea build infrastructure (20091224).
+  * Explicitely build-depend on x11-xkb-utils (xkbcomp is needed by
+    xvfb-run).
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 24 Dec 2009 12:43:00 +0100
 
 openjdk-6 (6b17~pre3-1ubuntu1) lucid; urgency=low
 

@@ -1,0 +1,128 @@
+# unused patch
+
+--- openjdk/hotspot/src/cpu/sparc/vm/assembler_sparc.inline.hpp.old	2009-10-02 23:16:39.000000000 +0200
++++ openjdk/hotspot/src/cpu/sparc/vm/assembler_sparc.inline.hpp	2010-01-11 16:02:21.152335133 +0100
+@@ -45,6 +45,7 @@
+ 
+ // inlines for SPARC assembler -- dmu 5/97
+ 
++#if 0
+ inline void Assembler::check_delay() {
+ # ifdef CHECK_DELAY
+   guarantee( delay_state != at_delay_slot, "must say delayed() when filling delay slot");
+@@ -56,6 +57,7 @@
+   check_delay();
+   AbstractAssembler::emit_long(x);
+ }
++#endif
+ 
+ inline void Assembler::emit_data(int x, relocInfo::relocType rtype) {
+   relocate(rtype);
+@@ -69,7 +71,9 @@
+ 
+ 
+ inline void Assembler::add(Register s1, Register s2, Register d )                             { emit_long( op(arith_op) | rd(d) | op3(add_op3) | rs1(s1) | rs2(s2) ); }
++#if 0
+ inline void Assembler::add(Register s1, int simm13a, Register d, relocInfo::relocType rtype ) { emit_data( op(arith_op) | rd(d) | op3(add_op3) | rs1(s1) | immed(true) | simm(simm13a, 13), rtype ); }
++#endif
+ inline void Assembler::add(Register s1, int simm13a, Register d, RelocationHolder const& rspec ) { emit_data( op(arith_op) | rd(d) | op3(add_op3) | rs1(s1) | immed(true) | simm(simm13a, 13), rspec ); }
+ 
+ inline void Assembler::bpr( RCondition c, bool a, Predict p, Register s1, address d, relocInfo::relocType rt ) { v9_only();  emit_data( op(branch_op) | annul(a) | cond(c) | op2(bpr_op2) | wdisp16(intptr_t(d), intptr_t(pc())) | predict(p) | rs1(s1), rt);  has_delay_slot(); }
+@@ -157,10 +161,12 @@
+   if (a.has_index()) { assert(offset == 0, ""); ld(  a.base(), a.index(),         d); }
+   else               {                          ld(  a.base(), a.disp() + offset, d); }
+ }
++#if 0
+ inline void Assembler::ldsb(const Address& a, Register d, int offset) {
+   if (a.has_index()) { assert(offset == 0, ""); ldsb(a.base(), a.index(),         d); }
+   else               {                          ldsb(a.base(), a.disp() + offset, d); }
+ }
++#endif
+ inline void Assembler::ldsh(const Address& a, Register d, int offset) {
+   if (a.has_index()) { assert(offset == 0, ""); ldsh(a.base(), a.index(),         d); }
+   else               {                          ldsh(a.base(), a.disp() + offset, d); }
+@@ -237,7 +243,9 @@
+   // p 226
+ 
+ inline void Assembler::stb(  Register d, Register s1, Register s2) { emit_long( op(ldst_op) | rd(d) | op3(stb_op3) | rs1(s1) | rs2(s2) ); }
++#if 0
+ inline void Assembler::stb(  Register d, Register s1, int simm13a) { emit_data( op(ldst_op) | rd(d) | op3(stb_op3) | rs1(s1) | immed(true) | simm(simm13a, 13)); }
++#endif
+ inline void Assembler::sth(  Register d, Register s1, Register s2) { emit_long( op(ldst_op) | rd(d) | op3(sth_op3) | rs1(s1) | rs2(s2) ); }
+ inline void Assembler::sth(  Register d, Register s1, int simm13a) { emit_data( op(ldst_op) | rd(d) | op3(sth_op3) | rs1(s1) | immed(true) | simm(simm13a, 13)); }
+ inline void Assembler::stw(  Register d, Register s1, Register s2) { emit_long( op(ldst_op) | rd(d) | op3(stw_op3) | rs1(s1) | rs2(s2) ); }
+@@ -249,7 +257,9 @@
+ inline void Assembler::std(  Register d, Register s1, Register s2) { v9_dep(); assert(d->is_even(), "not even"); emit_long( op(ldst_op) | rd(d) | op3(std_op3) | rs1(s1) | rs2(s2) ); }
+ inline void Assembler::std(  Register d, Register s1, int simm13a) { v9_dep(); assert(d->is_even(), "not even"); emit_data( op(ldst_op) | rd(d) | op3(std_op3) | rs1(s1) | immed(true) | simm(simm13a, 13)); }
+ 
++#if 0
+ inline void Assembler::st( Register d, Register s1, Register s2)      { stw(d, s1, s2); }
++#endif
+ inline void Assembler::st( Register d, Register s1, int simm13a)      { stw(d, s1, simm13a); }
+ 
+ #ifdef ASSERT
+--- openjdk/hotspot/src/cpu/sparc/vm/assembler_sparc.hpp.old	2009-10-02 23:16:39.000000000 +0200
++++ openjdk/hotspot/src/cpu/sparc/vm/assembler_sparc.hpp	2010-01-11 16:02:10.644835375 +0100
+@@ -1105,12 +1105,21 @@
+     AbstractAssembler::flush();
+   }
+ 
+-  inline void emit_long(int);  // shadows AbstractAssembler::emit_long
++  inline void emit_long(int x) {
++    check_delay();
++    AbstractAssembler::emit_long(x);
++  }
+   inline void emit_data(int x) { emit_long(x); }
+   inline void emit_data(int, RelocationHolder const&);
+   inline void emit_data(int, relocInfo::relocType rtype);
+   // helper for above fcns
+-  inline void check_delay();
++  inline void check_delay() {
++#   ifdef CHECK_DELAY
++    guarantee( delay_state != at_delay_slot, "must say delayed() when filling delay slot");
++    delay_state = no_delay;
++#   endif
++  }
++
+ 
+ 
+  public:
+@@ -1119,7 +1128,7 @@
+   // pp 135 (addc was addx in v8)
+ 
+   inline void add(Register s1, Register s2, Register d );
+-  inline void add(Register s1, int simm13a, Register d, relocInfo::relocType rtype = relocInfo::none);
++  inline void add(Register s1, int simm13a, Register d, relocInfo::relocType rtype = relocInfo::none) { emit_data( op(arith_op) | rd(d) | op3(add_op3) | rs1(s1) | immed(true) | simm(simm13a, 13), rtype ); }
+   inline void add(Register s1, int simm13a, Register d, RelocationHolder const& rspec);
+   inline void add(Register s1, RegisterOrConstant s2, Register d, int offset = 0);
+   inline void add(const Address& a, Register d, int offset = 0) { add( a.base(), a.disp() + offset, d, a.rspec(offset)); }
+@@ -1331,7 +1340,10 @@
+   inline void ld(    Register s1, ByteSize simm13a, Register d);
+ #endif
+ 
+-  inline void ldsb(const Address& a, Register d, int offset = 0);
++  inline void ldsb(const Address& a, Register d, int offset = 0) {
++    if (a.has_index()) { assert(offset == 0, ""); ldsb(a.base(), a.index(),         d); }
++    else               {                          ldsb(a.base(), a.disp() + offset, d); }
++  }
+   inline void ldsh(const Address& a, Register d, int offset = 0);
+   inline void ldsw(const Address& a, Register d, int offset = 0);
+   inline void ldub(const Address& a, Register d, int offset = 0);
+@@ -1552,7 +1564,7 @@
+   // p 226
+ 
+   inline void stb(  Register d, Register s1, Register s2 );
+-  inline void stb(  Register d, Register s1, int simm13a);
++  inline void stb(  Register d, Register s1, int simm13a) { emit_data( op(ldst_op) | rd(d) | op3(stb_op3) | rs1(s1) | immed(true) | simm(simm13a, 13)); }
+   inline void sth(  Register d, Register s1, Register s2 );
+   inline void sth(  Register d, Register s1, int simm13a);
+   inline void stw(  Register d, Register s1, Register s2 );
+@@ -1561,7 +1573,7 @@
+   inline void st(   Register d, Register s1, int simm13a);
+   inline void stx(  Register d, Register s1, Register s2 );
+   inline void stx(  Register d, Register s1, int simm13a);
+-  inline void std(  Register d, Register s1, Register s2 );
++  inline void std(  Register d, Register s1, Register s2 ) { stw(d, s1, s2); }
+   inline void std(  Register d, Register s1, int simm13a);
+ 
+ #ifdef ASSERT

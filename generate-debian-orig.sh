@@ -1,13 +1,13 @@
 
-tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz jdk7-jaf-2009_08_28.zip  jdk7-jaxp-m5.zip  jdk7-jaxws-2009_09_28.zip"
-tarballdir=b77
-version=7b77
+tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz jdk7-jaf-2009_08_28.zip  jdk7-jaxp-m6.zip  jdk7-jaxws-2009_09_28.zip"
+tarballdir=b84
+version=7b84
 cacaotb=cacao-0.99.4.tar.bz2
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
-icedtea_checkout=../icedtea7
+icedtea_checkout=icedtea7
 debian_checkout=openjdk7
 
 if [ -d $pkgdir ]; then

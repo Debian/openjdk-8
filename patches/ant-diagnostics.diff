@@ -1,0 +1,11 @@
+--- openjdk/langtools/make/Makefile~	2010-02-17 04:15:20.000000000 +0100
++++ openjdk/langtools/make/Makefile	2010-02-20 15:32:49.492335405 +0100
+@@ -174,7 +174,7 @@
+ # Create a make target for each
+ $(ANT_TARGETS):
+ 	@ mkdir -p $(OUTPUTDIR)/build $(ANT_TMPDIR)
+-	$(ANT_JAVA_HOME) $(ANT_OPTS) $(ANT) -diagnostics > $(OUTPUTDIR)/build/ant-diagnostics.log
++	-$(ANT_JAVA_HOME) $(ANT_OPTS) $(ANT) -diagnostics > $(OUTPUTDIR)/build/ant-diagnostics.log
+ 	$(ANT_JAVA_HOME) $(ANT_OPTS) $(ANT) $(ANT_OPTIONS) $@
+ 
+ #-------------------------------------------------------------------

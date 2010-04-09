@@ -1,0 +1,11 @@
+--- openjdk/jdk/src/solaris/classes/sun/awt/X11/XToolkit.java~	2010-02-17 04:14:46.000000000 +0100
++++ openjdk/jdk/src/solaris/classes/sun/awt/X11/XToolkit.java	2010-04-05 22:05:12.964836203 +0200
+@@ -1047,7 +1047,7 @@
+ 
+     public boolean isTraySupported() {
+         int wm = XWM.getWMID();
+-        if (wm == XWM.METACITY_WM || wm == XWM.KDE2_WM)
++        if (wm == XWM.METACITY_WM || wm == XWM.KDE2_WM || wm == XWM.COMPIZ_WM)
+         {
+             return true;
+         }
