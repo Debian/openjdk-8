@@ -5,7 +5,7 @@ Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
 Provides: ${zerovm:Provides}
-Conflicts: @basename@-jre-headless (<< 7b84-0), @basename@-jre (<< 7b84-0)
+Conflicts: @basename@-jre-headless (<< 7b89-0), @basename@-jre (<< 7b89-0)
 Description: Alternative JVM for OpenJDK, using Zero/Shark
  The package provides an alternative runtime using the Zero VM and the 
  Shark Just In Time Compiler (JIT).  Built on architectures in addition

@@ -1,10 +1,11 @@
-openjdk-7 (7b84-1~ppa1) UNRELEASED; urgency=low
+openjdk-7 (7b89-1~ppa1) UNRELEASED; urgency=low
 
   * Merge debian packaging r403:430 from openjdk-6.
   * Add myself to Uploaders.
-  * Build openjdk-7 snapshot (7b84)
+  * Build openjdk-7 snapshot (7b89)
+  * Use ant+ant-optional (IcedTea7 support ant 1.8).
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 06 Apr 2010 22:11:31 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 27 Apr 2010 22:21:56 +0200
 
 openjdk-7 (7b77-0ubuntu1~ppa1) lucid; urgency=low
 

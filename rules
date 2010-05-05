@@ -159,12 +159,12 @@ else
   $(error unknown bootstrap method for architecture $(DEB_HOST_ARCH))
 endif
 
-OPENJDK_VERSION = b84
+OPENJDK_VERSION = b89
 OPENJDK_SRC_ZIP = openjdk-7-ea-src-$(OPENJDK_VERSION)-25_mar_2010-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
 req_openjdk_bd_ver = 6b14
-req_openjdk_ver = 7b84
+req_openjdk_ver = 7b89
 
 unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
@@ -534,11 +534,7 @@ ifneq (,$(cacao_archs))
   bd_cacao = libtool, cacao-source (>= 0.99.4~),
 endif
 
-ifneq (,$(filter $(distrel),squeeze sid))
-  bd_ant = ant1.7, ant1.7-optional,
-else
-  bd_ant = ant, ant-optional,
-endif
+bd_ant = ant, ant-optional,
 
 ifeq ($(distribution),Debian)
   ifneq (,$(filter $(distrel),lenny))
