@@ -83,8 +83,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), alpha hppa sparc64)$(filter $(distrel), dappe
 else
   with_plugin_pkg = yes
 endif
-last_npp_version = 6b18~pre2-2
-plugin_name = IcedTeaPlugin.so
+plugin_name = IcedTeaNPPlugin.so
 
 with_wgy_zenhai = $(if $(filter $(distrel),lenny gutsy feisty edgy dapper),,yes)
 
@@ -99,8 +98,10 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 
 #stage1_openjdk_archs = alpha armel ia64 powerpc m68k mips mipsel sparc s390
-stage1_gcj_archs = amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sh4 sparc sparc64 s390
-stage1_gcj_archs = amd64 hppa ia64 lpia powerpc m68k mips mipsel sparc s390
+# FIXME Exception when building with GCJ : java.lang.ClassNotFoundException:
+# javax.tools.JavaFileManager$Location
+#stage1_gcj_archs = amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sh4 sparc sparc64 s390
+#stage1_gcj_archs = amd64 hppa ia64 lpia powerpc m68k mips mipsel sparc s390
 #stage1_gcj_archs = amd64 hppa ia64 lpia powerpc m68k mips mipsel sparc s390
 stage1_openjdk_archs = alpha amd64 armel i386 lpia
 stage1_cacao_archs =
@@ -112,8 +113,8 @@ endif
 
 ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
   # FIXME cacao doesn't build with 7, when not using gcj for stage1
-  cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
-  cacao_archs = alpha amd64 lpia powerpc m68k mips mipsel s390
+  #cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
+  #cacao_archs = alpha amd64 lpia powerpc m68k mips mipsel s390
 endif
 
 # requires patched llvm-2.6
@@ -132,13 +133,13 @@ endif
 ifneq (,$(filter $(DEB_HOST_ARCH), $(altzero_archs)))
   ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs) $(altshark_archs)))
     # FIXME: just build zero, shark doesn't build with hotspot hs16-b13.
-    alternate_vms += shark
-    zero_dir = shark
+    #alternate_vms += shark
+    #zero_dir = shark
     #alternate_vms += zero
     #zero_dir = zero
   else
-    alternate_vms += zero
-    zero_dir = zero
+    #alternate_vms += zero
+    #zero_dir = zero
   endif
 endif
 ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
@@ -781,7 +782,6 @@ packaging-files:
 	      -e 's,@plugin_name@,$(plugin_name),g' \
 	      -e 's/@pkg_plugin@/$(p_plug)/g' \
 	      -e 's,@browser_dirs@,$(browser_plugin_dirs),g' \
-	      -e 's,@last_npp_version@,$(last_npp_version),g' \
 	      -e 's,@java_launcher@,$(java_launcher),g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	    $$f > $$f2; \
