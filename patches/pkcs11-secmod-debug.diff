@@ -1,0 +1,11 @@
+--- openjdk/jdk/src/share/native/sun/security/pkcs11/j2secmod.h~	2010-02-17 04:14:45.000000000 +0100
++++ openjdk/jdk/src/share/native/sun/security/pkcs11/j2secmod.h	2010-04-12 15:00:23.903585870 +0200
+@@ -27,7 +27,7 @@
+ 
+ #include "sun_security_pkcs11_Secmod.h"
+ 
+-// #define SECMOD_DEBUG
++#define SECMOD_DEBUG
+ 
+ #include "j2secmod_md.h"
+ 

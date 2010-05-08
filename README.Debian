@@ -61,5 +61,18 @@ $ cat >> ~/.xsessionrc <<EOF
 export _JAVA_AWT_WM_NONREPARENTING=true
 EOF
 
+
+IcedTea NPPlugin
+----------------
+
+IcedTea provides a java plugin for at least mozilla based browsers.  It is
+not yet 100% with the closed source plugin, but much improved to the former
+GCJPlugin.  If you experience problems with the plugin, start your browser
+from the command line with the environment variable ICEDTEAPLUGIN_DEBUG set,
+and attach this output to a bug report.  You usually should not expect a
+quick fix, if the applet code is closed source, or only accessible after
+creating accounts for external web services using these applets.
+
+
  -- Matthias Klose <doko@ubuntu.com>  Sun, 03 May 2009 13:58:10 +0200
  -- Torsten Werner <twerner@debian.org>  Wed, 02 Apr 2008 11:46:53 +0200

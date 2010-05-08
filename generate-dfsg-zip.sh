@@ -104,4 +104,4 @@ NEW_ZIP=$(echo $1 | sed -e 's/\.tar.gz/-dfsg.tar.gz/;s/\.zip/-dfsg.tar.gz/')
 GZIP=-9v tar -cz -f $NEW_ZIP $jdkdir
 
 # Remove old unzipped openjdk dir.
-#rm -rf $jdkdir
+rm -rf $jdkdir

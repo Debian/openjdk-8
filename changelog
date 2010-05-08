@@ -4,6 +4,7 @@ openjdk-7 (7b89-1~ppa1) UNRELEASED; urgency=low
   * Add myself to Uploaders.
   * Build openjdk-7 snapshot (7b89)
   * Use ant+ant-optional (IcedTea7 support ant 1.8).
+  * Merge debian packaging r431:436 from openjdk-6.
 
  -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 27 Apr 2010 22:21:56 +0200
 
@@ -59,8 +60,26 @@ openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 14:27:03 +0100
 
-openjdk-6 (6b18~pre4-1ubuntu2) UNRELEASED; urgency=low
+openjdk-6 (6b18-1.8-2) unstable; urgency=low
 
+  * Update from the 1.8 branch.
+    - Fix build on Hitachi SH. Closes: #575346.
+    _ Shark and Zero fixes.
+  * Build shark using llvm-2.7.
+  * Don't use shark to run the test harness when testing the shark build.
+  * README.Debian: Add paragraph about debugging the IcedTea NPPlugin.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 01 May 2010 12:35:19 +0200
+
+openjdk-6 (6b18-1.8-1) unstable; urgency=low
+
+  * Upload to unstable.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 14 Apr 2010 02:53:37 +0200
+
+openjdk-6 (6b18-1.8-0ubuntu1) lucid; urgency=low
+
+  * Update IcedTea6 to the icedtea6-1.8 release.
   * Fix builds on Ubuntu/dapper and Debian/lenny.
   * On hppa, configure --without-rhino --disable-plugin.
   * Fix Hitachi SH configury. Closes: #575346.
@@ -69,8 +88,19 @@ openjdk-6 (6b18~pre4-1ubuntu2) UNRELEASED; urgency=low
   * Let XToolkit.isTraySupported() return true, if Compiz is running.
     Works around sun#6438179. LP: #300948.
   * Make <java_home>/jre/lib/security/nss.cfg a config file.
+  * Fail in the configuration of the packages, if /proc is not mounted.
+    java currently uses tricks to find its own shared libraries depending
+    on the path of the binary. Will be changed in OpenJDK7. Closes: #576453.
+  * Fix PR icedtea/469, testsuite failures with the NSS based security
+    provider. LP: #556549.
+  * Do not pass LD_LIBRARY_PATH from the plugin to the java process.
+    While libnss3.so gets loaded from /usr/lib, the dependent libraries
+    are loaded from MOZILLA_FIVE_HOME (See #561216 for the wrong firefox
+    config). LP: #561124.
+    Closes as well: LP: #551328, #554909, #560829, #549010, #553452. 
+  * Always build shark with hs14.
 
- -- Matthias Klose <doko@ubuntu.com>  Mon, 05 Apr 2010 14:04:48 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 14 Apr 2010 01:53:33 +0200
 
 openjdk-6 (6b18~pre4-1ubuntu1) lucid; urgency=low
 
@@ -919,16 +949,8 @@ openjdk-6 (6b13~pre2-0ubuntu2) jaunty; urgency=low
     - Fix build failures on zero based architectures.
   * Add build dependency on libxrender-dev.
   * Don't use fastjar on ia64, working around a build failure.
-  * Add configury for shark builds.
 
- -- Matthias Klose <doko@ubuntu.com>  Thu, 04 Dec 2008 16:26:15 +0100
-
-openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
-
-  * Build openjdk-7 snapshot (7b40).
-  * Update packaging for openjdk-7.
-
- -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 14:27:03 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 03 Dec 2008 18:43:23 +0100
 
 openjdk-6 (6b13~pre2-0ubuntu1) jaunty; urgency=low
 

@@ -97,16 +97,16 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 
-#stage1_openjdk_archs = alpha armel ia64 powerpc m68k mips mipsel sparc s390
-# FIXME Exception when building with GCJ : java.lang.ClassNotFoundException:
+# FIXME :drazzib: Exception when building with GCJ : java.lang.ClassNotFoundException:
 # javax.tools.JavaFileManager$Location
-#stage1_gcj_archs = amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sh4 sparc sparc64 s390
-#stage1_gcj_archs = amd64 hppa ia64 lpia powerpc m68k mips mipsel sparc s390
-#stage1_gcj_archs = amd64 hppa ia64 lpia powerpc m68k mips mipsel sparc s390
-stage1_openjdk_archs = alpha amd64 armel i386 lpia
+#stage1_gcj_archs = amd64 hppa i386 ia64 lpia powerpc m68k mipsel sh4 sparc sparc64 s390
+stage1_openjdk_archs = alpha armel mips amd64
 stage1_cacao_archs =
 
-ifneq (,$(filter $(distrel),hardy jaunty))
+ifneq (,$(filter nobootstrap, $(DEB_BUILD_OPTIONS)))
+  stage1_openjdk_archs := $(stage1_openjdk_archs) $(stage1_gcj_archs)
+  stage1_gcj_archs :=
+else ifneq (,$(filter $(distrel),hardy jaunty))
   stage1_openjdk_archs := $(stage1_openjdk_archs) $(stage1_gcj_archs)
   stage1_gcj_archs :=
 endif
@@ -127,21 +127,27 @@ ifneq (,$(filter $(distrel),lenny dapper hardy intrepid))
   altshark_archs =
 endif
 
-ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
-  alternate_vms += cacao
-endif
-ifneq (,$(filter $(DEB_HOST_ARCH), $(altzero_archs)))
-  ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs) $(altshark_archs)))
-    # FIXME: just build zero, shark doesn't build with hotspot hs16-b13.
-    #alternate_vms += shark
-    #zero_dir = shark
-    #alternate_vms += zero
-    #zero_dir = zero
-  else
-    #alternate_vms += zero
-    #zero_dir = zero
+ifeq (,$(filter noaltcacao, $(DEB_BUILD_OPTIONS)))
+  ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
+    alternate_vms += cacao
   endif
 endif
+ifeq (,$(filter noaltzero, $(DEB_BUILD_OPTIONS))$(filter noaltshark, $(DEB_BUILD_OPTIONS)))
+  ifneq (,$(filter $(DEB_HOST_ARCH), $(altzero_archs)))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs) $(altshark_archs)))
+      # FIXME: just build zero, shark doesn't build with hotspot hs16-b13.
+      # FIXME :drazzib: zero and shark FTBFS
+      #alternate_vms += shark
+      #zero_dir = shark
+      #alternate_vms += zero
+      #zero_dir = zero
+    else
+      #alternate_vms += zero
+      #zero_dir = zero
+    endif
+  endif
+endif
+
 ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
   STAGE1_JAVA = gcj
   ifneq (,$(filter $(distrel),dapper))
@@ -231,10 +237,22 @@ endif
 #  with_systemtap = yes
 #endif
 
-with_hotspot = new
+with_hotspot = original
+ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
+  with_hotspot = hs16
+endif
+#with_hotspot = original
+
+ifneq (,$(filter $(DEB_HOST_ARCH), sparc64))
+  export DISABLE_PRECOMPILED_HEADER=1
+endif
+
+ifeq (,$(filter $(distrel), dapper))
+  DISTRIBUTION_PATCHES += \
+	debian/patches/ld-symbolic-functions.diff
+endif
 DISTRIBUTION_PATCHES += \
 	debian/patches/set-exec-name.diff \
-	debian/patches/hotspot-warn-no-errformat.diff \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \
 	debian/patches/no-compiler-path.diff \
@@ -249,18 +267,22 @@ DISTRIBUTION_PATCHES += \
 # FIXME :drazzib: won't build in openjdk7
 #	debian/patches/icedtea-jdk-6438179.patch \
 	debian/patches/ipv4-mapped-ipv6-addresses.diff \
+	debian/patches/icedtea-override-redirect-metacity.patch \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
 
+#	debian/patches/gcc-no-hardening.diff \
 #	debian/patches/sparc-inline.diff \
+#	debian/patches/pkcs11-secmod-debug.diff \
 
 ifeq ($(with_hotspot),original)
   DISTRIBUTION_PATCHES += debian/patches/default-libpath-original.diff
 else
-  DISTRIBUTION_PATCHES += debian/patches/default-libpath.diff
+  DISTRIBUTION_PATCHES += debian/patches/default-libpath-hs17.diff
 endif
 
+#	debian/patches/hotspot-warn-no-errformat.diff \
 #	debian/patches/gcc-mtune-generic.diff \
 
 ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
@@ -413,16 +435,14 @@ endif
 
 ifeq ($(with_nss),yes)
   CONFIGURE_ARGS += --enable-nss
+else ifeq ($(with_nss),no)
+  CONFIGURE_ARGS += --disable-nss
 endif
 
 ifeq ($(with_plugin_pkg),no)
   CONFIGURE_ARGS += --disable-plugin
 else
   CONFIGURE_ARGS += --enable-plugin
-endif
-
-ifeq ($(with_systemtap),yes)
-  CONFIGURE_ARGS += --enable-systemtap --with-abs-install-dir=/$(basedir)
 endif
 
 ifeq ($(with_systemtap),yes)
@@ -523,11 +543,15 @@ bd_zero = \
 
 ifneq (,$(shark_archs))
   bd_zero = $(pkg_ffidev),
-  ifneq (,$(filter $(distrel),lucid maverick))
-    bd_shark = llvm-dev (>= 2.7~svn20100308) [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
-    bd_shark += oprofile [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
-  else ifneq (,$(filter $(distrel),karmic squeeze sid))
+  ifneq (,$(filter $(distrel),karmic))
     bd_shark = llvm-dev (>= 2.6) [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
+  else ifneq (,$(filter $(distrel),lucid))
+    bd_shark = llvm-dev (>= 2.7) [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
+    bd_shark += oprofile [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
+  else ifneq (,$(filter $(distrel),dapper hardy intrepid jaunty lenny etch))
+    bd_shark =
+  else
+    bd_shark = llvm-2.7-dev [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
   endif
 endif
 
@@ -572,7 +596,7 @@ endif
 ifeq ($(with_pulse),yes)
   bd_pulsejava = libpulse-dev (>= 0.9.12),
 endif
-ifeq ($(with_nss),yes)
+ifneq ($(with_nss),no)
   bd_nss = libnss3-dev (>= 3.12.3),
 endif
 ifeq ($(with_systemtap),yes)
@@ -582,7 +606,7 @@ endif
 dlopen_hl_depends = \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2,libcups2), \
 	liblcms1, $(if $(findstring jpeg7, $(bd_syslibs)),libjpeg7,libjpeg62)
-ifeq ($(with_nss),yes)
+ifneq ($(with_nss),no)
   dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
 endif
 dlopen_hl_recommends = \
@@ -794,7 +818,10 @@ endif
 
 icedtea-configure: stamps/icedtea-configure
 stamps/icedtea-configure:
+ifeq ($(on_buildd),yes)
 	-cat /etc/hosts
+endif
+
 	mkdir -p bin
 ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 hppa ppc64 s390x))
 	( \
@@ -806,18 +833,21 @@ ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 hppa ppc64 s390x))
 	  echo 'fi'; \
 	) > bin/uname
 	chmod +x bin/uname
+	echo "UNAME checks"
+	uname -a
+	/bin/uname -a
 endif
 
 ifneq (,$(filter $(distrel),dapper))
 	ln -sf /bin/true bin/sha256sum
 # Needed for patches/ecj/icedtea.patch
+	ln -sf /usr/bin/gcj-4.4 bin/gcj
 endif
 
-	ln -sf /usr/bin/gcj-4.4 bin/gcj
 	mkdir -p stamps
 	mkdir -p build
 	chmod +x configure
-	cd build && $(EXTRA_BUILD_ENV) ../configure $(CONFIGURE_ARGS)
+	cd build && $(EXTRA_BUILD_ENV) CXXFLAGS='-g -O2 -fno-stack-protector -U_FORTIFY_SOURCE' CFLAGS='-g -O2 -fno-stack-protector -U_FORTIFY_SOURCE' ../configure $(CONFIGURE_ARGS)
 	touch $@
 
 unpack: stamps/unpack
@@ -860,11 +890,11 @@ ifeq ($(with_check),yes)
     endif
 
     ifneq (,$(filter shark, $(alternate_vms)))
-      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc))
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 armel i386 lpia powerpc))
         # only activate after testing
         with_mauve_check += $(if $(filter $(DEB_HOST_ARCH),$(altshark_archs)),shark,zero)
       endif
-      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc))
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 armel i386 lpia powerpc))
         # only activate after testing; hangs several tests.
         with_jtreg_check += $(if $(filter $(DEB_HOST_ARCH),$(altshark_archs)),shark,zero)
       endif
@@ -1042,15 +1072,23 @@ stamps/jtreg-check-default: stamps/build stamps/xvfb-check
 	touch $@
 
 stamps/jtreg-check-cacao: stamps/build stamps/xvfb-check
-	$(MAKE) -f debian/rules jtreg-run-check VMNAME=cacao VMARGS='-vmoption:-cacao'
+	ICEDTEA_JTREG_OTHERVM=-othervm \
+	  $(MAKE) -f debian/rules jtreg-run-check VMNAME=cacao VMARGS='-vmoption:-cacao'
 	touch $@
 
 stamps/jtreg-check-shark: stamps/build stamps/xvfb-check
-	$(MAKE) -f debian/rules jtreg-run-check VMNAME=shark VMARGS='-vmoption:-shark'
+	ICEDTEA_JTREG_OTHERVM=-othervm \
+	  $(MAKE) -f debian/rules jtreg-run-check VMNAME=shark VMARGS='-vmoption:-shark'
 	touch $@
 
 stamps/jtreg-check-zero: stamps/build stamps/xvfb-check
+# zero as alternate VM is always built with shark (primary VM is hotspot)
+ifneq (,$(filter zero, $(alternate_vms)))
 	$(MAKE) -f debian/rules jtreg-run-check VMNAME=zero VMARGS='-vmoption:-zero'
+else
+	ICEDTEA_JTREG_OTHERVM=-othervm \
+	  $(MAKE) -f debian/rules jtreg-run-check VMNAME=zero VMARGS='-vmoption:-zero'
+endif
 	touch $@
 
 jtreg-run-check:
@@ -1120,6 +1158,7 @@ clean: debian-clean
 	rm -f jtreg_output* xvfb-run.log
 	rm -f buildwatch.pid
 	rm -f plugin/icedteanp/*.o plugin/icedteanp/*.so
+
 	dh_clean
 
 debian-clean:
@@ -1226,7 +1265,7 @@ endif
 	  management/management.properties \
 	  security/java.policy \
 	  security/java.security \
-	  $(if $(filter $(with_nss),yes),security/nss.cfg) \
+	  $$([ -f $(d)/$(basedir)/jre/lib/security/nss.cfg ] && echo security/nss.cfg) \
 	  $(if $(findstring ca-cert,$(pkg_certs)),,security/cacerts); \
 	do \
 	  mv $(d)/$(basedir)/jre/lib/$$i $(d)/etc/$(jdiralias)/$$i; \
@@ -1579,7 +1618,7 @@ endif
 	dh_builddeb -i $(nodocs) $(bd_options)
 
 absarchdir = $(CURDIR)/$(d_jrehl)/$(basedir)/jre/lib/$(archdir)
-shlibdeps_ld_path =$(absarchdir):$(absarchdir)/client:$(absarchdir)/server:$(absarchdir)/native_threads:$(shell echo /usr/lib/xulrunner-$$($$(basename $$(pkg-config --libs-only-L libxul | sed  's/^-L//;s/-devel//;s,/lib *$$,,' )) --gre-version | sed 's/^\(.....\).*/\1/'))
+shlibdeps_ld_path =$(absarchdir):$(absarchdir)/client:$(absarchdir)/server:$(absarchdir)/native_threads$(if $(xulrunner_depends),:$(shell pkg-config --libs-only-L libxul | sed  's/^-L//;s/-devel//;s,/lib *$$,,'))
 
 # Build architecture dependant packages
 binary-arch: build install

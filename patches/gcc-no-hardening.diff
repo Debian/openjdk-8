@@ -1,0 +1,54 @@
+--- openjdk/corba/make/common/Defs-linux.gmk.orig	2010-04-22 09:58:17.181086515 +0200
++++ openjdk/corba/make/common/Defs-linux.gmk	2010-04-26 14:24:18.061085475 +0200
+@@ -76,10 +76,10 @@
+ #
+ # Default optimization
+ #
+-CC_HIGHEST_OPT = -O3
+-CC_HIGHER_OPT  = -O3
+-CC_LOWER_OPT   = -O2
+-CC_NO_OPT      =
++CC_HIGHEST_OPT = -O3 -fno-stack-protector -U_FORTIFY_SOURCE
++CC_HIGHER_OPT  = -O3 -fno-stack-protector -U_FORTIFY_SOURCE
++CC_LOWER_OPT   = -O2 -fno-stack-protector -U_FORTIFY_SOURCE
++CC_NO_OPT      = -fno-stack-protector -U_FORTIFY_SOURCE
+ 
+ ifeq ($(PRODUCT), java)
+     _OPT = $(CC_HIGHER_OPT)
+--- openjdk/jdk/make/common/Defs-linux.gmk.orig	2010-04-22 09:58:17.181086515 +0200
++++ openjdk/jdk/make/common/Defs-linux.gmk	2010-04-26 14:23:05.512336179 +0200
+@@ -86,10 +86,10 @@
+ #
+ # Default optimization
+ #
+-CC_HIGHEST_OPT = -O3
+-CC_HIGHER_OPT  = -O3
+-CC_LOWER_OPT   = -O2
+-CC_NO_OPT      =
++CC_HIGHEST_OPT = -O3 -fno-stack-protector -U_FORTIFY_SOURCE
++CC_HIGHER_OPT  = -O3 -fno-stack-protector -U_FORTIFY_SOURCE
++CC_LOWER_OPT   = -O2 -fno-stack-protector -U_FORTIFY_SOURCE
++CC_NO_OPT      = -fno-stack-protector -U_FORTIFY_SOURCE
+ 
+ ifeq ($(PRODUCT), java)
+     _OPT = $(CC_HIGHER_OPT)
+--- openjdk/hotspot/make/linux/makefiles/gcc.make.orig	2010-04-22 09:58:17.181086515 +0200
++++ openjdk/hotspot/make/linux/makefiles/gcc.make	2010-04-26 14:22:27.202335807 +0200
+@@ -116,7 +116,7 @@
+ CFLAGS_WARN/BYFILE = $(CFLAGS_WARN/$@)$(CFLAGS_WARN/DEFAULT$(CFLAGS_WARN/$@)) 
+ 
+ # The flags to use for an Optimized g++ build
+-OPT_CFLAGS += -O3
++OPT_CFLAGS += -O3 -fno-stack-protector -U_FORTIFY_SOURCE
+ 
+ # Hotspot uses very unstrict aliasing turn this optimization off
+ OPT_CFLAGS += -fno-strict-aliasing
+@@ -127,7 +127,7 @@
+ OPT_CFLAGS += -fno-expensive-optimizations
+ endif
+ 
+-OPT_CFLAGS/NOOPT=-O0
++OPT_CFLAGS/NOOPT=-O0 -fno-stack-protector -U_FORTIFY_SOURCE
+ 
+ # 6835796. Problem in GCC 4.3.0 with mulnode.o optimized compilation.
+ ifneq "$(shell expr \( \( $(CC_VER_MAJOR) = 4 \) \& \( $(CC_VER_MINOR) = 3 \) \))" "0"
