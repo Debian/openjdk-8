@@ -1,0 +1,10 @@
+--- openjdk/jdk/src/solaris/classes/sun/awt/X11/XWindowPeer.java.orig	2008-05-25 17:31:31.000000000 +0200
++++ openjdk/jdk/src/solaris/classes/sun/awt/X11/XWindowPeer.java	2008-05-25 17:33:32.000000000 +0200
+@@ -1125,6 +1123,8 @@
+ 
+     boolean isOverrideRedirect() {
+         return (XWM.getWMID() == XWM.OPENLOOK_WM ? true : false) ||
++            (XWM.getWMID() == XWM.METACITY_WM ? true : false) ||
++            (XWM.getWMID() == XWM.COMPIZ_WM ? true : false) ||
+             ((XToolkit)Toolkit.getDefaultToolkit()).isOverrideRedirect((Window)target) ||
+             XTrayIconPeer.isTrayIconStuffWindow((Window)target);

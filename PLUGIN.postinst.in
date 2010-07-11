@@ -13,6 +13,7 @@ for browser_dir in $browser_dirs; do
     else
         browser=$browser_dir
     fi
+
     update-alternatives --quiet --install \
 	/usr/lib/$browser_dir/plugins/libjavaplugin.so \
 	$browser-javaplugin.so \

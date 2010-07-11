@@ -2,9 +2,10 @@ Source: openjdk-7
 Section: java
 Priority: optional
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
-Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
-Build-Depends: debhelper (>= 5), autotools-dev, lzma, m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, automake, autoconf, ant, libtool, cacao-source (>= 0.99.4~), g++-4.4 (>= 4.4.1),  ecj-gcj [amd64 hppa ia64 lpia powerpc m68k mips mipsel sparc s390], gcj-jdk [amd64 hppa ia64 lpia powerpc m68k mips mipsel sparc s390], openjdk-6-jdk (>= 6b14) [alpha amd64 armel i386 lpia], libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, libfreetype6-dev, libgtk2.0-dev, libxalan2-java, rhino, liblcms1-dev, libxinerama-dev, libffi-dev, llvm-dev (>= 2.5) [amd64 i386 lpia armel powerpc], libjpeg62-dev, libpng12-dev, libgif-dev, zlib1g-dev, xulrunner-dev (>= 1.9.1), fastjar (>= 2:0.96-0ubuntu2), libpulse-dev (>= 0.9.12), libnss3-dev (>= 3.12.3),  mauve, xvfb, autoconf, automake, xauth, xfonts-base
-Standards-Version: 3.8.3
+Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>,
+ Damien Raude-Morvan <drazzib@debian.org>
+Build-Depends: debhelper (>= 5), m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time,  autoconf, automake, autotools-dev, ant, ant-optional, libtool, cacao-source (>= 0.99.4~), g++-4.4 (>= 4.4.1),  ecj-gcj [amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sh4 sparc sparc64 s390], gcj-jdk [amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sh4 sparc sparc64 s390], openjdk-6-jdk (>= 6b11) [alpha armel], libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, libxalan2-java, liblcms1-dev, libxinerama-dev, rhino, libffi-dev, llvm-2.7-dev [amd64 i386 lpia armel powerpc], libpng12-dev, zlib1g-dev, libjpeg62-dev, libgif-dev, xulrunner-dev (>= 1.9.1.3-3) [!alpha !sparc64], fastjar (>= 2:0.96-0ubuntu2), libpulse-dev (>= 0.9.12), libnss3-dev (>= 3.12.3),  mauve, xvfb, xauth, xfonts-base, libgl1-mesa-dri, metacity | twm, x11-xkb-utils,
+Standards-Version: 3.8.4
 Homepage: http://openjdk.java.net/
 Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~openjdk/openjdk/openjdk7
 Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk7
@@ -16,7 +17,7 @@ Depends: openjdk-7-jre (>= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends
 Recommends: libxt-dev
 Suggests: openjdk-7-demo, openjdk-7-source, visualvm
 Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk, java-compiler
-Conflicts: openjdk-7-jre-headless (<< 7b77-0), openjdk-7-jre (<< 7b77-0)
+Conflicts: openjdk-7-jre-headless (<< 7b89-0), openjdk-7-jre (<< 7b89-0)
 Description: OpenJDK Development Kit (JDK)
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -27,12 +28,12 @@ Description: OpenJDK Development Kit (JDK)
 Package: openjdk-7-jre-headless
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-7-jre-lib (>= ${source:Version}), ca-certificates-java, tzdata-java, rhino, java-common (>= 0.28), ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: openjdk-7-jre-lib (>= ${source:Version}), ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}
-Suggests: libnss-mdns, sun-java6-fonts, ttf-dejavu-core, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-kochi-gothic | ttf-sazanami-gothic, ttf-kochi-mincho | ttf-sazanami-mincho, ttf-wqy-zenhei, ttf-indic-fonts-core, ttf-telugu-fonts, ttf-oriya-fonts, ttf-kannada-fonts, ttf-bengali-fonts,
+Suggests: libnss-mdns, sun-java6-fonts, ttf-dejavu-core, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-sazanami-gothic | ttf-kochi-gothic, ttf-sazanami-mincho | ttf-kochi-mincho, ttf-wqy-zenhei, ttf-indic-fonts,
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, ${defaultvm:Provides}
 Replaces: openjdk-7-jre-lib (<< 6b06-0ubuntu11), openjdk-7-jre (<< 6b09dfsg-0ubuntu2)
-Conflicts: openjdk-7-jre-lib (<< 7b77-0), openjdk-7-jre (<< 7b77-0), openjdk-7-jdk (<< 7b77-0), openjdk-7-demo (<< 7b77-0), openjdk-7-source (<< 7b77-0), openjdk-7-doc (<< 7b77-0), openjdk-7-dbg (<< 7b77-0), openjdk-7-jre-zero (<< 7b77-0)
+Conflicts: openjdk-7-jre-lib (<< 7b89-0), openjdk-7-jre (<< 7b89-0), openjdk-7-jdk (<< 7b89-0), openjdk-7-demo (<< 7b89-0), openjdk-7-source (<< 7b89-0), openjdk-7-doc (<< 7b89-0), openjdk-7-dbg (<< 7b89-0), openjdk-7-jre-zero (<< 7b89-0)
 Description: OpenJDK Java runtime, using ${vm:Name} (headless)
  Minimal Java runtime - needed for executing non GUI Java programs.
  Using ${vm:Name}.
@@ -46,7 +47,7 @@ Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (>= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
 Recommends: ${dlopenjre:Recommends}
 Suggests: icedtea6-plugin, ${pkg:pulseaudio}
-Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4), openjdk-7-jre-lib (<< 7b77-0), openjdk-7-jre-headless (<< 7b77-0), openjdk-7-jdk (<< 7b77-0), openjdk-7-demo (<< 7b77-0), openjdk-7-source (<< 7b77-0), openjdk-7-doc (<< 7b77-0), openjdk-7-dbg (<< 7b77-0), openjdk-7-jre-zero (<< 7b77-0)
+Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4), openjdk-7-jre-lib (<< 7b89-0), openjdk-7-jre-headless (<< 7b89-0), openjdk-7-jdk (<< 7b89-0), openjdk-7-demo (<< 7b89-0), openjdk-7-source (<< 7b89-0), openjdk-7-doc (<< 7b89-0), openjdk-7-dbg (<< 7b89-0), openjdk-7-jre-zero (<< 7b89-0)
 Replaces: openjdk-6-jre-headless (<< 6b16~pre3)
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
 Description: OpenJDK Java runtime, using ${vm:Name}
@@ -61,7 +62,7 @@ Architecture: all
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (>= ${base:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
-Conflicts: openjdk-7-jre-headless (<< 7b77-0), openjdk-7-jre (<< 7b77-0)
+Conflicts: openjdk-7-jre-headless (<< 7b89-0), openjdk-7-jre (<< 7b89-0)
 Description: OpenJDK Java runtime (architecture independent libraries)
  OpenJDK Java runtime, using ${vm:Name}.
  .
@@ -73,7 +74,7 @@ Architecture: any
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre (>= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
-Conflicts: openjdk-7-jre-headless (<< 7b77-0), openjdk-7-jre (<< 7b77-0)
+Conflicts: openjdk-7-jre-headless (<< 7b89-0), openjdk-7-jre (<< 7b89-0)
 Description: Java runtime based on OpenJDK (demos and examples)
  OpenJDK Java runtime
  .
@@ -84,8 +85,8 @@ Package: openjdk-7-source
 Architecture: all
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-7-jre (>= ${source:Version}), openjdk-7-jdk (>= ${binary:Version})
-Conflicts: openjdk-7-jre-headless (<< 7b77-0), openjdk-7-jre (<< 7b77-0)
+Depends: openjdk-7-jre (>= ${source:Version}), openjdk-7-jdk (>= ${binary:Version}), ${misc:Depends}
+Conflicts: openjdk-7-jre-headless (<< 7b89-0), openjdk-7-jre (<< 7b89-0)
 Description: OpenJDK Development Kit (JDK) source files
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -101,7 +102,9 @@ Section: doc
 Pre-Depends: ${dpkg:Depends}
 Architecture: all
 Suggests: openjdk-7-jdk
-Conflicts: openjdk-7-jre-headless (<< 7b77-0), openjdk-7-jre (<< 7b77-0)
+Conflicts: openjdk-7-jre-headless (<< 7b89-0), openjdk-7-jre (<< 7b89-0)
+Priority: extra
+Depends: ${misc:Depends}
 Description: OpenJDK Development Kit (JDK) documentation
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -116,10 +119,10 @@ Architecture: any
 Priority: extra
 Section: debug
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-7-jre-headless (= ${binary:Version})
+Depends: openjdk-7-jre-headless (= ${binary:Version}), ${misc:Depends}
 Recommends: openjdk-7-jre (= ${binary:Version})
 Suggests: openjdk-7-jdk (= ${binary:Version})
-Conflicts: openjdk-7-jre-headless (<< 7b77-0), openjdk-7-jre (<< 7b77-0)
+Conflicts: openjdk-7-jre-headless (<< 7b89-0), openjdk-7-jre (<< 7b89-0)
 Description: Java runtime based on OpenJDK (debugging symbols)
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -132,7 +135,7 @@ Description: Java runtime based on OpenJDK (debugging symbols)
 Package: icedtea-7-plugin
 Section: web
 Architecture: any
-Priority: optional
+Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4), icedtea7-plugin
@@ -169,7 +172,7 @@ Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Provides: ${zerovm:Provides}
-Conflicts: openjdk-7-jre-headless (<< 7b77-0), openjdk-7-jre (<< 7b77-0)
+Conflicts: openjdk-7-jre-headless (<< 7b89-0), openjdk-7-jre (<< 7b89-0)
 Description: Alternative JVM for OpenJDK, using Zero/Shark
  The package provides an alternative runtime using the Zero VM and the 
  Shark Just In Time Compiler (JIT).  Built on architectures in addition

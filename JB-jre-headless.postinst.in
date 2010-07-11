@@ -13,6 +13,14 @@ jre_tools='@jre_hl_tools@'
 
 case "$1" in
 configure)
+    # fail early.  java currently uses tricks to find its own shared
+    # libraries depending on the path of the binary. Will be changed
+    # in OpenJDK7
+    if ! mountpoint -q /proc; then
+	echo >&2 "the java command requires a mounted proc fs (/proc)."
+	exit 1
+    fi
+
     [ -d /etc/.java ] || mkdir -m 755 /etc/.java
     [ -d /etc/.java/.systemPrefs ] || mkdir -m 755 /etc/.java/.systemPrefs
     if [ ! -f /etc/.java/.systemPrefs/.system.lock ]; then
@@ -59,8 +67,6 @@ configure)
     if which update-binfmts >/dev/null && [ -r /usr/share/binfmts/jar ]; then
         update-binfmts --package @basename@ --import jar || true
     fi
-
-    mount | grep -qs 'on /proc type proc' || echo >&2 "/proc is not mounted; some java apps may fail"
 
     # activate class data sharing
     case @jdiralias@ in

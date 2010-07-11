@@ -1,0 +1,111 @@
+diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/linux_close.c openjdk/jdk/src/solaris/native/java/net/linux_close.c
+--- openjdk.orig/jdk/src/solaris/native/java/net/linux_close.c	2010-02-17 04:14:47.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/net/linux_close.c	2010-03-27 20:24:26.000000000 +0100
+@@ -37,6 +37,8 @@
+ 
+ #include <sys/poll.h>
+ 
++#include "net_util.h"
++
+ /*
+  * Stack allocated by thread when doing blocking operation
+  */
+@@ -301,9 +303,16 @@
+     BLOCKING_IO_RETURN_INT( s, accept(s, addr, addrlen) );
+ }
+ 
+-int NET_Connect(int s, struct sockaddr *addr, int addrlen) {
++static int NET_Connect_final(int s, struct sockaddr *addr, int addrlen) {
+     BLOCKING_IO_RETURN_INT( s, connect(s, addr, addrlen) );
+ }
++int NET_Connect(int s, struct sockaddr *addr, int addrlen) {
++    int rv = check_ipv4mapped_address(s, addr);
++    if (rv < 0) {
++        return rv;
++    }
++    return NET_Connect_final(s, addr, addrlen);
++}
+ 
+ #ifndef USE_SELECT
+ int NET_Poll(struct pollfd *ufds, unsigned int nfds, int timeout) {
+diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/net_util_md.c openjdk/jdk/src/solaris/native/java/net/net_util_md.c
+--- openjdk.orig/jdk/src/solaris/native/java/net/net_util_md.c	2010-02-17 04:14:47.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/net/net_util_md.c	2010-03-27 19:44:32.000000000 +0100
+@@ -1215,6 +1215,39 @@
+     return setsockopt(fd, level, opt, arg, len);
+ }
+ 
++/* 
++ * Check for IPv4 mapped or unspecified IPv6 addresses and disable
++ * IPV6_V6ONLY in such cases. This function is called from NET_Bind and
++ * NET_Connect and fixes
++ * http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6342561 .
++ */
++int
++check_ipv4mapped_address(int fd, struct sockaddr *him)
++{
++#if defined(AF_INET6)
++    if (ipv6_available()) {
++	struct sockaddr_in6 *him6 = (struct sockaddr_in6 *)him;
++	/* switch off IPV6_V6ONLY if needed */
++	if (IN6_IS_ADDR_V4MAPPED(& him6->sin6_addr) ||
++	    IN6_IS_ADDR_UNSPECIFIED(& him6->sin6_addr)) {
++	    int value = 42;
++            int len = sizeof(value);
++            int rv = getsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
++                &value, &len);
++            if (rv < 0) {
++                return rv;
++            }
++            if (value > 0) {
++                value = 0;
++	        return setsockopt(fd, IPPROTO_IPV6, IPV6_V6ONLY,
++	    	    &value, sizeof(value));
++            }
++	}
++    }
++#endif
++    return 0;
++}
++
+ /*
+  * Wrapper for bind system call - performs any necessary pre/post
+  * processing to deal with OS specific issues :-
+@@ -1251,6 +1284,11 @@
+     }
+ #endif
+ 
++    rv = check_ipv4mapped_address(fd, him);
++    if (rv < 0) {
++        return rv;
++    }
++
+ #if defined(__solaris__) && defined(AF_INET6)
+     /*
+      * Solaris 8/9 have seperate IPv4 and IPv6 port spaces so we
+diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/net_util_md.h openjdk/jdk/src/solaris/native/java/net/net_util_md.h
+--- openjdk.orig/jdk/src/solaris/native/java/net/net_util_md.h	2010-02-17 04:14:47.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/net/net_util_md.h	2010-03-27 20:24:26.000000000 +0100
+@@ -36,6 +36,7 @@
+ #include <sys/poll.h>
+ #endif
+ 
++extern int check_ipv4mapped_address(int fd, struct sockaddr *him);
+ 
+ #ifdef __linux__
+ extern int NET_Timeout(int s, long timeout);
+diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/PlainSocketImpl.c openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c
+--- openjdk.orig/jdk/src/solaris/native/java/net/PlainSocketImpl.c	2010-03-27 20:23:58.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c	2010-03-27 20:24:26.000000000 +0100
+@@ -401,8 +401,9 @@
+          */
+         SET_NONBLOCKING(fd);
+ 
+-        /* no need to use NET_Connect as non-blocking */
+-        connect_rv = connect(fd, (struct sockaddr *)&him, len);
++        /* no need to use NET_Connect as non-blocking; BUT! We want to
++         * support IPv4 mapped IPv6 adresses. */
++        connect_rv = NET_Connect(fd, (struct sockaddr *)&him, len);
+ 
+         /* connection not established immediately */
+         if (connect_rv != 0) {
