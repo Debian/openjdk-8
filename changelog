@@ -1,12 +1,20 @@
-openjdk-7 (7b89-1~ppa1) UNRELEASED; urgency=low
+openjdk-7 (7b89~pre1-0lucid1) lucid; urgency=low
 
+  [ Damien Raude-Morvan ]
   * Merge debian packaging r403:430 from openjdk-6.
   * Add myself to Uploaders.
   * Build openjdk-7 snapshot (7b89)
   * Use ant+ant-optional (IcedTea7 support ant 1.8).
   * Merge debian packaging r431:436 from openjdk-6.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 27 Apr 2010 22:21:56 +0200
+  [ Matthias Klose ]
+  * Merge debian packaging r430:445 from openjdk-6.
+  * Update debian patches to 7b89.
+  * Reenable the two stage build.
+  * Reenable building cacao.
+  * Reenable building zero.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 13 Jul 2010 10:32:11 +0200
 
 openjdk-7 (7b77-0ubuntu1~ppa1) lucid; urgency=low
 
@@ -59,12 +67,51 @@ openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
   * Update packaging for openjdk-7.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 14:27:03 +0100
+openjdk-6 (6b20~pre1-1) experimental; urgency=low
+
+  * Upload to experimental.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 28 Jun 2010 00:50:58 +0200
+
+openjdk-6 (6b20~pre1-0ubuntu2) maverick; urgency=low
+
+  * Shark & CACAO build fixes.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 25 Jun 2010 02:27:10 +0200
+
+openjdk-6 (6b20~pre1-0ubuntu1) maverick; urgency=low
+
+  * Update to 6b20 code drop.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 14 Apr 2010 02:53:37 +0200
+
+openjdk-6 (6b18-1.8-2ubuntu3) maverick; urgency=low
+
+  * Update from the 1.8 branch.
+    - Plugin fixes. LP: #597714.
+  * Add powerpcspe build fixes (Sebastian Andrzej Siewior). Closes: #586359.
+  * Work around build failure on buildds configured with low ARG_MAX
+    (Giovanni Mascellani). Closes: #575254.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 27 Jun 2010 10:16:27 +0200
+
+openjdk-6 (6b18-1.8-2ubuntu2) maverick; urgency=low
+
+  * Search for unversioned llvm-config tool.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 02 May 2010 12:03:01 +0200
+
+openjdk-6 (6b18-1.8-2ubuntu1) maverick; urgency=low
+
+  * Upload to maverick.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 02 May 2010 11:23:16 +0200
 
 openjdk-6 (6b18-1.8-2) unstable; urgency=low
 
   * Update from the 1.8 branch.
     - Fix build on Hitachi SH. Closes: #575346.
-    _ Shark and Zero fixes.
+    - Shark and Zero fixes.
   * Build shark using llvm-2.7.
   * Don't use shark to run the test harness when testing the shark build.
   * README.Debian: Add paragraph about debugging the IcedTea NPPlugin.

@@ -1,13 +1,14 @@
 
-tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz jdk7-jaf-2009_08_28.zip  jdk7-jaxp-m6.zip  jdk7-jaxws-2009_09_28.zip"
-tarballdir=b89
-version=7b89
+tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz"
+tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk.tar.gz langtools.tar.gz openjdk.tar.gz"
+tarballdir=src
+version=7b89~pre1
 cacaotb=cacao-0.99.4.tar.bz2
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
-icedtea_checkout=icedtea7
+icedtea_checkout=../icedtea7
 debian_checkout=openjdk7
 
 if [ -d $pkgdir ]; then
@@ -35,6 +36,7 @@ else
         for i in $tarballs; do
 	    cp -p $tarballdir/$i $pkgdir.orig/
 	done
+	cp -a $tarballdir/drops $pkgdir.orig/
 	;;
     esac
     tar -c -f - -C $icedtea_checkout . | tar -x -f - -C $pkgdir.orig

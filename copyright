@@ -29,6 +29,7 @@ IcedTea (see AUTHORS for a current list):
 
 OpenJDK:
     Sun Microsystems, Inc.
+    Oracle and/or its affiliates.
 
 Java Access Bridge:
     Bill Haneman <bill.haneman@sun.com>
@@ -73,6 +74,7 @@ IcedTea:
     
 OpenJDK:
     Copyright © 1996-2007 Sun Microsystems, Inc.
+    Copyright © 1996-2007 Oracle and/or its affiliates.
     For third party copyrights see below (copies from the third party readme).
     Portions Copyright © 1993-1999 IBM Corp.
     Portions Copyright © 1997 Eastman Kodak Company.
@@ -89,7 +91,7 @@ Java Access Bridge:
     Portions Copyright © 2002-2007 Darren Kenny <darren.kenny@sun.com>
 
 Packaging:
-    Copyright © 2007, 2008 Canonical Ltd.
+    Copyright © 2007, 2008, 2009, 2010 Canonical Ltd.
 
 ------------------------------------------------------------------------------
 License:

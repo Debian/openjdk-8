@@ -6,7 +6,7 @@ Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
 Build-Depends: debhelper (>= 5), m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, @bd_compress@ @bd_autotools@ @bd_ant@ @bd_cacao@ @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_shark@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_pulsejava@ @bd_nss@ @bd_systemtap@ @bd_mauve@ @bd_xvfb@
 Standards-Version: 3.8.4
 Homepage: http://openjdk.java.net/
-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~openjdk/openjdk/openjdk7
+Vcs-Bzr: http://bazaar.launchpad.net/~openjdk/openjdk/openjdk7
 Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk7
 
 Package: @basename@-jdk

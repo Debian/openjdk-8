@@ -2,12 +2,11 @@ Source: openjdk-7
 Section: java
 Priority: optional
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
-Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>,
- Damien Raude-Morvan <drazzib@debian.org>
-Build-Depends: debhelper (>= 5), m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time,  autoconf, automake, autotools-dev, ant, ant-optional, libtool, cacao-source (>= 0.99.4~), g++-4.4 (>= 4.4.1),  ecj-gcj [amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sh4 sparc sparc64 s390], gcj-jdk [amd64 hppa i386 ia64 lpia powerpc m68k mips mipsel sh4 sparc sparc64 s390], openjdk-6-jdk (>= 6b11) [alpha armel], libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, libxalan2-java, liblcms1-dev, libxinerama-dev, rhino, libffi-dev, llvm-2.7-dev [amd64 i386 lpia armel powerpc], libpng12-dev, zlib1g-dev, libjpeg62-dev, libgif-dev, xulrunner-dev (>= 1.9.1.3-3) [!alpha !sparc64], fastjar (>= 2:0.96-0ubuntu2), libpulse-dev (>= 0.9.12), libnss3-dev (>= 3.12.3),  mauve, xvfb, xauth, xfonts-base, libgl1-mesa-dri, metacity | twm, x11-xkb-utils,
+Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
+Build-Depends: debhelper (>= 5), m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time,  autoconf, automake, autotools-dev, ant, ant-optional, libtool, cacao-source (>= 1.1.0~), g++-4.4 (>= 4.4.1),  ecj-gcj [amd64 armel hppa i386 ia64 lpia powerpc powerpcspe m68k mips mipsel sh4 sparc sparc64 s390], gcj-jdk [amd64 armel hppa i386 ia64 lpia powerpc powerpcspe m68k mips mipsel sh4 sparc sparc64 s390], openjdk-6-jdk (>= 6b14) [alpha], libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, libxalan2-java, liblcms1-dev, libxinerama-dev, rhino, libffi-dev, llvm-dev (>= 2.7) [amd64 i386 lpia armel powerpc], oprofile [amd64 i386 lpia armel powerpc], libpng12-dev, zlib1g-dev, libjpeg62-dev, libgif-dev, xulrunner-1.9.2-dev, fastjar (>= 2:0.96-0ubuntu2), libpulse-dev (>= 0.9.12), libnss3-dev (>= 3.12.3),  mauve, xvfb, xauth, xfonts-base, libgl1-mesa-dri, metacity, x11-xkb-utils,
 Standards-Version: 3.8.4
 Homepage: http://openjdk.java.net/
-Vcs-Bzr: bzr+ssh://<user>@bazaar.launchpad.net/~openjdk/openjdk/openjdk7
+Vcs-Bzr: http://bazaar.launchpad.net/~openjdk/openjdk/openjdk7
 Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk7
 
 Package: openjdk-7-jdk
@@ -30,7 +29,7 @@ Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-lib (>= ${source:Version}), ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}
-Suggests: libnss-mdns, sun-java6-fonts, ttf-dejavu-core, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-sazanami-gothic | ttf-kochi-gothic, ttf-sazanami-mincho | ttf-kochi-mincho, ttf-wqy-zenhei, ttf-indic-fonts,
+Suggests: libnss-mdns, sun-java6-fonts, ttf-dejavu-core, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-sazanami-gothic | ttf-kochi-gothic, ttf-sazanami-mincho | ttf-kochi-mincho, ttf-wqy-zenhei, ttf-indic-fonts-core, ttf-telugu-fonts, ttf-oriya-fonts, ttf-kannada-fonts, ttf-bengali-fonts,
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, ${defaultvm:Provides}
 Replaces: openjdk-7-jre-lib (<< 6b06-0ubuntu11), openjdk-7-jre (<< 6b09dfsg-0ubuntu2)
 Conflicts: openjdk-7-jre-lib (<< 7b89-0), openjdk-7-jre (<< 7b89-0), openjdk-7-jdk (<< 7b89-0), openjdk-7-demo (<< 7b89-0), openjdk-7-source (<< 7b89-0), openjdk-7-doc (<< 7b89-0), openjdk-7-dbg (<< 7b89-0), openjdk-7-jre-zero (<< 7b89-0)
@@ -101,10 +100,10 @@ Package: openjdk-7-doc
 Section: doc
 Pre-Depends: ${dpkg:Depends}
 Architecture: all
-Suggests: openjdk-7-jdk
-Conflicts: openjdk-7-jre-headless (<< 7b89-0), openjdk-7-jre (<< 7b89-0)
 Priority: extra
 Depends: ${misc:Depends}
+Suggests: openjdk-7-jdk
+Conflicts: openjdk-7-jre-headless (<< 7b89-0), openjdk-7-jre (<< 7b89-0)
 Description: OpenJDK Development Kit (JDK) documentation
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -137,9 +136,9 @@ Section: web
 Architecture: any
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-7-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
-Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4), icedtea7-plugin
-Replaces: icedtea-gcjwebplugin, openjdk-7-jre (<< 6b12), icedtea7-plugin
+Depends: openjdk-7-jre (= ${binary:Version}), ${xulrunner:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Conflicts: icedtea7-plugin
+Replaces: openjdk-7-jre (<< 6b12), icedtea7-plugin
 Provides: icedtea7-plugin
 Xb-Npp-Description: IcedTea7 Java Web Browser Plugin (execution of applets on web pages)
 Xb-Npp-Applications: ec8030f7-c20a-464f-9b0e-13a3a9e97384, 92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a, aa5ca914-c309-495d-91cf-3141bbb04115
@@ -153,7 +152,7 @@ Description: web browser plugin based on OpenJDK and IcedTea to execute Java app
  Icedtea is a temporary fork of OpenJDK
 
 Package: icedtea-7-jre-cacao
-Architecture: alpha amd64 lpia powerpc m68k mips mipsel s390
+Architecture: alpha amd64 i386 lpia powerpc m68k mips mipsel
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}

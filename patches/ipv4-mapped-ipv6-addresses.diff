@@ -1,6 +1,5 @@
-diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/linux_close.c openjdk/jdk/src/solaris/native/java/net/linux_close.c
---- openjdk.orig/jdk/src/solaris/native/java/net/linux_close.c	2010-02-17 04:14:47.000000000 +0100
-+++ openjdk/jdk/src/solaris/native/java/net/linux_close.c	2010-03-27 20:24:26.000000000 +0100
+--- openjdk/jdk/src/solaris/native/java/net/linux_close.c.orig	2010-04-16 10:54:13.000000000 +0200
++++ openjdk/jdk/src/solaris/native/java/net/linux_close.c	2010-07-12 10:21:00.222048989 +0200
 @@ -37,6 +37,8 @@
  
  #include <sys/poll.h>
@@ -10,8 +9,8 @@ diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/linux_close.c openjdk/jdk
  /*
   * Stack allocated by thread when doing blocking operation
   */
-@@ -301,9 +303,16 @@
-     BLOCKING_IO_RETURN_INT( s, accept(s, addr, addrlen) );
+@@ -305,9 +307,16 @@
+     *addrlen = socklen;
  }
  
 -int NET_Connect(int s, struct sockaddr *addr, int addrlen) {
@@ -28,10 +27,9 @@ diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/linux_close.c openjdk/jdk
  
  #ifndef USE_SELECT
  int NET_Poll(struct pollfd *ufds, unsigned int nfds, int timeout) {
-diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/net_util_md.c openjdk/jdk/src/solaris/native/java/net/net_util_md.c
---- openjdk.orig/jdk/src/solaris/native/java/net/net_util_md.c	2010-02-17 04:14:47.000000000 +0100
-+++ openjdk/jdk/src/solaris/native/java/net/net_util_md.c	2010-03-27 19:44:32.000000000 +0100
-@@ -1215,6 +1215,39 @@
+--- openjdk/jdk/src/solaris/native/java/net/net_util_md.c.orig	2010-04-16 10:54:13.000000000 +0200
++++ openjdk/jdk/src/solaris/native/java/net/net_util_md.c	2010-07-12 10:21:00.222048989 +0200
+@@ -1222,6 +1222,39 @@
      return setsockopt(fd, level, opt, arg, len);
  }
  
@@ -71,7 +69,7 @@ diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/net_util_md.c openjdk/jdk
  /*
   * Wrapper for bind system call - performs any necessary pre/post
   * processing to deal with OS specific issues :-
-@@ -1251,6 +1284,11 @@
+@@ -1258,6 +1291,11 @@
      }
  #endif
  
@@ -83,9 +81,8 @@ diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/net_util_md.c openjdk/jdk
  #if defined(__solaris__) && defined(AF_INET6)
      /*
       * Solaris 8/9 have seperate IPv4 and IPv6 port spaces so we
-diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/net_util_md.h openjdk/jdk/src/solaris/native/java/net/net_util_md.h
---- openjdk.orig/jdk/src/solaris/native/java/net/net_util_md.h	2010-02-17 04:14:47.000000000 +0100
-+++ openjdk/jdk/src/solaris/native/java/net/net_util_md.h	2010-03-27 20:24:26.000000000 +0100
+--- openjdk/jdk/src/solaris/native/java/net/net_util_md.h.orig	2010-04-16 10:54:13.000000000 +0200
++++ openjdk/jdk/src/solaris/native/java/net/net_util_md.h	2010-07-12 10:21:00.222048989 +0200
 @@ -36,6 +36,7 @@
  #include <sys/poll.h>
  #endif
@@ -94,10 +91,9 @@ diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/net_util_md.h openjdk/jdk
  
  #ifdef __linux__
  extern int NET_Timeout(int s, long timeout);
-diff -ruN openjdk.orig/jdk/src/solaris/native/java/net/PlainSocketImpl.c openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c
---- openjdk.orig/jdk/src/solaris/native/java/net/PlainSocketImpl.c	2010-03-27 20:23:58.000000000 +0100
-+++ openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c	2010-03-27 20:24:26.000000000 +0100
-@@ -401,8 +401,9 @@
+--- openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c.orig	2010-04-16 10:54:13.000000000 +0200
++++ openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c	2010-07-12 10:21:00.222048989 +0200
+@@ -340,8 +340,9 @@
           */
          SET_NONBLOCKING(fd);
  
