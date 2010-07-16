@@ -196,10 +196,8 @@ endif
 ifeq ($(distribution),Ubuntu)
   ifneq (,$(filter $(distrel),jaunty))
     OPT_CFLAGS/cppInterpreter_arm.o = -O2 -falign-functions=32 -falign-loops=8 -g0
-  else ifneq (,$(filter $(distrel),karmic))
-    OPT_CFLAGS/cppInterpreter_arm.o = -march=armv6 -mtune=cortex-a8 -O2 -falign-functions=64 -falign-loops=8 -g0
   else
-    OPT_CFLAGS/cppInterpreter_arm.o = -march=armv7 -mtune=cortex-a8 -O2 -falign-functions=64 -falign-loops=8 -g0
+    OPT_CFLAGS/cppInterpreter_arm.o = -march=armv6 -mtune=cortex-a8 -O2 -falign-functions=64 -falign-loops=8 -g0
   endif
 else
   OPT_CFLAGS/cppInterpreter_arm.o = -O2 -falign-functions=32 -falign-loops=8 -g0
