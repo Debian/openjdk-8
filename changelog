@@ -1,3 +1,22 @@
+openjdk-7 (7b89~pre1-0lucid3) lucid; urgency=low
+
+  * Include docs in the -doc package. LP: #600834.
+  * Update from the IcedTea6 trunk.
+    - Plugin and netx fixes.
+    - Don't link the plugin against the libxul libraries. Closes: #576361.
+    - More plugin cpu usage fixes. Closes: #584335, #587049.
+    - Plugin: fixes AppletContext.getApplets().
+  * Fix Vcs-Bzr location. Closes: #530883.
+  * Search for unversioned llvm-config tool.
+  * Don't set XFILESEARCHPATH and NLSPATH on startup. LP: #586641.
+  * Fix chinese font metrics and prefer using 'WenQuanYi Micro Hei' font.
+    LP: #472845.
+  * Strip libjvm.so with --strip-debug instead of --strip-unneeded.
+    LP: #574997.
+  * Fix inter-package dependencies.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 15 Jul 2010 18:12:17 +0200
+
 openjdk-7 (7b89~pre1-0lucid1) lucid; urgency=low
 
   [ Damien Raude-Morvan ]

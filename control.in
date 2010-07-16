@@ -16,7 +16,7 @@ Depends: @basename@-jre (>= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
 Recommends: libxt-dev
 Suggests: @basename@-demo, @basename@-source, visualvm
 Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk, java-compiler
-Conflicts: @basename@-jre-headless (<< 7b89-0), @basename@-jre (<< 7b89-0)
+Conflicts: @basename@-jre-headless (<< 7b89pre1-0), @basename@-jre (<< 7b89pre1-0)
 Description: OpenJDK Development Kit (JDK)
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -32,7 +32,7 @@ Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}
 Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, ${defaultvm:Provides}
 Replaces: @basename@-jre-lib (<< 6b06-0ubuntu11), @basename@-jre (<< 6b09dfsg-0ubuntu2)
-Conflicts: @basename@-jre-lib (<< 7b89-0), @basename@-jre (<< 7b89-0), @basename@-jdk (<< 7b89-0), @basename@-demo (<< 7b89-0), @basename@-source (<< 7b89-0), @basename@-doc (<< 7b89-0), @basename@-dbg (<< 7b89-0), @basename@-jre-zero (<< 7b89-0)
+Conflicts: @basename@-jre-lib (<< 7b89pre1-0), @basename@-jre (<< 7b89pre1-0), @basename@-jdk (<< 7b89pre1-0), @basename@-demo (<< 7b89pre1-0), @basename@-source (<< 7b89pre1-0), @basename@-doc (<< 7b89pre1-0), @basename@-dbg (<< 7b89pre1-0), @basename@-jre-zero (<< 7b89pre1-0)
 Description: OpenJDK Java runtime, using ${vm:Name} (headless)
  Minimal Java runtime - needed for executing non GUI Java programs.
  Using ${vm:Name}.
@@ -46,7 +46,7 @@ Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
 Recommends: ${dlopenjre:Recommends}
 Suggests: icedtea6-plugin, ${pkg:pulseaudio}
-Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4), @basename@-jre-lib (<< 7b89-0), @basename@-jre-headless (<< 7b89-0), @basename@-jdk (<< 7b89-0), @basename@-demo (<< 7b89-0), @basename@-source (<< 7b89-0), @basename@-doc (<< 7b89-0), @basename@-dbg (<< 7b89-0), @basename@-jre-zero (<< 7b89-0)
+Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4), @basename@-jre-lib (<< 7b89pre1-0), @basename@-jre-headless (<< 7b89pre1-0), @basename@-jdk (<< 7b89pre1-0), @basename@-demo (<< 7b89pre1-0), @basename@-source (<< 7b89pre1-0), @basename@-doc (<< 7b89pre1-0), @basename@-dbg (<< 7b89pre1-0), @basename@-jre-zero (<< 7b89pre1-0)
 Replaces: openjdk-6-jre-headless (<< 6b16~pre3)
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
 Description: OpenJDK Java runtime, using ${vm:Name}
@@ -61,7 +61,7 @@ Architecture: @lib_arch@
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (>= ${base:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
-Conflicts: @basename@-jre-headless (<< 7b89-0), @basename@-jre (<< 7b89-0)
+Conflicts: @basename@-jre-headless (<< 7b89pre1-0), @basename@-jre (<< 7b89pre1-0)
 Description: OpenJDK Java runtime (architecture independent libraries)
  OpenJDK Java runtime, using ${vm:Name}.
  .
@@ -73,7 +73,7 @@ Architecture: any
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre (>= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
-Conflicts: @basename@-jre-headless (<< 7b89-0), @basename@-jre (<< 7b89-0)
+Conflicts: @basename@-jre-headless (<< 7b89pre1-0), @basename@-jre (<< 7b89pre1-0)
 Description: Java runtime based on OpenJDK (demos and examples)
  OpenJDK Java runtime
  .
@@ -85,7 +85,7 @@ Architecture: all
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre (>= @pkg_sversion@), @basename@-jdk (>= @pkg_version@), ${misc:Depends}
-Conflicts: @basename@-jre-headless (<< 7b89-0), @basename@-jre (<< 7b89-0)
+Conflicts: @basename@-jre-headless (<< 7b89pre1-0), @basename@-jre (<< 7b89pre1-0)
 Description: OpenJDK Development Kit (JDK) source files
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -103,7 +103,7 @@ Architecture: all
 Priority: extra
 Depends: ${misc:Depends}
 Suggests: @basename@-jdk
-Conflicts: @basename@-jre-headless (<< 7b89-0), @basename@-jre (<< 7b89-0)
+Conflicts: @basename@-jre-headless (<< 7b89pre1-0), @basename@-jre (<< 7b89pre1-0)
 Description: OpenJDK Development Kit (JDK) documentation
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -121,7 +121,7 @@ Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (= @pkg_version@), ${misc:Depends}
 Recommends: @basename@-jre (= @pkg_version@)
 Suggests: @basename@-jdk (= @pkg_version@)
-Conflicts: @basename@-jre-headless (<< 7b89-0), @basename@-jre (<< 7b89-0)
+Conflicts: @basename@-jre-headless (<< 7b89pre1-0), @basename@-jre (<< 7b89pre1-0)
 Description: Java runtime based on OpenJDK (debugging symbols)
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.

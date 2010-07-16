@@ -1,0 +1,19 @@
+http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4953367
+
+--- openjdk/jdk/src/solaris/native/java/lang/java_props_md.c~	2010-07-13 14:45:01.623297272 +0200
++++ openjdk/jdk/src/solaris/native/java/lang/java_props_md.c	2010-07-14 12:55:55.850797385 +0200
+@@ -410,12 +410,14 @@
+     sprops.path_separator = ":";
+     sprops.line_separator = "\n";
+ 
++#ifndef __linux__
+     /* Append CDE message and resource search path to NLSPATH and
+      * XFILESEARCHPATH, in order to pick localized message for
+      * FileSelectionDialog window (Bug 4173641).
+      */
+     setPathEnvironment("NLSPATH=/usr/dt/lib/nls/msg/%L/%N.cat");
+     setPathEnvironment("XFILESEARCHPATH=/usr/dt/app-defaults/%L/Dt");
++#endif
+ 
+     return &sprops;
+ }
