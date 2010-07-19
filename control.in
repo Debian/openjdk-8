@@ -44,7 +44,7 @@ Package: @basename@-jre
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
-Recommends: ${dlopenjre:Recommends}
+Recommends: ${dlopenjre:Recommends}, @core_fonts@
 Suggests: icedtea6-plugin, ${pkg:pulseaudio}
 Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4), @basename@-jre-lib (<< 7b89pre1-0), @basename@-jre-headless (<< 7b89pre1-0), @basename@-jdk (<< 7b89pre1-0), @basename@-demo (<< 7b89pre1-0), @basename@-source (<< 7b89pre1-0), @basename@-doc (<< 7b89pre1-0), @basename@-dbg (<< 7b89pre1-0), @basename@-jre-zero (<< 7b89pre1-0)
 Replaces: openjdk-6-jre-headless (<< 6b16~pre3)

@@ -662,8 +662,10 @@ endif
 
 ifneq (,$(filter $(distrel),etch dapper edgy feisty))
   core_fonts = ttf-dejavu
-else
+else ifneq (,$(filter $(distrel),lenny gutsy hardy intrepid jaunty karmic))
   core_fonts = ttf-dejavu-core
+else
+  core_fonts = ttf-dejavu-extra
 endif
 cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
 cjk_fonts += ttf-sazanami-gothic | ttf-kochi-gothic,

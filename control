@@ -29,7 +29,7 @@ Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-lib (>= ${source:Version}), ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}
-Suggests: libnss-mdns, sun-java6-fonts, ttf-dejavu-core, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-sazanami-gothic | ttf-kochi-gothic, ttf-sazanami-mincho | ttf-kochi-mincho, ttf-wqy-microhei | ttf-wqy-zenhei, ttf-indic-fonts-core, ttf-telugu-fonts, ttf-oriya-fonts, ttf-kannada-fonts, ttf-bengali-fonts,
+Suggests: libnss-mdns, sun-java6-fonts, ttf-dejavu-extra, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-sazanami-gothic | ttf-kochi-gothic, ttf-sazanami-mincho | ttf-kochi-mincho, ttf-wqy-microhei | ttf-wqy-zenhei, ttf-indic-fonts-core, ttf-telugu-fonts, ttf-oriya-fonts, ttf-kannada-fonts, ttf-bengali-fonts,
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, ${defaultvm:Provides}
 Replaces: openjdk-7-jre-lib (<< 6b06-0ubuntu11), openjdk-7-jre (<< 6b09dfsg-0ubuntu2)
 Conflicts: openjdk-7-jre-lib (<< 7b89pre1-0), openjdk-7-jre (<< 7b89pre1-0), openjdk-7-jdk (<< 7b89pre1-0), openjdk-7-demo (<< 7b89pre1-0), openjdk-7-source (<< 7b89pre1-0), openjdk-7-doc (<< 7b89pre1-0), openjdk-7-dbg (<< 7b89pre1-0), openjdk-7-jre-zero (<< 7b89pre1-0)
@@ -44,7 +44,7 @@ Package: openjdk-7-jre
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (>= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
-Recommends: ${dlopenjre:Recommends}
+Recommends: ${dlopenjre:Recommends}, ttf-dejavu-extra
 Suggests: icedtea6-plugin, ${pkg:pulseaudio}
 Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4), openjdk-7-jre-lib (<< 7b89pre1-0), openjdk-7-jre-headless (<< 7b89pre1-0), openjdk-7-jdk (<< 7b89pre1-0), openjdk-7-demo (<< 7b89pre1-0), openjdk-7-source (<< 7b89pre1-0), openjdk-7-doc (<< 7b89pre1-0), openjdk-7-dbg (<< 7b89pre1-0), openjdk-7-jre-zero (<< 7b89pre1-0)
 Replaces: openjdk-6-jre-headless (<< 6b16~pre3)
