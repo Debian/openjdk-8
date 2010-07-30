@@ -1,8 +1,9 @@
-openjdk-7 (7b89~pre1-0lucid4) UNRELEASED; urgency=low
+openjdk-7 (7b89-1.13-0ubuntu1) maverick; urgency=low
 
+  * Update to the IcedTea 1.13 release.
   * openjdk-7-jre: Recommend ttf-dejavu-extra. LP: #569396.
 
- -- Matthias Klose <doko@ubuntu.com>  Mon, 19 Jul 2010 13:57:54 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 30 Jul 2010 01:19:45 +0200
 
 openjdk-7 (7b89~pre1-0lucid3) lucid; urgency=low
 
