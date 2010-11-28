@@ -1,0 +1,11 @@
+--- openjdk/hotspot/src/cpu/sparc/vm/frame_sparc.hpp.orig	2010-08-27 18:01:43.000000000 +0000
++++ openjdk/hotspot/src/cpu/sparc/vm/frame_sparc.hpp	2010-09-07 15:15:04.000000000 +0000
+@@ -264,7 +264,7 @@
+ 
+  private:
+ 
+-  constantPoolCacheOop* frame::interpreter_frame_cpoolcache_addr() const;
++  constantPoolCacheOop* interpreter_frame_cpoolcache_addr() const;
+ 
+ #ifndef CC_INTERP
+ 

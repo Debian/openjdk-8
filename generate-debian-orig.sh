@@ -2,14 +2,14 @@
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz"
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk.tar.gz langtools.tar.gz openjdk.tar.gz"
 tarballdir=src
-version=7b89-1.13
+version=7b106~pre1
 cacaotb=cacao-0.99.4.tar.bz2
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
 icedtea_checkout=../icedtea7
-icedtea_checkout=icedtea-1.13
+#icedtea_checkout=icedtea-1.13
 debian_checkout=openjdk7
 
 if [ -d $pkgdir ]; then

@@ -8,3 +8,6 @@
 
 # empty directory by intent
 @basename@-jre-headless binary: package-contains-empty-directory usr/share/binfmts/
+
+# Strip libjvm.so with --strip-debug instead of --strip-unneeded. LP: #574997.
+@basename@-jre-headless binary: unstripped-binary-or-object
