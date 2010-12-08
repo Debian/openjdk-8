@@ -266,7 +266,6 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/hotspot-sparc-fix.diff \
 	debian/patches/ipv4-mapped-ipv6-addresses.diff \
 	debian/patches/icedtea-override-redirect-metacity.patch \
-	debian/patches/too-many-args-ftbfs.diff \
 	debian/patches/zero-only-use-floating-point-if-floating-poi.patch \
 	debian/patches/icedtea-4953367.patch \
 	debian/patches/fontconfig-wqy-microhei.patch \
@@ -386,11 +385,11 @@ CONFIGURE_ARGS += \
 	--with-corba-src-zip=$(CURDIR)/corba.tar.gz \
 	--with-jaxp-src-zip=$(CURDIR)/jaxp.tar.gz \
 	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
-	--with-jdk-src-zip=$(CURDIR)/jdk.tar.gz \
+	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
 	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz \
-	--with-jaxp-drop-zip=$(CURDIR)/drops/jdk7-jaxp-m6.zip \
-	--with-jaf-drop-zip=$(CURDIR)/drops/jdk7-jaf-2009_08_28.zip \
-	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws-2009_09_28.zip
+	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp-1_4_4.zip \
+	--with-jaf-drop-zip=$(CURDIR)/drops/jdk7-jaf-2010_08_19.zip \
+	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2-2010_08_19.zip
 
 #	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
 

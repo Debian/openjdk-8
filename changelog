@@ -1,3 +1,16 @@
+openjdk-7 (7b114-1.14~pre0-0) experimental; urgency=low
+
+  * New b114 code drop:
+    - d/rules: Use new archives by --with-*-src-zip
+  * Refresh patches:
+    - d/patches/shebang.diff: Year updated
+    - d/patches/ld-symbolic-functions.diff and
+      d/patches/no-compiler-path.diff: Changed corba generic Makefiles.
+  * Drop patch: d/patches/too-many-args-ftbfs.diff: Merged upstream.
+  * d/control: xulrunner-dev is now unversionned.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Wed, 08 Dec 2010 23:02:53 +0100
+
 openjdk-7 (7b89-1.13-0ubuntu1) maverick; urgency=low
 
   * Update to the IcedTea 1.13 release.
