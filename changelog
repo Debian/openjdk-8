@@ -6,10 +6,12 @@ openjdk-7 (7b121.bsd-1.14~pre0-0) experimental; urgency=low
     - d/patches/shebang.diff: Year updated
     - d/patches/ld-symbolic-functions.diff and
       d/patches/no-compiler-path.diff: Changed corba generic Makefiles.
-  * Drop patch: d/patches/too-many-args-ftbfs.diff: Merged upstream.
+  * Drop patches merges upstream:
+    - d/patches/too-many-args-ftbfs.diff
+    - d/patches/sparc.diff
   * d/control: xulrunner-dev is now unversionned.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Wed, 08 Dec 2010 23:02:53 +0100
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sun, 12 Dec 2010 20:47:08 +0100
 
 openjdk-7 (7b106~pre1-0lucid2) lucid; urgency=low
 
