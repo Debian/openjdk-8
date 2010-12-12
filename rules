@@ -391,8 +391,6 @@ CONFIGURE_ARGS += \
 	--with-jaf-drop-zip=$(CURDIR)/drops/jdk7-jaf-2010_08_19.zip \
 	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2-2010_08_19.zip
 
-#	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
-
 ifneq (,$(filter $(DEB_HOST_ARCH), hppa))
   CONFIGURE_ARGS += \
 	--without-rhino

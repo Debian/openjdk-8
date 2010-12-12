@@ -1,6 +1,6 @@
-openjdk-7 (7b114-1.14~pre0-0) experimental; urgency=low
+openjdk-7 (7b121.bsd-1.14~pre0-0) experimental; urgency=low
 
-  * New b114 code drop:
+  * New b121 (bsd-port) code drop:
     - d/rules: Use new archives by --with-*-src-zip
   * Refresh patches:
     - d/patches/shebang.diff: Year updated

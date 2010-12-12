@@ -1,9 +1,8 @@
+#!/bin/sh
 
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz"
-#tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk.tar.gz langtools.tar.gz openjdk.tar.gz"
-tarballdir=src
-version=7b114-1.13~pre0
-cacaotb=cacao-0.99.4.tar.bz2
+tarballdir=b121-bsd
+version=7b121.bsd-1.14~pre0
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
@@ -46,7 +45,8 @@ else
 	sh autogen.sh
 	rm -rf autom4te.cache
     )
-    cp -a $pkgdir.orig $pkgdir
     rm -rf $pkgdir.orig/.hg
+    cp -a $pkgdir.orig $pkgdir
     cp -a $debian_checkout $pkgdir/debian
+    rm -rf $pkgdir/debian/.bzr
 fi
