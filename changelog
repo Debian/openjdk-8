@@ -11,6 +11,20 @@ openjdk-7 (7b121.bsd-1.14~pre0-0) experimental; urgency=low
 
  -- Damien Raude-Morvan <drazzib@debian.org>  Wed, 08 Dec 2010 23:02:53 +0100
 
+openjdk-7 (7b106~pre1-0lucid2) lucid; urgency=low
+
+  * Build for lucid.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 09 Sep 2010 15:32:13 +0200
+
+openjdk-7 (7b106~pre1-0ubuntu2) maverick; urgency=low
+
+  * Build openjdk-7 snapshot (7b106)
+  * Symlink timezone data.
+  * Disable shark builds, currently broken in 7b106.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 07 Sep 2010 04:56:48 +0200
+
 openjdk-7 (7b89-1.13-0ubuntu1) maverick; urgency=low
 
   * Update to the IcedTea 1.13 release.

@@ -24,11 +24,16 @@ PKGVERSION := $(call vafilt,$(CHANGELOG_VARS),Version)
 
 distribution := $(shell lsb_release --id --short)
 distrel := $(shell lsb_release --codename --short)
+ifeq ($(distrel),n/a)
+  distrel := sid
+endif
 
 hotspot_archs	= amd64 i386 lpia sparc sparc64
 # requires llvm; llvm in jaunty is recent enough, but in universe
 ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
   shark_archs	= amd64 i386 lpia
+  # FIXME: shark build broken in b106
+  shark_archs	=
 endif
 no_bootstrap_archs = alpha armel
 
@@ -79,6 +84,8 @@ ifneq (,$(findstring cacao shark, $(PKGSOURCE)))
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha hppa sparc64)$(filter $(distrel), dapper))
+  with_plugin_pkg = no
+else ifneq (,$(filter $(DEB_HOST_ARCH)-$(distrel), sparc-hardy sparc-jaunty))
   with_plugin_pkg = no
 else
   with_plugin_pkg = yes
@@ -204,6 +211,9 @@ else
 endif
 export OPT_CFLAGS/cppInterpreter_arm.o
 
+# disable using precompiled header files
+export DISABLE_PRECOMPILED_HEADER=1
+
 ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
   with_pulse = yes
 endif
@@ -215,8 +225,12 @@ else ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy))
   with_jni_bridge = yes
 endif
 
-ifeq (,$(filter $(distrel),dapper))
+ifeq (,$(filter $(distrel),lenny karmic jaunty intrepid hardy gutsy feisty edgy dapper))
   with_nss = yes
+endif
+
+ifeq (,$(filter $(distrel), dapper))
+  with_tzdata = yes
 endif
 
 on_buildd := $(shell [ -f /CurrentlyBuilding -o "$$LOGNAME" = buildd ] && echo yes)
@@ -269,6 +283,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/zero-only-use-floating-point-if-floating-poi.patch \
 	debian/patches/icedtea-4953367.patch \
 	debian/patches/fontconfig-wqy-microhei.patch \
+	debian/patches/sparc.diff \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -571,7 +586,7 @@ ifneq (,$(shark_archs))
 endif
 
 ifneq (,$(cacao_archs))
-  bd_cacao = libtool, cacao-source (>= 1.1.0~),
+  bd_cacao = libtool, cacao-source (>= 1.1.0~pre0.1-0~),
 endif
 
 ifneq (,$(filter $(distrel),squeeze sid))
@@ -592,7 +607,11 @@ else
     bd_plugin = firefox-dev,
   else ifneq (,$(filter $(distrel),intrepid))
     bd_plugin = xulrunner-1.9-dev,
-  else ifneq (,$(filter $(distrel),hardy jaunty karmic lucid))
+  else ifneq (,$(filter $(distrel),hardy jaunty))
+    # all these use the xulrunner-1.9.2 backports in *-security
+    bd_plugin = xulrunner-1.9.2-dev [!sparc],
+    xulrunner_depends = xulrunner-1.9.2
+  else ifneq (,$(filter $(distrel),karmic lucid))
     # all these use the xulrunner-1.9.2 backports in *-security
     bd_plugin = xulrunner-1.9.2-dev,
     xulrunner_depends = xulrunner-1.9.2
@@ -741,12 +760,16 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs) $(altshark_archs)))
   control_vars += '-Vzerovm:Provides=$(p_jre)-shark'
 endif
 
+ifneq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
+  control_vars += '-Vjvm:Provides=java-virtual-machine'
+endif
+
 ifeq (,$(filter $(distrel), dapper))
   pkg_certs = ca-certificates-java
 endif
 control_vars += '-Vcacert:Depends=$(pkg_certs)'
 
-ifeq (,$(filter $(distrel), dapper))
+ifeq ($(with_tzdata),yes)
   pkg_tzdata = tzdata-java
 endif
 control_vars += '-Vtzdata:Depends=$(pkg_tzdata)'
@@ -833,6 +856,7 @@ packaging-files:
 	      -e 's/@pkg_plugin@/$(p_plug)/g' \
 	      -e 's,@browser_dirs@,$(browser_plugin_dirs),g' \
 	      -e 's,@java_launcher@,$(java_launcher),g' \
+	      -e 's,@with_tzdata@,$(with_tzdata),g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	    $$f > $$f2; \
 	done
@@ -882,7 +906,10 @@ endif
 
 unpack: stamps/unpack
 stamps/unpack: stamps/icedtea-configure
-	$(EXTRA_BUILD_ENV) $(MAKE) -C build stamps/extract.stamp
+	$(EXTRA_BUILD_ENV) $(MAKE) -C build \
+	    CACAO_VERSION=e321b101a9ee \
+	    CACAO_SHA256SUM=46bc5b6212c199dc4a3dbebe6386fe15a8248625a5dffa17115aab394a298444 \
+		stamps/extract.stamp
 ifeq ($(STAGE1_JAVA),gcj)
 #	$(EXTRA_BUILD_ENV) $(MAKE) -C build stamps/extract-ecj.stamp
 endif
@@ -935,7 +962,8 @@ ifeq ($(with_check),yes)
         # only activate after testing
         with_mauve_check += zero
       endif
-      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
+      # FIXME: b106 zero times out on a i386 PPA buildd
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 lpia))
         # only activate after testing; hangs several tests.
         with_jtreg_check += zero
       endif
@@ -1224,6 +1252,11 @@ install: packaging-files
 	: # add extra symlinks for header files
 	ln -sf linux/jni_md.h $(d)/$(basedir)/include/jni_md.h
 	ln -sf linux/jawt_md.h $(d)/$(basedir)/include/jawt_md.h
+
+ifeq ($(with_tzdata),yes)
+	: # use the timezone files from tzdata-java
+	rm -rf $(d)/$(basedir)/jre/lib/zi
+endif
 
 ifneq (,$(filter $(distrel),dapper))
 	: # include the freetype library for the dapper build
@@ -1544,6 +1577,11 @@ ifeq ($(with_bridge),yes)
 	  echo "usr/lib/jni/libjava-access-bridge-jni.so $(basedir)/jre/lib/ext/libjava-access-bridge-jni.so" \
 	    >> $(d_jre).links
   endif
+endif
+
+ifeq ($(with_tzdata),yes)
+	echo usr/share/javazi $(basedir)/jre/lib/zi \
+	  >> $(d_lib).links
 endif
 
 	: # create links for the config files
