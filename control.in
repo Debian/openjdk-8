@@ -2,7 +2,7 @@ Source: @basename@
 Section: java
 Priority: optional
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
-Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>
+Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>, Damien Raude-Morvan <drazzib@deban.org>
 Build-Depends: debhelper (>= 5), m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, @bd_compress@ @bd_autotools@ @bd_ant@ @bd_cacao@ @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_shark@ @bd_syslibs@ @bd_plugin@ @bd_netx@ @bd_pulsejava@ @bd_nss@ @bd_systemtap@ @bd_mauve@ @bd_xvfb@
 Standards-Version: 3.9.1
 Homepage: http://openjdk.java.net/

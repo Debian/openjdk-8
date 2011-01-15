@@ -212,7 +212,7 @@ endif
 export OPT_CFLAGS/cppInterpreter_arm.o
 
 # disable using precompiled header files
-export DISABLE_PRECOMPILED_HEADER=1
+export USE_PRECOMPILED_HEADER=0
 
 ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
   with_pulse = yes
@@ -257,10 +257,6 @@ ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
 endif
 with_hotspot = original
 
-ifneq (,$(filter $(DEB_HOST_ARCH), sparc64))
-  export DISABLE_PRECOMPILED_HEADER=1
-endif
-
 ifeq (,$(filter $(distrel), dapper))
   DISTRIBUTION_PATCHES += \
 	debian/patches/ld-symbolic-functions.diff
@@ -274,9 +270,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \
 	debian/patches/nonreparenting-wm.diff \
-	debian/patches/java-access-bridge-security.patch \
 	debian/patches/accessible-toolkit.patch \
-	debian/patches/hotspot-include-fixes.patch \
 	debian/patches/hotspot-sparc-fix.diff \
 	debian/patches/ipv4-mapped-ipv6-addresses.diff \
 	debian/patches/icedtea-override-redirect-metacity.patch \
@@ -588,11 +582,7 @@ ifneq (,$(cacao_archs))
   bd_cacao = libtool, cacao-source (>= 1.1.0~pre0.1-0~),
 endif
 
-ifneq (,$(filter $(distrel),squeeze sid))
-  bd_ant = ant1.7, ant1.7-optional,
-else
-  bd_ant = ant, ant-optional,
-endif
+bd_ant = ant, ant-optional,
 
 ifeq ($(distribution),Debian)
   ifneq (,$(filter $(distrel),lenny))
@@ -906,8 +896,6 @@ endif
 unpack: stamps/unpack
 stamps/unpack: stamps/icedtea-configure
 	$(EXTRA_BUILD_ENV) $(MAKE) -C build \
-	    CACAO_VERSION=e321b101a9ee \
-	    CACAO_SHA256SUM=46bc5b6212c199dc4a3dbebe6386fe15a8248625a5dffa17115aab394a298444 \
 		stamps/extract.stamp
 ifeq ($(STAGE1_JAVA),gcj)
 #	$(EXTRA_BUILD_ENV) $(MAKE) -C build stamps/extract-ecj.stamp

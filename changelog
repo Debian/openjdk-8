@@ -1,17 +1,23 @@
-openjdk-7 (7b121.bsd-1.14~pre0-0) experimental; urgency=low
+openjdk-7 (7b125-1.14~pre0-0) experimental; urgency=low
 
-  * New b121 (bsd-port) code drop:
+  * New b125 code drop:
     - d/rules: Use new archives by --with-*-src-zip
   * Refresh patches:
     - d/patches/shebang.diff: Year updated
     - d/patches/ld-symbolic-functions.diff and
       d/patches/no-compiler-path.diff: Changed corba generic Makefiles.
-  * Drop patches merges upstream:
-    - d/patches/too-many-args-ftbfs.diff
-    - d/patches/sparc.diff
-  * d/control: xulrunner-dev is now unversionned.
+    - d/patches/default-jvm-cfg.diff and d/patches/set-exec-name.diff:
+      Upstream merged "solaris" and "linux" java.c and java_md.c
+  * Drop patches:
+    - d/patches/too-many-args-ftbfs.diff (merged upstream)
+    - d/patches/sparc.diff (merges upstream)
+    - d/patches/hotspot-include-fixes.diff (includeDB dropped upstream)
+  * d/control.in: xulrunner-dev is now unversionned.
+  * d/rules:
+    - Replace DISABLE_PRECOMPILED_HEADER=1 by USE_PRECOMPILED_HEADER=0
+    - Use ant, ant-optionnal for all distrel
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Sun, 12 Dec 2010 20:47:08 +0100
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 15 Jan 2011 22:18:20 +0100
 
 openjdk-7 (7b106~pre1-0lucid2) lucid; urgency=low
 
