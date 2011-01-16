@@ -8,7 +8,6 @@ pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
 icedtea_checkout=icedtea7
-#icedtea_checkout=icedtea-1.13
 debian_checkout=openjdk7
 
 if [ -d $pkgdir ]; then
@@ -24,7 +23,7 @@ fi
 if [ -f $origtar ]; then
     tar xf $origtar
     if [ -d $pkgdir.orig ]; then
-	mv $pkgdir.orig $pkgdir
+       mv $pkgdir.orig $pkgdir
     fi
     tar -c -f - -C $icedtea_checkout . | tar -x -f - -C $pkgdir
     cp -a $debian_checkout $pkgdir/debian
@@ -34,16 +33,17 @@ else
     case "$base" in
       openjdk*)
         for i in $tarballs; do
-	    cp -p $tarballdir/$i $pkgdir.orig/
-	done
-	cp -a $tarballdir/drops $pkgdir.orig/
-	;;
+            cp -p $tarballdir/$i $pkgdir.orig/
+        done
+        cp -a $tarballdir/drops $pkgdir.orig/
+        cp -a $tarballdir/cacao-*.tar.* $pkgdir.orig/
+      ;;
     esac
     tar -c -f - -C $icedtea_checkout . | tar -x -f - -C $pkgdir.orig
     (
-	cd $pkgdir.orig
-	sh autogen.sh
-	rm -rf autom4te.cache
+      cd $pkgdir.orig
+      sh autogen.sh
+      rm -rf autom4te.cache
     )
     rm -rf $pkgdir.orig/.hg
     cp -a $pkgdir.orig $pkgdir

@@ -1,5 +1,12 @@
 openjdk-7 (7b125-1.14~pre0-0) experimental; urgency=low
 
+  * Merge debian packaging r446:464 from openjdk-6
+    but keep the following changes :
+    - Replace DISABLE_PRECOMPILED_HEADER=1 by USE_PRECOMPILED_HEADER=0
+    - Use "ant, ant-optionnal" for all distrel
+    - Drop --with-llvm-config option (not supported by IcedTea7)
+    - Drop "with_hotspot" variable (only one hotspot supported by IcedTea7)
+    - Drop --enable-xrender (not supported by IcedTea7)
   * New b125 code drop:
     - d/rules: Use new archives by --with-*-src-zip
   * Refresh patches:
@@ -12,10 +19,6 @@ openjdk-7 (7b125-1.14~pre0-0) experimental; urgency=low
     - d/patches/too-many-args-ftbfs.diff (merged upstream)
     - d/patches/sparc.diff (merges upstream)
     - d/patches/hotspot-include-fixes.diff (includeDB dropped upstream)
-  * d/control.in: xulrunner-dev is now unversionned.
-  * d/rules:
-    - Replace DISABLE_PRECOMPILED_HEADER=1 by USE_PRECOMPILED_HEADER=0
-    - Use ant, ant-optionnal for all distrel
 
  -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 15 Jan 2011 22:18:20 +0100
 
@@ -128,6 +131,202 @@ openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
   * Update packaging for openjdk-7.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 14:27:03 +0100
+
+openjdk-6 (6b20-1.10~pre3-0ubuntu4) natty; urgency=low
+
+  * Fix shark build on powerpc.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 24 Dec 2010 11:06:32 +0100
+
+openjdk-6 (6b20-1.10~pre3-0ubuntu3) natty; urgency=low
+
+  * Update from the IcedTea6 trunk (20101223).
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 23 Dec 2010 14:27:17 +0100
+
+openjdk-6 (6b20-1.10~pre3-0ubuntu1) natty; urgency=low
+
+  * Update from the IcedTea6 trunk (20101126).
+  * Update hotspot hs19.
+  * Fix build failures on ia64, s390 and sparc64.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 26 Nov 2010 16:38:16 +0100
+
+openjdk-6 (6b20-1.10~pre2-0ubuntu7~ppa1) natty; urgency=low
+
+  * Reenable shark on amd64, but build using llvm-2.7.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 21 Oct 2010 23:59:30 +0200
+
+openjdk-6 (6b20-1.10~pre2-0ubuntu5) natty; urgency=low
+
+  * Don't try to set up an alternative for javaws
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 21 Oct 2010 17:38:48 +0200
+
+openjdk-6 (6b20-1.10~pre2-0ubuntu3) natty; urgency=low
+
+  * Stop building zero/shark on amd64. Fails the self tests.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 21 Oct 2010 13:49:56 +0200
+
+openjdk-6 (6b20-1.10~pre2-0ubuntu2) natty; urgency=low
+
+  * Don't include OpenJDK's javaws either.
+  * openjdk-6-jre: Recommend icedtea-netx.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 21 Oct 2010 08:34:07 +0200
+
+openjdk-6 (6b20-1.10~pre2-0ubuntu1) natty; urgency=low
+
+  * Update from the IcedTea6 trunk (20101020).
+  * Remove the plugin and javaws from the packaging, removed upstream.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 20 Oct 2010 17:45:09 +0200
+
+openjdk-6 (6b20-1.10~pre1-0ubuntu2) natty; urgency=low
+
+  * Build with hotspot 19.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 14 Oct 2010 11:28:38 +0200
+
+openjdk-6 (6b20-1.10~pre1-0ubuntu1) natty; urgency=low
+
+  * Snapshot, taken from the IcedTea6 trunk (20101013).
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 13 Oct 2010 08:36:44 +0200
+
+openjdk-6 (6b20-1.9.2-1) experimental; urgency=low
+
+  * Upload to experimental.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 24 Nov 2010 05:29:43 +0100
+
+openjdk-6 (6b20-1.9.2-0ubuntu1) maverick-security; urgency=low
+
+  * IcedTea6 1.9.2 release.
+    - CVE-2010-3860: Fix IcedTea System property information leak via
+      public static.
+  * Build using Hotspot hs19.
+  * Start metacity using dbus-launch, when running the testsuite. LP: #632594.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 21 Nov 2010 18:30:39 +0100
+
+openjdk-6 (6b20-1.9.1-1ubuntu3) maverick-security; urgency=low
+
+  * Move all japanese man pages belonging to the jre into the -jre package.
+    Closes: #600765.
+  * Add -jdk replaces for -jre and -jre-headless. Closes: #600809.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 20 Oct 2010 12:51:34 +0200
+
+openjdk-6 (6b20-1.9.1-1ubuntu1) maverick-security; urgency=low
+
+  * Fix upgrade to symlinked timezone data. Closes: #600359.
+  * Move all japanese man pages belonging to the jre into the -jre package.
+    Closes: #600765.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 18 Oct 2010 16:07:48 +0200
+
+openjdk-6 (6b20-1.9.1-1) experimental; urgency=low
+
+  * Upload to experimental.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 12 Oct 2010 15:07:35 +0200
+
+openjdk-6 (6b20-1.9.1-0ubuntu1) maverick-security; urgency=low
+
+  * IcedTea6 1.9.1 release.
+    - Security updates:
+      - S6914943, CVE-2009-3555: TLS: MITM attacks via session renegotiation.
+      - S6559775, CVE-2010-3568: OpenJDK Deserialization Race condition.
+      - S6891766, CVE-2010-3554: OpenJDK corba reflection vulnerabilities.
+      - S6925710, CVE-2010-3562: OpenJDK IndexColorModel double-free.
+      - S6938813, CVE-2010-3557: OpenJDK Swing mutable static.
+      - S6957564, CVE-2010-3548: OpenJDK DNS server IP address information
+        leak.
+      - S6958060, CVE-2010-3564: OpenJDK kerberos vulnerability.
+      - S6963023, CVE-2010-3565: OpenJDK JPEG writeImage remote code execution.
+      - S6963489, CVE-2010-3566: OpenJDK ICC Profile remote code execution.
+      - S6966692, CVE-2010-3569: OpenJDK Serialization inconsistencies.
+      - S6622002, CVE-2010-3553: UIDefault.ProxyLazyValue has unsafe
+        reflection usage.
+      - S6623943: javax.swing.TimerQueue's thread occasionally fails to start.
+      - S6925672, CVE-2010-3561: Privileged ServerSocket.accept allows
+        receiving connections from any host.
+      - S6952017, CVE-2010-3549: HttpURLConnection chunked encoding issue
+        (Http request splitting).
+      - S6952603, CVE-2010-3551: NetworkInterface reveals local network
+        address to untrusted code.
+      - S6961084, CVE-2010-3541: limit setting of some request headers in
+        HttpURLConnection.
+      - S6963285, CVE-2010-3567: Crash in ICU Opentype layout engine due to
+        mismatch in character counts.
+      - S6980004, CVE-2010-3573: limit HTTP request cookie headers in
+        HttpURLConnection.
+      - S6981426, CVE-2010-3574: limit use of TRACE method in
+        HttpURLConnection.
+    - Plugin fixes.
+    - Backports from newer IcedTea releases.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 12 Oct 2010 12:13:40 +0200
+
+openjdk-6 (6b20-1.9-1) experimental; urgency=low
+
+  * Upload to experimental.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 07 Sep 2010 21:19:21 +0200
+
+openjdk-6 (6b20-1.9-0ubuntu1) maverick; urgency=low
+
+  * IcedTea6 1.9 release.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 07 Sep 2010 18:13:20 +0200
+
+openjdk-6 (6b20~pre2-0ubuntu2) maverick; urgency=low
+
+  * Update from the IcedTea6 trunk.
+  * Really let the build fail on armel.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 30 Jul 2010 16:55:38 +0200
+
+openjdk-6 (6b20~pre2-0ubuntu1) maverick; urgency=high
+
+  * Update from the IcedTea6 trunk.
+    - (CVE-2010-2783): IcedTea 'Extended JNLP Services' arbitrary file access.
+    - (CVE-2010-2548): IcedTea incomplete property access check for unsigned
+      applications
+  * openjdk-6-jre: Recommend ttf-dejavu-extra. LP: #569396.
+  * Explicitely fail the build on armel. The ARM assembler interpreter is
+    disabled and would a 3-5x performance regression compared to the current
+    6b18 armel binaries in the archive.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 29 Jul 2010 00:10:53 +0200
+
+openjdk-6 (6b20~pre1-2) experimental; urgency=low
+
+  * Upload to experimental.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 15 Jul 2010 13:55:02 +0200
+
+openjdk-6 (6b20~pre1-1ubuntu1) maverick; urgency=low
+
+  * Include docs in the -doc package. LP: #600834.
+  * Update from the IcedTea6 trunk.
+    - Plugin and netx fixes.
+    - Don't link the plugin against the libxul libraries. Closes: #576361.
+    - More plugin cpu usage fixes. Closes: #584335, #587049.
+    - Plugin: fixes AppletContext.getApplets().
+  * Fix Vcs-Bzr location. Closes: #530883.
+  * Search for unversioned llvm-config tool.
+  * Don't set XFILESEARCHPATH and NLSPATH on startup. LP: #586641.
+  * Fix chinese font metrics and prefer using 'WenQuanYi Micro Hei' font.
+    LP: #472845.
+  * Strip libjvm.so with --strip-debug instead of --strip-unneeded.
+    LP: #574997.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 15 Jul 2010 12:40:10 +0200
+
 openjdk-6 (6b20~pre1-1) experimental; urgency=low
 
   * Upload to experimental.
@@ -145,6 +344,37 @@ openjdk-6 (6b20~pre1-0ubuntu1) maverick; urgency=low
   * Update to 6b20 code drop.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 14 Apr 2010 02:53:37 +0200
+
+openjdk-6 (6b18-1.8-4) unstable; urgency=low
+
+  * Update from the 1.8 branch.
+    - Plugin and netx fixes.
+    - Don't link the plugin against the libxul libraries. Closes: #576361.
+    - More plugin cpu usage fixes. Closes: #584335, #587049.
+    - Plugin: fixes AppletContext.getApplets().
+    - Fix race conditions in plugin initialization code that were causing
+      hangs when loading multiple applets in parallel.
+  * Fix Vcs-Bzr location. Closes: #530883.
+  * Search for unversioned llvm-config tool.
+  * Don't set XFILESEARCHPATH and NLSPATH on startup. LP: #586641.
+  * Fix chinese font metrics and prefer using 'WenQuanYi Micro Hei' font. 
+    LP: #472845.
+  * Strip libjvm.so with --strip-debug instead of --strip-unneeded.
+    LP: #574997.
+  * Don't turn on the ARM assembler interpreter when building the shark
+    VM.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 15 Jul 2010 00:40:13 +0200
+
+openjdk-6 (6b18-1.8-3) unstable; urgency=low
+
+  * Update from the 1.8 branch.
+    - Plugin fixes. LP: #597714.
+  * Add powerpcspe build fixes (Sebastian Andrzej Siewior). Closes: #586359.
+  * Work around build failure on buildds configured with low ARG_MAX
+    (Giovanni Mascellani). Closes: #575254.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 27 Jun 2010 10:16:27 +0200
 
 openjdk-6 (6b18-1.8-2ubuntu3) maverick; urgency=low
 
@@ -1670,7 +1900,7 @@ openjdk-6 (6b06-0ubuntu3) hardy; urgency=low
     tests taken from the Fedora package).
   * Keep a backup of the `generated' directory; some files are regenerated
     differently, increasing the size of the diff.
-	
+  
  -- Matthias Klose <doko@ubuntu.com>  Thu, 06 Mar 2008 10:05:39 +0100
 
 openjdk-6 (6b06-0ubuntu2) hardy; urgency=low
@@ -1906,3 +2136,4 @@ icedtea (7~b14-20070704-1) unstable; urgency=low
   * Initial version.
 
  -- Michael Koch <konqueror@gmx.de>  Wed, 04 Jul 2007 08:25:31 -0100
+

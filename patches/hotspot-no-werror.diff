@@ -1,0 +1,11 @@
+--- openjdk/hotspot/make/linux/makefiles/gcc.make.orig	2010-11-29 15:43:34.397188809 +0000
++++ openjdk/hotspot/make/linux/makefiles/gcc.make	2010-11-29 17:44:05.507185775 +0000
+@@ -114,7 +114,7 @@
+ endif
+ 
+ # Compiler warnings are treated as errors
+-WARNINGS_ARE_ERRORS = -Werror
++WARNINGS_ARE_ERRORS =
+ 
+ # Except for a few acceptable ones
+ # Since GCC 4.3, -Wconversion has changed its meanings to warn these implicit

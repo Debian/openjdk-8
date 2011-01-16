@@ -1,5 +1,5 @@
---- openjdk/jdk/src/solaris/classes/sun/awt/X11/XWindowPeer.java.orig	2010-07-12 10:00:24.004546634 +0200
-+++ openjdk/jdk/src/solaris/classes/sun/awt/X11/XWindowPeer.java	2010-07-12 10:19:04.154550832 +0200
+--- openjdk/jdk/src/solaris/classes/sun/awt/X11/XWindowPeer.java.orig
++++ openjdk/jdk/src/solaris/classes/sun/awt/X11/XWindowPeer.java
 @@ -1143,6 +1143,7 @@
      boolean isOverrideRedirect() {
          return XWM.getWMID() == XWM.OPENLOOK_WM ||

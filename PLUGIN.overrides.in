@@ -1,2 +1,0 @@
-# empty directories for plugin alternatives
-@pkg_plugin@ binary: package-contains-empty-directory

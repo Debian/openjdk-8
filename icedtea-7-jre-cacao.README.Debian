@@ -1,8 +1,8 @@
-icedtea-6-jre-cacao for Debian
+icedtea-7-jre-cacao for Debian
 -------------------------------
 
 Please look for further documentation in the directory
-/usr/share/doc/openjdk-6-jre/ .
+/usr/share/doc/openjdk-7-jre/ .
 
 The package provides cacao as a JVM to be used with OpenJDK 6.
 To use the VM, call java with the option `-cacao'.
