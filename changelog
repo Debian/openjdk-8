@@ -4,7 +4,6 @@ openjdk-7 (7b125-1.14~pre0-0) experimental; urgency=low
     but keep the following changes :
     - Replace DISABLE_PRECOMPILED_HEADER=1 by USE_PRECOMPILED_HEADER=0
     - Use "ant, ant-optionnal" for all distrel
-    - Drop --with-llvm-config option (not supported by IcedTea7)
     - Drop "with_hotspot" variable (only one hotspot supported by IcedTea7)
     - Drop --enable-xrender (not supported by IcedTea7)
   * New b125 code drop:

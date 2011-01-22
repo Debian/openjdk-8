@@ -129,15 +129,16 @@ ifeq (,$(filter noaltcacao, $(DEB_BUILD_OPTIONS)))
 endif
 ifeq (,$(filter noaltzero, $(DEB_BUILD_OPTIONS))$(filter noaltshark, $(DEB_BUILD_OPTIONS)))
   ifneq (,$(filter $(DEB_HOST_ARCH), $(altzero_archs)))
+      # FIXME: ZeroVM currently FTBFS
+      # ciTypeFlow.cpp:2634: error: 'MaxNodeLimit' was not declared in this scope
     ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs) $(altshark_archs)))
-      # FIXME: just build zero, shark doesn't build with hotspot hs17.
-      alternate_vms += shark
-      zero_dir = shark
+      #alternate_vms += shark
+      #zero_dir = shark
       #alternate_vms += zero
       #zero_dir = zero
     else
-      alternate_vms += zero
-      zero_dir = zero
+      #alternate_vms += zero
+      #zero_dir = zero
     endif
   endif
 endif
@@ -280,7 +281,7 @@ DISTRIBUTION_PATCHES += \
 #	debian/patches/sparc-inline.diff \
 #	debian/patches/pkcs11-secmod-debug.diff \
 
-DISTRIBUTION_PATCHES += debian/patches/default-libpath-original.diff
+  DISTRIBUTION_PATCHES += debian/patches/default-libpath-original.diff
 
 #	debian/patches/hotspot-warn-no-errformat.diff \
 #	debian/patches/gcc-mtune-generic.diff \
@@ -542,15 +543,21 @@ bd_zero = \
 
 ifneq (,$(shark_archs))
   bd_zero = $(pkg_ffidev),
-  ifneq (,$(filter $(distrel),karmic))
-    bd_shark = llvm-dev (>= 2.6) [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
-  else ifneq (,$(filter $(distrel),lucid))
+  ifneq (,$(filter $(distrel),lucid))
     bd_shark = llvm-dev (>= 2.7) [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
     bd_shark += oprofile [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
-  else ifneq (,$(filter $(distrel),dapper hardy intrepid jaunty lenny etch))
-    bd_shark =
+  else ifneq (,$(filter $(distrel),karmic))
+    bd_shark = llvm-dev (>= 2.6) [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
   else
-    bd_shark = llvm-2.7-dev [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
+    ifneq (,$(filter $(distrel),squeeze sid maverick natty))
+      llvm_suffix = -2.7
+    else
+      llvm_suffix = -2.7
+    endif
+    bd_shark = llvm$(llvm_suffix)-dev [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
+    ifneq (,$(filter $(DEB_HOST_ARCH),$(shark_archs) $(altshark_archs)))
+      CONFIGURE_ARGS += --with-llvm-config=llvm-config$(llvm_suffix)
+    endif
   endif
 endif
 
@@ -559,7 +566,7 @@ ifneq (,$(cacao_archs))
   bd_cacao = libtool,
 endif
 
-bd_ant = ant, ant-optional,
+  bd_ant = ant, ant-optional,
 
 bd_netx = fastjar (>= 2:0.96-0ubuntu2),
 ifneq (,$(filter $(distrel),lenny))
@@ -821,11 +828,7 @@ ifneq (,$(filter $(distrel),dapper))
 # Needed for patches/ecj/icedtea.patch
 	ln -sf /usr/bin/gcj-4.4 bin/gcj
 endif
-	
-	if [ -x /usr/bin/llvm-config-2.7 ]; then \
-	  ln -sf /usr/bin/llvm-config-2.7 bin/llvm-config; \
-	fi
-	
+
 	mkdir -p stamps
 	mkdir -p build
 	chmod +x configure
