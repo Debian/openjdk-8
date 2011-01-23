@@ -383,9 +383,9 @@ CONFIGURE_ARGS += \
 	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
 	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
 	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz \
-	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp-1_4_4.zip \
+	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp-1_4_5-dev.zip \
 	--with-jaf-drop-zip=$(CURDIR)/drops/jdk7-jaf-2010_08_19.zip \
-	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2-2010_08_19.zip
+	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2_2-2010_12_14.zip
 
 ifneq (,$(filter $(DEB_HOST_ARCH), hppa))
 CONFIGURE_ARGS += \

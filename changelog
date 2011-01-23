@@ -1,4 +1,4 @@
-openjdk-7 (7b125-1.14~pre0-0) experimental; urgency=low
+openjdk-7 (7b126-1.14~pre0-0) experimental; urgency=low
 
   * Merge debian packaging r446:464 from openjdk-6
     but keep the following changes :
