@@ -1,4 +1,4 @@
-openjdk-7 (7b126-1.14~pre0-0) experimental; urgency=low
+openjdk-7 (7b126-1.14~pre0-1) UNRELEASED; urgency=low
 
   * Merge debian packaging r446:464 from openjdk-6
     but keep the following changes :
@@ -19,7 +19,7 @@ openjdk-7 (7b126-1.14~pre0-0) experimental; urgency=low
     - d/patches/sparc.diff (merges upstream)
     - d/patches/hotspot-include-fixes.diff (includeDB dropped upstream)
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 15 Jan 2011 22:18:20 +0100
+ -- Damien Raude-Morvan <drazzib@debian.org>  Mon, 24 Jan 2011 00:18:38 +0100
 
 openjdk-7 (7b106~pre1-0lucid2) lucid; urgency=low
 

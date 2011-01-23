@@ -532,7 +532,7 @@ bd_openjdk = \
 ifneq (,$(strip $(foreach i, dapper hardy intrepid jaunty,$(findstring $(i),$(PKGVERSION)))))
   bd_openjdk += rhino1.7,
 else
-  bd_openjdk += rhino,
+  bd_openjdk += rhino (>= 1.7R3~),
 endif
 pkg_ffidev = $(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),dapper hardy),libffi4-dev,libffi-dev),libffi-dev)
 
