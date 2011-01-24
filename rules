@@ -83,8 +83,8 @@ endif
 
 with_wgy_zenhai = $(if $(filter $(distrel),lenny gutsy feisty edgy dapper),,yes)
 
-arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc sparc=sparc sparc64=sparc64 sh4=sh s390=s390 ia64=ia64
-archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc sparc=sparc sparc64=sparcv9 sh4=sh s390=s390 ia64=ia64
+arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc sparc=sparc sparc64=sparc64 sh4=sh s390=s390 ia64=ia64 kfreebsd-amd64=amd64 kfreebsd-i386=i586
+archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc sparc=sparc sparc64=sparcv9 sh4=sh s390=s390 ia64=ia64 kfreebsd-amd64=amd64 kfreebsd-i386=i386
 
 jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 			$(filter $(DEB_HOST_ARCH)=%, $(arch_map))))
@@ -93,7 +93,7 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH)=%, %, \
 
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 
-stage1_gcj_archs = amd64 hppa i386 ia64 lpia powerpc powerpcspe m68k mips mipsel sh4 sparc sparc64 s390
+stage1_gcj_archs = amd64 hppa i386 ia64 lpia powerpc powerpcspe m68k mips mipsel sh4 sparc sparc64 s390 kfreebsd-i386 kfreebsd-amd64
 stage1_openjdk_archs = alpha armel
 stage1_cacao_archs =
 ifneq (,$(filter nobootstrap, $(DEB_BUILD_OPTIONS)))
