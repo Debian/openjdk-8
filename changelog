@@ -1,3 +1,10 @@
+openjdk-7 (7b128-1.14~pre0-1) UNRELEASED; urgency=low
+
+  * New b128 code drop.
+  * Exclude "release" file for dh_install.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Mon, 07 Feb 2011 23:45:13 +0100
+
 openjdk-7 (7b126-1.14~pre0-1) UNRELEASED; urgency=low
 
   * Merge debian packaging r446:464 from openjdk-6
