@@ -1,0 +1,68 @@
+Content of source package
+=========================
+"openjdk7" is a composite source package:
+- Based on IcedTea <http://icedtea.classpath.org/> which provides
+  a harness to build the source code from Oracle OpenJDK.
+- Multiple tarballs from each Oracle mercurial repositories :
+  corba / hotspot / jaxp / jaxws / jdk-dfsg / langtools / openjdk
+- Tarball from CacaoVM <http://www.cacaovm.org/>.
+- Debian packaging scripts and patches.
+
+Building a new OpenJDK+IcedTea-7 Debian package
+===================================================
+Pre-requisites:
+- Mercurial
+- Bazaar
+ sudo aptitude install mercurial bzr
+
+0) Clone OpenJDK debian packaging:
+ bzr branch lp:~openjdk/openjdk/openjdk7 openjdk7/
+
+1) Clone IcedTea-7 HG:
+ hg clone http://icedtea.classpath.org/hg/icedtea icedtea7/
+
+2) Download OpenJDK upstream tarballs and move them to $BUILD/
+ export BUILD=b128
+ mkdir -p $BUILD/
+ (
+   cd icedtea7/
+   sh autogen.sh && ./configure
+   make download
+ )
+ mv icedtea7/*.tar.gz icedtea7/drops $BUILD/
+ (
+   cd icedtea7/
+   make distclean
+ )
+
+3) Remove files with unclear license from jdk.tar.gz:
+ sh openjdk7/generate-dfsg-zip.sh $BUILD/jdk.tar.gz
+
+4) Generate "pristine directory" and "pristine+debian directory"
+ sh openjdk7/generate-debian-orig.sh
+
+Support for DEB_BUILD_OPTIONS
+=============================
+As described in Debian Policy §4.9.1, current package's debian/rules support
+the standardized environment variable DEB_BUILD_OPTIONS. This variable can
+contain several flags to change how a package is compiled and built.
+
+  * nocheck: don't run mauve and jtreg test suites.
+  * nodocs: pass --disable-docs to IcedTea configure script, which
+            disable Javadoc generation.
+  * nostrip: debugging symbols should not be stripped from the
+             binary during installation
+  * parallel=X: package should be built using up to X parallel processes
+  * nobootstrap: don't use gcj to bootstrap OpenJDK but use existing OpenJDK
+                 installed on current machine.
+  * noaltcacao: don't build alternative CACao VM.
+  * noaltzero: don't build alternative Zero VM.
+  * noaltshark: don't build alternative Shark VM.
+
+Sample usage:
+DEB_BUILD_OPTIONS="parallel=5 nocheck" debuild
+
+ Build with 5 parallel processes and don't run mauve/jtreg test suites.
+
+This also work with cowbuilder/pbuilder:
+sudo DEB_BUILD_OPTIONS="parallel=5 nocheck" cowbuilder --build openjdk-7_7*.dsc
