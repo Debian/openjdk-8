@@ -1,8 +1,8 @@
 #!/bin/sh
 
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz"
-tarballdir=b128
-version=7b128-1.14~pre0
+tarballdir=b129
+version=7b129-1.14~pre0
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz

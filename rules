@@ -110,6 +110,8 @@ endif
 ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
   cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
 endif
+# Cacao FTBFS with b129 : http://server.complang.tuwien.ac.at/cgi-bin/bugzilla/show_bug.cgi?id=154
+cacao_archs =
 
 # requires patched llvm-2.6
 ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
