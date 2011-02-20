@@ -1,6 +1,7 @@
-openjdk-7 (7b129-1.14~pre0-1) UNRELEASED; urgency=low
+openjdk-7 (1:7~b129-1.14~pre0-1) experimental; urgency=low
 
   * New b129 code drop.
+  * Bump epoch to 1 and use ~ to indicate that's not openjdk-7 final relaase.
 
  -- Damien Raude-Morvan <drazzib@debian.org>  Mon, 14 Feb 2011 00:34:45 +0100
 
