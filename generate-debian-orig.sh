@@ -1,13 +1,15 @@
 #!/bin/sh
 
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz"
-tarballdir=b129
-version=7~b129-1.14~pre0
+tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk.tar.gz langtools.tar.gz openjdk.tar.gz"
+jamvmtb=jamvm-a95ca049d3bb257d730535a5d5ec3f73a943d0aa.tar.gz
+tarballdir=b130
+version=7~b130-1.14~pre0
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
-icedtea_checkout=icedtea7
+icedtea_checkout=../icedtea
 debian_checkout=openjdk7
 
 if [ -d $pkgdir ]; then
@@ -36,7 +38,8 @@ else
             cp -p $tarballdir/$i $pkgdir.orig/
         done
         cp -a $tarballdir/drops $pkgdir.orig/
-        cp -a $tarballdir/cacao-*.tar.* $pkgdir.orig/
+	#cp -p $jamvmtb $pkgdir.orig/
+        #cp -a $tarballdir/cacao-*.tar.* $pkgdir.orig/
       ;;
     esac
     tar -c -f - -C $icedtea_checkout . | tar -x -f - -C $pkgdir.orig
@@ -48,5 +51,4 @@ else
     rm -rf $pkgdir.orig/.hg
     cp -a $pkgdir.orig $pkgdir
     cp -a $debian_checkout $pkgdir/debian
-    rm -rf $pkgdir/debian/.bzr
 fi

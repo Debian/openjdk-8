@@ -1,0 +1,36 @@
+Description: fall back to the built-in system library path
+ If a native library that's been requested can't be found in any of the
+ known paths, fall back to looking it up without a path - i.e., trust
+ dlopen() to do the right thing.  This addresses the problem with failing
+ to load libraries when using multiarch.
+Author: Steve Langasek <steve.langasek@linaro.org>
+Bug-Ubuntu: https://bugs.launchpad.net/bugs/737603
+
+Index: openjdk/jdk/src/share/classes/java/lang/ClassLoader.java
+===================================================================
+--- openjdk.orig/jdk/src/share/classes/java/lang/ClassLoader.java
++++ openjdk/jdk/src/share/classes/java/lang/ClassLoader.java
+@@ -1676,6 +1676,10 @@
+                     return;
+                 }
+             }
++            File libfile = new File(System.mapLibraryName(name));
++            if (loadLibrary0(fromClass, libfile)) {
++                return;
++            }
+         }
+         // Oops, it failed
+         throw new UnsatisfiedLinkError("no " + name + " in java.library.path");
+Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
+===================================================================
+--- openjdk.orig/hotspot/src/os/linux/vm/os_linux.cpp
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp
+@@ -352,7 +352,7 @@
+  *        ...
+  *        7: The default directories, normally /lib and /usr/lib.
+  */
+-#define DEFAULT_LIBPATH	"/usr/lib/jni:/lib:/usr/lib"
++#define DEFAULT_LIBPATH	"/usr/lib/jni"
+ 
+ #define EXTENSIONS_DIR  "/lib/ext"
+ #define ENDORSED_DIR    "/lib/endorsed"

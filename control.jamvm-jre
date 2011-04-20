@@ -1,0 +1,12 @@
+
+Package: icedtea-7-jre-jamvm
+Architecture: @jamvm_archs@
+Priority: extra
+Pre-Depends: ${dpkg:Depends}
+Depends: @basename@-jre-headless (= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
+Description: Alternative JVM for OpenJDK, using JamVM
+ The package provides an alternative runtime using the JamVM.  This is a
+ somewhat faster alternative than the Zero port on architectures like armel,
+ mips, mipsel, powerpc.
+ .
+ The VM is started with the option `-jamvm'. See the README.Debian for details.

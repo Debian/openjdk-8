@@ -1,3 +1,11 @@
+openjdk-7 (7~b130-1.14~pre0-1) natty; urgency=low
+
+  * New b130 code drop.
+  * Merge debian packaging r464:469 from openjdk-6.
+  * Do not bump the epoch, package was never uploaded to any official repository.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 20 Apr 2011 15:55:53 +0200
+
 openjdk-7 (1:7~b129-1.14~pre0-1) experimental; urgency=low
 
   * New b129 code drop.
@@ -144,6 +152,88 @@ openjdk-7 (7b40-0ubuntu1) jaunty; urgency=low
   * Update packaging for openjdk-7.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 02 Dec 2008 14:27:03 +0100
+
+openjdk-6 (6b22-1.10.1-0ubuntu1) natty; urgency=low
+
+  * IcedTea6 1.10.1 release.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 05 Apr 2011 12:20:36 +0200
+
+openjdk-6 (6b22-1.10.1~pre1-1) experimental; urgency=low
+
+  *  Upload to experimental.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 26 Mar 2011 10:43:49 +0100
+
+openjdk-6 (6b22-1.10.1~pre1-0ubuntu1) natty; urgency=low
+
+  * Update from the IcedTea6-1.10 release branch (20110325).
+  * Add multiarch directories to the default library path. LP: #737603.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 25 Mar 2011 16:33:57 +0100
+
+openjdk-6 (6b22-1.10-3) experimental; urgency=low
+
+  * Fix JamVM build on mips/mipsel (Robert Lougher).
+  * Re-enable the JamVM build on mips/mipsel.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 06 Mar 2011 15:01:54 +0100
+
+openjdk-6 (6b22-1.10-2) experimental; urgency=low
+
+  * Mention that IcedTea is copyrigh GPLv2 + "CLASSPATH" EXCEPTION.
+    Closes: #611269.
+  * Don't run the jdk checks for the alternate builds (hotspot and
+    langtools checks are still run).
+  * Disable the JamVM build on mips/mipsel.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 05 Mar 2011 16:13:40 +0100
+
+openjdk-6 (6b22-1.10-1) experimental; urgency=low
+
+  * Upload to experimental.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 04 Mar 2011 16:12:50 +0100
+
+openjdk-6 (6b22-1.10-0ubuntu2) natty; urgency=low
+
+  * Disable the jdk tests with the Shark, JamVM and Cacao VMs.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 04 Mar 2011 15:32:50 +0100
+
+openjdk-6 (6b22-1.10-0ubuntu1) natty; urgency=low
+
+  * IcedTea6 1.10 release.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 03 Mar 2011 09:32:19 +0100
+
+openjdk-6 (6b21~pre3-0ubuntu1) natty; urgency=low
+
+  * Update from the IcedTea6 trunk (20110224).
+  * icedtea-6-jre-jamvm: Build JamVM as an alternative VM,
+    start with `java -jamvm'.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 24 Feb 2011 02:45:56 +0100
+
+openjdk-6 (6b21~pre2-0ubuntu1) natty; urgency=low
+
+  * Update from the IcedTea6 trunk (20110217).
+  * Update hotspot hs20 (not yet enabled).
+  * Add ppc64 packaging bits.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 18 Feb 2011 15:55:41 +0100
+
+openjdk-6 (6b21~pre1-1) experimental; urgency=low
+
+  * Upload to experimental.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 22 Jan 2011 15:34:21 +0100
+
+openjdk-6 (6b21~pre1-0ubuntu1) natty; urgency=low
+
+  * Update to 6b21.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 22 Jan 2011 14:28:28 +0100
 
 openjdk-6 (6b20-1.10~pre3-0ubuntu4) natty; urgency=low
 
