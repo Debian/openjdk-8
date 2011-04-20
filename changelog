@@ -2,7 +2,8 @@ openjdk-7 (7~b130-1.14~pre0-1) natty; urgency=low
 
   * New b130 code drop.
   * Merge debian packaging r464:469 from openjdk-6.
-  * Do not bump the epoch, package was never uploaded to any official repository.
+  * Do not bump the epoch, package was never uploaded to any official
+    repository.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 20 Apr 2011 15:55:53 +0200
 
