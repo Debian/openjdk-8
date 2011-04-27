@@ -1,6 +1,7 @@
 openjdk-7 (7~b130-1.14~pre0-2) UNRELEASED; urgency=low
 
   * Remove obsolete conflicts. Closes: #624090.
+  * Add copyright for the rewriter class. Addresses part of #623693.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 27 Apr 2011 12:17:55 +0200
 
