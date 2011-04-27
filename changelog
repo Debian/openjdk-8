@@ -1,11 +1,17 @@
-openjdk-7 (7~b130-1.14~pre0-1) natty; urgency=low
+openjdk-7 (7~b130-1.14~pre0-2) UNRELEASED; urgency=low
+
+  * Remove obsolete conflicts. Closes: #624090.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 27 Apr 2011 12:17:55 +0200
+
+openjdk-7 (7~b130-1.14~pre0-1) experimental; urgency=low
 
   * New b130 code drop.
   * Merge debian packaging r464:469 from openjdk-6.
   * Do not bump the epoch, package was never uploaded to any official
     repository.
 
- -- Matthias Klose <doko@ubuntu.com>  Wed, 20 Apr 2011 15:55:53 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 20 Apr 2011 21:46:32 +0200
 
 openjdk-7 (1:7~b129-1.14~pre0-1) experimental; urgency=low
 
