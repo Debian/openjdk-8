@@ -42,13 +42,13 @@ jdirname	= java-$(shortver)-$(origin)
 origin		= openjdk
 basename	= openjdk-$(shortver)
 ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
-  priority	= 1061
+  priority	= 1051
   vm_name	= Hotspot JIT
 else ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
-  priority	= 1055
+  priority	= 1045
   vm_name	= Hotspot Shark
 else
-  priority	= 1053
+  priority	= 1043
   vm_name	= Hotspot Zero
 endif
 p_lib_arch	= all
@@ -294,7 +294,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/zero-only-use-floating-point-if-floating-poi.patch \
 	debian/patches/icedtea-4953367.patch \
 	debian/patches/fontconfig-wqy-microhei.patch \
-	$(if $(filter $(DEB_HOST_ARCH), sparc64), debian/patches/hotspot-no-werror.diff) \
+	$(if $(filter $(DEB_HOST_ARCH), amd64 i386),,debian/patches/hotspot-no-werror.diff) \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
