@@ -22,7 +22,7 @@ Pre-requisites:
  hg clone http://icedtea.classpath.org/hg/icedtea icedtea7/
 
 2) Download OpenJDK upstream tarballs and move them to $BUILD/
- export BUILD=b129
+ export BUILD=b136
  mkdir -p $BUILD/
  (
    cd icedtea7/

@@ -406,7 +406,7 @@ CONFIGURE_ARGS += \
 	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
 	--with-jdk-src-zip=$(CURDIR)/jdk.tar.gz \
 	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz \
-	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp-1_4_5-dev.zip \
+	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp-1_4_5-dev1.zip \
 	--with-jaf-drop-zip=$(CURDIR)/drops/jdk7-jaf-2010_08_19.zip \
 	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2_2-2010_12_14.zip
 

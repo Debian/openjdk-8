@@ -1,17 +1,17 @@
---- openjdk/jdk/make/common/shared/Platform.gmk.orig	2009-05-26 20:09:44.000000000 +0000
-+++ openjdk/jdk/make/common/shared/Platform.gmk	2009-05-26 20:10:18.000000000 +0000
-@@ -144,7 +144,7 @@
+--- openjdk/jdk/make/common/shared/Platform.gmk.orig
++++ openjdk/jdk/make/common/shared/Platform.gmk
+@@ -230,7 +230,7 @@
    # Suffix for file bundles used in previous release
-   BUNDLE_FILE_SUFFIX=.tar
+   BUNDLE_FILE_SUFFIX=.tar.gz
    # How much RAM does this machine have:
--  MB_OF_MEMORY=$(shell /etc/prtconf | fgrep 'Memory size:' | expand | cut -d' ' -f3)
+-  MB_OF_MEMORY := $(shell free -m | fgrep Mem: | awk '{print $$2;}' )
 +  MB_OF_MEMORY := $(shell m=`free -m | fgrep Mem: | sed -e 's@\ \ *@ @g' | cut -d' ' -f2`; if [ "$$m" -lt 384 ]; then echo 384; else echo $$m; fi)
  endif
  
- # Platform settings specific to Linux
---- openjdk/corba/make/common/shared/Platform.gmk.orig	2009-05-26 19:50:00.000000000 +0000
-+++ openjdk/corba/make/common/shared/Platform.gmk	2009-05-26 19:55:49.000000000 +0000
-@@ -270,7 +270,7 @@
+ # Windows with and without CYGWIN will be slightly different
+--- openjdk/corba/make/common/shared/Platform.gmk.orig
++++ openjdk/corba/make/common/shared/Platform.gmk
+@@ -237,7 +237,7 @@
      endif
    endif
    # How much RAM does this machine have:

@@ -1,3 +1,11 @@
+openjdk-7 (7~b136-1.14~pre0-1) experimental; urgency=low
+
+  * New b136 code drop:
+    - d/rules: Use jaxp-1_4_5-dev1.zip as jaxp-drop-zip.
+    - d/patches/icedtea-pretend-memory.diff: Refreshed.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sun, 01 May 2011 23:30:44 +0200
+
 openjdk-7 (7~b130-1.14~pre0-2) experimental; urgency=low
 
   * Remove obsolete conflicts. Closes: #624090.
