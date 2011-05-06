@@ -7,8 +7,9 @@ openjdk-7 (7~b136-1.14~pre0-1) UNRELEASED; urgency=low
 
   [ Matthias Klose ]
   * Fix -jre-lib dependency on -jre. Closes: #624846.
+  * Add lcms configury.
 
- -- Matthias Klose <doko@ubuntu.com>  Thu, 05 May 2011 19:35:00 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 05 May 2011 21:08:55 +0200
 
 openjdk-7 (7~b130-1.14~pre0-2) experimental; urgency=low
 
