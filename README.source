@@ -58,6 +58,7 @@ contain several flags to change how a package is compiled and built.
   * noaltcacao: don't build alternative CACao VM.
   * noaltzero: don't build alternative Zero VM.
   * noaltshark: don't build alternative Shark VM.
+  * noaltjamvm: don't build alternative Jamvm VM.
 
 Sample usage:
 DEB_BUILD_OPTIONS="parallel=5 nocheck" debuild
