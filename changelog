@@ -1,4 +1,16 @@
-openjdk-7 (7~b136-1.14~pre0-1) UNRELEASED; urgency=low
+openjdk-7 (7~b136-1.14~pre0-3) experimental; urgency=low
+
+  * Fix liblcms dependency for -jre-headless package.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 07 May 2011 17:20:15 +0200
+
+openjdk-7 (7~b136-1.14~pre0-2) experimental; urgency=low
+
+  * Fix build failure on i386 with GCC 4.6.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 06 May 2011 17:10:00 +0200
+
+openjdk-7 (7~b136-1.14~pre0-1) experimental; urgency=low
 
   [ Damien Raude-Morvan ]
   * New b136 code drop:
