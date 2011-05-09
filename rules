@@ -566,7 +566,7 @@ else
   bd_gcc = g++-4.6,
 endif
 bd_syslibs = libpng12-dev, zlib1g-dev,
-ifneq (,$(filter $(distrel),lenny squeeze sid natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
+ifneq (,$(filter $(distrel),lenny squeeze sid oneiric natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
   bd_syslibs += libjpeg62-dev,
 else
   bd_syslibs += libjpeg7-dev,
@@ -621,9 +621,9 @@ else
   bd_ant = ant, ant-optional,
 endif
 
-bd_netx = fastjar (>= 2:0.96-0ubuntu2),
+bd_fastjar = fastjar (>= 2:0.96-0ubuntu2),
 ifneq (,$(filter $(distrel),lenny))
-  bd_netx = fastjar (>= 2:0.95-4),
+  bd_fastjar = fastjar (>= 2:0.95-4),
 endif
 ifneq (,$(filter $(distrel),dapper))
   bd_compress = $(pkg_compress),
@@ -649,7 +649,7 @@ endif
 
 dlopen_hl_depends = \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2,libcups2), \
-	$(if $(findstring 2, $(lcms_version)), liblcms2-2, liblcms1), \
+	liblcms$(if $(filter 1,$(lcms_version)),1,2-2), \
 	$(if $(findstring jpeg7, $(bd_syslibs)),libjpeg7,libjpeg62)
 ifneq ($(with_nss),no)
   dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
@@ -794,7 +794,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_zero@/$(bd_zero)/g' \
 	      -e 's/@bd_gcc@/$(bd_gcc)/g' \
 	      -e 's/@bd_syslibs@/$(bd_syslibs)/g' \
-	      -e 's/@bd_netx@/$(bd_netx)/g' \
+	      -e 's/@bd_fastjar@/$(bd_fastjar)/g' \
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	      -e 's/@bd_xvfb@/$(bd_xvfb)/g' \
 	      -e 's/@bd_compress@/$(pkg_compress)/g' \

@@ -1,8 +1,21 @@
+openjdk-7 (7~b136-1.14~pre0-4) experimental; urgency=low
+
+  * Re-add build dependency on fastjar.
+  * Fix dependency on liblcms2-2.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 08 May 2011 10:21:21 +0200
+
 openjdk-7 (7~b136-1.14~pre0-3) experimental; urgency=low
 
   * Fix liblcms dependency for -jre-headless package.
 
  -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 07 May 2011 17:20:15 +0200
+
+openjdk-7 (7~b136-1.14~pre0-2ubuntu2) oneiric; urgency=low
+
+  * Re-add build dependency on fastjar.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 08 May 2011 02:51:47 +0200
 
 openjdk-7 (7~b136-1.14~pre0-2) experimental; urgency=low
 
