@@ -9,9 +9,10 @@ openjdk-7 (7~b136-1.14+debian1-1) experimental; urgency=low
   * Replace B-D on libxalan2-java by xsltproc for bootstrapping JMVTI.
   * Don't use GCJ_SUFFIX=4.6 for sid/wheezy/oneiric as GCJ version
     is not homogeneous between arch.
-  * Enable JamVM support.
+  * Enable JamVM support:
+    - d/control: Add B-D on libtool.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Thu, 26 May 2011 20:00:59 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Thu, 26 May 2011 23:03:56 +0200
 
 openjdk-7 (7~b136-1.14~pre0-4) experimental; urgency=low
 

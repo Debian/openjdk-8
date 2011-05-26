@@ -66,4 +66,4 @@ DEB_BUILD_OPTIONS="parallel=5 nocheck" debuild
  Build with 5 parallel processes and don't run mauve/jtreg test suites.
 
 This also work with cowbuilder/pbuilder:
-sudo DEB_BUILD_OPTIONS="parallel=5 nocheck" cowbuilder --build openjdk-7_7*.dsc
+DEB_BUILD_OPTIONS="parallel=5 nocheck" pdebuild --logfile ../build.log --pbuilder cowbuilder

@@ -639,6 +639,10 @@ ifeq ($(with_systemtap),yes)
   bd_systemtap = systemtap-sdt-dev,
 endif
 
+ifneq (,$(jamvm_archs))
+  bd_jamvm = libtool,
+endif
+
 dlopen_hl_depends = \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2,libcups2), \
 	liblcms$(if $(filter 1,$(lcms_version)),1,2-2), \
