@@ -117,10 +117,9 @@ endif
 cacao_archs =
 
 ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy dapper))
+  # Keep this in sync with Architecture: of icedtea-7-jre-jamvm
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel
 endif
-# JamVM is not (yet) supported by Icedtea 1.14
-jamvm_archs =
 
 # requires patched llvm-2.6
 ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
@@ -140,13 +139,9 @@ ifeq (,$(filter noaltcacao, $(DEB_BUILD_OPTIONS)))
 endif
 ifeq (,$(filter noaltzero, $(DEB_BUILD_OPTIONS))$(filter noaltshark, $(DEB_BUILD_OPTIONS)))
   ifneq (,$(filter $(DEB_HOST_ARCH), $(altzero_archs)))
-      # FIXME: ZeroVM currently FTBFS
-      # ciTypeFlow.cpp:2634: error: 'MaxNodeLimit' was not declared in this scope
     ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs) $(altshark_archs)))
       #alternate_vms += shark
       #zero_dir = shark
-      #alternate_vms += zero
-      #zero_dir = zero
     else
       #alternate_vms += zero
       #zero_dir = zero
@@ -186,6 +181,7 @@ req_openjdk_ver = 7~b130~pre0
 
 unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
+# This section should be in sync with "bd_gcc" definition
 ifneq (,$(filter $(distrel),dapper))
   #GCJ_SUFFIX = -4.4
   #ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
@@ -211,12 +207,9 @@ else ifneq (,$(filter $(distrel),squeeze karmic lucid maverick))
 else ifneq (,$(filter $(distrel),natty))
   export GCC_SUFFIX = -4.5
   export GCJ_SUFFIX = -4.5
-else ifneq (,$(filter $(distrel),wheezy sid oneiric))
-  export GCC_SUFFIX = -4.6
-  export GCJ_SUFFIX = -4.6
 else
   export GCC_SUFFIX = -4.6
-  export GCJ_SUFFIX = -4.6
+#  export GCJ_SUFFIX = -4.6
 endif
 
 ifeq ($(distribution),Ubuntu)
@@ -306,6 +299,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/fontconfig-wqy-microhei.patch \
 	$(if $(filter $(DEB_HOST_ARCH), amd64 i386),,debian/patches/hotspot-no-werror.diff) \
 	debian/patches/7031385.diff \
+	debian/patches/jamvm-oj7.patch \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -404,10 +398,6 @@ else
 	--with-rhino=/usr/share/java/js.jar
   endif
 endif
-
-#CONFIGURE_ARGS += \
-#	--with-xalan2-jar=/usr/share/java/xalan2.jar \
-#	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 
 CONFIGURE_ARGS += \
 	--with-openjdk-src-zip=$(CURDIR)/openjdk.tar.gz \
@@ -527,6 +517,7 @@ pkg_compress =
 
 # build dependencies
 bd_autotools = autoconf, $(if $(filter $(distrel), dapper),automake1.9,automake), autotools-dev,
+# This section should be in sync with "GCJ_SUFFIX" definition
 bd_bootstrap =
 ifneq (,$(stage1_gcj_archs))
   ifneq (,$(filter $(distrel),dapper))
@@ -552,6 +543,7 @@ ifneq (,$(stage1_cacao_archs))
 	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
 endif
 
+# This section should be in sync with "GCC_SUFFIX" definition
 ifneq (,$(filter $(distrel),dapper))
   bd_gcc = g++-4.0,
 else ifneq (,$(filter $(distrel),hardy gutsy feisty edgy))
@@ -577,7 +569,7 @@ bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2-dev,libcups2-dev), \
 	libasound2-dev, liblcms$(lcms_version)-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, \
-	libxalan2-java, libxinerama-dev,
+	libxinerama-dev, xsltproc,
 ifneq (,$(strip $(foreach i, dapper hardy intrepid jaunty,$(findstring $(i),$(PKGVERSION)))))
   bd_openjdk += rhino1.7,
 else

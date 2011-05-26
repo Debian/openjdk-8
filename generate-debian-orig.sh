@@ -1,10 +1,10 @@
 #!/bin/sh
 
-tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz"
+#tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz"
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk.tar.gz langtools.tar.gz openjdk.tar.gz"
 jamvmtb=jamvm-a95ca049d3bb257d730535a5d5ec3f73a943d0aa.tar.gz
 tarballdir=b136
-version=7~b136-1.14~pre0
+version=7~b136-1.14+debian1
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
@@ -38,7 +38,7 @@ else
             cp -p $tarballdir/$i $pkgdir.orig/
         done
         cp -a $tarballdir/drops $pkgdir.orig/
-	#cp -p $jamvmtb $pkgdir.orig/
+        cp -p $tarballdir/$jamvmtb $pkgdir.orig/
         #cp -a $tarballdir/cacao-*.tar.* $pkgdir.orig/
       ;;
     esac
