@@ -1,3 +1,9 @@
+openjdk-7 (7~b136-1.14+debian1-2) UNRELEASED; urgency=low
+
+  * Fix non-bootstrap builds.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 27 May 2011 16:11:57 +0200
+
 openjdk-7 (7~b136-1.14+debian1-1) experimental; urgency=low
 
   * New upstream release: Icedtea 1.14.
