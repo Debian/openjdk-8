@@ -299,7 +299,6 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/fontconfig-wqy-microhei.patch \
 	$(if $(filter $(DEB_HOST_ARCH), amd64 i386),,debian/patches/hotspot-no-werror.diff) \
 	debian/patches/7031385.diff \
-	debian/patches/jamvm-oj7.patch \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -340,6 +339,12 @@ endif
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha))
   DISTRIBUTION_ECJ_PATCHES += \
 	debian/patches/alpha-float-const.diff
+endif
+
+ifeq (,$(filter noaltjamvm, $(DEB_BUILD_OPTIONS)))
+  ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
+    DISTRIBUTION_PATCHES += debian/patches/jamvm-oj7.patch
+  endif
 endif
 
 export DISTRIBUTION_PATCHES DISTRIBUTION_ECJ_PATCHES
