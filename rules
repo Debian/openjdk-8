@@ -1085,11 +1085,7 @@ stamps/mauve-check-cacao: stamps/xvfb-check
 	touch $@
 
 stamps/mauve-check-jamvm: stamps/xvfb-check
-ifneq (,$(filter $(DEB_HOST_ARCH), armel))
 	$(MAKE) -f debian/rules mauve-run-check VMNAME=jamvm VMARGS='-vmarg -jamvm'
-else
-	$(MAKE) -f debian/rules jtreg-run-check VMNAME=jamvm VMARGS='-vmoption:-jamvm'
-endif
 	touch $@
 
 stamps/mauve-check-shark: stamps/xvfb-check
@@ -1169,7 +1165,8 @@ stamps/jtreg-check-cacao: stamps/build stamps/xvfb-check
 	touch $@
 
 stamps/jtreg-check-jamvm: stamps/build stamps/xvfb-check
-	$(MAKE) -f debian/rules jtreg-run-check VMNAME=jamvm VMARGS='-vmoption:-jamvm' \
+	ICEDTEA_JTREG_OTHERVM=-othervm \
+	  $(MAKE) -f debian/rules jtreg-run-check VMNAME=jamvm VMARGS='-vmoption:-jamvm' \
 		JTREG_CHECKS='hotspot langtools'
 	touch $@
 
