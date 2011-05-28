@@ -131,6 +131,8 @@ ifneq (,$(filter $(distrel),lenny dapper hardy intrepid))
   altzero_archs =
   altshark_archs =
 endif
+# shark currently broken in 7
+altshark_archs =
 
 ifeq (,$(filter noaltcacao, $(DEB_BUILD_OPTIONS)))
   ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
@@ -140,11 +142,11 @@ endif
 ifeq (,$(filter noaltzero, $(DEB_BUILD_OPTIONS))$(filter noaltshark, $(DEB_BUILD_OPTIONS)))
   ifneq (,$(filter $(DEB_HOST_ARCH), $(altzero_archs)))
     ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs) $(altshark_archs)))
-      #alternate_vms += shark
-      #zero_dir = shark
+      alternate_vms += shark
+      zero_dir = shark
     else
-      #alternate_vms += zero
-      #zero_dir = zero
+      alternate_vms += zero
+      zero_dir = zero
     endif
   endif
 endif
@@ -253,14 +255,14 @@ on_buildd := $(shell [ -f /CurrentlyBuilding -o "$$LOGNAME" = buildd ] && echo y
 ifeq ($(distribution),Debian)
   with_wm = $(notdir $(firstword $(wildcard /usr/bin/metacity /usr/bin/twm)))
   ifneq (,$(findstring twm, $(with_wm)))
-    with_wm_args = -f bin/jtreg.tmwrc
+    with_wm_args = -f $(CURDIR)/bin/jtreg.tmwrc
   endif
   bd_wm = metacity | twm, dbus-x11 | twm,
 else
   with_wm = $(notdir $(firstword $(wildcard /usr/bin/metacity /usr/bin/twm)))
   with_wm_args =
   ifneq (,$(findstring twm, $(with_wm)))
-    with_wm_args = -f bin/jtreg.tmwrc
+    with_wm_args = -f $(CURDIR)/bin/jtreg.tmwrc
   endif
   bd_wm = metacity | twm,
   ifeq (,$(filter $(distrel),etch dapper dapper))
@@ -638,7 +640,13 @@ ifeq ($(with_pulse),yes)
   bd_pulsejava = libpulse-dev (>= 0.9.12),
 endif
 ifeq ($(with_nss),yes)
-  bd_nss = libnss3-dev (>= 3.12.3),
+  ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic hardy dapper))
+    bd_nss = libnss3-dev (>= 3.12.3),
+  else ifneq (,$(filter $(distrel),squeeze wheezy sid))
+    bd_nss = libnss3-dev (>= 3.12.3),
+  else
+    bd_nss = libnss3-dev (>= 3.12.9+ckbi-1.82-0ubuntu4),
+  endif
 endif
 ifeq ($(with_systemtap),yes)
   bd_systemtap = systemtap-sdt-dev,
@@ -653,7 +661,13 @@ dlopen_hl_depends = \
 	liblcms$(if $(filter 1,$(lcms_version)),1,2-2), \
 	$(if $(findstring jpeg7, $(bd_syslibs)),libjpeg7,libjpeg62)
 ifneq ($(with_nss),no)
-  dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
+  ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic hardy dapper))
+    dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
+  else ifneq (,$(filter $(distrel),squeeze wheezy sid))
+    dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
+  else
+    dlopen_hl_depends += , libnss3-1d (>= 3.12.9+ckbi-1.82-0ubuntu4)
+  endif
 endif
 dlopen_hl_recommends = \
 dlopen_jre_depends = \
@@ -938,11 +952,11 @@ ifeq ($(with_check),yes)
     endif
 
     ifneq (,$(filter jamvm, $(alternate_vms)))
-      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc))
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
         # only activate after testing
         with_mauve_check += jamvm
       endif
-      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia powerpc))
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
         # only activate after testing; hangs several tests.
         with_jtreg_check += jamvm
       endif
@@ -985,6 +999,7 @@ endif
 build_stamps = stamps/build
 build_stamps +=  stamps/mauve-check-default stamps/jtreg-check-default
 #build_stamps += $(if $(filter cacao, $(alternate_vms)),stamps/mauve-check-cacao stamps/jtreg-check-cacao)
+build_stamps += $(if $(filter jamvm, $(alternate_vms)),stamps/mauve-check-jamvm stamps/jtreg-check-jamvm)
 ifeq (,$(filter $(distrel),lenny hardy gutsy feisty edgy dapper))
   build_stamps += $(if $(filter zero, $(alternate_vms)),stamps/mauve-check-zero stamps/jtreg-check-zero)
   ifneq (,$(filter shark, $(alternate_vms)))
@@ -1070,7 +1085,11 @@ stamps/mauve-check-cacao: stamps/xvfb-check
 	touch $@
 
 stamps/mauve-check-jamvm: stamps/xvfb-check
+ifneq (,$(filter $(DEB_HOST_ARCH), armel))
 	$(MAKE) -f debian/rules mauve-run-check VMNAME=jamvm VMARGS='-vmarg -jamvm'
+else
+	$(MAKE) -f debian/rules jtreg-run-check VMNAME=jamvm VMARGS='-vmoption:-jamvm'
+endif
 	touch $@
 
 stamps/mauve-check-shark: stamps/xvfb-check
@@ -1166,6 +1185,15 @@ stamps/jtreg-check-zero: stamps/build stamps/xvfb-check
 
 jtreg-run-check:
 ifneq (,$(filter $(VMNAME), $(with_jtreg_check)))
+	if [ ! -f build/$(sdkimg)/jre/lib/security/java.security.install ]; then \
+	  fgrep -v 'sun.security.pkcs11' build/$(sdkimg)/jre/lib/security/java.security \
+	    > build/$(sdkimg)/jre/lib/security/java.security.test; \
+	  mv build/$(sdkimg)/jre/lib/security/java.security \
+	    build/$(sdkimg)/jre/lib/security/java.security.install; \
+	  mv build/$(sdkimg)/jre/lib/security/java.security.test \
+	    build/$(sdkimg)/jre/lib/security/java.security; \
+	fi
+
 	@echo "BEGIN jtreg"
 	if [ -f bin/my-xvfb-run ]; then \
 	  time /bin/sh bin/my-xvfb-run $(MAKE) -C build -k jtregcheck \
@@ -1177,6 +1205,11 @@ ifneq (,$(filter $(VMNAME), $(with_jtreg_check)))
 	  cat xvfb-run.log >> jtreg_output-$(VMNAME); \
 	fi
 	@echo "END jtreg"
+
+	if [ -f build/$(sdkimg)/jre/lib/security/java.security.install ]; then \
+	  mv build/$(sdkimg)/jre/lib/security/java.security.install \
+	    build/$(sdkimg)/jre/lib/security/java.security; \
+	fi
 
 	for i in check-hotspot.log check-jdk.log check-langtools.log jtreg-summary.log; do \
 	  if [ -f build/test/$$i ]; then \

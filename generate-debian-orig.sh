@@ -2,9 +2,9 @@
 
 #tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz"
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk.tar.gz langtools.tar.gz openjdk.tar.gz"
-jamvmtb=jamvm-a95ca049d3bb257d730535a5d5ec3f73a943d0aa.tar.gz
+jamvmtb=jamvm-b56aca6c30847390c67ae6b1cae1c6ae0f2c6650.tar.gz
 tarballdir=b136
-version=7~b136-1.14+debian1
+version=7~b136-2.0~pre1
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz

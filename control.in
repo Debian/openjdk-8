@@ -30,7 +30,6 @@ Depends: @basename@-jre-lib (>= @pkg_sversion@), ${cacert:Depends}, ${tzdata:Dep
 Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}, ${jamvm:Recommends}
 Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, ${defaultvm:Provides}, ${jvm:Provides}
-Replaces: @basename@-jre-lib (<< 6b06-0ubuntu11), @basename@-jre (<< 6b09dfsg-0ubuntu2), @basename@-jdk (<< 6b20-1.9.1-0ubuntu2)
 Description: OpenJDK Java runtime, using ${vm:Name} (headless)
  Minimal Java runtime - needed for executing non GUI Java programs.
  Using ${vm:Name}.
@@ -45,7 +44,6 @@ Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shl
 Recommends: ${dlopenjre:Recommends}, @core_fonts@
 Suggests: icedtea6-plugin, ${pkg:pulseaudio}
 Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4)
-Replaces: openjdk-6-jre-headless (<< 6b16~pre3), openjdk-6-jdk (<< 6b20-1.9.1-0ubuntu2)
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime
 Description: OpenJDK Java runtime, using ${vm:Name}
  Full Java runtime environment - needed for executing Java GUI and Webstart

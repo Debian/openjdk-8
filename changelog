@@ -1,12 +1,17 @@
-openjdk-7 (7~b136-1.14+debian1-2) UNRELEASED; urgency=low
+openjdk-7 (7~b136-2.0~pre1-1) experimental; urgency=low
 
   [ Matthias Klose ]
   * Fix non-bootstrap builds.
+  * Merge debian packaging r469:472 from openjdk-6.
+  * Run jtreg tests using JamVM too.
+  * Don't run the jtreg tests with the NSS security provider enabled.
+  * Update JamVM to 20110528.
+  * Re-enable the zero build, keep the shark builds disabled.
 
   [ Damien Raude-Morvan ]
   * Only apply jamvm-oj7.patch when jamvm build in enabled.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 28 May 2011 00:29:48 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 28 May 2011 17:17:23 +0200
 
 openjdk-7 (7~b136-1.14+debian1-1) experimental; urgency=low
 
