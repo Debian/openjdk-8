@@ -1,3 +1,15 @@
+openjdk-7 (7~b136-2.0~pre1-2) experimental; urgency=low
+
+  * Disable zero on i386.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 29 May 2011 12:37:03 +0200
+
+openjdk-7 (7~b136-2.0~pre1-1ubuntu1) oneiric; urgency=low
+
+  * Upload to oneiric.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 29 May 2011 07:59:01 +0200
+
 openjdk-7 (7~b136-2.0~pre1-1) experimental; urgency=low
 
   [ Matthias Klose ]

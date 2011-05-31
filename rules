@@ -116,7 +116,7 @@ endif
 # Cacao FTBFS with b129 : http://server.complang.tuwien.ac.at/cgi-bin/bugzilla/show_bug.cgi?id=154
 cacao_archs =
 
-ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy dapper))
+ifeq (,$(filter $(distrel),squeeze lenny karmic hardy dapper))
   # Keep this in sync with Architecture: of icedtea-7-jre-jamvm
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel
 endif
@@ -127,6 +127,8 @@ ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper)
   altshark_archs = powerpc ppc64
 endif
 altzero_archs = $(filter-out sparc sparc64, $(hotspot_archs)) $(altshark_archs)
+# zero on i386 currently broken in 7
+altzero_archs = $(filter-out i386 lpia sparc sparc64, $(hotspot_archs)) $(altshark_archs)
 ifneq (,$(filter $(distrel),lenny dapper hardy intrepid))
   altzero_archs =
   altshark_archs =
@@ -1156,28 +1158,28 @@ jtreg_pids = ps x --no-headers -ww -o pid,ppid,args \
 
 stamps/jtreg-check-default: stamps/build stamps/xvfb-check
 	$(MAKE) -f debian/rules jtreg-run-check VMNAME=$(default_vm) VMARGS= \
-		$(if $(filter $(default_vm),hotspot),,JTREG_CHECKS='hotspot langtools')
+		$(if $(filter $(default_vm),hotspot),,TEST_SUITES='hotspot langtools')
 	touch $@
 
 stamps/jtreg-check-cacao: stamps/build stamps/xvfb-check
 	$(MAKE) -f debian/rules jtreg-run-check VMNAME=cacao VMARGS='-vmoption:-cacao' \
-		JTREG_CHECKS='hotspot langtools'
+		TEST_SUITES='hotspot langtools'
 	touch $@
 
 stamps/jtreg-check-jamvm: stamps/build stamps/xvfb-check
 	ICEDTEA_JTREG_OTHERVM=-othervm \
 	  $(MAKE) -f debian/rules jtreg-run-check VMNAME=jamvm VMARGS='-vmoption:-jamvm' \
-		JTREG_CHECKS='hotspot langtools'
+		TEST_SUITES='hotspot langtools'
 	touch $@
 
 stamps/jtreg-check-shark: stamps/build stamps/xvfb-check
 	$(MAKE) -f debian/rules jtreg-run-check VMNAME=shark VMARGS='-vmoption:-shark' \
-		JTREG_CHECKS='hotspot langtools'
+		TEST_SUITES='hotspot langtools'
 	touch $@
 
 stamps/jtreg-check-zero: stamps/build stamps/xvfb-check
 	$(MAKE) -f debian/rules jtreg-run-check VMNAME=zero VMARGS='-vmoption:-zero' \
-		JTREG_CHECKS='hotspot langtools'
+		TEST_SUITES='hotspot langtools'
 	touch $@
 
 jtreg-run-check:
