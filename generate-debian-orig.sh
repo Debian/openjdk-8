@@ -2,9 +2,9 @@
 
 #tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools.tar.gz openjdk.tar.gz"
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk.tar.gz langtools.tar.gz openjdk.tar.gz"
-jamvmtb=jamvm-b56aca6c30847390c67ae6b1cae1c6ae0f2c6650.tar.gz
-tarballdir=b136
-version=7~b136-2.0~pre1
+jamvmtb=jamvm-f8b8e8e78ec057a5852ff8c0f3386b48f3eca907.tar.gz
+tarballdir=b143
+version=7~b143-2.0~pre1
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz

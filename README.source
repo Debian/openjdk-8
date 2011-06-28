@@ -22,7 +22,7 @@ Pre-requisites:
  hg clone http://icedtea.classpath.org/hg/icedtea icedtea7/
 
 2) Download OpenJDK upstream tarballs and move them to $BUILD/
- export BUILD=b136
+ export BUILD=b143
  mkdir -p $BUILD/
  (
    cd icedtea7/
@@ -40,6 +40,8 @@ Pre-requisites:
 
 4) Generate "pristine directory" and "pristine+debian directory"
  sh openjdk7/generate-debian-orig.sh
+
+5) rm -rf debian/.bzr
 
 Support for DEB_BUILD_OPTIONS
 =============================

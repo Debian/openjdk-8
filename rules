@@ -302,7 +302,6 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-4953367.patch \
 	debian/patches/fontconfig-wqy-microhei.patch \
 	$(if $(filter $(DEB_HOST_ARCH), amd64 i386),,debian/patches/hotspot-no-werror.diff) \
-	debian/patches/7031385.diff \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -343,12 +342,6 @@ endif
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha))
   DISTRIBUTION_ECJ_PATCHES += \
 	debian/patches/alpha-float-const.diff
-endif
-
-ifeq (,$(filter noaltjamvm, $(DEB_BUILD_OPTIONS)))
-  ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
-    DISTRIBUTION_PATCHES += debian/patches/jamvm-oj7.patch
-  endif
 endif
 
 export DISTRIBUTION_PATCHES DISTRIBUTION_ECJ_PATCHES
@@ -416,9 +409,9 @@ CONFIGURE_ARGS += \
 	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
 	--with-jdk-src-zip=$(CURDIR)/jdk.tar.gz \
 	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz \
-	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp-1_4_5-dev1.zip \
+	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp-1_4_5.zip \
 	--with-jaf-drop-zip=$(CURDIR)/drops/jdk7-jaf-2010_08_19.zip \
-	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2_2-2010_12_14.zip
+	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2_4-b02-2011_05_09.zip
 
 #	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
 

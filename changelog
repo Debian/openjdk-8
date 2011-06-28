@@ -1,3 +1,11 @@
+openjdk-7 (7~b143-2.0~pre1-1) experimental; urgency=low
+
+  * New b143 code drop.
+  * Drop d/patches/7031385.diff: Merged upstream.
+  * Drop d/patches/jamvm-oj7.patch: Merged upstream.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 28 Jun 2011 01:25:19 +0200
+
 openjdk-7 (7~b136-2.0~pre1-2) experimental; urgency=low
 
   * Disable zero on i386.
