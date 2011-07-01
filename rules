@@ -1408,7 +1408,7 @@ endif
 	$(RM) debian/$(p_jre).install
 
 	cd $(CURDIR)/$(d); \
-	for i in $(basedir)/jre/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
+	for i in $(basedir)/jre/{bin,man/man1,man/ja_JP.UTF-8/man1}/*; do \
 	  case "$$i" in \
 	    */policytool*) echo $$i >> ../$(p_jre).install;; \
 	    *) echo $$i >> ../$(p_jrehl).install; \
@@ -1416,7 +1416,7 @@ endif
 	done
 
 	cd $(CURDIR)/$(d); \
-	for i in $(basedir)/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
+	for i in $(basedir)/{bin,man/man1,man/ja_JP.UTF-8/man1}/*; do \
 	  [ -h $$i ] || continue; \
 	  case "$$i" in \
 	    */policytool*) echo $$i >> ../$(p_jre).install;; \
@@ -1454,7 +1454,7 @@ endif
 	  echo '$(basedir)/ASSEMBLY_EXCEPTION'; \
 	  echo '$(basedir)/THIRD_PARTY_README'; \
 	  cd $(d); \
-	  for i in $(basedir)/{bin,man/man1,man/ja_JP.eucJP/man1}/*; do \
+	  for i in $(basedir)/{bin,man/man1,man/ja_JP.UTF-8/man1}/*; do \
 	    [ -h $$i -o "$$i" = $(basedir)/bin/java-rmi.cgi ] && continue; \
 	    echo $$i; \
 	  done; \
