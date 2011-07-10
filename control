@@ -135,7 +135,7 @@ Description: Alternative JVM for OpenJDK, using JamVM
  The VM is started with the option `-jamvm'. See the README.Debian for details.
 
 Package: openjdk-7-jre-zero
-Architecture: amd64 
+Architecture: amd64 i386 lpia 
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}

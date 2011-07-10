@@ -1,0 +1,14 @@
+Index: openjdk/hotspot/src/cpu/zero/vm/stack_zero.cpp
+===================================================================
+--- openjdk.orig/hotspot/src/cpu/zero/vm/stack_zero.cpp	2011-07-10 13:26:15.622698001 +0200
++++ openjdk/hotspot/src/cpu/zero/vm/stack_zero.cpp	2011-07-10 13:41:26.246697984 +0200
+@@ -69,7 +69,8 @@
+     break;
+ 
+   case _thread_in_vm:
+-    Exceptions::throw_stack_overflow_exception(thread, __FILE__, __LINE__);
++    Exceptions::throw_stack_overflow_exception(thread, __FILE__, __LINE__,
++                                               methodHandle());
+     break;
+ 
+   default:

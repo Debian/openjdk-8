@@ -1,11 +1,17 @@
 openjdk-7 (7~b143-2.0~pre1-1) experimental; urgency=low
 
+  [ Damien Raude-Morvan ]
   * New b143 code drop.
   * Drop d/patches/7031385.diff: Merged upstream.
   * Drop d/patches/jamvm-oj7.patch: Merged upstream.
   * Manpages are now ja_JP.UTF-8 instead of ja_JP.eucJP
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Fri, 01 Jul 2011 20:52:36 +0200
+  [ Matthias Klose ]
+  * Apply fix for IcedTea issue #753, #757.
+  * Update s390 hotspot build fixes.
+  * Re-enable zero on i386.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 10 Jul 2011 14:28:17 +0200
 
 openjdk-7 (7~b136-2.0~pre1-2) experimental; urgency=low
 

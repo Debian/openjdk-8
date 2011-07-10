@@ -127,8 +127,6 @@ ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper)
   altshark_archs = powerpc ppc64
 endif
 altzero_archs = $(filter-out sparc sparc64, $(hotspot_archs)) $(altshark_archs)
-# zero on i386 currently broken in 7
-altzero_archs = $(filter-out i386 lpia sparc sparc64, $(hotspot_archs)) $(altshark_archs)
 ifneq (,$(filter $(distrel),lenny dapper hardy intrepid))
   altzero_archs =
   altshark_archs =
@@ -302,6 +300,9 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-4953367.patch \
 	debian/patches/fontconfig-wqy-microhei.patch \
 	$(if $(filter $(DEB_HOST_ARCH), amd64 i386),,debian/patches/hotspot-no-werror.diff) \
+	debian/patches/pr753.diff \
+	debian/patches/pr757.diff \
+	debian/patches/hotspot-s390.diff \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -560,7 +561,7 @@ else
   bd_gcc = g++-4.6,
 endif
 bd_syslibs = libpng12-dev, zlib1g-dev,
-ifneq (,$(filter $(distrel),lenny squeeze sid oneiric natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
+ifneq (,$(filter $(distrel),lenny squeeze wheezy sid oneiric natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
   bd_syslibs += libjpeg62-dev,
 else
   bd_syslibs += libjpeg7-dev,
