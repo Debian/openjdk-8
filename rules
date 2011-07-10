@@ -303,6 +303,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/pr753.diff \
 	debian/patches/pr757.diff \
 	debian/patches/hotspot-s390.diff \
+	debian/patches/hotspot-sparc.diff \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \

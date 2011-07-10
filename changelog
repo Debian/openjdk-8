@@ -1,3 +1,9 @@
+openjdk-7 (7~b143-2.0~pre1-2) UNRELEASED; urgency=low
+
+  * Fix build on sparc.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 10 Jul 2011 17:03:22 +0200
+
 openjdk-7 (7~b143-2.0~pre1-1) experimental; urgency=low
 
   [ Damien Raude-Morvan ]
