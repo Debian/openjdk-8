@@ -1,8 +1,10 @@
-openjdk-7 (7~b143-2.0~pre1-2) UNRELEASED; urgency=low
+openjdk-7 (7~b143-2.0~pre1-1ubuntu1) oneiric; urgency=low
 
+  * Fix zero builds on non-ix86 architectures.
   * Fix build on sparc.
+  * Build using jpeg8.
 
- -- Matthias Klose <doko@ubuntu.com>  Sun, 10 Jul 2011 17:03:22 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 12 Jul 2011 14:25:24 +0200
 
 openjdk-7 (7~b143-2.0~pre1-1) experimental; urgency=low
 

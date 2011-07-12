@@ -304,6 +304,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/pr757.diff \
 	debian/patches/hotspot-s390.diff \
 	debian/patches/hotspot-sparc.diff \
+	debian/patches/jdk-no-mapfile.diff \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -562,10 +563,10 @@ else
   bd_gcc = g++-4.6,
 endif
 bd_syslibs = libpng12-dev, zlib1g-dev,
-ifneq (,$(filter $(distrel),lenny squeeze wheezy sid oneiric natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
+ifneq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
   bd_syslibs += libjpeg62-dev,
 else
-  bd_syslibs += libjpeg7-dev,
+  bd_syslibs += libjpeg8-dev,
 endif
 bd_syslibs += \
 	libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev),
@@ -656,7 +657,7 @@ endif
 dlopen_hl_depends = \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2,libcups2), \
 	liblcms$(if $(filter 1,$(lcms_version)),1,2-2), \
-	$(if $(findstring jpeg7, $(bd_syslibs)),libjpeg7,libjpeg62)
+	$(if $(findstring jpeg8, $(bd_syslibs)),libjpeg8,libjpeg62)
 ifneq ($(with_nss),no)
   ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic hardy dapper))
     dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
