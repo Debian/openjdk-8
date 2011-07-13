@@ -1,0 +1,11 @@
+--- openjdk/hotspot/make/linux/makefiles/defs.make.orig	2011-07-13 09:00:57.000000000 +0200
++++ openjdk/hotspot/make/linux/makefiles/defs.make	2011-07-13 08:58:01.000000000 +0200
+@@ -58,7 +58,7 @@
+ endif
+ 
+ # sparc
+-ifeq ($(ARCH), sparc64)
++ifneq (,$(filter $(ARCH), sparc sparc64))
+   ifeq ($(ARCH_DATA_MODEL), 64)
+     ARCH_DATA_MODEL  = 64
+     MAKE_ARGS        += LP64=1

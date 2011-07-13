@@ -1,3 +1,9 @@
+openjdk-7 (7~b143-2.0~pre1-3) UNRELEASED; urgency=low
+
+  * Recognize 32bit user space on sparc.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 13 Jul 2011 08:44:21 +0200
+
 openjdk-7 (7~b143-2.0~pre1-2) experimental; urgency=low
 
   * Upload to experimental.

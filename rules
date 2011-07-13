@@ -305,6 +305,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/hotspot-s390.diff \
 	debian/patches/hotspot-sparc.diff \
 	debian/patches/jdk-no-mapfile.diff \
+	debian/patches/hotspot-sparc-arch.diff \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
