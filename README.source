@@ -19,10 +19,10 @@ Pre-requisites:
  bzr branch lp:~openjdk/openjdk/openjdk7 openjdk7/
 
 1) Clone IcedTea-7 HG:
- hg clone http://icedtea.classpath.org/hg/icedtea icedtea7/
+ hg clone http://icedtea.classpath.org/hg/icedtea7 icedtea7/
 
 2) Download OpenJDK upstream tarballs and move them to $BUILD/
- export BUILD=b143
+ export BUILD=b147
  mkdir -p $BUILD/
  (
    cd icedtea7/

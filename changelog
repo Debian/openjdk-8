@@ -1,9 +1,15 @@
-openjdk-7 (7~b143-2.0~pre1-3) UNRELEASED; urgency=low
+openjdk-7 (7~b147-2.0~pre1-1) UNRELEASED; urgency=low
 
+  [ Matthias Klose ]
   * Fix build on sparc64.
   * Recognize 32bit user space on sparc.
 
- -- Matthias Klose <doko@ubuntu.com>  Wed, 13 Jul 2011 08:44:21 +0200
+  [ Damien Raude-Morvan ]
+  * New b147 code drop (OpenJDK7 RC1).
+  * d/patches/zero-jsr292-fixes.diff: Fixes on Zero/Shark for JSR 292 support
+    from Chris Phillips <ChrisPhi@lgonqn.org>.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Fri, 15 Jul 2011 23:02:29 +0200
 
 openjdk-7 (7~b143-2.0~pre1-2) experimental; urgency=low
 

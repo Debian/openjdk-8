@@ -307,6 +307,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/jdk-no-mapfile.diff \
 	debian/patches/hotspot-sparc-arch.diff \
 	debian/patches/sparc-trapsfix.patch \
+	debian/patches/zero-jsr292-fixes.diff \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -414,9 +415,9 @@ CONFIGURE_ARGS += \
 	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
 	--with-jdk-src-zip=$(CURDIR)/jdk.tar.gz \
 	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz \
-	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp-1_4_5.zip \
+	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp145_01.zip \
 	--with-jaf-drop-zip=$(CURDIR)/drops/jdk7-jaf-2010_08_19.zip \
-	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2_4-b02-2011_05_09.zip
+	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2_4-b03-2011_05_27.zip
 
 #	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
 
