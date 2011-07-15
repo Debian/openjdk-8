@@ -8,8 +8,10 @@ openjdk-7 (7~b147-2.0~pre1-1) UNRELEASED; urgency=low
   * New b147 code drop (OpenJDK7 RC1).
   * d/patches/zero-jsr292-fixes.diff: Fixes on Zero/Shark for JSR 292 support
     from Chris Phillips <ChrisPhi@lgonqn.org>.
+  * d/generate-dfsg-zip.sh: Update for OpenJDK7 as a first step to get #623693
+    fixed.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Fri, 15 Jul 2011 23:02:29 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 16 Jul 2011 00:42:24 +0200
 
 openjdk-7 (7~b143-2.0~pre1-2) experimental; urgency=low
 
