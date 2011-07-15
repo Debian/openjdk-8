@@ -306,7 +306,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/hotspot-sparc.diff \
 	debian/patches/jdk-no-mapfile.diff \
 	debian/patches/hotspot-sparc-arch.diff \
-	patches/sparc-trapsfix.patch \
+	debian/patches/sparc-trapsfix.patch \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
