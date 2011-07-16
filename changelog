@@ -10,8 +10,10 @@ openjdk-7 (7~b147-2.0~pre1-1) UNRELEASED; urgency=low
     from Chris Phillips <ChrisPhi@lgonqn.org>.
   * d/generate-dfsg-zip.sh: Update for OpenJDK7 as a first step to get #623693
     fixed.
+  * d/patches/kfreebsd-*: WiP patches for GNU/kFreeBSD support
+    (not yet enabled by default).
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 16 Jul 2011 00:42:24 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 16 Jul 2011 11:06:16 +0200
 
 openjdk-7 (7~b143-2.0~pre1-2) experimental; urgency=low
 

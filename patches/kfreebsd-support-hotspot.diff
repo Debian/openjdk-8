@@ -1,0 +1,444 @@
+Description: Initial GNU/kFreeBSD support for openjdk-7 (Hotspot part)
+ - Alter build system to consider GNU/kFreeBSD like linux
+   since this port is libc based.
+   openjdk/hotspot/make/defs.make
+ - Use LOCAL_PEERCRED (from kFreeBSD kernel) instead of
+   SO_PEERCRED and alter related structs.
+   openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp
+ - Use sysctl call instead of sysinfo.
+   openjdk/hotspot/src/os/linux/vm/os_linux.cpp
+ - Change access to CPU register
+   openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
+   (from bsd-port)
+ Should not be keep like this :
+ - Undefined UINTPTR_MAX
+   openjdk/hotspot/src/share/vm/memory/allocation.hpp
+Author: Damien Raude-Morvan <drazzib@debian.org>
+Last-Update: 2011-06-28
+Forwarded: no
+Index: openjdk/hotspot/make/defs.make
+===================================================================
+--- openjdk/hotspot/make/defs.make.orig	2011-07-16 01:49:43.000000000 +0200
++++ openjdk/hotspot/make/defs.make	2011-07-16 02:13:04.000000000 +0200
+@@ -132,6 +132,10 @@
+   OSNAME=linux
+ endif
+ 
++ifeq ($(OS), GNU/kFreeBSD)
++  OSNAME=linux
++endif
++
+ # Determinations of default make arguments and platform specific settings
+ MAKE_ARGS=
+ 
+Index: openjdk/hotspot/make/linux/Makefile
+===================================================================
+--- openjdk/hotspot/make/linux/Makefile.orig	2011-07-16 01:49:43.000000000 +0200
++++ openjdk/hotspot/make/linux/Makefile	2011-07-16 02:13:04.000000000 +0200
+@@ -233,6 +233,9 @@
+ SUPPORTED_OS_VERSION = 2.4% 2.5% 2.6% 3%
+ OS_VERSION := $(shell uname -r)
+ EMPTY_IF_NOT_SUPPORTED = $(filter $(SUPPORTED_OS_VERSION),$(OS_VERSION))
++ifeq ($(shell uname -s), GNU/kFreeBSD)
++EMPTY_IF_NOT_SUPPORTED = supported
++endif
+ 
+ check_os_version:
+ ifeq ($(DISABLE_HOTSPOT_OS_VERSION_CHECK)$(EMPTY_IF_NOT_SUPPORTED),)
+Index: openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp
+===================================================================
+--- openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp.orig	2011-07-16 01:49:43.000000000 +0200
++++ openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp	2011-07-16 02:13:04.000000000 +0200
+@@ -39,6 +39,10 @@
+ #define UNIX_PATH_MAX   sizeof(((struct sockaddr_un *)0)->sun_path)
+ #endif
+ 
++#if defined(__FreeBSD_kernel__)
++#include <sys/ucred.h>
++#endif
++
+ // The attach mechanism on Linux uses a UNIX domain socket. An attach listener
+ // thread is created at startup or is created on-demand via a signal from
+ // the client tool. The attach listener creates a socket and binds it to a file
+@@ -337,9 +341,15 @@
+ 
+     // get the credentials of the peer and check the effective uid/guid
+     // - check with jeff on this.
++#if defined(LOCAL_PEERCRED) /* GNU/kFreeBSD */
++    struct xucred cred_info;
++    socklen_t optlen = sizeof(cred_info);
++    if (::getsockopt(s, SOL_SOCKET, LOCAL_PEERCRED, (void*)&cred_info, &optlen) == -1) {
++#else
+     struct ucred cred_info;
+     socklen_t optlen = sizeof(cred_info);
+     if (::getsockopt(s, SOL_SOCKET, SO_PEERCRED, (void*)&cred_info, &optlen) == -1) {
++#endif
+       int res;
+       RESTARTABLE(::close(s), res);
+       continue;
+@@ -347,10 +357,14 @@
+     uid_t euid = geteuid();
+     gid_t egid = getegid();
+ 
++#if defined(LOCAL_PEERCRED) /* GNU/kFreeBSD */
++    if (cred_info.cr_uid != euid || cred_info.cr_gid != egid) {
++#else
+     if (cred_info.uid != euid || cred_info.gid != egid) {
+-      int res;
++#endif
++      int res;   
+       RESTARTABLE(::close(s), res);
+-      continue;
++      continue;  
+     }
+ 
+     // peer credential look okay so we read the request
+Index: openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp
+===================================================================
+--- openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp.orig	2011-07-16 01:49:43.000000000 +0200
++++ openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp	2011-07-16 02:13:04.000000000 +0200
+@@ -169,7 +169,9 @@
+   "WINCH",      SIGWINCH,       /* Window size change (4.3 BSD, Sun).  */
+   "POLL",       SIGPOLL,        /* Pollable event occurred (System V).  */
+   "IO",         SIGIO,          /* I/O now possible (4.2 BSD).  */
++#ifdef SIGPWR
+   "PWR",        SIGPWR,         /* Power failure restart (System V).  */
++#endif
+ #ifdef SIGSYS
+   "SYS",        SIGSYS          /* Bad system call. Only on some Linuxen! */
+ #endif
+Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
+===================================================================
+--- openjdk/hotspot/src/os/linux/vm/os_linux.cpp.orig	2011-07-16 01:49:43.000000000 +0200
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2011-07-16 02:13:04.000000000 +0200
+@@ -115,8 +115,13 @@
+ # include <semaphore.h>
+ # include <fcntl.h>
+ # include <string.h>
++#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
++# include <sys/param.h>
++# include <sys/sysctl.h>
++#else
+ # include <syscall.h>
+ # include <sys/sysinfo.h>
++#endif
+ # include <gnu/libc-version.h>
+ # include <sys/ipc.h>
+ # include <sys/shm.h>
+@@ -127,6 +132,10 @@
+ 
+ #define MAX_PATH    (2 * K)
+ 
++#ifndef ETIME
++#define ETIME ETIMEDOUT
++#endif
++
+ // for timer info max values which include all bits
+ #define ALL_64_BITS CONST64(0xFFFFFFFFFFFFFFFF)
+ #define SEC_IN_NANOSECS  1000000000LL
+@@ -180,11 +189,22 @@
+ }
+ 
+ julong os::Linux::available_memory() {
++#ifndef __FreeBSD_kernel__
+   // values in struct sysinfo are "unsigned long"
+   struct sysinfo si;
+   sysinfo(&si);
+ 
+   return (julong)si.freeram * si.mem_unit;
++#else
++  int mib[2] = {CTL_HW, HW_USERMEM}, mem;
++  size_t len;
++  len = sizeof(mem);
++  if (sysctl(mib, 2, &mem, &len, NULL, 0) == 0) {
++    return (julong) mem;
++  } else {
++    return 0;
++  }
++#endif
+ }
+ 
+ julong os::physical_memory() {
+@@ -2125,18 +2145,22 @@
+   st->print("Memory:");
+   st->print(" %dk page", os::vm_page_size()>>10);
+ 
++#ifndef __FreeBSD_kernel__
+   // values in struct sysinfo are "unsigned long"
+   struct sysinfo si;
+   sysinfo(&si);
++#endif
+ 
+   st->print(", physical " UINT64_FORMAT "k",
+             os::physical_memory() >> 10);
+   st->print("(" UINT64_FORMAT "k free)",
+             os::available_memory() >> 10);
++#ifndef __FreeBSD_kernel__
+   st->print(", swap " UINT64_FORMAT "k",
+             ((jlong)si.totalswap * si.mem_unit) >> 10);
+   st->print("(" UINT64_FORMAT "k free)",
+             ((jlong)si.freeswap * si.mem_unit) >> 10);
++#endif
+   st->cr();
+ }
+ 
+@@ -4334,9 +4358,8 @@
+ 
+ int os::Linux::safe_cond_timedwait(pthread_cond_t *_cond, pthread_mutex_t *_mutex, const struct timespec *_abstime)
+ {
+-   if (is_NPTL()) {
+-      return pthread_cond_timedwait(_cond, _mutex, _abstime);
+-   } else {
++#if defined(__linux__)
++   if (!is_NPTL()) {
+ #ifndef IA64
+       // 6292965: LinuxThreads pthread_cond_timedwait() resets FPU control
+       // word back to default 64bit precision if condvar is signaled. Java
+@@ -4349,6 +4372,8 @@
+ #endif // IA64
+       return status;
+    }
++#endif
++   return pthread_cond_timedwait(_cond, _mutex, _abstime);
+ }
+ 
+ ////////////////////////////////////////////////////////////////////////////////
+@@ -5295,6 +5320,7 @@
+ int os::fork_and_exec(char* cmd) {
+   const char * argv[4] = {"sh", "-c", cmd, NULL};
+ 
++#ifdef __linux__
+   // fork() in LinuxThreads/NPTL is not async-safe. It needs to run
+   // pthread_atfork handlers and reset pthread library. All we need is a
+   // separate process to execve. Make a direct syscall to fork process.
+@@ -5302,6 +5328,9 @@
+   // the best...
+   pid_t pid = NOT_IA64(syscall(__NR_fork);)
+               IA64_ONLY(fork();)
++#else
++  pid_t pid = fork();
++#endif
+ 
+   if (pid < 0) {
+     // fork failed
+@@ -5310,6 +5339,7 @@
+   } else if (pid == 0) {
+     // child process
+ 
++#ifdef __linux__
+     // execve() in LinuxThreads will call pthread_kill_other_threads_np()
+     // first to kill every thread on the thread list. Because this list is
+     // not reset by fork() (see notes above), execve() will instead kill
+@@ -5319,6 +5349,9 @@
+     // above.
+     NOT_IA64(syscall(__NR_execve, "/bin/sh", argv, environ);)
+     IA64_ONLY(execve("/bin/sh", (char* const*)argv, environ);)
++#else
++    execve("/bin/sh", (char* const*)argv, environ);
++#endif
+ 
+     // execve failed
+     _exit(-1);
+Index: openjdk/hotspot/src/os/posix/launcher/java_md.c
+===================================================================
+--- openjdk/hotspot/src/os/posix/launcher/java_md.c.orig	2011-07-16 01:49:43.000000000 +0200
++++ openjdk/hotspot/src/os/posix/launcher/java_md.c	2011-07-16 02:13:04.000000000 +0200
+@@ -41,7 +41,7 @@
+ #include "version_comp.h"
+ #endif
+ 
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ #include <pthread.h>
+ #else
+ #include <thread.h>
+@@ -89,7 +89,7 @@
+  *      A collection of useful strings. One should think of these as #define
+  *      entries, but actual strings can be more efficient (with many compilers).
+  */
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ static const char *system_dir   = "/usr/java";
+ static const char *user_dir     = "/java";
+ #else /* Solaris */
+@@ -426,7 +426,7 @@
+       runpath = getenv("LD_LIBRARY_PATH");
+ #endif /* __sun */
+ 
+-#ifdef __linux
++#if defined(__linux__) || defined(__GLIBC__)
+       /*
+        * On linux, if a binary is running as sgid or suid, glibc sets
+        * LD_LIBRARY_PATH to the empty string for security purposes.  (In
+@@ -792,7 +792,7 @@
+ jboolean
+ GetApplicationHome(char *buf, jint bufsize)
+ {
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     char *execname = GetExecname();
+     if (execname) {
+         strncpy(buf, execname, bufsize-1);
+@@ -961,7 +961,7 @@
+             }
+         }
+     }
+-#elif defined(__linux__)
++#elif defined(__linux__) || defined(__GLIBC__)
+     {
+         const char* self = "/proc/self/exe";
+         char buf[PATH_MAX+1];
+@@ -1832,7 +1832,7 @@
+ int
+ ContinueInNewThread(int (JNICALL *continuation)(void *), jlong stack_size, void * args) {
+     int rslt;
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     pthread_t tid;
+     pthread_attr_t attr;
+     pthread_attr_init(&attr);
+Index: openjdk/hotspot/src/share/vm/memory/allocation.hpp
+===================================================================
+--- openjdk/hotspot/src/share/vm/memory/allocation.hpp.orig	2011-07-16 01:49:43.000000000 +0200
++++ openjdk/hotspot/src/share/vm/memory/allocation.hpp	2011-07-16 02:13:04.000000000 +0200
+@@ -214,9 +214,9 @@
+   void signal_out_of_memory(size_t request, const char* whence) const;
+ 
+   void check_for_overflow(size_t request, const char* whence) const {
+-    if (UINTPTR_MAX - request < (uintptr_t)_hwm) {
+-      signal_out_of_memory(request, whence);
+-    }
++//    if (UINTPTR_MAX - request < (uintptr_t)_hwm) {
++//      signal_out_of_memory(request, whence);
++//    }
+  }
+ 
+  public:
+Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
+===================================================================
+--- openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp.orig	2011-07-16 01:49:43.000000000 +0200
++++ openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp	2011-07-16 02:13:04.000000000 +0200
+@@ -81,6 +81,7 @@
+ # include <ucontext.h>
+ # include <fpu_control.h>
+ 
++#ifdef __linux__
+ #ifdef AMD64
+ #define REG_SP REG_RSP
+ #define REG_PC REG_RIP
+@@ -94,6 +95,33 @@
+ #define SPELL_REG_SP "esp"
+ #define SPELL_REG_FP "ebp"
+ #endif // AMD64
++#endif
++
++#if defined(__FreeBSD_kernel__)
++#define context_trapno uc_mcontext.mc_trapno
++#ifdef AMD64
++#define SPELL_REG_SP "rsp"
++#define SPELL_REG_FP "rbp"
++#define context_pc uc_mcontext.mc_rip
++#define context_sp uc_mcontext.mc_rsp
++#define context_fp uc_mcontext.mc_rbp
++#define context_rip uc_mcontext.mc_rip
++#define context_rsp uc_mcontext.mc_rsp
++#define context_rbp uc_mcontext.mc_rbp
++#define context_flags uc_mcontext.mc_flags
++#define context_err uc_mcontext.mc_err
++#else
++#define SPELL_REG_SP "esp"
++#define SPELL_REG_FP "ebp"
++#define context_pc uc_mcontext.mc_eip
++#define context_sp uc_mcontext.mc_esp
++#define context_fp uc_mcontext.mc_ebp
++#define context_eip uc_mcontext.mc_eip
++#define context_esp uc_mcontext.mc_esp
++#define context_eflags uc_mcontext.mc_eflags
++#define context_trapno uc_mcontext.mc_trapno
++#endif // AMD64
++#endif
+ 
+ address os::current_stack_pointer() {
+ #ifdef SPARC_WORKS
+@@ -119,15 +147,27 @@
+ }
+ 
+ address os::Linux::ucontext_get_pc(ucontext_t * uc) {
++#ifdef __linux__
+   return (address)uc->uc_mcontext.gregs[REG_PC];
++#elif defined(__FreeBSD_kernel__)
++  return (intptr_t*)uc->context_pc;
++#endif
+ }
+ 
+ intptr_t* os::Linux::ucontext_get_sp(ucontext_t * uc) {
++#ifdef __linux__
+   return (intptr_t*)uc->uc_mcontext.gregs[REG_SP];
++#elif defined(__FreeBSD_kernel__)
++  return (intptr_t*)uc->context_sp;
++#endif
+ }
+ 
+ intptr_t* os::Linux::ucontext_get_fp(ucontext_t * uc) {
++#ifdef __linux__
+   return (intptr_t*)uc->uc_mcontext.gregs[REG_FP];
++#elif defined(__FreeBSD_kernel__)
++  return (intptr_t*)uc->context_fp;
++#endif
+ }
+ 
+ // For Forte Analyzer AsyncGetCallTrace profiling support - thread
+@@ -279,12 +319,20 @@
+     pc = (address) os::Linux::ucontext_get_pc(uc);
+ 
+     if (pc == (address) Fetch32PFI) {
++#ifdef __linux__
+        uc->uc_mcontext.gregs[REG_PC] = intptr_t(Fetch32Resume) ;
++#elif defined(__FreeBSD_kernel__)
++       uc->context_pc = intptr_t(Fetch32Resume) ;
++#endif
+        return 1 ;
+     }
+ #ifdef AMD64
+     if (pc == (address) FetchNPFI) {
++#ifdef __linux__
+        uc->uc_mcontext.gregs[REG_PC] = intptr_t (FetchNResume) ;
++#elif defined(__FreeBSD_kernel__)
++       uc->context_pc = intptr_t (FetchNResume) ;
++#endif
+        return 1 ;
+     }
+ #endif // AMD64
+@@ -430,7 +478,11 @@
+   // Furthermore, a false-positive should be harmless.
+   if (UnguardOnExecutionViolation > 0 &&
+       (sig == SIGSEGV || sig == SIGBUS) &&
++#ifdef __linux__
+       uc->uc_mcontext.gregs[REG_TRAPNO] == trap_page_fault) {
++#elif defined(__FreeBSD_kernel__)
++      uc->context_trapno == trap_page_fault) {
++#endif
+     int page_size = os::vm_page_size();
+     address addr = (address) info->si_addr;
+     address pc = os::Linux::ucontext_get_pc(uc);
+Index: openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp
+===================================================================
+--- openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp.orig	2011-07-16 02:13:26.000000000 +0200
++++ openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp	2011-07-16 02:13:52.000000000 +0200
+@@ -970,11 +970,11 @@
+   // The product of bbNo and _state_len can get large if there are lots of
+   // basic blocks and stack/locals/monitors.  Need to check to make sure
+   // we don't overflow the capacity of a pointer.
+-  if ((unsigned)bbNo > UINTPTR_MAX / sizeof(CellTypeState) / _state_len) {
+-    report_error("The amount of memory required to analyze this method "
+-                 "exceeds addressable range");
+-    return;
+-  }
++  //if ((unsigned)bbNo > UINTPTR_MAX / sizeof(CellTypeState) / _state_len) {
++  //  report_error("The amount of memory required to analyze this method "
++  //               "exceeds addressable range");
++  //  return;
++  //}
+ 
+   CellTypeState *basicBlockState =
+       NEW_RESOURCE_ARRAY(CellTypeState, bbNo * _state_len);

@@ -118,7 +118,7 @@ cacao_archs =
 
 ifeq (,$(filter $(distrel),squeeze lenny karmic hardy dapper))
   # Keep this in sync with Architecture: of icedtea-7-jre-jamvm
-  jamvm_archs = amd64 armel armhf i386 lpia mips mipsel
+  jamvm_archs = amd64 armel armhf i386 lpia mips mipsel kfreebsd-i386 kfreebsd-amd64
 endif
 
 # requires patched llvm-2.6
@@ -349,6 +349,19 @@ ifneq (,$(filter $(DEB_HOST_ARCH), alpha))
   DISTRIBUTION_ECJ_PATCHES += \
 	debian/patches/alpha-float-const.diff
 endif
+
+#ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
+#  DISTRIBUTION_PATCHES += \
+#        debian/patches/kfreebsd-support-jdk.diff \
+#        debian/patches/kfreebsd-support-hotspot.diff \
+#        debian/patches/kfreebsd-support-corba.diff
+#        
+#  ifeq (,$(filter noaltjamvm, $(DEB_BUILD_OPTIONS)))
+#    ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
+#      DISTRIBUTION_PATCHES += debian/patches/kfreebsd-support-jamvm.diff
+#    endif
+#  endif    
+#endif
 
 export DISTRIBUTION_PATCHES DISTRIBUTION_ECJ_PATCHES
 

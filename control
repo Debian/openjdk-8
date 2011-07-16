@@ -123,7 +123,7 @@ Description: Java runtime based on OpenJDK (debugging symbols)
  from the IcedTea project.
 
 Package: icedtea-7-jre-jamvm
-Architecture: amd64 armel armhf i386 lpia mips mipsel
+Architecture: amd64 armel armhf i386 lpia mips mipsel kfreebsd-i386 kfreebsd-amd64
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}

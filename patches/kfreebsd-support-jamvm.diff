@@ -1,0 +1,21 @@
+Description: 
+ -Add iddef TIOCINQ = FIONREAD
+ jamvm/src/classlib/openjdk/jvm.c
+Author: Damien Raude-Morvan <drazzib@debian.org>
+Last-Update: 2011-06-28
+Forwarded: no
+Index: jamvm/jamvm/src/classlib/openjdk/jvm.c
+===================================================================
+--- jamvm/jamvm/src/classlib/openjdk/jvm.c.orig	2011-05-28 02:45:54.000000000 +0200
++++ jamvm/jamvm/src/classlib/openjdk/jvm.c	2011-06-28 23:12:11.000000000 +0200
+@@ -58,6 +58,10 @@ static int have_monotonic_clock;
+ #define have_monotonic_clock FALSE
+ #endif
+ 
++#ifndef TIOCINQ
++#define TIOCINQ FIONREAD
++#endif
++
+ static Class *cloneable_class, *constant_pool_class;
+ static Class *exception_class, *runtime_excp_class;
+ 
