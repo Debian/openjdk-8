@@ -48,7 +48,7 @@ else
       sh autogen.sh
       rm -rf autom4te.cache
     )
-    rm -rf $pkgdir.orig/.hg
     cp -a $pkgdir.orig $pkgdir
+    rm -rf $pkgdir.orig/.hg
     cp -a $debian_checkout $pkgdir/debian
 fi

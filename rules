@@ -611,10 +611,10 @@ ifneq (,$(shark_archs))
   else ifneq (,$(filter $(distrel),karmic))
     bd_shark = llvm-dev (>= 2.6) [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
   else
-    ifneq (,$(filter $(distrel),squeeze sid maverick natty))
+    ifneq (,$(filter $(distrel),squeeze maverick natty))
       llvm_suffix = -2.7
     else
-      llvm_suffix = -2.7
+      llvm_suffix = -2.9
     endif
     bd_shark = llvm$(llvm_suffix)-dev [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
     ifneq (,$(filter $(DEB_HOST_ARCH),$(shark_archs) $(altshark_archs)))
