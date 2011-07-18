@@ -9,8 +9,8 @@
 -#else 
 -# include <asm/traps.h>
 -#endif
-++// always found in asm/
-++#include <asm/traps.h>
++// always found in asm/
++#include <asm/traps.h>
  
  void MacroAssembler::read_ccr_trap(Register ccr_save) {
    // No implementation
