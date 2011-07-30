@@ -15,13 +15,50 @@ Description: Initial GNU/kFreeBSD support for openjdk-7 (JDK part)
    openjdk/jdk/make/com/sun/nio/Makefile
  - Don't build jsoundala
    openjdk/jdk/make/javax/sound/Makefile
+ - Disable epoll feature and so LinuxWatchService
+   openjdk/jdk/make/java/nio/Makefile
 Author: Damien Raude-Morvan <drazzib@debian.org>
 Last-Update: 2011-06-28
 Forwarded: no
+Index: openjdk/jdk/make/com/sun/nio/Makefile
+===================================================================
+--- openjdk/jdk/make/com/sun/nio/Makefile.orig
++++ openjdk/jdk/make/com/sun/nio/Makefile
+@@ -30,11 +30,11 @@
+ BUILDDIR = ../../..
+ include $(BUILDDIR)/common/Defs.gmk
+ 
+-SUBDIRS = sctp
+-include $(BUILDDIR)/common/Subdirs.gmk
++#SUBDIRS = sctp
++#include $(BUILDDIR)/common/Subdirs.gmk
+ 
+ all build clean clobber::
+-	$(SUBDIRS-loop)
++#	$(SUBDIRS-loop)
+ 
+ clean clobber::
+-	$(RM) -r $(CLASSDESTDIR)/com/sun/nio
++#	$(RM) -r $(CLASSDESTDIR)/com/sun/nio
+Index: openjdk/jdk/make/common/shared/Defs-versions.gmk
+===================================================================
+--- openjdk/jdk/make/common/shared/Defs-versions.gmk.orig
++++ openjdk/jdk/make/common/shared/Defs-versions.gmk
+@@ -148,7 +148,9 @@
+   REQUIRED_OS_VERSION         = 2.6
+   REQUIRED_OS_VARIANT_NAME    = Fedora
+   REQUIRED_OS_VARIANT_VERSION = 9
+-  REQUIRED_ALSA_VERSION       = 0.9.1
++ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
++   REQUIRED_ALSA_VERSION       = 0.9.1
++endif
+   REQUIRED_COMPILER_NAME      = GCC4
+   REQUIRED_COMPILER_VERSION   = GCC4
+   REQUIRED_GCC_VER            = 2.95
 Index: openjdk/jdk/make/common/shared/Platform.gmk
 ===================================================================
---- openjdk/jdk/make/common/shared/Platform.gmk.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/make/common/shared/Platform.gmk	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/make/common/shared/Platform.gmk.orig
++++ openjdk/jdk/make/common/shared/Platform.gmk
 @@ -152,7 +152,7 @@
  endif
  
@@ -31,10 +68,25 @@ Index: openjdk/jdk/make/common/shared/Platform.gmk
    PLATFORM = linux
    # Arch and OS name/version
    ifdef CROSS_COMPILE_ARCH
+Index: openjdk/jdk/make/common/shared/Sanity-Settings.gmk
+===================================================================
+--- openjdk/jdk/make/common/shared/Sanity-Settings.gmk.orig
++++ openjdk/jdk/make/common/shared/Sanity-Settings.gmk
+@@ -186,8 +186,10 @@
+ endif
+ ifeq ($(PLATFORM),linux)
+   ifdef REQUIRED_ALSA_VERSION
++  ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
+     ALL_SETTINGS+=$(call addRequiredSetting,ALSA_VERSION)
+   endif
++  endif
+ endif
+ ALL_SETTINGS+=$(call addRequiredVersionSetting,OS_VERSION)
+ ALL_SETTINGS+=$(call addOptionalSetting,OS_VARIANT_NAME)
 Index: openjdk/jdk/make/common/shared/Sanity.gmk
 ===================================================================
---- openjdk/jdk/make/common/shared/Sanity.gmk.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/make/common/shared/Sanity.gmk	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/make/common/shared/Sanity.gmk.orig
++++ openjdk/jdk/make/common/shared/Sanity.gmk
 @@ -114,12 +114,14 @@
      elif [ -f /etc/lsb-release ] ; then \
        $(EGREP) DISTRIB_RELEASE /etc/lsb-release | $(SED) -e 's@.*DISTRIB_RELEASE=\(.*\)@\1@'; \
@@ -50,10 +102,68 @@ Index: openjdk/jdk/make/common/shared/Sanity.gmk
  
  ifeq ($(PLATFORM), windows)
    # Windows 2000 is 5.0, Windows XP is 5.1, Windows 2003 is 5.2
+Index: openjdk/jdk/make/java/nio/Makefile
+===================================================================
+--- openjdk/jdk/make/java/nio/Makefile.orig
++++ openjdk/jdk/make/java/nio/Makefile
+@@ -186,11 +186,6 @@
+ 	sun/nio/ch/DevPollArrayWrapper.java \
+ 	sun/nio/ch/DevPollSelectorImpl.java \
+ 	sun/nio/ch/DevPollSelectorProvider.java \
+-	sun/nio/ch/EPoll.java \
+-	sun/nio/ch/EPollArrayWrapper.java \
+-	sun/nio/ch/EPollPort.java \
+-	sun/nio/ch/EPollSelectorProvider.java \
+-	sun/nio/ch/EPollSelectorImpl.java \
+ 	sun/nio/ch/InheritedChannel.java \
+ 	sun/nio/ch/LinuxAsynchronousChannelProvider.java \
+         sun/nio/ch/PollSelectorProvider.java \
+@@ -207,7 +202,6 @@
+ 	sun/nio/fs/LinuxFileSystemProvider.java \
+ 	sun/nio/fs/LinuxUserDefinedFileAttributeView.java \
+ 	sun/nio/fs/LinuxNativeDispatcher.java \
+-	sun/nio/fs/LinuxWatchService.java \
+ 	sun/nio/fs/PollingWatchService.java \
+ 	sun/nio/fs/UnixChannelFactory.java \
+ 	sun/nio/fs/UnixCopyFile.java \
+@@ -229,9 +223,6 @@
+ 	sun/nio/fs/UnixUserPrincipals.java
+ 
+ FILES_c += \
+-	EPoll.c \
+-	EPollArrayWrapper.c \
+-	EPollPort.c \
+ 	InheritedChannel.c \
+ 	NativeThread.c \
+         PollArrayWrapper.c \
+@@ -240,15 +231,11 @@
+ 	\
+ 	GnomeFileTypeDetector.c \
+ 	LinuxNativeDispatcher.c \
+-	LinuxWatchService.c \
+ 	UnixCopyFile.c \
+ 	UnixNativeDispatcher.c
+ 
+ FILES_export += \
+  	sun/nio/ch/DevPollArrayWrapper.java \
+-	sun/nio/ch/EPoll.java \
+-        sun/nio/ch/EPollArrayWrapper.java \
+-	sun/nio/ch/EPollPort.java \
+ 	sun/nio/ch/InheritedChannel.java \
+ 	sun/nio/ch/NativeThread.java \
+ 	sun/nio/ch/UnixAsynchronousServerSocketChannelImpl.java \
+@@ -256,7 +243,6 @@
+ 	\
+ 	sun/nio/fs/GnomeFileTypeDetector.java \
+ 	sun/nio/fs/LinuxNativeDispatcher.java \
+-	sun/nio/fs/LinuxWatchService.java \
+ 	sun/nio/fs/UnixCopyFile.java \
+ 	sun/nio/fs/UnixNativeDispatcher.java
+ 	
 Index: openjdk/jdk/make/javax/sound/Makefile
 ===================================================================
---- openjdk/jdk/make/javax/sound/Makefile.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/make/javax/sound/Makefile	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/make/javax/sound/Makefile.orig
++++ openjdk/jdk/make/javax/sound/Makefile
 @@ -100,8 +100,8 @@
  
  ifeq ($(PLATFORM), linux)
@@ -67,8 +177,8 @@ Index: openjdk/jdk/make/javax/sound/Makefile
  
 Index: openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h
 ===================================================================
---- openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h.orig
++++ openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h
 @@ -61,7 +61,7 @@
  #define log1p   jlog1p
  #define expm1   jexpm1
@@ -80,8 +190,8 @@ Index: openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h
  #define __ieee754_acosh         __j__ieee754_acosh
 Index: openjdk/jdk/src/share/native/sun/security/ec/impl/ecc_impl.h
 ===================================================================
---- openjdk/jdk/src/share/native/sun/security/ec/impl/ecc_impl.h.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/share/native/sun/security/ec/impl/ecc_impl.h	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/share/native/sun/security/ec/impl/ecc_impl.h.orig
++++ openjdk/jdk/src/share/native/sun/security/ec/impl/ecc_impl.h
 @@ -49,7 +49,7 @@
  /*
   * Multi-platform definitions
@@ -93,8 +203,8 @@ Index: openjdk/jdk/src/share/native/sun/security/ec/impl/ecc_impl.h
  typedef unsigned char uint8_t;
 Index: openjdk/jdk/src/solaris/bin/ergo_i586.c
 ===================================================================
---- openjdk/jdk/src/solaris/bin/ergo_i586.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/bin/ergo_i586.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/bin/ergo_i586.c.orig
++++ openjdk/jdk/src/solaris/bin/ergo_i586.c
 @@ -106,7 +106,7 @@
  
  #endif /* __solaris__ */
@@ -106,8 +216,8 @@ Index: openjdk/jdk/src/solaris/bin/ergo_i586.c
   * A utility method for asking the CPU about itself.
 Index: openjdk/jdk/src/solaris/bin/java_md.c
 ===================================================================
---- openjdk/jdk/src/solaris/bin/java_md.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/bin/java_md.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/bin/java_md.c.orig
++++ openjdk/jdk/src/solaris/bin/java_md.c
 @@ -37,7 +37,7 @@
  #include "manifest_info.h"
  #include "version_comp.h"
@@ -135,7 +245,7 @@ Index: openjdk/jdk/src/solaris/bin/java_md.c
      {
          const char* self = "/proc/self/exe";
          char buf[PATH_MAX+1];
-@@ -1446,7 +1446,7 @@
+@@ -1435,7 +1435,7 @@
  int
  ContinueInNewThread0(int (JNICALL *continuation)(void *), jlong stack_size, void * args) {
      int rslt;
@@ -144,7 +254,7 @@ Index: openjdk/jdk/src/solaris/bin/java_md.c
      pthread_t tid;
      pthread_attr_t attr;
      pthread_attr_init(&attr);
-@@ -1491,7 +1491,7 @@
+@@ -1480,7 +1480,7 @@
  
  void SetJavaLauncherPlatformProps() {
     /* Linux only */
@@ -155,8 +265,8 @@ Index: openjdk/jdk/src/solaris/bin/java_md.c
      sprintf(pid_prop_str, "%s%d", substr, getpid());
 Index: openjdk/jdk/src/solaris/bin/jexec.c
 ===================================================================
---- openjdk/jdk/src/solaris/bin/jexec.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/bin/jexec.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/bin/jexec.c.orig
++++ openjdk/jdk/src/solaris/bin/jexec.c
 @@ -76,7 +76,7 @@
  #include <string.h>
  #include <limits.h>
@@ -202,7 +312,7 @@ Index: openjdk/jdk/src/solaris/bin/jexec.c
  const char * isJar(const char * path);
  #endif
  
-@@ -172,7 +172,7 @@
+@@ -171,7 +171,7 @@
      nargv = (const char **) malloc((argc + 2) * (sizeof (const char *)));
      nargv[nargc++] = java;
  
@@ -211,7 +321,7 @@ Index: openjdk/jdk/src/solaris/bin/jexec.c
      /* The "-jar" flag is already in the original args list on Solaris,
       * so it only needs to be added on Linux. */
      nargv[nargc++] = JAR_FLAG;
-@@ -182,7 +182,7 @@
+@@ -181,7 +181,7 @@
          const char * jarfile = argv[argi++];
          const char * message = NULL;
  
@@ -220,7 +330,7 @@ Index: openjdk/jdk/src/solaris/bin/jexec.c
          /* On Linux we also need to make sure argv[1] is really a JAR
           * file (this will also resolve any symlinks, which helps). */
          char jarPath[PATH_MAX + 1];
-@@ -291,7 +291,7 @@
+@@ -290,7 +290,7 @@
  }
  
  
@@ -231,8 +341,8 @@ Index: openjdk/jdk/src/solaris/bin/jexec.c
   *
 Index: openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java
 ===================================================================
---- openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java.orig
++++ openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java
 @@ -238,9 +238,6 @@
              }
              throw new UnixException("Value of " + DOS_XATTR_NAME + " attribute is invalid");
@@ -245,8 +355,8 @@ Index: openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java
              buffer.release();
 Index: openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java
 ===================================================================
---- openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java.orig
++++ openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java
 @@ -101,9 +101,7 @@
                  LinuxNativeDispatcher.fgetxattr(fd, "user.java".getBytes(), 0L, 0);
                  return true;
@@ -260,8 +370,8 @@ Index: openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java
              }
 Index: openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.c.orig
++++ openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.c
 @@ -35,7 +35,9 @@
  #include <sys/swap.h>
  #include <sys/resource.h>
@@ -297,8 +407,8 @@ Index: openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.
  
 Index: openjdk/jdk/src/solaris/native/java/io/io_util_md.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/io/io_util_md.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/io/io_util_md.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/io/io_util_md.c.orig
++++ openjdk/jdk/src/solaris/native/java/io/io_util_md.c
 @@ -36,7 +36,7 @@
      WITH_PLATFORM_STRING(env, path, ps) {
          FD fd;
@@ -310,8 +420,8 @@ Index: openjdk/jdk/src/solaris/native/java/io/io_util_md.c
          while ((p > ps) && (*p == '/'))
 Index: openjdk/jdk/src/solaris/native/java/lang/UNIXProcess_md.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/lang/UNIXProcess_md.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/lang/UNIXProcess_md.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/lang/UNIXProcess_md.c.orig
++++ openjdk/jdk/src/solaris/native/java/lang/UNIXProcess_md.c
 @@ -93,7 +93,7 @@
  #define START_CHILD_USE_CLONE 0  /* clone() currently disabled; see above. */
  
@@ -332,8 +442,8 @@ Index: openjdk/jdk/src/solaris/native/java/lang/UNIXProcess_md.c
      #define START_CHILD_USE_VFORK 0
 Index: openjdk/jdk/src/solaris/native/java/lang/java_props_md.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/lang/java_props_md.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/lang/java_props_md.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/lang/java_props_md.c.orig
++++ openjdk/jdk/src/solaris/native/java/lang/java_props_md.c
 @@ -23,7 +23,7 @@
   * questions.
   */
@@ -357,11 +467,11 @@ Index: openjdk/jdk/src/solaris/native/java/lang/java_props_md.c
      lc = setlocale(cat, NULL);
  
 -#ifndef __linux__
-+#if !defined(__linux__) && !defined(__GLIBC)
++#if !defined(__linux__) && !defined(__GLIBC__)
      if (lc == NULL) {
          return 0;
      }
-@@ -273,7 +273,7 @@
+@@ -272,7 +272,7 @@
           * in order to use optimizations. */
          *std_encoding = (*p != '\0') ? p : "ISO8859-1";
  
@@ -370,7 +480,7 @@ Index: openjdk/jdk/src/solaris/native/java/lang/java_props_md.c
          /*
           * Remap the encoding string to a different value for japanese
           * locales on linux so that customized converters are used instead
-@@ -442,7 +442,7 @@
+@@ -437,7 +437,7 @@
      sprops.display_variant = sprops.variant;
      sprops.sun_jnu_encoding = sprops.encoding;
  
@@ -381,8 +491,8 @@ Index: openjdk/jdk/src/solaris/native/java/lang/java_props_md.c
  #else
 Index: openjdk/jdk/src/solaris/native/java/lang/locale_str.h
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/lang/locale_str.h.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/lang/locale_str.h	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/lang/locale_str.h.orig
++++ openjdk/jdk/src/solaris/native/java/lang/locale_str.h
 @@ -48,7 +48,7 @@
      "gl", "gl_ES",
      "he", "iw_IL",
@@ -445,8 +555,8 @@ Index: openjdk/jdk/src/solaris/native/java/lang/locale_str.h
      "YU", "CS", // YU has been removed from ISO 3166
 Index: openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c.orig
++++ openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c
 @@ -64,7 +64,7 @@
          /* Something went wrong, maybe networking is not setup? */
          strcpy(hostname, "localhost");
@@ -476,8 +586,8 @@ Index: openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c
             * On some Linuxes, when bound to the loopback interface, connect
 Index: openjdk/jdk/src/solaris/native/java/net/Inet6AddressImpl.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/net/Inet6AddressImpl.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/net/Inet6AddressImpl.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/net/Inet6AddressImpl.c.orig
++++ openjdk/jdk/src/solaris/native/java/net/Inet6AddressImpl.c
 @@ -70,7 +70,7 @@
      } else {
          // ensure null-terminated
@@ -507,8 +617,8 @@ Index: openjdk/jdk/src/solaris/native/java/net/Inet6AddressImpl.c
             * On some Linuxes, when bound to the loopback interface, connect
 Index: openjdk/jdk/src/solaris/native/java/net/NetworkInterface.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/net/NetworkInterface.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/net/NetworkInterface.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/net/NetworkInterface.c.orig
++++ openjdk/jdk/src/solaris/native/java/net/NetworkInterface.c
 @@ -53,6 +53,17 @@
  #define _PATH_PROCNET_IFINET6           "/proc/net/if_inet6"
  #endif
@@ -844,8 +954,8 @@ Index: openjdk/jdk/src/solaris/native/java/net/NetworkInterface.c
  
 Index: openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c.orig
++++ openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c
 @@ -33,7 +33,7 @@
  #ifdef __solaris__
  #include <fcntl.h>
@@ -912,8 +1022,8 @@ Index: openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c
  #endif
 Index: openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c.orig
++++ openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c
 @@ -32,7 +32,7 @@
  #endif
  #include <netinet/tcp.h>        /* Defines TCP_NODELAY, needed for 2.6 */
@@ -943,8 +1053,8 @@ Index: openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c
           * InetAddress.getLocalHost gets back the loopback address
 Index: openjdk/jdk/src/solaris/native/java/net/net_util_md.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/net/net_util_md.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/net/net_util_md.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/net/net_util_md.c.orig
++++ openjdk/jdk/src/solaris/native/java/net/net_util_md.c
 @@ -46,6 +46,11 @@
  #include <net/route.h>
  #include <sys/utsname.h>
@@ -959,8 +1069,8 @@ Index: openjdk/jdk/src/solaris/native/java/net/net_util_md.c
  #endif
 Index: openjdk/jdk/src/solaris/native/java/net/net_util_md.h
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/net/net_util_md.h.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/net/net_util_md.h	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/net/net_util_md.h.orig
++++ openjdk/jdk/src/solaris/native/java/net/net_util_md.h
 @@ -37,7 +37,7 @@
  #endif
  
@@ -981,8 +1091,8 @@ Index: openjdk/jdk/src/solaris/native/java/net/net_util_md.h
  #endif
 Index: openjdk/jdk/src/solaris/native/java/nio/MappedByteBuffer.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/nio/MappedByteBuffer.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/nio/MappedByteBuffer.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/nio/MappedByteBuffer.c.orig
++++ openjdk/jdk/src/solaris/native/java/nio/MappedByteBuffer.c
 @@ -40,7 +40,7 @@
      int result = 0;
      int i = 0;
@@ -994,8 +1104,8 @@ Index: openjdk/jdk/src/solaris/native/java/nio/MappedByteBuffer.c
      char *vec = (char *)malloc(numPages * sizeof(char));
 Index: openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c.orig
++++ openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c
 @@ -31,7 +31,7 @@
  #include <errno.h>
  #include <stddef.h>
@@ -1034,8 +1144,8 @@ Index: openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c
           */
 Index: openjdk/jdk/src/solaris/native/sun/awt/VDrawingArea.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/VDrawingArea.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/VDrawingArea.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/VDrawingArea.c.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/VDrawingArea.c
 @@ -33,7 +33,7 @@
  #include <stdio.h>
  #include <malloc.h>
@@ -1047,8 +1157,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/VDrawingArea.c
  #endif /* __linux__ */
 Index: openjdk/jdk/src/solaris/native/sun/awt/awt_Font.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/awt_Font.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_Font.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_Font.c.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_Font.c
 @@ -334,7 +334,7 @@
              if (strcmp(style, "regular") == 0) {
                  altstyle = "roman";
@@ -1060,8 +1170,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/awt_Font.c
              }
 Index: openjdk/jdk/src/solaris/native/sun/awt/awt_GraphicsEnv.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/awt_GraphicsEnv.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_GraphicsEnv.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_GraphicsEnv.c.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_GraphicsEnv.c
 @@ -122,7 +122,7 @@
   */
  
@@ -1118,8 +1228,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/awt_GraphicsEnv.c
      AWT_LOCK();
 Index: openjdk/jdk/src/solaris/native/sun/awt/awt_InputMethod.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/awt_InputMethod.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_InputMethod.c	2011-07-16 09:52:18.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_InputMethod.c.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_InputMethod.c
 @@ -67,7 +67,7 @@
                                  XIMPreeditDrawCallbackStruct *);
  static void PreeditCaretCallback(XIC, XPointer,
@@ -1299,8 +1409,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/awt_InputMethod.c
      AWT_UNLOCK();
 Index: openjdk/jdk/src/solaris/native/sun/awt/awt_MToolkit.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/awt_MToolkit.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_MToolkit.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_MToolkit.c.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_MToolkit.c
 @@ -63,7 +63,7 @@
  extern JavaVM *jvm;
  
@@ -1321,8 +1431,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/awt_MToolkit.c
                xembed_eventHandler(&xev);
 Index: openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c
 @@ -45,7 +45,7 @@
  #include "wsutils.h"
  #include "list.h"
@@ -1334,8 +1444,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c
  
 Index: openjdk/jdk/src/solaris/native/sun/awt/awt_util.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/awt_util.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_util.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_util.c.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_util.c
 @@ -605,7 +605,7 @@
  
    return answer;
@@ -1356,8 +1466,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/awt_util.c
  {
 Index: openjdk/jdk/src/solaris/native/sun/awt/awt_util.h
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/awt_util.h.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_util.h	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_util.h.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_util.h
 @@ -195,7 +195,7 @@
  
  
@@ -1369,8 +1479,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/awt_util.h
    Cardinal      max_refs;       /* Maximum length of refs array. */
 Index: openjdk/jdk/src/solaris/native/sun/awt/awt_xembed_server.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/awt_xembed_server.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_xembed_server.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_xembed_server.c.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_xembed_server.c
 @@ -35,7 +35,7 @@
  #include <X11/Xlib.h>
  #include <X11/Xatom.h>
@@ -1391,8 +1501,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/awt_xembed_server.c
  {
 Index: openjdk/jdk/src/solaris/native/sun/awt/extutil.h
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/extutil.h.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/extutil.h	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/extutil.h.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/extutil.h
 @@ -58,7 +58,7 @@
   */
  /* $XFree86: xc/include/extensions/extutil.h,v 1.5 2001/01/17 17:53:20 dawes Exp $ */
@@ -1404,8 +1514,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/extutil.h
  #define _EXTUTIL_H_
 Index: openjdk/jdk/src/solaris/native/sun/awt/fontpath.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/fontpath.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/fontpath.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/fontpath.c.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/fontpath.c
 @@ -23,7 +23,7 @@
   * questions.
   */
@@ -1480,8 +1590,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/fontpath.c
  
 Index: openjdk/jdk/src/solaris/native/sun/awt/multi_font.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/awt/multi_font.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/awt/multi_font.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/awt/multi_font.c.orig
++++ openjdk/jdk/src/solaris/native/sun/awt/multi_font.c
 @@ -348,7 +348,7 @@
      return JNI_TRUE;
  }
@@ -1502,8 +1612,8 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/multi_font.c
                 string" and its implementation uses "strlen()" to calculate the length
 Index: openjdk/jdk/src/solaris/native/sun/java2d/j2d_md.h
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/java2d/j2d_md.h.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/java2d/j2d_md.h	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/java2d/j2d_md.h.orig
++++ openjdk/jdk/src/solaris/native/sun/java2d/j2d_md.h
 @@ -30,7 +30,7 @@
  /*
   * Linux version of <sys/types.h> does not define intptr_t
@@ -1515,8 +1625,8 @@ Index: openjdk/jdk/src/solaris/native/sun/java2d/j2d_md.h
  
 Index: openjdk/jdk/src/solaris/native/sun/java2d/loops/vis_FuncArray.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/java2d/loops/vis_FuncArray.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/java2d/loops/vis_FuncArray.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/java2d/loops/vis_FuncArray.c.orig
++++ openjdk/jdk/src/solaris/native/sun/java2d/loops/vis_FuncArray.c
 @@ -804,7 +804,7 @@
  static int initialized;
  static int usevis = JNI_TRUE;
@@ -1528,8 +1638,8 @@ Index: openjdk/jdk/src/solaris/native/sun/java2d/loops/vis_FuncArray.c
  #   define ULTRA_CHIP   "sun4u"
 Index: openjdk/jdk/src/solaris/native/sun/net/dns/ResolverConfigurationImpl.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/net/dns/ResolverConfigurationImpl.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/net/dns/ResolverConfigurationImpl.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/net/dns/ResolverConfigurationImpl.c.orig
++++ openjdk/jdk/src/solaris/native/sun/net/dns/ResolverConfigurationImpl.c
 @@ -33,7 +33,7 @@
  #include <strings.h>
  #endif
@@ -1541,8 +1651,8 @@ Index: openjdk/jdk/src/solaris/native/sun/net/dns/ResolverConfigurationImpl.c
  
 Index: openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c.orig
++++ openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c
 @@ -30,7 +30,7 @@
  #include "sun_net_spi_DefaultProxySelector.h"
  #include <dlfcn.h>
@@ -1554,8 +1664,8 @@ Index: openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c
  #include <strings.h>
 Index: openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramChannelImpl.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramChannelImpl.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramChannelImpl.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramChannelImpl.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramChannelImpl.c
 @@ -35,7 +35,7 @@
  #include <string.h>
  #include <errno.h>
@@ -1576,8 +1686,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramChannelImpl.c
          SOCKADDR sa;
 Index: openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramDispatcher.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramDispatcher.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramDispatcher.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramDispatcher.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramDispatcher.c
 @@ -73,7 +73,7 @@
      m.msg_accrightslen = 0;
  #endif
@@ -1598,8 +1708,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramDispatcher.c
  #endif
 Index: openjdk/jdk/src/solaris/native/sun/nio/ch/FileChannelImpl.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/ch/FileChannelImpl.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/FileChannelImpl.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/FileChannelImpl.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/FileChannelImpl.c
 @@ -37,6 +37,12 @@
  
  #if defined(__linux__) || defined(__solaris__)
@@ -1647,8 +1757,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/ch/FileChannelImpl.c
  #endif
 Index: openjdk/jdk/src/solaris/native/sun/nio/ch/NativeThread.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/ch/NativeThread.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/NativeThread.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/NativeThread.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/NativeThread.c
 @@ -33,7 +33,7 @@
  #include "nio_util.h"
  
@@ -1687,8 +1797,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/ch/NativeThread.c
  #endif
 Index: openjdk/jdk/src/solaris/native/sun/nio/ch/Net.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/ch/Net.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/Net.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/Net.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/Net.c
 @@ -86,7 +86,7 @@
  #endif  /* __solaris__ */
  
@@ -1718,8 +1828,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/ch/Net.c
  #else
 Index: openjdk/jdk/src/solaris/native/sun/nio/ch/Sctp.h
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/ch/Sctp.h.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/Sctp.h	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/Sctp.h.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/Sctp.h
 @@ -67,7 +67,7 @@
  
  
@@ -1769,8 +1879,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/ch/Sctp.h
  #endif /* !SUN_NIO_CH_SCTP_H */
 Index: openjdk/jdk/src/solaris/native/sun/nio/ch/SctpChannelImpl.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/ch/SctpChannelImpl.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/SctpChannelImpl.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/SctpChannelImpl.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/SctpChannelImpl.c
 @@ -337,7 +337,7 @@
              break;
          case SCTP_ADDR_MADE_PRIM :
@@ -1791,8 +1901,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/ch/SctpChannelImpl.c
                  rv = 0;
 Index: openjdk/jdk/src/solaris/native/sun/nio/ch/SctpNet.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/ch/SctpNet.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/SctpNet.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/SctpNet.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/SctpNet.c
 @@ -58,6 +58,7 @@
   */
  jboolean loadSocketExtensionFuncs
@@ -1811,8 +1921,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/ch/SctpNet.c
      return JNI_TRUE;
 Index: openjdk/jdk/src/solaris/native/sun/nio/ch/ServerSocketChannelImpl.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/ch/ServerSocketChannelImpl.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/ServerSocketChannelImpl.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/ServerSocketChannelImpl.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/ServerSocketChannelImpl.c
 @@ -28,7 +28,7 @@
  #include <sys/types.h>
  #include <sys/socket.h>
@@ -1824,8 +1934,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/ch/ServerSocketChannelImpl.c
  
 Index: openjdk/jdk/src/solaris/native/sun/nio/ch/SocketChannelImpl.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/ch/SocketChannelImpl.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/SocketChannelImpl.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/SocketChannelImpl.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/SocketChannelImpl.c
 @@ -31,7 +31,7 @@
  #include <string.h>
  #include <poll.h>
@@ -1837,8 +1947,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/ch/SocketChannelImpl.c
  
 Index: openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c
 @@ -36,7 +36,7 @@
  #include <strings.h>
  #endif
@@ -1850,8 +1960,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c
  
 Index: openjdk/jdk/src/solaris/native/sun/nio/fs/UnixNativeDispatcher.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/fs/UnixNativeDispatcher.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/fs/UnixNativeDispatcher.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/fs/UnixNativeDispatcher.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/fs/UnixNativeDispatcher.c
 @@ -26,7 +26,7 @@
  /**
   * fstatat in glibc requires _ATFILE_SOURCE to be defined.
@@ -1872,8 +1982,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/fs/UnixNativeDispatcher.c
  #endif
 Index: openjdk/jdk/src/solaris/native/sun/nio/fs/genUnixConstants.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/nio/fs/genUnixConstants.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/nio/fs/genUnixConstants.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/nio/fs/genUnixConstants.c.orig
++++ openjdk/jdk/src/solaris/native/sun/nio/fs/genUnixConstants.c
 @@ -106,7 +106,9 @@
      DEF(ENOSYS);
      DEF(ELOOP);
@@ -1886,8 +1996,8 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/fs/genUnixConstants.c
      // flags used with openat/unlinkat/etc.
 Index: openjdk/jdk/src/solaris/native/sun/xawt/XToolkit.c
 ===================================================================
---- openjdk/jdk/src/solaris/native/sun/xawt/XToolkit.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/sun/xawt/XToolkit.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/native/sun/xawt/XToolkit.c.orig
++++ openjdk/jdk/src/solaris/native/sun/xawt/XToolkit.c
 @@ -27,7 +27,7 @@
  #include <X11/Xutil.h>
  #include <X11/Xos.h>
@@ -1908,8 +2018,8 @@ Index: openjdk/jdk/src/solaris/native/sun/xawt/XToolkit.c
    void *array[10];
 Index: openjdk/jdk/src/solaris/transport/socket/socket_md.c
 ===================================================================
---- openjdk/jdk/src/solaris/transport/socket/socket_md.c.orig	2011-07-16 02:14:10.000000000 +0200
-+++ openjdk/jdk/src/solaris/transport/socket/socket_md.c	2011-07-16 09:52:19.000000000 +0200
+--- openjdk/jdk/src/solaris/transport/socket/socket_md.c.orig
++++ openjdk/jdk/src/solaris/transport/socket/socket_md.c
 @@ -36,7 +36,7 @@
  #ifdef __solaris__
  #include <thread.h>
@@ -1928,85 +2038,3 @@ Index: openjdk/jdk/src/solaris/transport/socket/socket_md.c
  int
  dbgsysTlsAlloc() {
      pthread_key_t key;
-Index: openjdk/jdk/make/com/sun/nio/Makefile
-===================================================================
---- openjdk/jdk/make/com/sun/nio/Makefile.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/make/com/sun/nio/Makefile	2011-07-16 09:52:19.000000000 +0200
-@@ -30,11 +30,11 @@
- BUILDDIR = ../../..
- include $(BUILDDIR)/common/Defs.gmk
- 
--SUBDIRS = sctp
--include $(BUILDDIR)/common/Subdirs.gmk
-+#SUBDIRS = sctp
-+#include $(BUILDDIR)/common/Subdirs.gmk
- 
- all build clean clobber::
--	$(SUBDIRS-loop)
-+#	$(SUBDIRS-loop)
- 
- clean clobber::
--	$(RM) -r $(CLASSDESTDIR)/com/sun/nio
-+#	$(RM) -r $(CLASSDESTDIR)/com/sun/nio
-Index: openjdk/jdk/src/share/bin/java.c
-===================================================================
---- openjdk/jdk/src/share/bin/java.c.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/src/share/bin/java.c	2011-07-16 09:52:19.000000000 +0200
-@@ -1898,6 +1898,10 @@
-       args.what = what;
-       args.ifn = *ifn;
- 
-+      //DEBUG ContinueInNewThread java.c
-+      DumpState();
-+      //DEBUG
-+
-       rslt = ContinueInNewThread0(JavaMain, threadStackSize, (void*)&args);
-       /* If the caller has deemed there is an error we
-        * simply return that, otherwise we return the value of
-Index: openjdk/jdk/make/common/shared/Defs-versions.gmk
-===================================================================
---- openjdk/jdk/make/common/shared/Defs-versions.gmk.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/make/common/shared/Defs-versions.gmk	2011-07-16 09:52:19.000000000 +0200
-@@ -148,7 +148,9 @@
-   REQUIRED_OS_VERSION         = 2.6
-   REQUIRED_OS_VARIANT_NAME    = Fedora
-   REQUIRED_OS_VARIANT_VERSION = 9
--  REQUIRED_ALSA_VERSION       = 0.9.1
-+ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
-+   REQUIRED_ALSA_VERSION       = 0.9.1
-+endif
-   REQUIRED_COMPILER_NAME      = GCC4
-   REQUIRED_COMPILER_VERSION   = GCC4
-   REQUIRED_GCC_VER            = 2.95
-Index: openjdk/jdk/make/common/shared/Sanity-Settings.gmk
-===================================================================
---- openjdk/jdk/make/common/shared/Sanity-Settings.gmk.orig	2011-07-16 02:14:09.000000000 +0200
-+++ openjdk/jdk/make/common/shared/Sanity-Settings.gmk	2011-07-16 09:52:19.000000000 +0200
-@@ -186,8 +186,10 @@
- endif
- ifeq ($(PLATFORM),linux)
-   ifdef REQUIRED_ALSA_VERSION
-+  ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
-     ALL_SETTINGS+=$(call addRequiredSetting,ALSA_VERSION)
-   endif
-+  endif
- endif
- ALL_SETTINGS+=$(call addRequiredVersionSetting,OS_VERSION)
- ALL_SETTINGS+=$(call addOptionalSetting,OS_VARIANT_NAME)
-Index: openjdk/jdk/make/java/nio/Makefile
-===================================================================
---- openjdk/jdk/make/java/nio/Makefile.orig	2011-07-16 10:04:04.000000000 +0200
-+++ openjdk/jdk/make/java/nio/Makefile	2011-07-16 10:06:34.000000000 +0200
-@@ -229,9 +229,9 @@
- 	sun/nio/fs/UnixUserPrincipals.java
- 
- FILES_c += \
--	EPoll.c \
--	EPollArrayWrapper.c \
--	EPollPort.c \
-+#	EPoll.c \
-+#	EPollArrayWrapper.c \
-+#	EPollPort.c \
- 	InheritedChannel.c \
- 	NativeThread.c \
-         PollArrayWrapper.c \

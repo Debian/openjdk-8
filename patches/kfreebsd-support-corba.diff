@@ -7,8 +7,8 @@ Last-Update: 2011-06-28
 Forwarded: no
 Index: openjdk/corba/make/common/shared/Platform.gmk
 ===================================================================
---- openjdk/corba/make/common/shared/Platform.gmk.orig	2011-07-16 01:48:27.000000000 +0200
-+++ openjdk/corba/make/common/shared/Platform.gmk	2011-07-16 01:49:37.000000000 +0200
+--- openjdk/corba/make/common/shared/Platform.gmk.orig
++++ openjdk/corba/make/common/shared/Platform.gmk
 @@ -147,7 +147,7 @@
  endif
  

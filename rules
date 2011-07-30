@@ -28,7 +28,7 @@ ifeq ($(distrel),n/a)
   distrel := sid
 endif
 
-hotspot_archs	= amd64 i386 lpia sparc sparc64
+hotspot_archs	= amd64 i386 lpia sparc sparc64 kfreebsd-amd64 kfreebsd-i386
 # requires llvm; llvm in jaunty is recent enough, but in universe
 ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
   shark_archs	= amd64 i386 lpia
@@ -350,18 +350,18 @@ ifneq (,$(filter $(DEB_HOST_ARCH), alpha))
 	debian/patches/alpha-float-const.diff
 endif
 
-#ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
-#  DISTRIBUTION_PATCHES += \
-#        debian/patches/kfreebsd-support-jdk.diff \
-#        debian/patches/kfreebsd-support-hotspot.diff \
-#        debian/patches/kfreebsd-support-corba.diff
-#        
-#  ifeq (,$(filter noaltjamvm, $(DEB_BUILD_OPTIONS)))
-#    ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
-#      DISTRIBUTION_PATCHES += debian/patches/kfreebsd-support-jamvm.diff
-#    endif
-#  endif    
-#endif
+ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
+  DISTRIBUTION_PATCHES += \
+        debian/patches/kfreebsd-support-jdk.diff \
+        debian/patches/kfreebsd-support-hotspot.diff \
+        debian/patches/kfreebsd-support-corba.diff
+        
+  ifeq (,$(filter noaltjamvm, $(DEB_BUILD_OPTIONS)))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
+      DISTRIBUTION_PATCHES += debian/patches/kfreebsd-support-jamvm.diff
+    endif
+  endif    
+endif
 
 export DISTRIBUTION_PATCHES DISTRIBUTION_ECJ_PATCHES
 
@@ -431,8 +431,6 @@ CONFIGURE_ARGS += \
 	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp145_01.zip \
 	--with-jaf-drop-zip=$(CURDIR)/drops/jdk7-jaf-2010_08_19.zip \
 	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2_4-b03-2011_05_27.zip
-
-#	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
 
 ifneq (,$(filter $(DEB_HOST_ARCH), hppa))
 CONFIGURE_ARGS += \

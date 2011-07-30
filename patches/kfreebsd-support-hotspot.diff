@@ -9,17 +9,311 @@ Description: Initial GNU/kFreeBSD support for openjdk-7 (Hotspot part)
    openjdk/hotspot/src/os/linux/vm/os_linux.cpp
  - Change access to CPU register
    openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
+   openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c
+   openjdk/hotspot/agent/src/os/linux/libproc.h
+   openjdk/hotspot/agent/src/os/linux/ps_core.c
    (from bsd-port)
+ - Fix ptrace usage under freebsd kernel
+   openjdk/hotspot/agent/src/os/linux/ps_proc.c
  Should not be keep like this :
  - Undefined UINTPTR_MAX
    openjdk/hotspot/src/share/vm/memory/allocation.hpp
+   openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp
 Author: Damien Raude-Morvan <drazzib@debian.org>
 Last-Update: 2011-06-28
 Forwarded: no
+Index: openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c
+===================================================================
+--- openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c.orig
++++ openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c
+@@ -316,7 +316,7 @@
+ 
+ #ifdef i386
+ #define REG_INDEX(reg) sun_jvm_hotspot_debugger_x86_X86ThreadContext_##reg
+-
++#ifdef __linux__
+   regs[REG_INDEX(GS)]  = (uintptr_t) gregs.xgs;
+   regs[REG_INDEX(FS)]  = (uintptr_t) gregs.xfs;
+   regs[REG_INDEX(ES)]  = (uintptr_t) gregs.xes;
+@@ -332,7 +332,23 @@
+   regs[REG_INDEX(PC)] = (uintptr_t) gregs.eip;
+   regs[REG_INDEX(CS)]  = (uintptr_t) gregs.xcs;
+   regs[REG_INDEX(SS)]  = (uintptr_t) gregs.xss;
+-
++#elif defined(__FreeBSD_kernel__)
++  regs[REG_INDEX(GS)]  = (uintptr_t) gregs.r_gs;
++  regs[REG_INDEX(FS)]  = (uintptr_t) gregs.r_fs;
++  regs[REG_INDEX(ES)]  = (uintptr_t) gregs.r_es;
++  regs[REG_INDEX(DS)]  = (uintptr_t) gregs.r_ds;
++  regs[REG_INDEX(EDI)] = (uintptr_t) gregs.r_edi;
++  regs[REG_INDEX(ESI)] = (uintptr_t) gregs.r_esi;
++  regs[REG_INDEX(FP)] = (uintptr_t) gregs.r_ebp;
++  regs[REG_INDEX(SP)] = (uintptr_t) gregs.r_isp;
++  regs[REG_INDEX(EBX)] = (uintptr_t) gregs.r_ebx;
++  regs[REG_INDEX(EDX)] = (uintptr_t) gregs.r_edx;
++  regs[REG_INDEX(ECX)] = (uintptr_t) gregs.r_ecx;
++  regs[REG_INDEX(EAX)] = (uintptr_t) gregs.r_eax;
++  regs[REG_INDEX(PC)] = (uintptr_t) gregs.r_eip;
++  regs[REG_INDEX(CS)]  = (uintptr_t) gregs.r_cs;
++  regs[REG_INDEX(SS)]  = (uintptr_t) gregs.r_ss;
++#endif
+ #endif /* i386 */
+ 
+ #if ia64
+@@ -344,7 +360,7 @@
+ 
+ #ifdef amd64
+ #define REG_INDEX(reg) sun_jvm_hotspot_debugger_amd64_AMD64ThreadContext_##reg
+-
++#ifdef __linux__
+   regs[REG_INDEX(R15)] = gregs.r15;
+   regs[REG_INDEX(R14)] = gregs.r14;
+   regs[REG_INDEX(R13)] = gregs.r13;
+@@ -370,7 +386,33 @@
+   regs[REG_INDEX(ES)] = gregs.es;
+   regs[REG_INDEX(FS)] = gregs.fs;
+   regs[REG_INDEX(GS)] = gregs.gs;
+-
++#elif defined(__FreeBSD_kernel__)
++  regs[REG_INDEX(R15)] = gregs.r_r15;
++  regs[REG_INDEX(R14)] = gregs.r_r14;
++  regs[REG_INDEX(R13)] = gregs.r_r13;
++  regs[REG_INDEX(R12)] = gregs.r_r12;
++  regs[REG_INDEX(RBP)] = gregs.r_rbp;
++  regs[REG_INDEX(RBX)] = gregs.r_rbx;
++  regs[REG_INDEX(R11)] = gregs.r_r11;
++  regs[REG_INDEX(R10)] = gregs.r_r10;
++  regs[REG_INDEX(R9)] = gregs.r_r9;
++  regs[REG_INDEX(R8)] = gregs.r_r8;
++  regs[REG_INDEX(RAX)] = gregs.r_rax;
++  regs[REG_INDEX(RCX)] = gregs.r_rcx;
++  regs[REG_INDEX(RDX)] = gregs.r_rdx;
++  regs[REG_INDEX(RSI)] = gregs.r_rsi;
++  regs[REG_INDEX(RDI)] = gregs.r_rdi;
++  regs[REG_INDEX(RIP)] = gregs.r_rip;
++  regs[REG_INDEX(CS)] = gregs.r_cs;
++  regs[REG_INDEX(RSP)] = gregs.r_rsp;
++  regs[REG_INDEX(SS)] = gregs.r_ss;
++//  regs[REG_INDEX(FSBASE)] = gregs.fs_base;
++//  regs[REG_INDEX(GSBASE)] = gregs.gs_base;
++//  regs[REG_INDEX(DS)] = gregs.ds;
++//  regs[REG_INDEX(ES)] = gregs.es;
++//  regs[REG_INDEX(FS)] = gregs.fs;
++//  regs[REG_INDEX(GS)] = gregs.gs;
++#endif
+ #endif /* amd64 */
+ 
+ #if defined(sparc) || defined(sparcv9)
+Index: openjdk/hotspot/agent/src/os/linux/libproc.h
+===================================================================
+--- openjdk/hotspot/agent/src/os/linux/libproc.h.orig
++++ openjdk/hotspot/agent/src/os/linux/libproc.h
+@@ -27,6 +27,9 @@
+ 
+ #include <unistd.h>
+ #include <stdint.h>
++#if defined(__FreeBSD_kernel__)
++#include <machine/reg.h>
++#endif
+ #include "proc_service.h"
+ 
+ #if defined(sparc) || defined(sparcv9)
+@@ -87,6 +90,10 @@
+ #define user_regs_struct  pt_regs
+ #endif
+ 
++#if defined(__FreeBSD_kernel__)
++#define user_regs_struct reg
++#endif
++
+ // This C bool type must be int for compatibility with Linux calls and
+ // it would be a mistake to equivalence it to C++ bool on many platforms
+ 
+Index: openjdk/hotspot/agent/src/os/linux/ps_core.c
+===================================================================
+--- openjdk/hotspot/agent/src/os/linux/ps_core.c.orig
++++ openjdk/hotspot/agent/src/os/linux/ps_core.c
+@@ -539,11 +539,12 @@
+       return false;
+ 
+    // copy regs
+-   memcpy(&newthr->regs, prstat->pr_reg, sizeof(struct user_regs_struct));
++   memcpy(&newthr->regs, &prstat->pr_reg, sizeof(struct user_regs_struct));
+ 
+    if (is_debug()) {
+       print_debug("integer regset\n");
+ #ifdef i386
++#ifdef __linux__
+       // print the regset
+       print_debug("\teax = 0x%x\n", newthr->regs.eax);
+       print_debug("\tebx = 0x%x\n", newthr->regs.ebx);
+@@ -554,9 +555,21 @@
+       print_debug("\tesi = 0x%x\n", newthr->regs.esi);
+       print_debug("\tedi = 0x%x\n", newthr->regs.edi);
+       print_debug("\teip = 0x%x\n", newthr->regs.eip);
++#elif defined(__FreeBSD_kernel__)
++      print_debug("\teax = 0x%x\n", newthr->regs.r_eax);
++      print_debug("\tebx = 0x%x\n", newthr->regs.r_ebx);
++      print_debug("\tecx = 0x%x\n", newthr->regs.r_ecx);
++      print_debug("\tedx = 0x%x\n", newthr->regs.r_edx);
++      print_debug("\tesp = 0x%x\n", newthr->regs.r_esp);
++      print_debug("\tebp = 0x%x\n", newthr->regs.r_ebp);
++      print_debug("\tesi = 0x%x\n", newthr->regs.r_esi);
++      print_debug("\tedi = 0x%x\n", newthr->regs.r_edi);
++      print_debug("\teip = 0x%x\n", newthr->regs.r_eip);
++#endif
+ #endif
+ 
+ #if defined(amd64) || defined(x86_64)
++#ifdef __linux__
+       // print the regset
+       print_debug("\tr15 = 0x%lx\n", newthr->regs.r15);
+       print_debug("\tr14 = 0x%lx\n", newthr->regs.r14);
+@@ -585,6 +598,35 @@
+       print_debug("\tes = 0x%lx\n", newthr->regs.es);
+       print_debug("\tfs = 0x%lx\n", newthr->regs.fs);
+       print_debug("\tgs = 0x%lx\n", newthr->regs.gs);
++#elif defined(__FreeBSD_kernel__)
++      print_debug("\tr15 = 0x%lx\n", newthr->regs.r_r15);
++      print_debug("\tr14 = 0x%lx\n", newthr->regs.r_r14);
++      print_debug("\tr13 = 0x%lx\n", newthr->regs.r_r13);
++      print_debug("\tr12 = 0x%lx\n", newthr->regs.r_r12);
++      print_debug("\trbp = 0x%lx\n", newthr->regs.r_rbp);
++      print_debug("\trbx = 0x%lx\n", newthr->regs.r_rbx);
++      print_debug("\tr11 = 0x%lx\n", newthr->regs.r_r11);
++      print_debug("\tr10 = 0x%lx\n", newthr->regs.r_r10);
++      print_debug("\tr9 = 0x%lx\n", newthr->regs.r_r9);
++      print_debug("\tr8 = 0x%lx\n", newthr->regs.r_r8);
++      print_debug("\trax = 0x%lx\n", newthr->regs.r_rax);
++      print_debug("\trcx = 0x%lx\n", newthr->regs.r_rcx);
++      print_debug("\trdx = 0x%lx\n", newthr->regs.r_rdx);
++      print_debug("\trsi = 0x%lx\n", newthr->regs.r_rsi);
++      print_debug("\trdi = 0x%lx\n", newthr->regs.r_rdi);
++      //print_debug("\torig_rax = 0x%lx\n", newthr->regs.orig_rax);
++      print_debug("\trip = 0x%lx\n", newthr->regs.r_rip);
++      print_debug("\tcs = 0x%lx\n", newthr->regs.r_cs);
++      //print_debug("\teflags = 0x%lx\n", newthr->regs.eflags);
++      print_debug("\trsp = 0x%lx\n", newthr->regs.r_rsp);
++      print_debug("\tss = 0x%lx\n", newthr->regs.r_ss);
++      //print_debug("\tfs_base = 0x%lx\n", newthr->regs.fs_base);
++      //print_debug("\tgs_base = 0x%lx\n", newthr->regs.gs_base);
++      //print_debug("\tds = 0x%lx\n", newthr->regs.ds);
++      //print_debug("\tes = 0x%lx\n", newthr->regs.es);
++      //print_debug("\tfs = 0x%lx\n", newthr->regs.fs);
++      //print_debug("\tgs = 0x%lx\n", newthr->regs.gs);
++#endif
+ #endif
+    }
+ 
+Index: openjdk/hotspot/agent/src/os/linux/ps_proc.c
+===================================================================
+--- openjdk/hotspot/agent/src/os/linux/ps_proc.c.orig
++++ openjdk/hotspot/agent/src/os/linux/ps_proc.c
+@@ -37,6 +37,18 @@
+ #define __WALL          0x40000000  // Copied from /usr/include/linux/wait.h
+ #endif
+ 
++#ifndef PTRACE_PEEKDATA
++#define PTRACE_PEEKDATA PT_READ_D
++#endif
++
++#ifndef PTRACE_ATTACH
++#define PTRACE_ATTACH PT_ATTACH
++#endif
++
++#ifndef PTRACE_DETACH
++#define PTRACE_DETACH PT_DETACH
++#endif
++
+ // This file has the libproc implementation specific to live process
+ // For core files, refer to ps_core.c
+ 
+@@ -54,7 +66,7 @@
+ // before calling process_read_data.
+ 
+ static bool process_read_data(struct ps_prochandle* ph, uintptr_t addr, char *buf, size_t size) {
+-  long rslt;
++  int rslt;
+   size_t i, words;
+   uintptr_t end_addr = addr + size;
+   uintptr_t aligned_addr = align(addr, sizeof(long));
+@@ -62,36 +74,36 @@
+   if (aligned_addr != addr) {
+     char *ptr = (char *)&rslt;
+     errno = 0;
+-    rslt = ptrace(PTRACE_PEEKDATA, ph->pid, aligned_addr, 0);
++    rslt = ptrace(PTRACE_PEEKDATA, ph->pid, (caddr_t) aligned_addr, 0);
+     if (errno) {
+       print_debug("ptrace(PTRACE_PEEKDATA, ..) failed for %d bytes @ %lx\n", size, addr);
+       return false;
+     }
+     for (; aligned_addr != addr; aligned_addr++, ptr++);
+-    for (; ((intptr_t)aligned_addr % sizeof(long)) && aligned_addr < end_addr;
++    for (; ((intptr_t)aligned_addr % sizeof(int)) && aligned_addr < end_addr;
+         aligned_addr++)
+        *(buf++) = *(ptr++);
+   }
+ 
+-  words = (end_addr - aligned_addr) / sizeof(long);
++  words = (end_addr - aligned_addr) / sizeof(int);
+ 
+-  // assert((intptr_t)aligned_addr % sizeof(long) == 0);
++  // assert((intptr_t)aligned_addr % sizeof(int) == 0);
+   for (i = 0; i < words; i++) {
+     errno = 0;
+-    rslt = ptrace(PTRACE_PEEKDATA, ph->pid, aligned_addr, 0);
++    rslt = ptrace(PTRACE_PEEKDATA, ph->pid, (caddr_t) aligned_addr, 0);
+     if (errno) {
+       print_debug("ptrace(PTRACE_PEEKDATA, ..) failed for %d bytes @ %lx\n", size, addr);
+       return false;
+     }
+-    *(long *)buf = rslt;
+-    buf += sizeof(long);
+-    aligned_addr += sizeof(long);
++    *(int *)buf = rslt;
++    buf += sizeof(int);
++    aligned_addr += sizeof(int);
+   }
+ 
+   if (aligned_addr != end_addr) {
+     char *ptr = (char *)&rslt;
+     errno = 0;
+-    rslt = ptrace(PTRACE_PEEKDATA, ph->pid, aligned_addr, 0);
++    rslt = ptrace(PTRACE_PEEKDATA, ph->pid, (caddr_t) aligned_addr, 0);
+     if (errno) {
+       print_debug("ptrace(PTRACE_PEEKDATA, ..) failed for %d bytes @ %lx\n", size, addr);
+       return false;
+@@ -130,7 +142,7 @@
+ #endif
+ 
+ #ifdef PTRACE_GETREGS_REQ
+- if (ptrace_getregs(PTRACE_GETREGS_REQ, pid, user, NULL) < 0) {
++ if (ptrace_getregs(PTRACE_GETREGS_REQ, pid, (caddr_t) user, 0) < 0) {
+    print_debug("ptrace(PTRACE_GETREGS, ...) failed for lwp %d\n", pid);
+    return false;
+  }
+@@ -144,7 +156,7 @@
+ 
+ // attach to a process/thread specified by "pid"
+ static bool ptrace_attach(pid_t pid) {
+-  if (ptrace(PTRACE_ATTACH, pid, NULL, NULL) < 0) {
++  if (ptrace(PTRACE_ATTACH, pid, NULL, 0) < 0) {
+     print_debug("ptrace(PTRACE_ATTACH, ..) failed for %d\n", pid);
+     return false;
+   } else {
+@@ -271,7 +283,7 @@
+ 
+ // detach a given pid
+ static bool ptrace_detach(pid_t pid) {
+-  if (pid && ptrace(PTRACE_DETACH, pid, NULL, NULL) < 0) {
++  if (pid && ptrace(PTRACE_DETACH, pid, NULL, 0) < 0) {
+     print_debug("ptrace(PTRACE_DETACH, ..) failed for %d\n", pid);
+     return false;
+   } else {
 Index: openjdk/hotspot/make/defs.make
 ===================================================================
---- openjdk/hotspot/make/defs.make.orig	2011-07-16 01:49:43.000000000 +0200
-+++ openjdk/hotspot/make/defs.make	2011-07-16 02:13:04.000000000 +0200
+--- openjdk/hotspot/make/defs.make.orig
++++ openjdk/hotspot/make/defs.make
 @@ -132,6 +132,10 @@
    OSNAME=linux
  endif
@@ -33,8 +327,8 @@ Index: openjdk/hotspot/make/defs.make
  
 Index: openjdk/hotspot/make/linux/Makefile
 ===================================================================
---- openjdk/hotspot/make/linux/Makefile.orig	2011-07-16 01:49:43.000000000 +0200
-+++ openjdk/hotspot/make/linux/Makefile	2011-07-16 02:13:04.000000000 +0200
+--- openjdk/hotspot/make/linux/Makefile.orig
++++ openjdk/hotspot/make/linux/Makefile
 @@ -233,6 +233,9 @@
  SUPPORTED_OS_VERSION = 2.4% 2.5% 2.6% 3%
  OS_VERSION := $(shell uname -r)
@@ -47,8 +341,8 @@ Index: openjdk/hotspot/make/linux/Makefile
  ifeq ($(DISABLE_HOTSPOT_OS_VERSION_CHECK)$(EMPTY_IF_NOT_SUPPORTED),)
 Index: openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp
 ===================================================================
---- openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp.orig	2011-07-16 01:49:43.000000000 +0200
-+++ openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp	2011-07-16 02:13:04.000000000 +0200
+--- openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp.orig
++++ openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp
 @@ -39,6 +39,10 @@
  #define UNIX_PATH_MAX   sizeof(((struct sockaddr_un *)0)->sun_path)
  #endif
@@ -95,8 +389,8 @@ Index: openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp
      // peer credential look okay so we read the request
 Index: openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp
 ===================================================================
---- openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp.orig	2011-07-16 01:49:43.000000000 +0200
-+++ openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp	2011-07-16 02:13:04.000000000 +0200
+--- openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp.orig
++++ openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp
 @@ -169,7 +169,9 @@
    "WINCH",      SIGWINCH,       /* Window size change (4.3 BSD, Sun).  */
    "POLL",       SIGPOLL,        /* Pollable event occurred (System V).  */
@@ -109,8 +403,8 @@ Index: openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp
  #endif
 Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
 ===================================================================
---- openjdk/hotspot/src/os/linux/vm/os_linux.cpp.orig	2011-07-16 01:49:43.000000000 +0200
-+++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2011-07-16 02:13:04.000000000 +0200
+--- openjdk/hotspot/src/os/linux/vm/os_linux.cpp.orig
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp
 @@ -115,8 +115,13 @@
  # include <semaphore.h>
  # include <fcntl.h>
@@ -159,7 +453,7 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
  }
  
  julong os::physical_memory() {
-@@ -2125,18 +2145,22 @@
+@@ -2090,18 +2110,22 @@
    st->print("Memory:");
    st->print(" %dk page", os::vm_page_size()>>10);
  
@@ -182,28 +476,7 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
    st->cr();
  }
  
-@@ -4334,9 +4358,8 @@
- 
- int os::Linux::safe_cond_timedwait(pthread_cond_t *_cond, pthread_mutex_t *_mutex, const struct timespec *_abstime)
- {
--   if (is_NPTL()) {
--      return pthread_cond_timedwait(_cond, _mutex, _abstime);
--   } else {
-+#if defined(__linux__)
-+   if (!is_NPTL()) {
- #ifndef IA64
-       // 6292965: LinuxThreads pthread_cond_timedwait() resets FPU control
-       // word back to default 64bit precision if condvar is signaled. Java
-@@ -4349,6 +4372,8 @@
- #endif // IA64
-       return status;
-    }
-+#endif
-+   return pthread_cond_timedwait(_cond, _mutex, _abstime);
- }
- 
- ////////////////////////////////////////////////////////////////////////////////
-@@ -5295,6 +5320,7 @@
+@@ -5260,6 +5284,7 @@
  int os::fork_and_exec(char* cmd) {
    const char * argv[4] = {"sh", "-c", cmd, NULL};
  
@@ -211,7 +484,7 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
    // fork() in LinuxThreads/NPTL is not async-safe. It needs to run
    // pthread_atfork handlers and reset pthread library. All we need is a
    // separate process to execve. Make a direct syscall to fork process.
-@@ -5302,6 +5328,9 @@
+@@ -5267,6 +5292,9 @@
    // the best...
    pid_t pid = NOT_IA64(syscall(__NR_fork);)
                IA64_ONLY(fork();)
@@ -221,7 +494,7 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
  
    if (pid < 0) {
      // fork failed
-@@ -5310,6 +5339,7 @@
+@@ -5275,6 +5303,7 @@
    } else if (pid == 0) {
      // child process
  
@@ -229,7 +502,7 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
      // execve() in LinuxThreads will call pthread_kill_other_threads_np()
      // first to kill every thread on the thread list. Because this list is
      // not reset by fork() (see notes above), execve() will instead kill
-@@ -5319,6 +5349,9 @@
+@@ -5284,6 +5313,9 @@
      // above.
      NOT_IA64(syscall(__NR_execve, "/bin/sh", argv, environ);)
      IA64_ONLY(execve("/bin/sh", (char* const*)argv, environ);)
@@ -241,8 +514,8 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
      _exit(-1);
 Index: openjdk/hotspot/src/os/posix/launcher/java_md.c
 ===================================================================
---- openjdk/hotspot/src/os/posix/launcher/java_md.c.orig	2011-07-16 01:49:43.000000000 +0200
-+++ openjdk/hotspot/src/os/posix/launcher/java_md.c	2011-07-16 02:13:04.000000000 +0200
+--- openjdk/hotspot/src/os/posix/launcher/java_md.c.orig
++++ openjdk/hotspot/src/os/posix/launcher/java_md.c
 @@ -41,7 +41,7 @@
  #include "version_comp.h"
  #endif
@@ -288,7 +561,7 @@ Index: openjdk/hotspot/src/os/posix/launcher/java_md.c
      {
          const char* self = "/proc/self/exe";
          char buf[PATH_MAX+1];
-@@ -1832,7 +1832,7 @@
+@@ -1821,7 +1821,7 @@
  int
  ContinueInNewThread(int (JNICALL *continuation)(void *), jlong stack_size, void * args) {
      int rslt;
@@ -297,27 +570,10 @@ Index: openjdk/hotspot/src/os/posix/launcher/java_md.c
      pthread_t tid;
      pthread_attr_t attr;
      pthread_attr_init(&attr);
-Index: openjdk/hotspot/src/share/vm/memory/allocation.hpp
-===================================================================
---- openjdk/hotspot/src/share/vm/memory/allocation.hpp.orig	2011-07-16 01:49:43.000000000 +0200
-+++ openjdk/hotspot/src/share/vm/memory/allocation.hpp	2011-07-16 02:13:04.000000000 +0200
-@@ -214,9 +214,9 @@
-   void signal_out_of_memory(size_t request, const char* whence) const;
- 
-   void check_for_overflow(size_t request, const char* whence) const {
--    if (UINTPTR_MAX - request < (uintptr_t)_hwm) {
--      signal_out_of_memory(request, whence);
--    }
-+//    if (UINTPTR_MAX - request < (uintptr_t)_hwm) {
-+//      signal_out_of_memory(request, whence);
-+//    }
-  }
- 
-  public:
 Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
 ===================================================================
---- openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp.orig	2011-07-16 01:49:43.000000000 +0200
-+++ openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp	2011-07-16 02:13:04.000000000 +0200
+--- openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp.orig
++++ openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
 @@ -81,6 +81,7 @@
  # include <ucontext.h>
  # include <fpu_control.h>
@@ -326,7 +582,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
  #ifdef AMD64
  #define REG_SP REG_RSP
  #define REG_PC REG_RIP
-@@ -94,6 +95,33 @@
+@@ -94,6 +95,40 @@
  #define SPELL_REG_SP "esp"
  #define SPELL_REG_FP "ebp"
  #endif // AMD64
@@ -353,6 +609,13 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
 +#define context_fp uc_mcontext.mc_ebp
 +#define context_eip uc_mcontext.mc_eip
 +#define context_esp uc_mcontext.mc_esp
++#define context_eax uc_mcontext.mc_eax
++#define context_ebx uc_mcontext.mc_ebx
++#define context_ecx uc_mcontext.mc_ecx
++#define context_edx uc_mcontext.mc_edx
++#define context_ebp uc_mcontext.mc_ebp
++#define context_esi uc_mcontext.mc_esi
++#define context_edi uc_mcontext.mc_edi
 +#define context_eflags uc_mcontext.mc_eflags
 +#define context_trapno uc_mcontext.mc_trapno
 +#endif // AMD64
@@ -360,14 +623,14 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
  
  address os::current_stack_pointer() {
  #ifdef SPARC_WORKS
-@@ -119,15 +147,27 @@
+@@ -119,15 +154,27 @@
  }
  
  address os::Linux::ucontext_get_pc(ucontext_t * uc) {
 +#ifdef __linux__
    return (address)uc->uc_mcontext.gregs[REG_PC];
 +#elif defined(__FreeBSD_kernel__)
-+  return (intptr_t*)uc->context_pc;
++  return (address)uc->context_pc;
 +#endif
  }
  
@@ -388,7 +651,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
  }
  
  // For Forte Analyzer AsyncGetCallTrace profiling support - thread
-@@ -279,12 +319,20 @@
+@@ -279,12 +326,20 @@
      pc = (address) os::Linux::ucontext_get_pc(uc);
  
      if (pc == (address) Fetch32PFI) {
@@ -409,7 +672,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
         return 1 ;
      }
  #endif // AMD64
-@@ -430,7 +478,11 @@
+@@ -430,7 +485,11 @@
    // Furthermore, a false-positive should be harmless.
    if (UnguardOnExecutionViolation > 0 &&
        (sig == SIGSEGV || sig == SIGBUS) &&
@@ -421,10 +684,140 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
      int page_size = os::vm_page_size();
      address addr = (address) info->si_addr;
      address pc = os::Linux::ucontext_get_pc(uc);
+@@ -500,7 +559,11 @@
+     // save all thread context in case we need to restore it
+     if (thread != NULL) thread->set_saved_exception_pc(pc);
+ 
++#ifdef __linux__
+     uc->uc_mcontext.gregs[REG_PC] = (greg_t)stub;
++#elif defined(__FreeBSD_kernel__)
++    uc->context_pc = (intptr_t)stub;
++#endif
+     return true;
+   }
+ 
+@@ -752,6 +815,7 @@
+ 
+   ucontext_t *uc = (ucontext_t*)context;
+   st->print_cr("Registers:");
++#ifdef __linux__
+ #ifdef AMD64
+   st->print(  "RAX=" INTPTR_FORMAT, uc->uc_mcontext.gregs[REG_RAX]);
+   st->print(", RBX=" INTPTR_FORMAT, uc->uc_mcontext.gregs[REG_RBX]);
+@@ -794,6 +858,48 @@
+   st->print(", EFLAGS=" INTPTR_FORMAT, uc->uc_mcontext.gregs[REG_EFL]);
+   st->print(", CR2=" INTPTR_FORMAT, uc->uc_mcontext.cr2);
+ #endif // AMD64
++#elif defined(__FreeBSD_kernel__)
++#ifdef AMD64
++  st->print(  "RAX=" INTPTR_FORMAT, uc->context_rax);
++  st->print(", RBX=" INTPTR_FORMAT, uc->context_rbx);
++  st->print(", RCX=" INTPTR_FORMAT, uc->context_rcx);
++  st->print(", RDX=" INTPTR_FORMAT, uc->context_rdx);
++  st->cr();
++  st->print(  "RSP=" INTPTR_FORMAT, uc->context_rsp);
++  st->print(", RBP=" INTPTR_FORMAT, uc->context_rbp);
++  st->print(", RSI=" INTPTR_FORMAT, uc->context_rsi);
++  st->print(", RDI=" INTPTR_FORMAT, uc->context_rdi);
++  st->cr();
++  st->print(  "R8 =" INTPTR_FORMAT, uc->context_r8);
++  st->print(", R9 =" INTPTR_FORMAT, uc->context_r9);
++  st->print(", R10=" INTPTR_FORMAT, uc->context_r10);
++  st->print(", R11=" INTPTR_FORMAT, uc->context_r11);
++  st->cr();
++  st->print(  "R12=" INTPTR_FORMAT, uc->context_r12);
++  st->print(", R13=" INTPTR_FORMAT, uc->context_r13);
++  st->print(", R14=" INTPTR_FORMAT, uc->context_r14);
++  st->print(", R15=" INTPTR_FORMAT, uc->context_r15);
++  st->cr();
++  st->print(  "RIP=" INTPTR_FORMAT, uc->context_rip);
++  st->print(", EFLAGS=" INTPTR_FORMAT, uc->context_flags);
++  st->print(", ERR=" INTPTR_FORMAT, uc->context_err);
++  st->cr();
++  st->print("  TRAPNO=" INTPTR_FORMAT, uc->context_trapno);
++#else
++  st->print(  "EAX=" INTPTR_FORMAT, uc->context_eax);
++  st->print(", EBX=" INTPTR_FORMAT, uc->context_ebx);
++  st->print(", ECX=" INTPTR_FORMAT, uc->context_ecx);
++  st->print(", EDX=" INTPTR_FORMAT, uc->context_edx);
++  st->cr();
++  st->print(  "ESP=" INTPTR_FORMAT, uc->context_esp);
++  st->print(", EBP=" INTPTR_FORMAT, uc->context_ebp);
++  st->print(", ESI=" INTPTR_FORMAT, uc->context_esi);
++  st->print(", EDI=" INTPTR_FORMAT, uc->context_edi);
++  st->cr();
++  st->print(  "EIP=" INTPTR_FORMAT, uc->context_eip);
++  st->print(", EFLAGS=" INTPTR_FORMAT, uc->context_eflags);
++#endif // AMD64
++#endif
+   st->cr();
+   st->cr();
+ 
+@@ -824,6 +930,7 @@
+ 
+   // this is only for the "general purpose" registers
+ 
++#ifdef __linux__
+ #ifdef AMD64
+   st->print("RAX="); print_location(st, uc->uc_mcontext.gregs[REG_RAX]);
+   st->print("RBX="); print_location(st, uc->uc_mcontext.gregs[REG_RBX]);
+@@ -851,6 +958,35 @@
+   st->print("ESI="); print_location(st, uc->uc_mcontext.gregs[REG_ESI]);
+   st->print("EDI="); print_location(st, uc->uc_mcontext.gregs[REG_EDI]);
+ #endif // AMD64
++#elif defined(__FreeBSD_kernel__)
++#ifdef AMD64
++  st->print("RAX="); print_location(st, uc->context_rax);
++  st->print("RBX="); print_location(st, uc->context_rbx);
++  st->print("RCX="); print_location(st, uc->context_rcx);
++  st->print("RDX="); print_location(st, uc->context_rdx);
++  st->print("RSP="); print_location(st, uc->context_rsp);
++  st->print("RBP="); print_location(st, uc->context_rbp);
++  st->print("RSI="); print_location(st, uc->context_rsi);
++  st->print("RDI="); print_location(st, uc->context_rdi);
++  st->print("R8 ="); print_location(st, uc->context_r8);
++  st->print("R9 ="); print_location(st, uc->context_r9);
++  st->print("R10="); print_location(st, uc->context_r10);
++  st->print("R11="); print_location(st, uc->context_r11);
++  st->print("R12="); print_location(st, uc->context_r12);
++  st->print("R13="); print_location(st, uc->context_r13);
++  st->print("R14="); print_location(st, uc->context_r14);
++  st->print("R15="); print_location(st, uc->context_r15);
++#else
++  st->print("EAX="); print_location(st, uc->context_eax);
++  st->print("EBX="); print_location(st, uc->context_ebx);
++  st->print("ECX="); print_location(st, uc->context_ecx);
++  st->print("EDX="); print_location(st, uc->context_edx);
++  st->print("ESP="); print_location(st, uc->context_esp);
++  st->print("EBP="); print_location(st, uc->context_ebp);
++  st->print("ESI="); print_location(st, uc->context_esi);
++  st->print("EDI="); print_location(st, uc->context_edi);
++#endif // AMD64
++#endif
+ 
+   st->cr();
+ }
+Index: openjdk/hotspot/src/share/vm/memory/allocation.hpp
+===================================================================
+--- openjdk/hotspot/src/share/vm/memory/allocation.hpp.orig
++++ openjdk/hotspot/src/share/vm/memory/allocation.hpp
+@@ -214,9 +214,9 @@
+   void signal_out_of_memory(size_t request, const char* whence) const;
+ 
+   void check_for_overflow(size_t request, const char* whence) const {
+-    if (UINTPTR_MAX - request < (uintptr_t)_hwm) {
+-      signal_out_of_memory(request, whence);
+-    }
++//    if (UINTPTR_MAX - request < (uintptr_t)_hwm) {
++//      signal_out_of_memory(request, whence);
++//    }
+  }
+ 
+  public:
 Index: openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp
 ===================================================================
---- openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp.orig	2011-07-16 02:13:26.000000000 +0200
-+++ openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp	2011-07-16 02:13:52.000000000 +0200
+--- openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp.orig
++++ openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp
 @@ -970,11 +970,11 @@
    // The product of bbNo and _state_len can get large if there are lots of
    // basic blocks and stack/locals/monitors.  Need to check to make sure
