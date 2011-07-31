@@ -187,31 +187,39 @@ unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 ifneq (,$(filter $(distrel),dapper))
   #GCJ_SUFFIX = -4.4
   #ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
-  #  export GCC_SUFFIX = -4.0
+  #  export CC = gcc-4.0
+  #  export CXX = g++-4.0
   #endif
   #ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc sparc))
-  #  export GCC_SUFFIX = -4.0
+  #  export CC = gcc-4.0
+  #  export CXX = g++-4.0
   #endif
 else ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
   ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
-    export GCC_SUFFIX = -4.1
+    export CC = gcc-4.1
+    export CXX = g++-4.1
     GCJ_SUFFIX = -4.2
   endif
   ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc sparc))
-    export GCC_SUFFIX = -4.2
+    export CC = gcc-4.2
+    export CXX = g++-4.2
   endif
 else ifneq (,$(filter $(distrel),lenny intrepid jaunty))
-  export GCC_SUFFIX = -4.3
-  export GCJ_SUFFIX = -4.3
+  export CC = gcc-4.3
+  export CXX = g++-4.3
+  GCJ_SUFFIX = -4.3
 else ifneq (,$(filter $(distrel),squeeze karmic lucid maverick))
-  export GCC_SUFFIX = -4.4
-  export GCJ_SUFFIX = -4.4
+  export CC = gcc-4.4
+  export CXX = g++-4.4
+  GCJ_SUFFIX = -4.4
 else ifneq (,$(filter $(distrel),natty))
-  export GCC_SUFFIX = -4.5
-  export GCJ_SUFFIX = -4.5
+  export CC = gcc-4.5
+  export CXX = g++-4.5
+  GCJ_SUFFIX = -4.5
 else
-  export GCC_SUFFIX = -4.6
-#  export GCJ_SUFFIX = -4.6
+  export CC = gcc-4.6
+  export CXX = g++-4.6
+# GCJ_SUFFIX = -4.6
 endif
 
 ifeq ($(distribution),Ubuntu)
@@ -289,7 +297,6 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/set-exec-name.diff \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \
-	debian/patches/no-compiler-path.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \
@@ -300,14 +307,11 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-4953367.patch \
 	debian/patches/fontconfig-wqy-microhei.patch \
 	$(if $(filter $(DEB_HOST_ARCH), amd64 i386),,debian/patches/hotspot-no-werror.diff) \
-	debian/patches/pr753.diff \
-	debian/patches/pr757.diff \
 	debian/patches/hotspot-s390.diff \
 	debian/patches/hotspot-sparc.diff \
 	debian/patches/jdk-no-mapfile.diff \
 	debian/patches/hotspot-sparc-arch.diff \
-	debian/patches/sparc-trapsfix.patch \
-	debian/patches/zero-jsr292-fixes.diff \
+	debian/patches/sparc-trapsfix.patch
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -317,7 +321,7 @@ DISTRIBUTION_PATCHES += \
 
   DISTRIBUTION_PATCHES += \
 	debian/patches/default-libpath-original.diff \
-	debian/patches/deb-multiarch.diff \
+	debian/patches/deb-multiarch.diff
 
 #	debian/patches/hotspot-warn-no-errformat.diff \
 #	debian/patches/gcc-mtune-generic.diff \
@@ -562,7 +566,7 @@ ifneq (,$(stage1_cacao_archs))
 	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
 endif
 
-# This section should be in sync with "GCC_SUFFIX" definition
+# This section should be in sync with "CC/CXX" definition
 ifneq (,$(filter $(distrel),dapper))
   bd_gcc = g++-4.0,
 else ifneq (,$(filter $(distrel),hardy gutsy feisty edgy))
