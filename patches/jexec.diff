@@ -6,7 +6,7 @@ diff -ru openjdk-6-6b08.bak/jdk/src/solaris/bin/jexec.c openjdk-6-6b08.orig/jdk/
      /* Get the path to the java binary, which is in a known position relative
       * to our current position, which is in argv[0]. */
 -    if (getJavaPath(argv[argi++], java, RELATIVE_DEPTH) != 0) {
-+    if (getJavaPath("/usr/lib/jvm/java-6-openjdk/jre/lib/jexec", java, RELATIVE_DEPTH) != 0) {
++    if (getJavaPath("/usr/lib/jvm/java-7-openjdk/jre/lib/jexec", java, RELATIVE_DEPTH) != 0) {
          errorExit(errno, MISSING_JAVA_MSG);
      }
 +    argi++;
