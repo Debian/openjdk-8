@@ -1,14 +1,21 @@
-openjdk-7 (7~b147-2.0~pre2-1) experimental; urgency=low
+openjdk-7 (7~b147-2.0~pre2-1) UNRELEASED; urgency=low
 
-  * New icedtea7 forest drop:
+  * New icedtea7-forest drop:
     - d/patches/pr753.diff: drop, merged in icedtea7-forest.
     - d/patches/pr757.diff: drop, merged in icedtea7-forest.
     - d/patches/zero-jsr292-fixes.diff: drop, merged in icedtea7-forest.
     - d/patches/no-compiler-path.diff: drop, now handled correctly icedtea7's
       configure and openjdk's Makefile (by CC and CXX environment variables).
-  * d/rules: Enable support for GNU/kFreeBSD arch.
+  * d/patches/zero-fpu-control-is-noop.diff: Remove ShouldNotCallThis from
+    os_linux_zero.cpp (fix crash under i386).
+  * d/rules: Enable support for GNU/kFreeBSD arch:
+    - d/patches/kfreebsd-support-*: Update with latest fixes.
+    - d/patches/kfreebsd-sync-issues.diff: hack to force some wait
+      until we fix sync issues.
+  * d/rules: Use DEB_HOST_ARCH_CPU for jvmarch/archdir. Thanks to  
+    Jérémie Koenig <jk@jk.fr.eu.org> for patch.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Sun, 31 Jul 2011 18:22:35 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 02 Aug 2011 01:55:48 +0200
 
 openjdk-7 (7~b147-2.0~pre1-1) experimental; urgency=low
 

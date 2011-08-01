@@ -175,6 +175,121 @@ Index: openjdk/jdk/make/javax/sound/Makefile
    #MXSPP_ADD = $(PLATFORM)-$(ARCH)/
  endif # PLATFORM linux
  
+Index: openjdk/jdk/src/share/classes/com/sun/servicetag/Installer.java
+===================================================================
+--- openjdk/jdk/src/share/classes/com/sun/servicetag/Installer.java.orig
++++ openjdk/jdk/src/share/classes/com/sun/servicetag/Installer.java
+@@ -549,7 +549,7 @@
+         Set<String> archs = new HashSet<String>();
+ 
+         String os = System.getProperty("os.name");
+-        if (os.equals("SunOS") || os.equals("Linux")) {
++        if (os.equals("SunOS") || os.equals("Linux") || os.equals("GNU/kFreeBSD")) {
+             // Traverse the directories under <JRE>/lib.
+             // If <JRE>/lib/<arch>/libjava.so exists, add <arch>
+             // to the product defined ID
+Index: openjdk/jdk/src/share/classes/com/sun/servicetag/Registry.java
+===================================================================
+--- openjdk/jdk/src/share/classes/com/sun/servicetag/Registry.java.orig
++++ openjdk/jdk/src/share/classes/com/sun/servicetag/Registry.java
+@@ -84,7 +84,7 @@
+             String os = System.getProperty("os.name");
+             if (os.equals("SunOS")) {
+                 stclient = new File(STCLIENT_SOLARIS);
+-            } else if (os.equals("Linux")) {
++            } else if (os.equals("Linux") || os.equals("GNU/kFreeBSD")) {
+                 stclient = new File(STCLIENT_LINUX);
+             } else if (os.startsWith("Windows")) {
+                 stclient = getWindowsStClientFile();
+Index: openjdk/jdk/src/share/classes/com/sun/servicetag/SystemEnvironment.java
+===================================================================
+--- openjdk/jdk/src/share/classes/com/sun/servicetag/SystemEnvironment.java.orig
++++ openjdk/jdk/src/share/classes/com/sun/servicetag/SystemEnvironment.java
+@@ -61,7 +61,7 @@
+             String os = System.getProperty("os.name");
+             if (os.equals("SunOS")) {
+                 sysEnv = new SolarisSystemEnvironment();
+-            } else if (os.equals("Linux")) {
++            } else if (os.equals("Linux") || os.equals("GNU/kFreeBSD")) {
+                 sysEnv = new LinuxSystemEnvironment();
+             } else if (os.startsWith("Windows")) {
+                 sysEnv = new WindowsSystemEnvironment();
+Index: openjdk/jdk/src/share/classes/java/awt/GraphicsEnvironment.java
+===================================================================
+--- openjdk/jdk/src/share/classes/java/awt/GraphicsEnvironment.java.orig
++++ openjdk/jdk/src/share/classes/java/awt/GraphicsEnvironment.java
+@@ -172,7 +172,7 @@
+                         } else {
+                             String osName = System.getProperty("os.name");
+                             headless = defaultHeadless =
+-                                Boolean.valueOf(("Linux".equals(osName) || "SunOS".equals(osName)) &&
++                                Boolean.valueOf(("Linux".equals(osName) || "SunOS".equals(osName) || "GNU/kFreeBSD".equals(osName)) &&
+                                                 (System.getenv("DISPLAY") == null));
+                         }
+                     } else if (nm.equals("true")) {
+Index: openjdk/jdk/src/share/classes/sun/font/FontUtilities.java
+===================================================================
+--- openjdk/jdk/src/share/classes/sun/font/FontUtilities.java.orig
++++ openjdk/jdk/src/share/classes/sun/font/FontUtilities.java
+@@ -74,7 +74,7 @@
+                 String osName = System.getProperty("os.name", "unknownOS");
+                 isSolaris = osName.startsWith("SunOS");
+ 
+-                isLinux = osName.startsWith("Linux");
++                isLinux = osName.startsWith("Linux") || osName.equals("GNU/kFreeBSD");
+ 
+                 String t2kStr = System.getProperty("sun.java2d.font.scaler");
+                 if (t2kStr != null) {
+Index: openjdk/jdk/src/share/classes/sun/nio/cs/ext/ExtendedCharsets.java
+===================================================================
+--- openjdk/jdk/src/share/classes/sun/nio/cs/ext/ExtendedCharsets.java.orig
++++ openjdk/jdk/src/share/classes/sun/nio/cs/ext/ExtendedCharsets.java
+@@ -1279,7 +1279,7 @@
+         }
+         String osName = AccessController.doPrivileged(
+             new GetPropertyAction("os.name"));
+-        if ("SunOS".equals(osName) || "Linux".equals(osName)) {
++        if ("SunOS".equals(osName) || "Linux".equals(osName) || "GNU/kFreeBSD".equals(osName)) {
+             charset("x-COMPOUND_TEXT", "COMPOUND_TEXT",
+                     new String[] {
+                         "COMPOUND_TEXT",        // JDK historical
+Index: openjdk/jdk/src/share/classes/sun/print/PSPrinterJob.java
+===================================================================
+--- openjdk/jdk/src/share/classes/sun/print/PSPrinterJob.java.orig
++++ openjdk/jdk/src/share/classes/sun/print/PSPrinterJob.java
+@@ -1534,7 +1534,7 @@
+             pFlags |= NOSHEET;
+             ncomps+=1;
+         }
+-       if (System.getProperty("os.name").equals("Linux")) {
++       if (System.getProperty("os.name").equals("Linux") || System.getProperty("os.name").equals("GNU/kFreeBSD")) {
+             execCmd = new String[ncomps];
+             execCmd[n++] = "/usr/bin/lpr";
+             if ((pFlags & PRINTER) != 0) {
+Index: openjdk/jdk/src/share/classes/sun/security/jgss/GSSManagerImpl.java
+===================================================================
+--- openjdk/jdk/src/share/classes/sun/security/jgss/GSSManagerImpl.java.orig
++++ openjdk/jdk/src/share/classes/sun/security/jgss/GSSManagerImpl.java
+@@ -48,6 +48,7 @@
+                     public Boolean run() {
+                             String osname = System.getProperty("os.name");
+                             if (osname.startsWith("SunOS") ||
++                                osname.startsWith("GNU/kFreeBSD") ||
+                                 osname.startsWith("Linux")) {
+                                 return new Boolean(System.getProperty
+                                     (USE_NATIVE_PROP));
+Index: openjdk/jdk/src/share/classes/sun/security/krb5/internal/ccache/FileCredentialsCache.java
+===================================================================
+--- openjdk/jdk/src/share/classes/sun/security/krb5/internal/ccache/FileCredentialsCache.java.orig
++++ openjdk/jdk/src/share/classes/sun/security/krb5/internal/ccache/FileCredentialsCache.java
+@@ -403,6 +403,7 @@
+             long uid = 0;
+ 
+             if (osname.startsWith("SunOS") ||
++                osname.startsWith("GNU/kFreeBSD") ||
+                 (osname.startsWith("Linux"))) {
+                 try {
+                     Class<?> c = Class.forName
 Index: openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h
 ===================================================================
 --- openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h.orig
@@ -339,6 +454,58 @@ Index: openjdk/jdk/src/solaris/bin/jexec.c
  /*
   * Check if the given file is a JAR file.
   *
+Index: openjdk/jdk/src/solaris/classes/sun/awt/X11/XScrollbarPeer.java
+===================================================================
+--- openjdk/jdk/src/solaris/classes/sun/awt/X11/XScrollbarPeer.java.orig
++++ openjdk/jdk/src/solaris/classes/sun/awt/X11/XScrollbarPeer.java
+@@ -74,7 +74,7 @@
+      * Currently uses hardcoded values
+      */
+     private int getDefaultDimension() {
+-        if (System.getProperty("os.name").equals("Linux")) {
++        if (System.getProperty("os.name").equals("Linux") || System.getProperty("os.name").equals("GNU/kFreeBSD")) {
+             return DEFAULT_WIDTH_LINUX;
+         } else {
+             return DEFAULT_WIDTH_SOLARIS;
+Index: openjdk/jdk/src/solaris/classes/sun/font/FcFontConfiguration.java
+===================================================================
+--- openjdk/jdk/src/solaris/classes/sun/font/FcFontConfiguration.java.orig
++++ openjdk/jdk/src/solaris/classes/sun/font/FcFontConfiguration.java
+@@ -294,7 +294,7 @@
+ 
+         super.setOsNameAndVersion();
+ 
+-        if (!osName.equals("Linux")) {
++        if (!(osName.equals("Linux") || osName.equals("GNU/kFreeBSD"))) {
+             return;
+         }
+         try {
+Index: openjdk/jdk/src/solaris/classes/sun/nio/ch/DefaultAsynchronousChannelProvider.java
+===================================================================
+--- openjdk/jdk/src/solaris/classes/sun/nio/ch/DefaultAsynchronousChannelProvider.java.orig
++++ openjdk/jdk/src/solaris/classes/sun/nio/ch/DefaultAsynchronousChannelProvider.java
+@@ -48,7 +48,7 @@
+             .doPrivileged(new GetPropertyAction("os.name"));
+         if (osname.equals("SunOS"))
+             return new SolarisAsynchronousChannelProvider();
+-        if (osname.equals("Linux"))
++        if (osname.equals("Linux") || osname.equals("GNU/kFreeBSD"))
+             return new LinuxAsynchronousChannelProvider();
+         throw new InternalError("platform not recognized");
+     }
+Index: openjdk/jdk/src/solaris/classes/sun/nio/fs/DefaultFileSystemProvider.java
+===================================================================
+--- openjdk/jdk/src/solaris/classes/sun/nio/fs/DefaultFileSystemProvider.java.orig
++++ openjdk/jdk/src/solaris/classes/sun/nio/fs/DefaultFileSystemProvider.java
+@@ -66,7 +66,7 @@
+             .doPrivileged(new GetPropertyAction("os.name"));
+         if (osname.equals("SunOS"))
+             return createProvider("sun.nio.fs.SolarisFileSystemProvider");
+-        if (osname.equals("Linux"))
++        if (osname.equals("Linux") || osname.equals("GNU/kFreeBSD"))
+             return createProvider("sun.nio.fs.LinuxFileSystemProvider");
+         throw new AssertionError("Platform not recognized");
+     }
 Index: openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java
 ===================================================================
 --- openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java.orig
@@ -368,6 +535,19 @@ Index: openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java
              } finally {
                  UnixNativeDispatcher.close(fd);
              }
+Index: openjdk/jdk/src/solaris/classes/sun/print/UnixPrintServiceLookup.java
+===================================================================
+--- openjdk/jdk/src/solaris/classes/sun/print/UnixPrintServiceLookup.java.orig
++++ openjdk/jdk/src/solaris/classes/sun/print/UnixPrintServiceLookup.java
+@@ -119,7 +119,7 @@
+     }
+ 
+     static boolean isBSD() {
+-        return osname.equals("Linux");
++        return osname.equals("Linux") || osname.equals("GNU/kFreeBSD");
+     }
+ 
+     static final int UNINITIALIZED = -1;
 Index: openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.c
 ===================================================================
 --- openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.c.orig

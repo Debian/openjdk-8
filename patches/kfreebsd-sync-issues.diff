@@ -1,0 +1,102 @@
+Description: Hack for GNU/kFreeBSD platform: add some sleep during build.
+ We add some <sleep/> call in jaxp/jaxws/langtool ANT build.xml to get
+ a build of those JAR archives with *all* classes.
+ Without this hack, JAR contains only part of expected classes and so
+ we have many random/unexpected build failures.
+ TODO: I suspect some issue with jar tool and/or jar Ant task which might
+ not handle correctly timestamp on UFS filesystem ?!
+ <http://ant.apache.org/manual/Tasks/jar.html>
+ TODO: We should drop this patch and found a proper fix.
+Author: Damien Raude-Morvan <drazzib@debian.org>
+Last-Update: 2011-08-02
+Forwarded: no
+Index: openjdk/jaxp/build.xml
+===================================================================
+--- openjdk/jaxp/build.xml.orig
++++ openjdk/jaxp/build.xml
+@@ -108,7 +108,13 @@
+ 	    depends="init, -init-src-dirs, -dist-classes-jar-uptodate"
+             unless="dist.classes.jar.uptodate">
+         <delete file="${dist.classes.jar}"/>
++
++<sleep seconds="70"/>
++
+         <jar file="${dist.classes.jar}" basedir="${build.classes.dir}"/>
++
++<sleep seconds="70"/>
++
+     </target>
+ 
+     <target name="-build-setup"
+@@ -136,6 +142,9 @@
+             <compilerarg line="${javac.version.opt} ${javac.lint.opts} ${javac.no.jdk.warnings}"/>
+             <src refid="src.dir.id"/>
+         </javac>
++
++<sleep seconds="70"/>
++
+     </target>
+ 
+     <!-- Test. (FIXME: Need to know how to run tests.) -->
+Index: openjdk/jaxws/build.xml
+===================================================================
+--- openjdk/jaxws/build.xml.orig
++++ openjdk/jaxws/build.xml
+@@ -108,7 +108,13 @@
+ 	    depends="init, -init-src-dirs, -dist-classes-jar-uptodate"
+             unless="dist.classes.jar.uptodate">
+         <delete file="${dist.classes.jar}"/>
++
++<sleep seconds="70"/>
++
+         <jar file="${dist.classes.jar}" basedir="${build.classes.dir}"/>
++
++<sleep seconds="70"/>
++
+     </target>
+ 
+     <target name="-build-setup"
+@@ -136,6 +142,9 @@
+             <compilerarg line="${javac.version.opt} ${javac.lint.opts} ${javac.no.jdk.warnings}"/>
+             <src refid="src.dir.id"/>
+         </javac>
++
++<sleep seconds="70"/>
++
+     </target>
+ 
+     <!-- Test. (FIXME: Need to know how to run tests.) -->
+Index: openjdk/langtools/make/build.xml
+===================================================================
+--- openjdk/langtools/make/build.xml.orig
++++ openjdk/langtools/make/build.xml
+@@ -234,6 +234,9 @@
+             <include name="*"/>
+         </chmod>
+         <mkdir dir="${dist.lib.dir}"/>
++
++<sleep seconds="70"/>
++
+         <jar file="${dist.lib.dir}/classes.jar" basedir="${build.classes.dir}"/>
+         <zip file="${dist.lib.dir}/src.zip" basedir="${src.classes.dir}"/>
+     </target>
+@@ -731,6 +734,9 @@
+             <attribute name="jarclasspath" default=""/>
+             <sequential>
+                 <mkdir dir="@{lib.dir}"/>
++
++<sleep seconds="70"/>
++
+                 <jar destfile="@{lib.dir}/@{name}.jar"
+                      basedir="@{classes.dir}"
+                      includes="@{includes}">
+@@ -858,6 +864,9 @@
+                destdir="${build.toolclasses.dir}/"
+                classpath="${ant.core.lib}"
+                includeantruntime="false"/>
++
++<sleep seconds="70"/>
++
+         <taskdef name="pcompile"
+                  classname="CompilePropertiesTask"
+                  classpath="${build.toolclasses.dir}/"/>
