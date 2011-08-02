@@ -26,7 +26,7 @@ On some architectures (currently armel and powerpc, when built against
 llvm-2.6) which use ther zero vm as the default, the openjdk-7-jre-zero
 package contains the shark vm.
 
-To change the default permanently, edit /etc/java-6-openjdk/jvm.cfg.
+To change the default permanently, edit /etc/java-7-openjdk/jvm.cfg.
 
 The CACAO VM can be found in the icedtea-7-jre-cacao package, the Zero/Shark
 VM can be found in the openjdk-7-jre-zero package (on the architectures
@@ -36,7 +36,7 @@ Please look for further documentation in the directory
 /usr/share/doc/openjdk-7-jre/ .
 
 The package openjdk-7-jre-headless ships a cgi script
-/usr/lib/jvm/java-6-openjdk/bin/java-rmi.cgi that you must integrate
+/usr/lib/jvm/java-7-openjdk/bin/java-rmi.cgi that you must integrate
 into your webserver setup manually if you need it. It is not activated
 automatically.
 
