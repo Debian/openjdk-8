@@ -16,8 +16,10 @@ openjdk-7 (7~b147-2.0~pre2-1) UNRELEASED; urgency=low
     Jérémie Koenig <jk@jk.fr.eu.org> for patch.
   * d/patches/jexec.diff: Update for openjdk-7.
   * d/JB-jdk.overrides.in: Fix override for new Lintian 2.5.0 path handling.
+  * d/icedtea-7-jre-jamvm.overrides: As for others libjvm.so, we use
+    --strip-debug instead of --strip-unneeded.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 02 Aug 2011 20:49:45 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 02 Aug 2011 21:00:30 +0200
 
 openjdk-7 (7~b147-2.0~pre1-1) experimental; urgency=low
 
