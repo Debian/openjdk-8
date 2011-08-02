@@ -4,4 +4,4 @@
 @basename@-jdk binary: binary-or-shlib-defines-rpath
 
 # this is in @basename@-jre
-@basename@-jdk binary: menu-icon-missing /usr/share/pixmaps/@basename@.xpm
+@basename@-jdk binary: menu-icon-missing usr/share/pixmaps/@basename@.xpm

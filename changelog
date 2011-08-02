@@ -15,8 +15,9 @@ openjdk-7 (7~b147-2.0~pre2-1) UNRELEASED; urgency=low
   * d/rules: Use DEB_HOST_ARCH_CPU for jvmarch/archdir. Thanks to  
     Jérémie Koenig <jk@jk.fr.eu.org> for patch.
   * d/patches/jexec.diff: Update for openjdk-7.
+  * d/JB-jdk.overrides.in: Fix override for new Lintian 2.5.0 path handling.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 02 Aug 2011 01:57:26 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 02 Aug 2011 20:49:45 +0200
 
 openjdk-7 (7~b147-2.0~pre1-1) experimental; urgency=low
 
