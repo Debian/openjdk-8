@@ -12,6 +12,7 @@ openjdk-7 (7~b147-2.0~pre2-1) UNRELEASED; urgency=low
     - d/patches/kfreebsd-support-*: Update with latest fixes.
     - d/patches/kfreebsd-sync-issues.diff: hack to force some wait
       until we fix sync issues.
+    - d/rules: Enable shark for GNU/kFreeBSD.
   * d/rules: Use DEB_HOST_ARCH_CPU for jvmarch/archdir. Thanks to  
     Jérémie Koenig <jk@jk.fr.eu.org> for patch.
   * d/patches/jexec.diff: Update for openjdk-7.
@@ -19,7 +20,7 @@ openjdk-7 (7~b147-2.0~pre2-1) UNRELEASED; urgency=low
   * d/icedtea-7-jre-jamvm.overrides: As for others libjvm.so, we use
     --strip-debug instead of --strip-unneeded.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 02 Aug 2011 21:00:30 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 02 Aug 2011 21:46:57 +0200
 
 openjdk-7 (7~b147-2.0~pre1-1) experimental; urgency=low
 
