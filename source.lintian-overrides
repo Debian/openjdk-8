@@ -1,5 +1,0 @@
-# needed to build on older releases
-openjdk-7: dh_desktop-is-deprecated
-
-# called conditionally
-openjdk-7: debhelper-script-needs-versioned-build-depends

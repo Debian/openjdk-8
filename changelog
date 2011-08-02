@@ -1,11 +1,12 @@
 openjdk-7 (7~b147-2.0~pre2-1) UNRELEASED; urgency=low
 
-  * New icedtea7-forest drop:
+  * Update to icedtea7-forest snapshot (20110802):
     - d/patches/pr753.diff: drop, merged in icedtea7-forest.
     - d/patches/pr757.diff: drop, merged in icedtea7-forest.
     - d/patches/zero-jsr292-fixes.diff: drop, merged in icedtea7-forest.
     - d/patches/no-compiler-path.diff: drop, now handled correctly icedtea7's
       configure and openjdk's Makefile (by CC and CXX environment variables).
+    - Updated JamVM to the 2011-08-01 revision.
   * d/patches/zero-fpu-control-is-noop.diff: Remove ShouldNotCallThis from
     os_linux_zero.cpp (fix crash under i386).
   * d/rules: Enable support for GNU/kFreeBSD arch:
@@ -19,8 +20,9 @@ openjdk-7 (7~b147-2.0~pre2-1) UNRELEASED; urgency=low
   * d/JB-jdk.overrides.in: Fix override for new Lintian 2.5.0 path handling.
   * d/icedtea-7-jre-jamvm.overrides: As for others libjvm.so, we use
     --strip-debug instead of --strip-unneeded.
+  * d/source.lintian-overrides: Drop, not used anymore in openjdk-7.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 02 Aug 2011 21:46:57 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 02 Aug 2011 22:04:20 +0200
 
 openjdk-7 (7~b147-2.0~pre1-1) experimental; urgency=low
 
