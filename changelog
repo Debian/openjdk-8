@@ -7,6 +7,8 @@ openjdk-7 (7~b147-2.0~pre2-1) UNRELEASED; urgency=low
     - d/patches/no-compiler-path.diff: drop, now handled correctly icedtea7's
       configure and openjdk's Makefile (by CC and CXX environment variables).
     - Updated JamVM to the 2011-08-01 revision.
+
+  [ Damien Raude-Morvan ]
   * d/patches/zero-fpu-control-is-noop.diff: Remove ShouldNotCallThis from
     os_linux_zero.cpp (fix crash under i386).
   * d/rules: Enable support for GNU/kFreeBSD arch:
@@ -14,7 +16,7 @@ openjdk-7 (7~b147-2.0~pre2-1) UNRELEASED; urgency=low
     - d/patches/kfreebsd-sync-issues.diff: hack to force some wait
       until we fix sync issues.
     - d/rules: Enable shark for GNU/kFreeBSD.
-  * d/rules: Use DEB_HOST_ARCH_CPU for jvmarch/archdir. Thanks to  
+  * d/rules: Use DEB_HOST_ARCH_CPU for jvmarch/archdir. Thanks to
     Jérémie Koenig <jk@jk.fr.eu.org> for patch.
   * d/patches/jexec.diff: Update for openjdk-7.
   * d/JB-jdk.overrides.in: Fix override for new Lintian 2.5.0 path handling.
@@ -22,7 +24,14 @@ openjdk-7 (7~b147-2.0~pre2-1) UNRELEASED; urgency=low
     --strip-debug instead of --strip-unneeded.
   * d/source.lintian-overrides: Drop, not used anymore in openjdk-7.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 02 Aug 2011 22:04:20 +0200
+  [ Matthias Klose ]
+  * Merge debian packaging r472:482 from openjdk-6:
+    - openjdk-6-jre-headless: Depend on icedtea-6-jre-jamvm, if it's
+      the default VM.
+    - Use gcj-4.4 as the stage1 java VM on mips and mipsel.
+    - Make JamVM the default VM on Ubuntu oneiric/ARM.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 04 Aug 2011 11:38:01 +0200
 
 openjdk-7 (7~b147-2.0~pre1-1) experimental; urgency=low
 

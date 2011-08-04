@@ -26,7 +26,7 @@ Description: OpenJDK Development Kit (JDK)
 Package: @basename@-jre-headless
 Architecture: any
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre-lib (>= @pkg_sversion@), ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre-lib (>= @pkg_sversion@), ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}, ${jamvm:Recommends}
 Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, ${defaultvm:Provides}, ${jvm:Provides}

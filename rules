@@ -118,6 +118,9 @@ ifeq (,$(filter $(distrel),squeeze lenny karmic hardy dapper))
   # Keep this in sync with Architecture: of icedtea-7-jre-jamvm
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel kfreebsd-i386 kfreebsd-amd64
 endif
+ifeq (,$(filter $(distrel),wheezy sid squeeze lenny maverick natty maverick lucid karmic hardy dapper))
+  jamvm_defaults = armel armhf
+endif
 
 # requires patched llvm-2.6
 ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
@@ -212,6 +215,12 @@ else ifneq (,$(filter $(distrel),natty))
   export CC = gcc-4.5
   export CXX = g++-4.5
   GCJ_SUFFIX = -4.5
+else ifneq (,$(filter $(distrel),wheezy sid))
+  export CC = gcc-4.6
+  export CXX = g++-4.6
+  ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel))
+    GCJ_SUFFIX = -4.4
+  endif
 else
   export CC = gcc-4.6
   export CXX = g++-4.6
@@ -554,6 +563,9 @@ ifneq (,$(stage1_gcj_archs))
 	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
 	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
   endif
+  ifneq (,$(filter $(distrel),wheezy sid))
+    bd_bootstrap += gcj-4.4-jdk [mips mipsel],
+  endif
 endif
 ifneq (,$(stage1_openjdk_archs))
   bd_bootstrap += \
@@ -772,7 +784,11 @@ ifneq (,$(filter-out $(hotspot_archs), $(cacao_archs)))
   control_vars += '-Vcacao:Recommends=$(p_jrec) (= $${binary:Version})'
 endif
 ifneq (,$(filter-out $(hotspot_archs), $(jamvm_archs)))
-  control_vars += '-Vjamvm:Recommends=$(p_jrej) (= $${binary:Version})'
+  ifneq (,$(filter $(DEB_HOST_ARCH),$(jamvm_defaults)))
+    control_vars += '-Vjredefault:Depends=$(p_jrej) (= $${binary:Version})'
+  else
+    control_vars += '-Vjamvm:Recommends=$(p_jrej) (= $${binary:Version})'
+  endif
 endif
 
 ifeq ($(with_bridge),yes)
@@ -1391,6 +1407,15 @@ endif
 	done
 	mv $(d)/$(basedir)/jre/lib/$(archdir)/jvm.cfg \
 		$(d)/etc/$(jdiralias)/
+ifneq (,$(filter $(DEB_HOST_ARCH),$(jamvm_defaults)))
+	grep '^[# ]' $(d)/etc/$(jdiralias)/jvm.cfg \
+		> $(d)/etc/$(jdiralias)/jvm.cfg.new
+	grep 'jamvm' $(d)/etc/$(jdiralias)/jvm.cfg \
+		>> $(d)/etc/$(jdiralias)/jvm.cfg.new
+	egrep -v '^[# ]|jamvm' $(d)/etc/$(jdiralias)/jvm.cfg \
+		>> $(d)/etc/$(jdiralias)/jvm.cfg.new
+	mv $(d)/etc/$(jdiralias)/jvm.cfg.new $(d)/etc/$(jdiralias)/jvm.cfg
+endif
 
 	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.properties.src \
 		$(d)/etc/$(jdiralias)/fontconfig.properties
