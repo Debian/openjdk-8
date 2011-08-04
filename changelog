@@ -1,6 +1,6 @@
-openjdk-7 (7~b147-2.0~pre2-1) UNRELEASED; urgency=low
+openjdk-7 (7~b147-2.0~pre2-1) experimental; urgency=low
 
-  * Update to icedtea7-forest snapshot (20110802):
+  * Update to icedtea7-forest snapshot (20110804):
     - d/patches/pr753.diff: drop, merged in icedtea7-forest.
     - d/patches/pr757.diff: drop, merged in icedtea7-forest.
     - d/patches/zero-jsr292-fixes.diff: drop, merged in icedtea7-forest.
