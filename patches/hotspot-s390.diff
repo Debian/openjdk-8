@@ -202,3 +202,4 @@ Forwarded: http://mail.openjdk.java.net/pipermail/hotspot-dev/2011-July/004301.h
             min_alignment()));
  
    } else {
+

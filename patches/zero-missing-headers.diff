@@ -1,0 +1,35 @@
+Description: at least in 7b143, building without the precompiled headers doesn't work.
+ patch attached.
+Forwarded: http://mail.openjdk.java.net/pipermail/zero-dev/2011-July/000385.html
+
+--- openjdk/hotspot/src/cpu/zero/vm/cppInterpreter_zero.cpp~    2011-05-19 11:27:44.000000000 +0000
++++ openjdk/hotspot/src/cpu/zero/vm/cppInterpreter_zero.cpp 2011-06-02 09:22:35.000000000 +0000
+@@ -36,6 +36,7 @@
+ #include "oops/oop.inline.hpp"
+ #include "prims/jvmtiExport.hpp"
+ #include "prims/jvmtiThreadState.hpp"
++#include "prims/methodHandles.hpp"
+ #include "runtime/arguments.hpp"
+ #include "runtime/deoptimization.hpp"
+ #include "runtime/frame.inline.hpp"
+--- openjdk/hotspot/src/cpu/zero/vm/nativeInst_zero.cpp~    2011-05-19 11:27:44.000000000 +0000
++++ openjdk/hotspot/src/cpu/zero/vm/nativeInst_zero.cpp 2011-06-02 09:45:34.000000000 +0000
+@@ -25,6 +25,7 @@
+ 
+ #include "precompiled.hpp"
+ #include "assembler_zero.inline.hpp"
++#include "entry_zero.hpp"
+ #include "memory/resourceArea.hpp"
+ #include "nativeInst_zero.hpp"
+ #include "oops/oop.inline.hpp"
+--- openjdk/hotspot/src/cpu/zero/vm/entry_zero.hpp~ 2011-05-19 11:27:44.000000000 +0000
++++ openjdk/hotspot/src/cpu/zero/vm/entry_zero.hpp  2011-06-02 09:50:55.000000000 +0000
+@@ -26,6 +26,8 @@
+ #ifndef CPU_ZERO_VM_ENTRY_ZERO_HPP
+ #define CPU_ZERO_VM_ENTRY_ZERO_HPP
+ 
++#include "interpreter/cppInterpreter.hpp"
++
+ class ZeroEntry {
+  public:
+   ZeroEntry() {

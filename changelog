@@ -1,8 +1,9 @@
 openjdk-7 (7~b147-2.0~pre2-2) experimental; urgency=low
 
   * d/patches/kfreebsd-support-jamvm.diff: Add support for kfreebsd-amd64.
+  * Split d/patches/hotspot-s390.diff and zero-missing-headers.diff.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Fri, 05 Aug 2011 19:15:11 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 06 Aug 2011 00:31:44 +0200
 
 openjdk-7 (7~b147-2.0~pre2-1) experimental; urgency=low
 

@@ -317,7 +317,8 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/jdk-no-mapfile.diff \
 	debian/patches/hotspot-sparc-arch.diff \
 	debian/patches/sparc-trapsfix.patch \
-	debian/patches/zero-fpu-control-is-noop.diff
+	debian/patches/zero-fpu-control-is-noop.diff \
+        debian/patches/zero-missing-headers.diff
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
