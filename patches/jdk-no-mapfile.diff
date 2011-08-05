@@ -1,3 +1,7 @@
+Description: don't assume that mapfiles are available for every architecture; most likely
+ only seen with some zero builds.
+Forwarded: http://mail.openjdk.java.net/pipermail/zero-dev/2011-July/000386.html
+
 --- openjdk/jdk/make/common/Program.gmk.orig	2011-07-11 08:51:21.132825771 +0000
 +++ openjdk/jdk/make/common/Program.gmk	2011-07-11 12:36:55.602676639 +0000
 @@ -56,12 +56,14 @@

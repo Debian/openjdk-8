@@ -1,3 +1,7 @@
+Description: Apparently hotspot for sparc-linux was never built, both in 8b23 and 7b143
+ (didn't use newer releases). jtreg test results look as good as with 6b18.
+Forwarded: http://mail.openjdk.java.net/pipermail/hotspot-dev/2011-July/004300.html
+
 --- openjdk/hotspot/src/os_cpu/linux_sparc/vm/os_linux_sparc.cpp.orig	2011-06-27 23:25:25.000000000 +0000
 +++ openjdk/hotspot/src/os_cpu/linux_sparc/vm/os_linux_sparc.cpp	2011-07-10 14:49:44.527642486 +0000
 @@ -310,28 +310,29 @@

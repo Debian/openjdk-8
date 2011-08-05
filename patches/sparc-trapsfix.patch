@@ -1,3 +1,5 @@
+http://article.gmane.org/gmane.comp.java.openjdk.distro-packaging.devel/9316
+
 --- openjdk/hotspot/src/os_cpu/linux_sparc/vm/assembler_linux_sparc.cpp~	2011-07-12 16:00:43.000000000 +0200
 +++ openjdk/hotspot/src/os_cpu/linux_sparc/vm/assembler_linux_sparc.cpp	2011-07-13 15:36:49.000000000 +0200
 @@ -33,11 +33,8 @@
