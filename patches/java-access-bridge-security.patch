@@ -1,3 +1,5 @@
+# unused patch
+
 --- openjdk/jdk/src/share/lib/security/java.security~	2009-08-05 18:50:24.000000000 +0200
 +++ openjdk/jdk/src/share/lib/security/java.security	2009-08-05 18:53:51.000000000 +0200
 @@ -127,7 +127,7 @@

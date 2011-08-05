@@ -1,3 +1,5 @@
+# unused patch
+
 --- openjdk/langtools/make/Makefile~	2010-02-17 04:15:20.000000000 +0100
 +++ openjdk/langtools/make/Makefile	2010-02-20 15:32:49.492335405 +0100
 @@ -174,7 +174,7 @@
