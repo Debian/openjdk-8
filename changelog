@@ -1,3 +1,9 @@
+openjdk-7 (7~b147-2.0~pre2-2) experimental; urgency=low
+
+  * d/patches/kfreebsd-support-jamvm.diff: Add support for kfreebsd-amd64.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Fri, 05 Aug 2011 19:15:11 +0200
+
 openjdk-7 (7~b147-2.0~pre2-1) experimental; urgency=low
 
   * Update to icedtea7-forest snapshot (20110804):

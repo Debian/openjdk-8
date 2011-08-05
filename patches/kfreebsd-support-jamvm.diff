@@ -1,9 +1,23 @@
 Description: 
- -Add iddef TIOCINQ = FIONREAD
+ - Add iddef TIOCINQ = FIONREAD
  jamvm/src/classlib/openjdk/jvm.c
+ - Update configure for kfreebsd-amd64
+ jamvm/jamvm/configure.ac
 Author: Damien Raude-Morvan <drazzib@debian.org>
-Last-Update: 2011-06-28
+Last-Update: 2011-08-05
 Forwarded: no
+Index: jamvm/jamvm/configure.ac
+===================================================================
+--- jamvm/jamvm/configure.ac.orig
++++ jamvm/jamvm/configure.ac
+@@ -38,6 +38,7 @@
+ i386-*-freebsd*) host_os=bsd libdl_needed=no ;;
+ i386-*-solaris*) host_cpu=x86 host_os=solaris ;;
+ x86_64-*-linux*) host_os=linux ;;
++x86_64-*-kfreebsd*) host_os=linux ;;
+ hppa*-*-linux*) host_cpu=parisc host_os=linux ;;
+ mips*-*-linux*) host_cpu=mips host_os=linux ;;
+ x86_64-*-openbsd*) host_os=bsd libdl_needed=no ;;
 Index: jamvm/jamvm/src/classlib/openjdk/jvm.c
 ===================================================================
 --- jamvm/jamvm/src/classlib/openjdk/jvm.c.orig
