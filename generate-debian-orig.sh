@@ -23,13 +23,15 @@ if [ -d $pkgdir.orig ]; then
 fi
 
 if [ -f $origtar ]; then
+    echo "Using existing $origtar"
     tar xf $origtar
     if [ -d $pkgdir.orig ]; then
        mv $pkgdir.orig $pkgdir
     fi
     tar -c -f - -C $icedtea_checkout . | tar -x -f - -C $pkgdir
-    cp -a $debian_checkout $pkgdir/debian
+    rm -rf $pkgdir/.hg
 else
+    echo "Creating new $pkgdir.orig/"
     rm -rf $pkgdir.orig
     mkdir -p $pkgdir.orig
     case "$base" in
@@ -48,7 +50,16 @@ else
       sh autogen.sh
       rm -rf autom4te.cache
     )
-    cp -a $pkgdir.orig $pkgdir
     rm -rf $pkgdir.orig/.hg
-    cp -a $debian_checkout $pkgdir/debian
+    cp -a $pkgdir.orig $pkgdir
 fi
+
+echo "Build debian diff in $pkgdir/"
+cp -a $debian_checkout $pkgdir/debian
+rm -rf $pkgdir/debian/.bzr
+(
+  cd $pkgdir
+  ../$debian_checkout/update-shasum.sh
+  sh autogen.sh
+  rm -rf autom4te.cache
+)

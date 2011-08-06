@@ -41,8 +41,6 @@ Pre-requisites:
 4) Generate "pristine directory" and "pristine+debian directory"
  sh openjdk7/generate-debian-orig.sh
 
-5) rm -rf debian/.bzr
-
 Support for DEB_BUILD_OPTIONS
 =============================
 As described in Debian Policy §4.9.1, current package's debian/rules support

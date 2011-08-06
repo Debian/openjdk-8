@@ -1,9 +1,15 @@
 openjdk-7 (7~b147-2.0~pre2-2) experimental; urgency=low
 
   * d/patches/kfreebsd-support-jamvm.diff: Add support for kfreebsd-amd64.
+  * d/patches/kfreebsd-support-hotspot.diff: Small fixes for Hotspot on
+    kfreebsd-i386.
   * Split d/patches/hotspot-s390.diff and zero-missing-headers.diff.
+  * Re-add missing changes from last upload:
+    - patches/use-idx_t.patch: Edit upstream patch to avoid FTBFS on s390.
+    - Makefile.{am,im}: Force bootclasspath (useful when building from
+      openjdk-6).
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 06 Aug 2011 00:31:44 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 06 Aug 2011 23:50:58 +0200
 
 openjdk-7 (7~b147-2.0~pre2-1) experimental; urgency=low
 
