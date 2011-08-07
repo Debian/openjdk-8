@@ -600,7 +600,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
  #ifdef AMD64
  #define REG_SP REG_RSP
  #define REG_PC REG_RIP
-@@ -94,6 +95,40 @@
+@@ -94,6 +95,54 @@
  #define SPELL_REG_SP "esp"
  #define SPELL_REG_FP "ebp"
  #endif // AMD64
@@ -611,19 +611,33 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
 +#ifdef AMD64
 +#define SPELL_REG_SP "rsp"
 +#define SPELL_REG_FP "rbp"
-+#define context_pc uc_mcontext.mc_rip
 +#define context_sp uc_mcontext.mc_rsp
++#define context_pc uc_mcontext.mc_rip
 +#define context_fp uc_mcontext.mc_rbp
 +#define context_rip uc_mcontext.mc_rip
 +#define context_rsp uc_mcontext.mc_rsp
 +#define context_rbp uc_mcontext.mc_rbp
 +#define context_flags uc_mcontext.mc_flags
 +#define context_err uc_mcontext.mc_err
++#define context_rax uc_mcontext.mc_rax
++#define context_rbx uc_mcontext.mc_rbx
++#define context_rcx uc_mcontext.mc_rcx
++#define context_rdx uc_mcontext.mc_rdx
++#define context_rsi uc_mcontext.mc_rsi
++#define context_rdi uc_mcontext.mc_rdi
++#define context_r8 uc_mcontext.mc_r8
++#define context_r9 uc_mcontext.mc_r9
++#define context_r10 uc_mcontext.mc_r10
++#define context_r11 uc_mcontext.mc_r11
++#define context_r12 uc_mcontext.mc_r12
++#define context_r13 uc_mcontext.mc_r13
++#define context_r14 uc_mcontext.mc_r14
++#define context_r15 uc_mcontext.mc_r15
 +#else
 +#define SPELL_REG_SP "esp"
 +#define SPELL_REG_FP "ebp"
-+#define context_pc uc_mcontext.mc_eip
 +#define context_sp uc_mcontext.mc_esp
++#define context_pc uc_mcontext.mc_eip
 +#define context_fp uc_mcontext.mc_ebp
 +#define context_eip uc_mcontext.mc_eip
 +#define context_esp uc_mcontext.mc_esp
@@ -641,7 +655,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
  
  address os::current_stack_pointer() {
  #ifdef SPARC_WORKS
-@@ -119,15 +154,27 @@
+@@ -119,15 +168,27 @@
  }
  
  address os::Linux::ucontext_get_pc(ucontext_t * uc) {
@@ -669,7 +683,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
  }
  
  // For Forte Analyzer AsyncGetCallTrace profiling support - thread
-@@ -279,12 +326,20 @@
+@@ -279,12 +340,20 @@
      pc = (address) os::Linux::ucontext_get_pc(uc);
  
      if (pc == (address) Fetch32PFI) {
@@ -690,7 +704,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
         return 1 ;
      }
  #endif // AMD64
-@@ -430,7 +485,11 @@
+@@ -430,7 +499,11 @@
    // Furthermore, a false-positive should be harmless.
    if (UnguardOnExecutionViolation > 0 &&
        (sig == SIGSEGV || sig == SIGBUS) &&
@@ -702,7 +716,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
      int page_size = os::vm_page_size();
      address addr = (address) info->si_addr;
      address pc = os::Linux::ucontext_get_pc(uc);
-@@ -500,7 +559,11 @@
+@@ -500,7 +573,11 @@
      // save all thread context in case we need to restore it
      if (thread != NULL) thread->set_saved_exception_pc(pc);
  
@@ -714,7 +728,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
      return true;
    }
  
-@@ -752,6 +815,7 @@
+@@ -752,6 +829,7 @@
  
    ucontext_t *uc = (ucontext_t*)context;
    st->print_cr("Registers:");
@@ -722,7 +736,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
  #ifdef AMD64
    st->print(  "RAX=" INTPTR_FORMAT, uc->uc_mcontext.gregs[REG_RAX]);
    st->print(", RBX=" INTPTR_FORMAT, uc->uc_mcontext.gregs[REG_RBX]);
-@@ -794,6 +858,48 @@
+@@ -794,6 +872,48 @@
    st->print(", EFLAGS=" INTPTR_FORMAT, uc->uc_mcontext.gregs[REG_EFL]);
    st->print(", CR2=" INTPTR_FORMAT, uc->uc_mcontext.cr2);
  #endif // AMD64
@@ -771,7 +785,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
    st->cr();
    st->cr();
  
-@@ -824,6 +930,7 @@
+@@ -824,6 +944,7 @@
  
    // this is only for the "general purpose" registers
  
@@ -779,7 +793,7 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
  #ifdef AMD64
    st->print("RAX="); print_location(st, uc->uc_mcontext.gregs[REG_RAX]);
    st->print("RBX="); print_location(st, uc->uc_mcontext.gregs[REG_RBX]);
-@@ -851,6 +958,35 @@
+@@ -851,6 +972,35 @@
    st->print("ESI="); print_location(st, uc->uc_mcontext.gregs[REG_ESI]);
    st->print("EDI="); print_location(st, uc->uc_mcontext.gregs[REG_EDI]);
  #endif // AMD64
