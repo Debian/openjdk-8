@@ -1,3 +1,9 @@
+openjdk-7 (7~b147-2.0~pre2-4) UNRELEASED; urgency=low
+
+  * Build using GCC-4.4 on mips/mipsel.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 10 Aug 2011 11:50:40 +0200
+
 openjdk-7 (7~b147-2.0~pre2-3) experimental; urgency=low
 
   * d/patches/kfreebsd-support-hotspot.diff: Fix access to CPU registry under

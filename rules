@@ -219,6 +219,8 @@ else ifneq (,$(filter $(distrel),wheezy sid))
   export CC = gcc-4.6
   export CXX = g++-4.6
   ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel))
+    export CC = gcc-4.4
+    export CXX = g++-4.4
     GCJ_SUFFIX = -4.4
   endif
 else
@@ -565,7 +567,7 @@ ifneq (,$(stage1_gcj_archs))
 	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
   endif
   ifneq (,$(filter $(distrel),wheezy sid))
-    bd_bootstrap += gcj-4.4-jdk [mips mipsel],
+    bd_bootstrap += gcj-4.4-jdk [mips mipsel], g++-4.4 [mips mipsel],
   endif
 endif
 ifneq (,$(stage1_openjdk_archs))
