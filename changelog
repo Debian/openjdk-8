@@ -1,8 +1,13 @@
 openjdk-7 (7~b147-2.0~pre2-4) UNRELEASED; urgency=low
 
-  * Build using GCC-4.4 on mips/mipsel.
+  [ Matthias Klose ]
+  * Build using GCC-4.4 on mips/mipsel (Closes #628620).
 
- -- Matthias Klose <doko@ubuntu.com>  Wed, 10 Aug 2011 11:50:40 +0200
+  [ Damien Raude-Morvan ]
+  * d/patches/kfreebsd-support-hotspot.diff: Add workaround
+    to handle #637378.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Thu, 11 Aug 2011 23:51:40 +0200
 
 openjdk-7 (7~b147-2.0~pre2-3) experimental; urgency=low
 

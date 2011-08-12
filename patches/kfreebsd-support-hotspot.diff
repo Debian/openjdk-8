@@ -102,17 +102,18 @@ Index: openjdk/hotspot/agent/src/os/linux/libproc.h
 ===================================================================
 --- openjdk/hotspot/agent/src/os/linux/libproc.h.orig
 +++ openjdk/hotspot/agent/src/os/linux/libproc.h
-@@ -27,6 +27,9 @@
+@@ -27,6 +27,10 @@
  
  #include <unistd.h>
  #include <stdint.h>
 +#if defined(__FreeBSD_kernel__)
++#include <sys/types.h>
 +#include <machine/reg.h>
 +#endif
  #include "proc_service.h"
  
  #if defined(sparc) || defined(sparcv9)
-@@ -87,6 +90,10 @@
+@@ -87,6 +91,10 @@
  #define user_regs_struct  pt_regs
  #endif
  
