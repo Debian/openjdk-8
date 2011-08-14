@@ -1,7 +1,13 @@
 openjdk-7 (7~b147-2.0~pre2-4) UNRELEASED; urgency=low
 
+  * Update to IcedTea7 (20110814):
+    - JamVM updates.
+
   [ Matthias Klose ]
-  * Build using GCC-4.4 on mips/mipsel (Closes #628620).
+  * Build using GCC-4.4 on mips/mipsel. Closes #628620.
+  * Merge debian packaging r482:485 from openjdk-6:
+    - Call dbus-launch --exit-with-session in testsuite. Closes: #612394.
+    - Build for s390x using Zero.
 
   [ Damien Raude-Morvan ]
   * d/patches/kfreebsd-support-hotspot.diff: Add workaround
