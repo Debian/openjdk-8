@@ -37,6 +37,7 @@ Pre-requisites:
 
 3) Remove files with unclear license from jdk.tar.gz:
  sh openjdk7/generate-dfsg-zip.sh $BUILD/jdk.tar.gz
+ sh openjdk7/generate-dfsg-zip.sh $BUILD/langtools.tar.gz
 
 4) Generate "pristine directory" and "pristine+debian directory"
  sh openjdk7/generate-debian-orig.sh

@@ -321,7 +321,6 @@ DISTRIBUTION_PATCHES += \
 	$(if $(filter $(DEB_HOST_ARCH), amd64 i386),,debian/patches/hotspot-no-werror.diff) \
 	debian/patches/hotspot-s390.diff \
 	debian/patches/hotspot-sparc.diff \
-	debian/patches/jdk-no-mapfile.diff \
 	debian/patches/hotspot-sparc-arch.diff \
 	debian/patches/sparc-trapsfix.patch \
 	debian/patches/zero-fpu-control-is-noop.diff \
@@ -446,7 +445,7 @@ CONFIGURE_ARGS += \
 	--with-jaxp-src-zip=$(CURDIR)/jaxp.tar.gz \
 	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
 	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
-	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz \
+	--with-langtools-src-zip=$(CURDIR)/langtools-dfsg.tar.gz \
 	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp145_01.zip \
 	--with-jaf-drop-zip=$(CURDIR)/drops/jdk7-jaf-2010_08_19.zip \
 	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2_4-b03-2011_05_27.zip

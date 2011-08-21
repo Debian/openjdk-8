@@ -17,32 +17,36 @@ case "$1" in
   *.tar*) tar xf $1;;
 esac
 
-# Remove J2DBench sources, some of which have questionable license
-# headers.
-rm -rf \
-  $jdkdir/src/share/demo/java2d/J2DBench
+case "$1" in
+  *jdk*)
+    echo "Cleanup jdk tarball..."
+    # Remove J2DBench sources, some of which have questionable license
+    # headers.
+    rm -rf \
+        $jdkdir/src/share/demo/java2d/J2DBench
 
-# BEGIN Debian/Ubuntu additions
+    # binary files
+    rm -f \
+        $jdkdir/test/sun/net/idn/*.spp
 
-# binary files
-rm -f \
-  $jdkdir/test/sun/net/idn/*.spp
+    rm -rf \
+        $jdkdir/test/sun/security/pkcs11/nss/lib/*
 
-rm -rf \
-  $jdkdir/test/sun/security/pkcs11/nss/lib/*
+    rm -f \
+        $jdkdir/test/java/util/Locale/data/deflocale.sh \
+        $jdkdir/test/java/util/Locale/data/deflocale.rhel5 \
+        $jdkdir/test/java/util/Locale/data/deflocale.rhel5.fmtasdefault \
+        $jdkdir/test/java/util/Locale/data/deflocale.sol10.fmtasdefault \
+        $jdkdir/test/java/util/Locale/data/deflocale.win7 \
+        $jdkdir/test/java/util/Locale/data/deflocale.win7.fmtasdefault
+;;
 
-rm -f \
-  $jdkdir/test/java/util/Locale/data/deflocale.sh \
-  $jdkdir/test/java/util/Locale/data/deflocale.rhel5 \
-  $jdkdir/test/java/util/Locale/data/deflocale.rhel5.fmtasdefault \
-  $jdkdir/test/java/util/Locale/data/deflocale.sol10.fmtasdefault \
-  $jdkdir/test/java/util/Locale/data/deflocale.win7 \
-  $jdkdir/test/java/util/Locale/data/deflocale.win7.fmtasdefault
+  *langtools*)
+    echo "Cleanup langtools tarball..."
+    rm -rf $jdkdir/test/tools/javac/T5090006/broken.jar
+;;
 
-# TODO
-#$ find $jdkdir -name '*.jar' -o -name '*.class'|grep -v test
-
-# END Debian/Ubuntu additions
+esac
 
 # Create new zip with new name.
 
