@@ -1,12 +1,11 @@
 #!/bin/sh -e
 
 basedir=/@basedir@
-basediralias=/@basediralias@
 jre_tools='@jre_tools@'
 
 if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
     for i in $jre_tools; do
-	update-alternatives --remove $i $basediralias/jre/bin/$i
+	update-alternatives --remove $i $basedir/jre/bin/$i
     done
 fi
 

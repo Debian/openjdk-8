@@ -15,6 +15,7 @@ DEB_HOST_GNU_TYPE	?= $(call vafilt,$(DPKG_VARS),DEB_HOST_GNU_TYPE)
 DEB_BUILD_GNU_TYPE	?= $(call vafilt,$(DPKG_VARS),DEB_BUILD_GNU_TYPE)
 DEB_HOST_ARCH		?= $(call vafilt,$(DPKG_VARS),DEB_HOST_ARCH)
 DEB_HOST_ARCH_CPU	?= $(call vafilt,$(DPKG_VARS),DEB_HOST_ARCH_CPU)
+DEB_HOST_MULTIARCH	?= $(call vafilt,$(DPKG_VARS),DEB_HOST_MULTIARCH)
 
 PATH := $(CURDIR)/bin:$(PATH)
 export PATH
@@ -29,6 +30,14 @@ ifeq ($(distrel),n/a)
   distrel := sid
 endif
 
+multiarch_dir = /$(DEB_HOST_MULTIARCH)
+ifneq (,$(DEB_HOST_MULTIARCH))
+  ifneq (,$(filter $(distrel),natty))
+    DEB_HOST_MULTIARCH =
+    multiarch_dir =
+  endif
+endif
+
 hotspot_archs	= amd64 i386 lpia sparc sparc64 kfreebsd-amd64 kfreebsd-i386
 # requires llvm; llvm in jaunty is recent enough, but in universe
 ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
@@ -39,7 +48,6 @@ no_bootstrap_archs = alpha armel
 VENDOR		= openjdk
 Vendor		= OpenJDK
 TOP		= usr/lib/jvm
-jdirname	= java-$(shortver)-$(origin)
 origin		= openjdk
 basename	= openjdk-$(shortver)
 ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
@@ -55,11 +63,22 @@ endif
 p_lib_arch	= all
 jvmver		= 1.7.0
 shortver	= 7
-jdiralias	= java-$(shortver)-$(origin)
-basedir		= usr/lib/jvm/$(jdiralias)
+ifneq (,$(DEB_HOST_MULTIARCH))
+  jdirname	= java-$(shortver)-$(origin)-$(DEB_HOST_ARCH)
+  jdiralias	= java-$(jvmver)-$(origin)-$(DEB_HOST_ARCH)
+  basedir	= $(TOP)/$(jdirname)
+  commonbasedir	= $(TOP)/java-$(shortver)-$(origin)
+  etcdir	= etc/java-$(shortver)-$(origin)
+else
+  jdirname	= java-$(shortver)-$(origin)
+  jdiralias	= java-$(jvmdir)-$(origin)
+  basedir	= $(TOP)/$(jdirname)
+  commonbasedir	= $(TOP)/java-$(shortver)-$(origin)
+  etcdir	= etc/$(jdirname)
+endif
+security	= $(etcdir)/security
 jreimg		= openjdk.build/j2re-image
 sdkimg		= openjdk.build/j2sdk-image
-security	= etc/$(jdiralias)/security
 
 # Support parallel=<n> in DEB_BUILD_OPTIONS (see #209008)
 COMMA=,
@@ -77,6 +96,7 @@ endif
 #export ALT_PARALLEL_COMPILE_JOBS = 1
 
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
+with_check = disabled for this upload
 with_docs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),,yes)
 ifneq (,$(findstring cacao shark, $(PKGSOURCE)))
   with_docs = disabled for cacao and shark
@@ -169,7 +189,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
   endif
 else ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_openjdk_archs)))
   STAGE1_JAVA = openjdk
-  STAGE1_HOME = /usr/lib/jvm/java-6-openjdk
+  STAGE1_HOME = $(firstword $(wildcard /usr/lib/jvm/java-6-openjdk-$(DEB_HOST_ARCH) /usr/lib/jvm/java-1.6.0-openjdk))
 else ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_cacao_archs)))
   STAGE1_JAVA = cacao
   STAGE1_HOME = /usr/lib/jvm/java-6-cacao
@@ -709,16 +729,8 @@ dlopen_jre_depends = \
 	libxrandr2, libxinerama1, libgl1-mesa-glx
 dlopen_jre_recommends =
 
-ifeq ($(distribution),Ubuntu)
-  ifneq (,$(filter $(distrel),jaunty intrepid hardy gutsy feisty edgy dapper))
-    # FIXME: check for every release ...
-    browser_plugin_dirs = xulrunner-addons firefox iceape iceweasel mozilla midbrowser xulrunner
-  else
-    browser_plugin_dirs = mozilla
-  endif
-else
-  browser_plugin_dirs = mozilla
-endif
+plugin_name = IcedTeaPlugin.so
+browser_plugin_dirs = mozilla
 
 java_launcher = /$(basedir)/bin/java
 ifeq ($(distribution),Ubuntu)
@@ -788,6 +800,12 @@ else ifeq ($(pkg_compress),bzip2)
   control_vars += '-Vdpkg:Depends=dpkg (>= 1.10.24)'
 endif
 
+ifneq (,$(DEB_HOST_MULTIARCH))
+  control_vars += \
+	'-Vmultiarch:Depends=multiarch-support' \
+	'-Vmultiarch:Conflicts=icedtea-netx (<< 1.1.1-2~)'
+endif
+
 ifneq (,$(filter-out $(hotspot_archs), $(cacao_archs)))
   control_vars += '-Vcacao:Recommends=$(p_jrec) (= $${binary:Version})'
 endif
@@ -800,7 +818,9 @@ ifneq (,$(filter-out $(hotspot_archs), $(jamvm_archs)))
 endif
 
 ifeq ($(with_bridge),yes)
-  ifeq ($(with_jni_bridge),yes)
+  ifneq (,$(DEB_HOST_MULTIARCH))
+    control_vars += '-Vdep:bridge=libaccess-bridge-java-jni (>= 1.26.2-6)'
+  else ifeq ($(with_jni_bridge),yes)
     control_vars += '-Vdep:bridge=libaccess-bridge-java-jni'
   else
     control_vars += '-Vdep:bridge=libaccess-bridge-java'
@@ -871,6 +891,7 @@ debian/control: debian/control.in debian/rules
 	    $(if $(cacao_archs), debian/control.cacao-jre) \
 	    $(if $(jamvm_archs), debian/control.jamvm-jre) \
 	    $(if $(altzero_archs), debian/control.zero-jre) \
+	    $(if $(DEB_HOST_MULTIARCH),,| grep -v '^Multi-Arch') \
 		> debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
@@ -892,7 +913,7 @@ packaging-files:
 	      -e 's/@basename@/$(basename)/g' \
 	      -e 's,@TOP@,$(TOP),g' \
 	      -e 's,@basedir@,$(basedir),g' \
-	      -e 's,@basediralias@,$(TOP)/$(jdiralias),g' \
+	      -e 's,@etcdir@,$(etcdir),g' \
 	      -e 's,@jdiralias@,$(jdiralias),g' \
 	      -e 's,@jdirname@,$(jdirname),g' \
 	      -e 's/@srcname@/$(srcname)/g' \
@@ -901,6 +922,7 @@ packaging-files:
 	      -e 's/@tag@/$(tag)/g' \
 	      -e 's/@priority@/$(priority)/g' \
 	      -e 's/@mantag@/$(mantag)/g' \
+	      -e 's/@multiarch@/$(DEB_HOST_MULTIARCH)/g' \
 	      -e 's/@jre_hl_tools@/$(jre_hl_tools_alt)/g' \
 	      -e 's/@jre_tools@/$(jre_tools_alt)/g' \
 	      -e 's/@jdk_tools@/$(jdk_tools_alt)/g' \
@@ -990,7 +1012,7 @@ ifeq ($(with_check),yes)
     endif
 
     ifneq (,$(filter jamvm, $(alternate_vms)))
-      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 ))
         # only activate after testing
         with_mauve_check += jamvm
       endif
@@ -1063,7 +1085,7 @@ build: pre-build $(build_stamps)
 	rm -f buildwatch.pid
 
 stamps/build: stamps/patch
-ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel hppa ia64 m68k mips mipsel powerpc powerpcspe ppc64 s390 sparc))
+ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel armhf hppa ia64 m68k mips mipsel powerpc powerpcspe ppc64 s390 s390x sparc))
 	sh -c 'sh debian/buildwatch.sh $(CURDIR)/build &'
 endif
 	if $(EXTRA_BUILD_ENV) $(MAKE) -C build $(build_target); then \
@@ -1371,17 +1393,17 @@ endif
 	    ln -sf $$d$$i $$i2; \
 	  done
 
-	mkdir -p $(d)/etc/$(jdiralias)/security
-	mkdir -p $(d)/etc/$(jdiralias)/management
-	mkdir -p $(d)/etc/$(jdiralias)/images/cursors
+	mkdir -p $(d)/$(etcdir)/security
+	mkdir -p $(d)/$(etcdir)/management
+	mkdir -p $(d)/$(etcdir)/images/cursors
 
 	: # rename templates (comments only) to config files,
-	: # and move to /etc/$(jdiralias)
+	: # and move to /$(etcdir)
 	for i in \
 	  management/jmxremote.password \
 	  management/snmp.acl; \
 	do \
-	  mv $(d)/$(basedir)/jre/lib/$$i.template $(d)/etc/$(jdiralias)/$$i; \
+	  mv $(d)/$(basedir)/jre/lib/$$i.template $(d)/$(etcdir)/$$i; \
 	done
 
 	cp -p debian/accessibility.properties $(d)/$(basedir)/jre/lib/
@@ -1391,7 +1413,7 @@ ifneq (,$(pkg_certs))
 	rm -f $(d)/$(basedir)/jre/lib/security/cacerts
 endif
 
-	: # move config files to etc/$(jdiralias) and symlink them.
+	: # move config files to $(etcdir) and symlink them.
 	for i in \
 	  accessibility.properties \
 	  calendars.properties \
@@ -1404,6 +1426,7 @@ endif
 	  psfontj2d.properties \
 	  psfont.properties.ja \
 	  swing.properties \
+	  tz.properties \
 	  management/jmxremote.access \
 	  management/management.properties \
 	  security/java.policy \
@@ -1411,24 +1434,24 @@ endif
 	  $$([ -f $(d)/$(basedir)/jre/lib/security/nss.cfg ] && echo security/nss.cfg) \
 	  $(if $(findstring ca-cert,$(pkg_certs)),,security/cacerts); \
 	do \
-	  mv $(d)/$(basedir)/jre/lib/$$i $(d)/etc/$(jdiralias)/$$i; \
+	  mv $(d)/$(basedir)/jre/lib/$$i $(d)/$(etcdir)/$$i; \
 	done
 	mv $(d)/$(basedir)/jre/lib/$(archdir)/jvm.cfg \
-		$(d)/etc/$(jdiralias)/
+		$(d)/$(etcdir)/
 ifneq (,$(filter $(DEB_HOST_ARCH),$(jamvm_defaults)))
-	grep '^[# ]' $(d)/etc/$(jdiralias)/jvm.cfg \
-		> $(d)/etc/$(jdiralias)/jvm.cfg.new
-	grep 'jamvm' $(d)/etc/$(jdiralias)/jvm.cfg \
-		>> $(d)/etc/$(jdiralias)/jvm.cfg.new
-	egrep -v '^[# ]|jamvm' $(d)/etc/$(jdiralias)/jvm.cfg \
-		>> $(d)/etc/$(jdiralias)/jvm.cfg.new
-	mv $(d)/etc/$(jdiralias)/jvm.cfg.new $(d)/etc/$(jdiralias)/jvm.cfg
+	grep '^[# ]' $(d)/$(etcdir)/jvm.cfg \
+		> $(d)/$(etcdir)/jvm.cfg.new
+	grep 'jamvm' $(d)/$(etcdir)/jvm.cfg \
+		>> $(d)/$(etcdir)/jvm.cfg.new
+	egrep -v '^[# ]|jamvm' $(d)/$(etcdir)/jvm.cfg \
+		>> $(d)/$(etcdir)/jvm.cfg.new
+	mv $(d)/$(etcdir)/jvm.cfg.new $(d)/$(etcdir)/jvm.cfg
 endif
 
 	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.properties.src \
-		$(d)/etc/$(jdiralias)/fontconfig.properties
+		$(d)/$(etcdir)/fontconfig.properties
 	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.bfc \
-		$(d)/etc/$(jdiralias)/fontconfig.bfc
+		$(d)/$(etcdir)/fontconfig.bfc
 
 	: # remove files which we do not want to distribute
 	rm -f $(d)/$(basedir)/jre/lib/fontconfig*.properties.src
@@ -1440,9 +1463,9 @@ endif
 	rmdir $(d)/$(basedir)/jre/lib/security
 
 	: # TODO: why do we provide a custom font.properties.ja?
-	: # cp -p debian/font.properties.ja $(d_jbin)/etc/$(jdiralias)/.
+	: # cp -p debian/font.properties.ja $(d_jbin)/$(etcdir)/.
 #	cp debian/font.properties.wgy_zenhai \
-#		$(d)/etc/$(jdiralias)/font.properties.ja
+#		$(d)/$(etcdir)/font.properties.ja
 
 
 	: # now move things to the packages. it is so ****** to create
@@ -1489,12 +1512,12 @@ endif
 
 	: # $(p_lib).install
 	( \
-	  echo '$(basedir)/jre/ASSEMBLY_EXCEPTION'; \
-	  echo '$(basedir)/jre/THIRD_PARTY_README'; \
+	  echo '$(basedir)/jre/ASSEMBLY_EXCEPTION $(commonbasedir)/jre/'; \
+	  echo '$(basedir)/jre/THIRD_PARTY_README $(commonbasedir)/jre/'; \
 	  cd $(d); \
 	  for i in $(basedir)/jre/lib/*; do \
 	    case "$$i" in */$(archdir)|*/jexec|*/rt.jar|*/security) continue; esac; \
-	    echo $$i; \
+	    echo $$i $(commonbasedir)/jre/lib/; \
 	  done; \
 	) > debian/$(p_lib).install
 
@@ -1514,7 +1537,7 @@ endif
 
 	: # $(p_src).install
 	( \
-	  echo '$(basedir)/src.zip'; \
+	  echo '$(basedir)/src.zip $(commonbasedir)/'; \
 	) > debian/$(p_src).install
 
 	: # move demos and samples, create symlinks for $(p_demo)
@@ -1601,6 +1624,9 @@ endif
 	( \
 	  echo usr/share/doc/$(p_jrehl) $(basedir)/docs; \
 	) > $(d_jrehl).links
+ifneq (,$(DEB_HOST_MULTIARCH))
+	echo '/$(basedir) /usr/lib/jvm/$(jdirname)' >> $(d_jrehl).links
+endif
 
 	: # create docdir symlinks for $(p_jre)
 	( \
@@ -1639,21 +1665,34 @@ ifeq ($(with_bridge),yes)
 	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
 	    >> $(d_jre).links
   ifeq ($(with_jni_bridge),yes)
-	  echo "usr/lib/jni/libjava-access-bridge-jni.so $(basedir)/jre/lib/ext/libjava-access-bridge-jni.so" \
+	  echo "usr/lib$(multiarch_dir)/jni/libjava-access-bridge-jni.so $(basedir)/jre/lib/ext/libjava-access-bridge-jni.so" \
 	    >> $(d_jre).links
   endif
 endif
 
 ifeq ($(with_tzdata),yes)
-	echo usr/share/javazi $(basedir)/jre/lib/zi \
+	echo usr/share/javazi $(commonbasedir)/jre/lib/zi \
 	  >> $(d_lib).links
 endif
 
 	: # create links for the config files
-	find $(d_jrehl)/etc/$(jdiralias) -type f ! -name jvm.cfg \
-	    -printf "etc/$(jdiralias)/%P $(basedir)/jre/lib/%P\n" >> $(d_jrehl).links
-	echo "etc/$(jdiralias)/jvm.cfg $(basedir)/jre/lib/$(archdir)/jvm.cfg" \
-	    >> $(d_jrehl).links
+	find $(d_jrehl)/$(etcdir) -type f ! -name jvm.cfg ! -name nss.cfg \
+	    -printf "$(etcdir)/%P $(basedir)/jre/lib/%P\n" >> $(d_jrehl).links
+ifneq (,$(DEB_HOST_MULTIARCH))
+	mv $(d_jrehl)/$(etcdir)/security/nss.cfg \
+	  $(d_jrehl)/$(etcdir)/security/nss-$(DEB_HOST_ARCH).cfg
+	mv $(d_jrehl)/$(etcdir)/jvm.cfg \
+	  $(d_jrehl)/$(etcdir)/jvm-$(DEB_HOST_ARCH).cfg
+	( \
+	  echo "$(etcdir)/security/nss-$(DEB_HOST_ARCH).cfg $(basedir)/jre/lib/security/nss.cfg"; \
+	  echo "$(etcdir)/jvm-$(DEB_HOST_ARCH).cfg $(basedir)/jre/lib/$(archdir)/jvm.cfg"; \
+	) >> $(d_jrehl).links
+else
+	( \
+	  echo "$(etcdir)/security/nss.cfg $(basedir)/jre/lib/security/nss.cfg"; \
+	  echo "$(etcdir)/jvm.cfg $(basedir)/jre/lib/$(archdir)/jvm.cfg"; \
+	) >> $(d_jrehl).links
+endif
 ifneq (,$(pkg_certs))
 	echo "etc/ssl/certs/java/cacerts $(basedir)/jre/lib/security/cacerts" \
 	    >> $(d_jrehl).links
@@ -1669,21 +1708,17 @@ endif
 	  echo 'section=main'; \
 	  echo ''; \
 	  for i in $(jre_hl_tools_alt); do \
-	    echo "hl $$i /$(TOP)/$(jdiralias)/jre/bin/$$i"; \
+	    echo "hl $$i /$(basedir)/jre/bin/$$i"; \
 	  done; \
-	  echo "hl jexec /$(TOP)/$(jdiralias)/jre/lib/jexec"; \
+	  echo "hl jexec /$(basedir)/jre/lib/jexec"; \
 	  for i in $(jre_tools_alt); do \
-	    echo "jre $$i /$(TOP)/$(jdiralias)/jre/bin/$$i"; \
+	    echo "jre $$i /$(basedir)/jre/bin/$$i"; \
 	  done; \
 	  for i in $(jdk_tools_alt); do \
-	    echo "jdk $$i /$(TOP)/$(jdiralias)/bin/$$i"; \
+	    echo "jdk $$i /$(basedir)/bin/$$i"; \
 	  done; \
 	  for d in $(browser_plugin_dirs); do \
-	    case "$$d" in \
-	      xulrunner-addons) b=xulrunner-1.9;; \
-	      *) b=$$d;; \
-	    esac; \
-	    echo "plugin $$b-javaplugin.so /$(TOP)/$(jdiralias)/jre/lib/$(archdir)/$(plugin_name)"; \
+	    echo "plugin $$b-javaplugin.so /$(basedir)/jre/lib/$(archdir)/$(plugin_name)"; \
 	  done; \
 	) > $(d_jrehl)/$(TOP)/.$(jdiralias).jinfo
 
@@ -1694,7 +1729,12 @@ endif
 	) > $(d_jrehl)/$(basedir)/jre/lib/jar.binfmt
 
 	: # another jvm symlink
+ifneq (,$(DEB_HOST_MULTIARCH))
+#	ln -sf $(jdirname) $(d_jrehl)/usr/lib/jvm/java-$(jvmver)-$(origin)
+	ln -sf $(jdirname) $(d_jrehl)/usr/lib/jvm/$(jdiralias)
+else
 	ln -sf $(jdiralias) $(d_jrehl)/usr/lib/jvm/java-$(jvmver)-$(origin)
+endif
 
 ifeq ($(with_systemtap),yes)
 	: # systemtap support
@@ -1703,11 +1743,21 @@ ifeq ($(with_systemtap),yes)
 endif
 
 	: # Install stuff to generate font config and timezone files.
-	mkdir -p $(d_lib)/$(basedir)/jre/lib
+	mkdir -p $(d_lib)/$(commonbasedir)/jre/lib
 	cp -p build/openjdk.build/btjars/compilefontconfig.jar \
-		$(d_lib)/$(basedir)/jre/lib/
+		$(d_lib)/$(commonbasedir)/jre/lib/
 	cp -p build/openjdk.build/btjars/javazic.jar \
-		$(d_lib)/$(basedir)/jre/lib/
+		$(d_lib)/$(commonbasedir)/jre/lib/
+
+ifneq (,$(DEB_HOST_MULTIARCH))
+	: # create symlinks for the files in $(p_lib)
+	find $(d_lib)/$(commonbasedir) -type f \
+	    -printf "$(commonbasedir)/%P $(basedir)/%P\n" >> $(d_jrehl).links
+  ifeq ($(with_tzdata),yes)
+	echo usr/share/javazi $(basedir)/jre/lib/zi \
+	  >> $(d_jrehl).links
+  endif
+endif
 
 	: # install lintian overrides
 	for FILE in debian/*.overrides; do \
@@ -1749,6 +1799,19 @@ endif
 absarchdir = $(CURDIR)/$(d_jrehl)/$(basedir)/jre/lib/$(archdir)
 shlibdeps_ld_path =$(absarchdir):$(absarchdir)/client:$(absarchdir)/server:$(absarchdir)/native_threads$(if $(xulrunner_depends),:$(shell pkg-config --libs-only-L libxul | sed  's/^-L//;s/-devel//;s,/lib *$$,,'))
 
+# pass vm name as first argument
+define install_test_results
+	mkdir -p $(d_jdk)/usr/share/doc/$(p_jrehl)/test-$(DEB_HOST_ARCH)
+	-cp build/mauve-$(1)/mauve_output-$(1) \
+	  $(d_jdk)/usr/share/doc/$(p_jrehl)/test-$(DEB_HOST_ARCH)/mauve_output-$(1).log
+	-cp jtreg_output-$(1) \
+	  $(d_jdk)/usr/share/doc/$(p_jrehl)/test-$(DEB_HOST_ARCH)/jtreg_output-$(1).log
+	-cp build/test/jtreg-summary-$(1).log build/test/check-*-$(1).log \
+	  $(d_jdk)/usr/share/doc/$(p_jrehl)/test-$(DEB_HOST_ARCH)/
+	-cp build/test/failed_tests-$(1).tar.gz \
+	  $(d_jdk)/usr/share/doc/$(p_jrehl)/test-$(DEB_HOST_ARCH)/failed_tests-$(1).tar.gz
+endef
+
 # Build architecture dependant packages
 binary-arch: build install
 	dh_testdir
@@ -1761,48 +1824,20 @@ binary-arch: build install
 	for i in AUTHORS NEWS README; do \
 	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jrehl)/$$i.IcedTea; \
 	done
-	mkdir -p $(d_jdk)/usr/share/doc/$(p_jrehl)
-	cp build/mauve-$(default_vm)/mauve_output-$(default_vm) \
-		$(d_jdk)/usr/share/doc/$(p_jrehl)/mauve_output-$(default_vm).log
-	cp jtreg_output-$(default_vm) \
-		$(d_jdk)/usr/share/doc/$(p_jrehl)/jtreg_output-$(default_vm).log
-	-cp build/test/jtreg-summary-$(default_vm).log build/test/check-*-$(default_vm).log \
-		$(d_jdk)/usr/share/doc/$(p_jrehl)/
-	-cp build/test/failed_tests-$(default_vm).tar.gz $(d_jdk)/usr/share/doc/$(p_jrehl)/
+	$(call install_test_results,$(default_vm))
 
 ifneq (,$(filter cacao, $(alternate_vms)))
 	dh_installchangelogs -p$(p_jrec)
 	dh_installdocs -p$(p_jrec)
-	mkdir -p $(d_jrec)/usr/share/doc/$(p_jrehl)
-	-cp build/mauve-cacao/mauve_output-cacao \
-		$(d_jrec)/usr/share/doc/$(p_jrehl)/mauve_output-cacao.log
-	-cp jtreg_output-cacao \
-		$(d_jrec)/usr/share/doc/$(p_jrehl)/jtreg_output-cacao.log
-	-cp build/test/jtreg-summary-cacao.log build/test/check-*-cacao.log \
-		$(d_jrec)/usr/share/doc/$(p_jrehl)/
-	-cp build/test/failed_tests-cacao.tar.gz $(d_jrec)/usr/share/doc/$(p_jrehl)/
+	$(call install_test_results,cacao)
 endif
 ifneq (,$(filter jamvm, $(alternate_vms)))
 	dh_installchangelogs -p$(p_jrej)
 	dh_installdocs -p$(p_jrej)
-	mkdir -p $(d_jrej)/usr/share/doc/$(p_jrehl)
-	-cp build/mauve-jamvm/mauve_output-jamvm \
-		$(d_jrej)/usr/share/doc/$(p_jrehl)/mauve_output-jamvm.log
-	-cp jtreg_output-jamvm \
-		$(d_jrej)/usr/share/doc/$(p_jrehl)/jtreg_output-jamvm.log
-	-cp build/test/jtreg-summary-jamvm.log build/test/check-*-jamvm.log \
-		$(d_jrej)/usr/share/doc/$(p_jrehl)/
-	-cp build/test/failed_tests-jamvm.tar.gz $(d_jrej)/usr/share/doc/$(p_jrehl)/
+	$(call install_test_results,jamvm)
 endif
 ifneq (,$(filter zero, $(alternate_vms)))
-	mkdir -p $(d_jrez)/usr/share/doc/$(p_jrehl)
-	-cp build/mauve-zero/mauve_output-zero \
-		$(d_jrez)/usr/share/doc/$(p_jrehl)/mauve_output-zero.log
-	-cp jtreg_output-zero \
-		$(d_jrez)/usr/share/doc/$(p_jrehl)/jtreg_output-zero.log
-	-cp build/test/jtreg-summary-zero.log build/test/check-*-zero.log \
-		$(d_jrez)/usr/share/doc/$(p_jrehl)/
-	-cp build/test/failed_tests-zero.tar.gz $(d_jrez)/usr/share/doc/$(p_jrehl)/
+	$(call install_test_results,zero)
 endif
 	dh_desktop -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)
 	dh_installmenu -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)
@@ -1827,7 +1862,7 @@ ifeq (,$(findstring nostrip, $(DEB_BUILD_OPTIONS)))
 	done
 endif
 
-	dh_compress -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)
+	dh_compress -s $(nodemo) $(nojrec) $(nojrej) $(nojrez) -Xexamples -Xdemos -Xpackage-list
 	dh_fixperms -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)
 	dh_makeshlibs -p$(p_jrehl) -p$(p_jre)
 	dh_shlibdeps -s $(nodemo) $(nojrec) $(nojrej) $(nojrez) -L $(p_jrehl) \

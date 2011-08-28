@@ -1,6 +1,7 @@
 
 Package: icedtea-7-jre-jamvm
 Architecture: @jamvm_archs@
+Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}

@@ -2,11 +2,10 @@
 
 set -e
 
+multiarch=@multiarch@
 priority=@priority@
 basedir=/@basedir@
-basediralias=/@basediralias@
-jdiralias=@jdiralias@
-mandir=/@basediralias@/jre/man
+mandir=$basedir/jre/man
 srcext=1.gz
 dstext=1.gz
 jre_tools='@jre_hl_tools@'
@@ -32,6 +31,17 @@ configure)
 	chmod 644 /etc/.java/.systemPrefs/.systemRootModFile
     fi
 
+    if [ -z "$2" ]; then
+	update_alternatives=y
+    fi
+    if [ -n "$multiarch" ] && [ -n "$2" ] && dpkg --compare-versions "$2" lt 7~b147-2.0~pre3-3~; then
+	update_alternatives=y
+    fi
+
+    if [ "$update_alternatives" = y ]; then
+    if [ -n "$multiarch" ] && [ "$DPKG_MAINTSCRIPT_ARCH" != $(dpkg --print-architecture) ]; then
+	priority=$(expr $priority - 1)
+    fi
     for i in $jre_tools; do
 	unset slave1 slave2 || true
         if [ -e $mandir/man1/$i.$srcext ]; then
@@ -51,16 +61,17 @@ configure)
             --install \
             /usr/bin/$i \
             $i \
-            $basediralias/jre/bin/$i \
+            $basedir/jre/bin/$i \
             $priority \
 	    $slave1 $slave2
     done
     update-alternatives \
-	--install /usr/bin/jexec jexec $basediralias/jre/lib/jexec $priority \
+	--install /usr/bin/jexec jexec $basedir/jre/lib/jexec $priority \
 	--slave \
 	    /usr/share/binfmts/jar \
 	    jexec-binfmt \
-	    $basediralias/jre/lib/jar.binfmt
+	    $basedir/jre/lib/jar.binfmt
+    fi # update alternatives
 
     # register binfmt; ignore errors, the alternative may already be
     # registered by another JRE.
@@ -69,10 +80,7 @@ configure)
     fi
 
     # activate class data sharing
-    case @jdiralias@ in
-	*cacao|*shark);;
-	*)
-	case @archdir@ in i386|sparc)
+    case @archdir@ in i386|sparc)
 	rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
 	log=$(tempfile)
 	if ! $basedir/bin/java -client -Xshare:dump -XX:PermSize=128m > $log; then
@@ -83,7 +91,6 @@ configure)
 	    #exit 1
 	fi
 	rm -f $log
-	esac
     esac
 
     ;;

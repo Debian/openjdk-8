@@ -1,6 +1,7 @@
 
 Package: @basename@-jre-zero
 Architecture: @altzero_archs@
+Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}

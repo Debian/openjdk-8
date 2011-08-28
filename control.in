@@ -11,6 +11,7 @@ Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk7
 
 Package: @basename@-jdk
 Architecture: any
+Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre (>= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
 Recommends: libxt-dev
@@ -25,11 +26,13 @@ Description: OpenJDK Development Kit (JDK)
 
 Package: @basename@-jre-headless
 Architecture: any
-Pre-Depends: ${dpkg:Depends}
+Multi-Arch: same
+Pre-Depends: ${dpkg:Depends}, ${multiarch:Depends}
 Depends: @basename@-jre-lib (>= @pkg_sversion@), ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}, ${jamvm:Recommends}
 Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, ${defaultvm:Provides}, ${jvm:Provides}
+Conflicts: ${multiarch:Conflicts}
 Description: OpenJDK Java runtime, using ${vm:Name} (headless)
  Minimal Java runtime - needed for executing non GUI Java programs.
  Using ${vm:Name}.
@@ -39,6 +42,7 @@ Description: OpenJDK Java runtime, using ${vm:Name} (headless)
 
 Package: @basename@-jre
 Architecture: any
+Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
 Recommends: ${dlopenjre:Recommends}, @core_fonts@
@@ -65,6 +69,7 @@ Description: OpenJDK Java runtime (architecture independent libraries)
 
 Package: @basename@-demo
 Architecture: any
+Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre (>= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
@@ -107,6 +112,7 @@ Description: OpenJDK Development Kit (JDK) documentation
 
 Package: @basename@-dbg
 Architecture: any
+Multi-Arch: same
 Priority: extra
 Section: debug
 Pre-Depends: ${dpkg:Depends}

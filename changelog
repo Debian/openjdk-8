@@ -1,8 +1,12 @@
-openjdk-7 (7~b147-2.0~pre3-3) UNRELEASED; urgency=low
+openjdk-7 (7~b147-2.0~pre3-3) experimental; urgency=low
 
   * Merge debian packaging r485:489 from openjdk-6:
     - Build using GCC-4.4 on sparc and sparc64.
     - Enable testsuite runs in s390x.
+  * Merge debian packaging r490 from openjdk-6:
+    - Set plugin name for the jinfo file. Closes: #638548,
+    - Disable the mauve testsuite on i386.
+    - Make the installation multiarch aware.
 
  -- Matthias Klose <doko@ubuntu.com>  Sun, 28 Aug 2011 20:42:54 +0200
 

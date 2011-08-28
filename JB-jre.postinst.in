@@ -2,11 +2,10 @@
 
 set -e
 
+multiarch=@multiarch@
 priority=@priority@
 basedir=/@basedir@
-basediralias=/@basediralias@
-jdiralias=@jdiralias@
-mandir=/@basediralias@/jre/man
+mandir=$basedir/jre/man
 srcext=1.gz
 dstext=1.gz
 jre_tools='@jre_tools@'
@@ -18,6 +17,17 @@ configure)
 	ln -sf @basename@-jre-headless /usr/share/doc/@basename@-jre;
     fi
 
+    if [ -z "$2" ]; then
+	update_alternatives=y
+    fi
+    if [ -n "$multiarch" ] && [ -n "$2" ] && dpkg --compare-versions "$2" lt 7~b147-2.0~pre3-3~; then
+	update_alternatives=y
+    fi
+
+    if [ "$update_alternatives" = y ]; then
+    if [ -n "$multiarch" ] && [ "$DPKG_MAINTSCRIPT_ARCH" != $(dpkg --print-architecture) ]; then
+	priority=$(expr $priority - 1)
+    fi
     for i in $jre_tools; do
 	unset slave1 slave2 || true
         if [ -e $mandir/man1/$i.$srcext ]; then
@@ -37,21 +47,11 @@ configure)
             --install \
             /usr/bin/$i \
             $i \
-            $basediralias/jre/bin/$i \
+            $basedir/jre/bin/$i \
             $priority \
 	    $slave1 $slave2
     done
-
-    # fix slave links for man page alternatives
-    if [ -n "$2" ] && dpkg --compare-versions "$2" lt 6-00-2ubuntu2; then
-	for i in $jre_tools; do
-	    current=$(LANG=C update-alternatives --display $i 2>&1 \
-		| awk '/link currently points to/ { print $NF}')
-	    case "$current" in /@basediralias@*)
-	        update-alternatives --quiet --set $i $basediralias/jre/bin/$i
-	    esac
-	done
-    fi
+    fi # update alternatives
 
     ;;
 

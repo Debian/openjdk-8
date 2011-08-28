@@ -6,4 +6,20 @@ if [ -h /usr/share/doc/@basename@-jre-headless ]; then
 	rm -f /usr/share/doc/@basename@-jre-headless
 fi
 
+multiarch=@multiarch@
+old_basedir=/usr/lib/jvm/java-7-openjdk
+jre_tools='policytool'
+
+case "$1" in
+    upgrade)
+	if [ -n "$multiarch" ] && [ -n "$2" ] && dpkg --compare-versions "$2" lt 6b23~pre8-2~; then
+	    for i in $jre_tools; do
+		update-alternatives --remove $i $old_basedir/jre/bin/$i || true
+	    done
+	fi
+	;;
+esac
+
 #DEBHELPER#
+
+exit 0

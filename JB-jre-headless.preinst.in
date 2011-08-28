@@ -6,4 +6,19 @@ if [ -h /usr/share/doc/@basename@-jre-headless ]; then
 	rm -f /usr/share/doc/@basename@-jre-headless
 fi
 
+multiarch=@multiarch@
+old_basedir=/usr/lib/jvm/java-7-openjdk
+jre_tools='java keytool pack200 rmid rmiregistry unpack200 orbd servertool tnameserv'
+
+case "$1" in
+    upgrade)
+	if [ -n "$multiarch" ] && [ -n "$2" ] && dpkg --compare-versions "$2" lt 6b23~pre8-2~; then
+	    for i in $jre_tools; do
+		update-alternatives --remove $i $old_basedir/jre/bin/$i || true
+	    done
+	    update-alternatives --remove jexec $old_basedir/jre/lib/jexec || true
+	fi
+	;;
+esac
+
 #DEBHELPER#

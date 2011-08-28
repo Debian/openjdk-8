@@ -3,7 +3,7 @@ Section: java
 Priority: optional
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
 Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>, Damien Raude-Morvan <drazzib@debian.org>
-Build-Depends: debhelper (>= 5), m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, fastjar (>= 2:0.96-0ubuntu2),  autoconf, automake, autotools-dev, ant, ant-optional,  libtool, g++-4.6,  ecj-gcj [amd64 armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64], gcj-jdk [amd64 armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64], gcj-4.4-jdk [mips mipsel], g++-4.4 [mips mipsel], openjdk-6-jdk (>= 6b18) [alpha armel], libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, liblcms2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, libxinerama-dev, xsltproc, rhino (>= 1.7R3~), libffi-dev, llvm-2.9-dev [amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386 powerpc ppc64], libpng12-dev, zlib1g-dev, libjpeg8-dev, libgif-dev, libpulse-dev (>= 0.9.12), libnss3-dev (>= 3.12.3),  mauve, xvfb, xauth, xfonts-base, libgl1-mesa-dri, twm | metacity, twm | dbus-x11, x11-xkb-utils,
+Build-Depends: debhelper (>= 5), m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, fastjar (>= 2:0.96-0ubuntu2),  autoconf, automake, autotools-dev, ant, ant-optional,  libtool, g++-4.6,  ecj-gcj [amd64 armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64], gcj-jdk [amd64 armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64], gcj-4.4-jdk [mips mipsel sparc sparc64], g++-4.4 [mips mipsel sparc sparc64], openjdk-6-jdk (>= 6b18) [alpha armel], libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, liblcms2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, libxinerama-dev, xsltproc, rhino (>= 1.7R3~), libffi-dev, llvm-2.9-dev [amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386 powerpc ppc64], libpng12-dev, zlib1g-dev, libjpeg8-dev, libgif-dev, libpulse-dev (>= 0.9.12), libnss3-dev (>= 3.12.3),  mauve, xvfb, xauth, xfonts-base, libgl1-mesa-dri, twm | metacity, twm | dbus-x11, x11-xkb-utils,
 Standards-Version: 3.9.2
 Homepage: http://openjdk.java.net/
 Vcs-Bzr: http://bazaar.launchpad.net/~openjdk/openjdk/openjdk7
@@ -11,6 +11,7 @@ Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk7
 
 Package: openjdk-7-jdk
 Architecture: any
+Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre (>= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Recommends: libxt-dev
@@ -25,11 +26,13 @@ Description: OpenJDK Development Kit (JDK)
 
 Package: openjdk-7-jre-headless
 Architecture: any
-Pre-Depends: ${dpkg:Depends}
+Multi-Arch: same
+Pre-Depends: ${dpkg:Depends}, ${multiarch:Depends}
 Depends: openjdk-7-jre-lib (>= ${source:Version}), ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}, ${jamvm:Recommends}
 Suggests: libnss-mdns, sun-java6-fonts, ttf-dejavu-extra, ttf-baekmuk | ttf-unfonts | ttf-unfonts-core, ttf-sazanami-gothic | ttf-kochi-gothic, ttf-sazanami-mincho | ttf-kochi-mincho, ttf-wqy-microhei | ttf-wqy-zenhei, ttf-indic-fonts,
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, ${defaultvm:Provides}, ${jvm:Provides}
+Conflicts: ${multiarch:Conflicts}
 Description: OpenJDK Java runtime, using ${vm:Name} (headless)
  Minimal Java runtime - needed for executing non GUI Java programs.
  Using ${vm:Name}.
@@ -39,6 +42,7 @@ Description: OpenJDK Java runtime, using ${vm:Name} (headless)
 
 Package: openjdk-7-jre
 Architecture: any
+Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (>= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
 Recommends: ${dlopenjre:Recommends}, ttf-dejavu-extra
@@ -65,6 +69,7 @@ Description: OpenJDK Java runtime (architecture independent libraries)
 
 Package: openjdk-7-demo
 Architecture: any
+Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre (>= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
@@ -107,6 +112,7 @@ Description: OpenJDK Development Kit (JDK) documentation
 
 Package: openjdk-7-dbg
 Architecture: any
+Multi-Arch: same
 Priority: extra
 Section: debug
 Pre-Depends: ${dpkg:Depends}
@@ -124,6 +130,7 @@ Description: Java runtime based on OpenJDK (debugging symbols)
 
 Package: icedtea-7-jre-jamvm
 Architecture: amd64 armel i386 lpia mips mipsel kfreebsd-i386 kfreebsd-amd64
+Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
@@ -136,6 +143,7 @@ Description: Alternative JVM for OpenJDK, using JamVM
 
 Package: openjdk-7-jre-zero
 Architecture: amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386 powerpc ppc64
+Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
