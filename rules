@@ -222,7 +222,7 @@ else ifneq (,$(filter $(distrel),natty))
 else ifneq (,$(filter $(distrel),wheezy sid))
   export CC = gcc-4.6
   export CXX = g++-4.6
-  ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel))
+  ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel sparc sparc64))
     export CC = gcc-4.4
     export CXX = g++-4.4
     GCJ_SUFFIX = -4.4
@@ -572,7 +572,7 @@ ifneq (,$(stage1_gcj_archs))
 	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
   endif
   ifneq (,$(filter $(distrel),wheezy sid))
-    bd_bootstrap += gcj-4.4-jdk [mips mipsel], g++-4.4 [mips mipsel],
+    bd_bootstrap += gcj-4.4-jdk [mips mipsel sparc sparc64], g++-4.4 [mips mipsel sparc sparc64],
   endif
 endif
 ifneq (,$(stage1_openjdk_archs))
@@ -974,7 +974,7 @@ ifeq ($(with_check),yes)
     ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha ia64 mips mipsel powerpc powerpcspe ppc64 s390 sh4))
       with_mauve_check = $(default_vm)
     endif
-    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc powerpcspe ppc64 s390 sh4))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc powerpcspe ppc64 s390 s390x sh4))
       with_jtreg_check = $(default_vm)
     endif
 
