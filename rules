@@ -67,7 +67,7 @@ ifneq (,$(DEB_HOST_MULTIARCH))
   jdirname	= java-$(shortver)-$(origin)-$(DEB_HOST_ARCH)
   jdiralias	= java-$(jvmver)-$(origin)-$(DEB_HOST_ARCH)
   basedir	= $(TOP)/$(jdirname)
-  commonbasedir	= $(TOP)/java-$(shortver)-$(origin)
+  commonbasedir	= $(TOP)/java-$(shortver)-$(origin)-common
   etcdir	= etc/java-$(shortver)-$(origin)
 else
   jdirname	= java-$(shortver)-$(origin)
@@ -1480,6 +1480,12 @@ endif
 	  echo '$(basedir)/man/ja'; \
 	  echo '$(basedir)/bin/java-rmi.cgi'; \
 	) > debian/$(p_jrehl).install
+ifneq (,$(DEB_HOST_MULTIARCH))
+	( \
+	  echo '$(basedir)/jre/lib/meta-index'; \
+	  echo '$(basedir)/jre/lib/ext/meta-index'; \
+	) >> debian/$(p_jrehl).install
+endif
 	$(RM) debian/$(p_jre).install
 
 	cd $(CURDIR)/$(d); \
@@ -1516,7 +1522,10 @@ endif
 	  echo '$(basedir)/jre/THIRD_PARTY_README $(commonbasedir)/jre/'; \
 	  cd $(d); \
 	  for i in $(basedir)/jre/lib/*; do \
-	    case "$$i" in */$(archdir)|*/jexec|*/rt.jar|*/security) continue; esac; \
+	    case "$$i" in \
+	      */$(archdir)|*/jexec|*/rt.jar|*/security$(if $(DEB_HOST_MULTIARCH),|*/meta-index)) \
+	        continue; \
+	    esac; \
 	    echo $$i $(commonbasedir)/jre/lib/; \
 	  done; \
 	) > debian/$(p_lib).install
@@ -1565,6 +1574,10 @@ endif
 
 	dh_install --sourcedir=debian/tmp --fail-missing -XLICENSE -Xrelease
 
+ifneq (,$(DEB_HOST_MULTIARCH))
+	rm -f $(d_lib)/$(commonbasedir)/jre/lib/ext/meta-index
+endif
+
 	: # give all permissions to cross-VM extension directory
 	sed -i \
 	    -e '/permission java\.security\.AllPermission;/,/};/c\' \
@@ -1574,6 +1587,9 @@ endif
 	    -e 'grant codeBase "file:/$(basedir)/ext/*" {\' \
 	    -e '        permission java.security.AllPermission;\' \
 	    -e '};\' \
+	    $(if $(DEB_HOST_MULTIARCH),-e 'grant codeBase "file:/$(commonbasedir)/ext/*" {\' \
+	    -e '        permission java.security.AllPermission;\' \
+	    -e '};\') \
 	    -e '\' \
 	    -e '// Comment this out if you want to give all permissions to the\' \
 	    -e '// Debian Java repository too:\' \
@@ -1671,8 +1687,8 @@ ifeq ($(with_bridge),yes)
 endif
 
 ifeq ($(with_tzdata),yes)
-	echo usr/share/javazi $(commonbasedir)/jre/lib/zi \
-	  >> $(d_lib).links
+	echo usr/share/javazi $(basedir)/jre/lib/zi \
+	  >> $(if $(DEB_HOST_MULTIARCH),$(d_jrehl),$(d_lib)).links
 endif
 
 	: # create links for the config files
@@ -1751,7 +1767,8 @@ endif
 
 ifneq (,$(DEB_HOST_MULTIARCH))
 	: # create symlinks for the files in $(p_lib)
-	find $(d_lib)/$(commonbasedir) -type f \
+	find $(d_lib)/$(commonbasedir) \
+	    ! -name zi ! -name meta-index \( -name cmm -prune -o -type f \) \
 	    -printf "$(commonbasedir)/%P $(basedir)/%P\n" >> $(d_jrehl).links
   ifeq ($(with_tzdata),yes)
 	echo usr/share/javazi $(basedir)/jre/lib/zi \

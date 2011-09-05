@@ -1,3 +1,18 @@
+openjdk-7 (7~b147-2.0~pre3-3ubuntu2) oneiric; urgency=low
+
+  * Merge debian packaging r491 from openjdk-6:
+    - Move the -lib files into a different location so that the java-7-openjdk
+      name can be used as a symlink.
+    - Symlink the jre/cmm directory, instead of the files inside. Closes: #639883.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 01 Sep 2011 21:08:45 +0200
+
+openjdk-7 (7~b147-2.0~pre3-3ubuntu1) oneiric; urgency=low
+
+  * Regenerate the control file.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 28 Aug 2011 23:42:18 +0200
+
 openjdk-7 (7~b147-2.0~pre3-3) experimental; urgency=low
 
   * Merge debian packaging r485:489 from openjdk-6:

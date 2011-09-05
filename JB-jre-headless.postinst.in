@@ -73,6 +73,15 @@ configure)
 	    $basedir/jre/lib/jar.binfmt
     fi # update alternatives
 
+    if [ -n "$multiarch" ] && [ -n "$2" ] && dpkg --compare-versions "$2" lt 7~b147-2.0~pre3-3ubuntu2~; then
+	for d in cmm; do
+	    if [ -d $basedir/jre/lib/$d ] && [ ! -h $basedir/jre/lib/$d ]; then
+		rm -rf $basedir/jre/lib/$d
+		ln -s ../../../java-6-openjdk-common/jre/lib/$d $basedir/jre/lib/$d
+	    fi
+	done
+    fi
+
     # register binfmt; ignore errors, the alternative may already be
     # registered by another JRE.
     if which update-binfmts >/dev/null && [ -r /usr/share/binfmts/jar ]; then
