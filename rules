@@ -896,7 +896,7 @@ debian/control: debian/control.in debian/rules
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
 	else \
-	  diff -u debian/control.old debian/control; \
+	  diff -u debian/control.old debian/control | wdiff -d -; \
 	  echo "debian/control did change, please restart the build"; \
 	  rm -f debian/control.old; \
           exit 1; \

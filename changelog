@@ -1,3 +1,14 @@
+openjdk-7 (7~b147-2.0~pre4-1) unstable; urgency=low
+
+  * Update to IcedTea7 (20110906):
+    - JamVM: support for armhf and other various fixes.
+  * Upload to unstable.
+  * Regenerate control file for debian unstable.
+  * Makefile.am: Force JAVA_HOME for ant call to --with-jdk-home value (without
+    this, it defaults to existing JAVA_HOME env or /usr/bin/java link)
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Mon, 05 Sep 2011 23:50:43 +0200
+
 openjdk-7 (7~b147-2.0~pre3-3ubuntu2) oneiric; urgency=low
 
   * Merge debian packaging r491 from openjdk-6:
