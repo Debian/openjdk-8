@@ -1,3 +1,17 @@
+openjdk-7 (7~b147-2.0~pre5-1) UNRELEASED; urgency=low
+
+  * Update to IcedTea7 (20110914).
+  * d/patches/jdk-no-mapfile.diff: Drop, merged in icedtea7-forest
+    (for real this time).
+  * d/patches/kfreebsd-support-jdk.diff: Refresh.
+  * d/patches/icedtea-patch.diff: Remove usage of nssLibraryDirectory because
+    while it works for nss3, it fails for softokn3 (since the latter is
+    in nss/ subdirectory). Without this param, openjdk-7 will rely on
+    default ld.so behavior.
+    In openjdk-6, nssLibraryDirectory was not used to load softokn3 (Secmod).
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Thu, 15 Sep 2011 09:37:21 +0200
+
 openjdk-7 (7~b147-2.0~pre4-1) unstable; urgency=low
 
   * Update to IcedTea7 (20110906):

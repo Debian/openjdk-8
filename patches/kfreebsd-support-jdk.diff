@@ -13,12 +13,12 @@ Description: Initial GNU/kFreeBSD support for openjdk-7 (JDK part)
    (from bsd-port)
  - Don't build sctp protocol
    openjdk/jdk/make/com/sun/nio/Makefile
- - Don't build jsoundala
+ - Don't build jsoundalsa
    openjdk/jdk/make/javax/sound/Makefile
  - Disable epoll feature and so LinuxWatchService
    openjdk/jdk/make/java/nio/Makefile
 Author: Damien Raude-Morvan <drazzib@debian.org>
-Last-Update: 2011-06-28
+Last-Update: 2011-09-14
 Forwarded: no
 Index: openjdk/jdk/make/com/sun/nio/Makefile
 ===================================================================
@@ -106,75 +106,140 @@ Index: openjdk/jdk/make/java/nio/Makefile
 ===================================================================
 --- openjdk/jdk/make/java/nio/Makefile.orig
 +++ openjdk/jdk/make/java/nio/Makefile
-@@ -186,11 +186,6 @@
- 	sun/nio/ch/DevPollArrayWrapper.java \
- 	sun/nio/ch/DevPollSelectorImpl.java \
- 	sun/nio/ch/DevPollSelectorProvider.java \
--	sun/nio/ch/EPoll.java \
--	sun/nio/ch/EPollArrayWrapper.java \
--	sun/nio/ch/EPollPort.java \
--	sun/nio/ch/EPollSelectorProvider.java \
--	sun/nio/ch/EPollSelectorImpl.java \
- 	sun/nio/ch/InheritedChannel.java \
- 	sun/nio/ch/LinuxAsynchronousChannelProvider.java \
-         sun/nio/ch/PollSelectorProvider.java \
-@@ -207,7 +202,6 @@
- 	sun/nio/fs/LinuxFileSystemProvider.java \
- 	sun/nio/fs/LinuxUserDefinedFileAttributeView.java \
- 	sun/nio/fs/LinuxNativeDispatcher.java \
--	sun/nio/fs/LinuxWatchService.java \
- 	sun/nio/fs/PollingWatchService.java \
- 	sun/nio/fs/UnixChannelFactory.java \
- 	sun/nio/fs/UnixCopyFile.java \
-@@ -229,9 +223,6 @@
- 	sun/nio/fs/UnixUserPrincipals.java
+@@ -94,6 +94,70 @@
  
+ else
+ 
++ifeq ($(SYSTEM_UNAME),GNU/kFreeBSD)
++
++FILES_java += \
++        sun/nio/ch/AbstractPollSelectorImpl.java \
++        sun/nio/ch/DevPollArrayWrapper.java \
++        sun/nio/ch/DevPollSelectorImpl.java \
++        sun/nio/ch/DevPollSelectorProvider.java \
++        sun/nio/ch/InheritedChannel.java \
++        sun/nio/ch/LinuxAsynchronousChannelProvider.java \
++        sun/nio/ch/PollSelectorProvider.java \
++        sun/nio/ch/PollSelectorImpl.java \
++        sun/nio/ch/Port.java \
++        sun/nio/ch/SimpleAsynchronousFileChannelImpl.java \
++        sun/nio/ch/SolarisAsynchronousChannelProvider.java \
++        sun/nio/ch/SolarisEventPort.java \
++        sun/nio/ch/UnixAsynchronousServerSocketChannelImpl.java \
++        sun/nio/ch/UnixAsynchronousSocketChannelImpl.java \
++        \
++        sun/nio/fs/GnomeFileTypeDetector.java \
++        sun/nio/fs/LinuxDosFileAttributeView.java \
++        sun/nio/fs/LinuxFileStore.java \
++        sun/nio/fs/LinuxFileSystem.java \
++        sun/nio/fs/LinuxFileSystemProvider.java \
++        sun/nio/fs/LinuxUserDefinedFileAttributeView.java \
++        sun/nio/fs/LinuxNativeDispatcher.java \
++        sun/nio/fs/PollingWatchService.java \
++        sun/nio/fs/SolarisNativeDispatcher.java \
++        sun/nio/fs/SolarisWatchService.java \
++        sun/nio/fs/UnixChannelFactory.java \
++        sun/nio/fs/UnixCopyFile.java \
++        sun/nio/fs/UnixDirectoryStream.java \
++        sun/nio/fs/UnixException.java \
++        sun/nio/fs/UnixFileAttributeViews.java \
++        sun/nio/fs/UnixFileAttributes.java \
++        sun/nio/fs/UnixFileKey.java \
++        sun/nio/fs/UnixFileModeAttribute.java \
++        sun/nio/fs/UnixFileStore.java \
++        sun/nio/fs/UnixFileStoreAttributes.java \
++        sun/nio/fs/UnixFileSystem.java \
++        sun/nio/fs/UnixFileSystemProvider.java \
++        sun/nio/fs/UnixMountEntry.java \
++        sun/nio/fs/UnixNativeDispatcher.java \
++        sun/nio/fs/UnixPath.java \
++        sun/nio/fs/UnixSecureDirectoryStream.java \
++        sun/nio/fs/UnixUriUtils.java \
++        sun/nio/fs/UnixUserPrincipals.java
++
++FILES_export += \
++        sun/nio/ch/DevPollArrayWrapper.java \
++        sun/nio/ch/InheritedChannel.java \
++        sun/nio/ch/NativeThread.java \
++        sun/nio/ch/SolarisEventPort.java \
++        sun/nio/ch/UnixAsynchronousServerSocketChannelImpl.java \
++        sun/nio/ch/UnixAsynchronousSocketChannelImpl.java \
++        \
++        sun/nio/fs/GnomeFileTypeDetector.java \
++        sun/nio/fs/LinuxNativeDispatcher.java \
++        sun/nio/fs/SolarisNativeDispatcher.java \
++        sun/nio/fs/SolarisWatchService.java \
++        sun/nio/fs/UnixCopyFile.java \
++        sun/nio/fs/UnixNativeDispatcher.java
++
++else
++
+ FILES_java += \
+         sun/nio/ch/AbstractPollSelectorImpl.java \
+ 	sun/nio/ch/DevPollArrayWrapper.java \
+@@ -164,10 +228,12 @@
+ 	sun/nio/fs/UnixCopyFile.java \
+ 	sun/nio/fs/UnixNativeDispatcher.java
+ 
++endif # kFreeBSD
++
+ FILES_gen += \
+ 	sun/nio/fs/UnixConstants.java
+ 
+-endif
++endif # else
+ 
+ ifeq ($(PLATFORM), solaris)
+ 
+@@ -213,6 +279,22 @@
+ 
+ ifeq ($(PLATFORM), linux)
+ 
++ifeq ($(SYSTEM_UNAME),GNU/kFreeBSD)
++
++FILES_c += \
++        InheritedChannel.c \
++        NativeThread.c \
++        PollArrayWrapper.c \
++        UnixAsynchronousServerSocketChannelImpl.c \
++        UnixAsynchronousSocketChannelImpl.c \
++        \
++        GnomeFileTypeDetector.c \
++        LinuxNativeDispatcher.c \
++        UnixCopyFile.c \
++        UnixNativeDispatcher.c
++
++else
++
  FILES_c += \
--	EPoll.c \
--	EPollArrayWrapper.c \
--	EPollPort.c \
- 	InheritedChannel.c \
- 	NativeThread.c \
-         PollArrayWrapper.c \
-@@ -240,15 +231,11 @@
- 	\
- 	GnomeFileTypeDetector.c \
- 	LinuxNativeDispatcher.c \
--	LinuxWatchService.c \
+ 	EPoll.c \
+ 	EPollArrayWrapper.c \
+@@ -229,6 +311,8 @@
  	UnixCopyFile.c \
  	UnixNativeDispatcher.c
  
- FILES_export += \
-  	sun/nio/ch/DevPollArrayWrapper.java \
--	sun/nio/ch/EPoll.java \
--        sun/nio/ch/EPollArrayWrapper.java \
--	sun/nio/ch/EPollPort.java \
- 	sun/nio/ch/InheritedChannel.java \
- 	sun/nio/ch/NativeThread.java \
- 	sun/nio/ch/UnixAsynchronousServerSocketChannelImpl.java \
-@@ -256,7 +243,6 @@
- 	\
- 	sun/nio/fs/GnomeFileTypeDetector.java \
- 	sun/nio/fs/LinuxNativeDispatcher.java \
--	sun/nio/fs/LinuxWatchService.java \
- 	sun/nio/fs/UnixCopyFile.java \
- 	sun/nio/fs/UnixNativeDispatcher.java
- 	
++endif # kFreeBSD
++
+ ifndef USE_SYSTEM_GIO
+ FILES_c += \
+ 	gio_fp.c
 Index: openjdk/jdk/make/javax/sound/Makefile
 ===================================================================
 --- openjdk/jdk/make/javax/sound/Makefile.orig
 +++ openjdk/jdk/make/javax/sound/Makefile
-@@ -100,8 +100,8 @@
+@@ -99,10 +99,12 @@
+ endif # PLATFORM win32
  
  ifeq ($(PLATFORM), linux)
++ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
    # ALSA handles directaudio, ports, and MIDI
--  SUBDIRS += jsoundalsa
--  EXTRA_SOUND_JNI_LIBS += jsoundalsa
-+  #SUBDIRS += jsoundalsa
-+  #EXTRA_SOUND_JNI_LIBS += jsoundalsa
+   SUBDIRS += jsoundalsa
+   EXTRA_SOUND_JNI_LIBS += jsoundalsa
    #MXSPP_ADD = $(PLATFORM)-$(ARCH)/
++endif # kFreeBSD
  endif # PLATFORM linux
  
+ ifeq ($(PLATFORM), solaris)
 Index: openjdk/jdk/src/share/classes/com/sun/servicetag/Installer.java
 ===================================================================
 --- openjdk/jdk/src/share/classes/com/sun/servicetag/Installer.java.orig
@@ -1714,7 +1779,7 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/fontpath.c
  #define MAP_FAILED ((caddr_t)-1)
  #endif
  
-@@ -61,7 +61,7 @@
+@@ -64,7 +64,7 @@
  
  #define MAXFDIRS 512    /* Max number of directories that contain fonts */
  
@@ -1723,7 +1788,7 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/fontpath.c
  /*
   * This can be set in the makefile to "/usr/X11" if so desired.
   */
-@@ -362,7 +362,7 @@
+@@ -365,7 +365,7 @@
  
  #endif /* !HEADLESS */
  
@@ -1732,7 +1797,7 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/fontpath.c
  /* from awt_LoadLibrary.c */
  JNIEXPORT jboolean JNICALL AWTIsHeadless();
  #endif
-@@ -487,7 +487,7 @@
+@@ -490,7 +490,7 @@
       */
      fcdirs = getFontConfigLocations();
  
@@ -1741,7 +1806,7 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/fontpath.c
      knowndirs = fullLinuxFontPath;
  #else /* IF SOLARIS */
      knowndirs = fullSolarisFontPath;
-@@ -499,7 +499,7 @@
+@@ -502,7 +502,7 @@
       * be initialised.
       */
  #ifndef HEADLESS
@@ -1750,7 +1815,7 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/fontpath.c
      if (!AWTIsHeadless()) { /* .. so need to call a function to check */
  #endif
        /* Using the X11 font path to locate font files is now a fallback
-@@ -514,7 +514,7 @@
+@@ -517,7 +517,7 @@
          x11dirs = getX11FontPath();
      }
      AWT_UNLOCK();
@@ -1759,15 +1824,6 @@ Index: openjdk/jdk/src/solaris/native/sun/awt/fontpath.c
      }
  #endif
  #endif /* !HEADLESS */
-@@ -547,7 +547,7 @@
- }
- 
- #include <dlfcn.h>
--#ifndef __linux__ /* i.e. is solaris */
-+#if !defined(__linux__) && !defined(__GLIBC__) /* i.e. is solaris */
- #include <link.h>
- #endif
- 
 Index: openjdk/jdk/src/solaris/native/sun/awt/multi_font.c
 ===================================================================
 --- openjdk/jdk/src/solaris/native/sun/awt/multi_font.c.orig
@@ -1833,9 +1889,9 @@ Index: openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c
 ===================================================================
 --- openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c.orig
 +++ openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c
-@@ -30,7 +30,7 @@
+@@ -29,7 +29,7 @@
+ #include "jlong.h"
  #include "sun_net_spi_DefaultProxySelector.h"
- #include <dlfcn.h>
  #include <stdio.h>
 -#ifdef __linux__
 +#if defined(__linux__) || defined(__GLIBC__)
@@ -2129,7 +2185,7 @@ Index: openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c
 ===================================================================
 --- openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c.orig
 +++ openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c
-@@ -36,7 +36,7 @@
+@@ -35,7 +35,7 @@
  #include <strings.h>
  #endif
  

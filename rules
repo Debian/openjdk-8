@@ -341,7 +341,6 @@ DISTRIBUTION_PATCHES += \
 	$(if $(filter $(DEB_HOST_ARCH), amd64 i386),,debian/patches/hotspot-no-werror.diff) \
 	debian/patches/hotspot-s390.diff \
 	debian/patches/hotspot-sparc.diff \
-	debian/patches/jdk-no-mapfile.diff \
 	debian/patches/hotspot-sparc-arch.diff \
 	debian/patches/sparc-trapsfix.patch \
 	debian/patches/zero-fpu-control-is-noop.diff \
