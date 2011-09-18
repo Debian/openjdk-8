@@ -9,8 +9,11 @@ openjdk-7 (7~b147-2.0~pre5-1) UNRELEASED; urgency=low
     in nss/ subdirectory). Without this param, openjdk-7 will rely on
     default ld.so behavior. (Closes: #637337, #638008)
     In openjdk-6, nssLibraryDirectory was not used to load softokn3 (Secmod).
+  * d/control: openjdk-7-jre Provides java7-runtime, openjdk-7-jre-headless
+    Provides java7-runtime-headless and openjdk-7-jdk Provides java7-jdk.
+    (Closes: #641668).
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Thu, 15 Sep 2011 09:38:32 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sun, 18 Sep 2011 21:21:44 +0200
 
 openjdk-7 (7~b147-2.0~pre4-1) unstable; urgency=low
 
