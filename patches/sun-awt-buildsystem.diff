@@ -1,0 +1,61 @@
+This patch is targeted for icedtea7-forest jdk. Since rev 005c45393f0d, 
+USE_SYSTEM_CUPS define seems to be used to skip usage of embed cups headers. I 
+found some issues with current makefiles.
+
+1) In openjdk/jdk/make/sun/awt/FILES_c_unix.gmk there is a typo in 
+FILES_NO_MOTIF_c. It should be "+=" and not "=".
+Actual error: it skip build of others files and latter cause, for example, 
+"java.lang.UnsatisfiedLinkError: java.awt.Font.initIDs" when doing XAWTIcon 
+generation with ToBin tool.
+
+2) In openjdk/jdk/make/sun/awt/mawt.gmk, there is missing directives when 
+comparing with xawt ones.
+- Missing vpath %.c for embed cups headers
+- Missing OTHER_LDLIBS for cups libs
+
+http://mail.openjdk.java.net/pipermail/distro-pkg-dev/2011-September/015682.html
+
+Index: openjdk/jdk/make/sun/awt/FILES_c_unix.gmk
+===================================================================
+--- openjdk/jdk/make/sun/awt/FILES_c_unix.gmk.orig
++++ openjdk/jdk/make/sun/awt/FILES_c_unix.gmk
+@@ -231,11 +231,11 @@
+ 	CUPSfuncs.c
+ 
+ ifndef USE_SYSTEM_CUPS
+-FILES_NO_MOTIF_c = \
++FILES_NO_MOTIF_c += \
+ 	cups_fp.c
+ endif
+ 
+ ifndef USE_SYSTEM_FONTCONFIG
+-FILES_NO_MOTIF_c = \
++FILES_NO_MOTIF_c += \
+ 	fontconfig_fp.c
+ endif
+Index: openjdk/jdk/make/sun/awt/mawt.gmk
+===================================================================
+--- openjdk/jdk/make/sun/awt/mawt.gmk.orig
++++ openjdk/jdk/make/sun/awt/mawt.gmk
+@@ -103,6 +103,10 @@
+ vpath %.cpp $(SHARE_SRC)/native/$(PKGDIR)/image
+ vpath %.c   $(PLATFORM_SRC)/native/$(PKGDIR)/robot_child
+ 
++ifndef USE_SYSTEM_CUPS
++vpath %.c   $(PLATFORM_SRC)/native/common/deps
++endif
++
+ ifndef USE_SYSTEM_FONTCONFIG
+ vpath %.c   $(PLATFORM_SRC)/native/common/deps/fontconfig2
+ endif
+@@ -186,6 +190,10 @@
+ OTHER_LDLIBS += $(JVMLIB) $(LIBCXX) \
+                 -lawt $(LIBM)
+ 
++ifdef USE_SYSTEM_CUPS
++  OTHER_LDLIBS += $(CUPS_LIBS)
++endif
++
+ ifdef USE_SYSTEM_FONTCONFIG
+   OTHER_LDLIBS += $(FONTCONFIG_LIBS)
+ else

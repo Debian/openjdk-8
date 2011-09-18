@@ -1,8 +1,9 @@
 openjdk-7 (7~b147-2.0~pre5-1) UNRELEASED; urgency=low
 
   * Update to IcedTea7 (20110914).
-  * d/patches/jdk-no-mapfile.diff: Drop, merged in icedtea7-forest
+    - d/patches/jdk-no-mapfile.diff: Drop, merged in icedtea7-forest
     (for real this time).
+    - d/patches/sun-awt-buildsystem.diff: Fix icedtea7-forest awt build.
   * d/patches/kfreebsd-support-jdk.diff: Refresh.
   * d/patches/icedtea-patch.diff: Remove usage of nssLibraryDirectory because
     while it works for nss3, it fails for softokn3 (since the latter is
@@ -13,7 +14,7 @@ openjdk-7 (7~b147-2.0~pre5-1) UNRELEASED; urgency=low
     Provides java7-runtime-headless and openjdk-7-jdk Provides java7-jdk.
     (Closes: #641668).
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Sun, 18 Sep 2011 21:21:44 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sun, 18 Sep 2011 22:42:27 +0200
 
 openjdk-7 (7~b147-2.0~pre4-1) unstable; urgency=low
 
