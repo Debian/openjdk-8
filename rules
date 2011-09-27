@@ -71,7 +71,7 @@ ifneq (,$(DEB_HOST_MULTIARCH))
   etcdir	= etc/java-$(shortver)-$(origin)
 else
   jdirname	= java-$(shortver)-$(origin)
-  jdiralias	= java-$(jvmdir)-$(origin)
+  jdiralias	= java-$(jvmver)-$(origin)
   basedir	= $(TOP)/$(jdirname)
   commonbasedir	= $(TOP)/java-$(shortver)-$(origin)
   etcdir	= etc/$(jdirname)
@@ -1745,12 +1745,7 @@ endif
 	) > $(d_jrehl)/$(basedir)/jre/lib/jar.binfmt
 
 	: # another jvm symlink
-ifneq (,$(DEB_HOST_MULTIARCH))
-#	ln -sf $(jdirname) $(d_jrehl)/usr/lib/jvm/java-$(jvmver)-$(origin)
 	ln -sf $(jdirname) $(d_jrehl)/usr/lib/jvm/$(jdiralias)
-else
-	ln -sf $(jdiralias) $(d_jrehl)/usr/lib/jvm/java-$(jvmver)-$(origin)
-endif
 
 ifeq ($(with_systemtap),yes)
 	: # systemtap support

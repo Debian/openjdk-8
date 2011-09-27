@@ -1,3 +1,10 @@
+openjdk-7 (7~b147-2.0~pre5-2) UNRELEASED; urgency=low
+
+  * Merge debian packaging r496 from openjdk-6:
+    - Fix dangling java-1.7.0-openjdk symlink for non-multiarch builds.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 27 Sep 2011 14:29:45 +0200
+
 openjdk-7 (7~b147-2.0~pre5-1) unstable; urgency=low
 
   * Update to IcedTea7 (20110914).
