@@ -1,9 +1,9 @@
 #!/bin/sh
 
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools-dfsg.tar.gz openjdk.tar.gz"
-jamvmtb=jamvm-12d05e620a9fda129925104bc848014f91d971db.tar.gz
+jamvmtb=jamvm-310c491ddc14e92a6ffff27030a1a1821e6395a8.tar.gz
 tarballdir=b147
-version=7~b147-2.0~pre5
+version=7~b147-2.0~pre6
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
@@ -59,7 +59,7 @@ rm -rf $pkgdir/debian/.bzr
 (
   cd $pkgdir
   debian/update-shasum.sh
-  patch -p1 < debian/patches/icedtea-patch.diff
+  patch -p0 < debian/patches/icedtea-patch.diff
   sh autogen.sh
   rm -rf autom4te.cache
 )

@@ -1,9 +1,21 @@
-openjdk-7 (7~b147-2.0~pre5-2) UNRELEASED; urgency=low
+openjdk-7 (7~b147-2.0~pre6-1) unstable; urgency=low
 
+  * Update to IcedTea7 (20110928).
+
+  [ Matthias Klose ]
   * Merge debian packaging r496 from openjdk-6:
     - Fix dangling java-1.7.0-openjdk symlink for non-multiarch builds.
 
- -- Matthias Klose <doko@ubuntu.com>  Tue, 27 Sep 2011 14:29:45 +0200
+  [ Damien Raude-Morvan ]
+  * d/rules: --disable-compile-against-syscalls for kFreeBSD (since there is
+    no epoll support).
+  * Update patches:
+    - d/patches/sun-awt-buildsystem.diff: Drop, merged upstream.
+    - d/patches/icedtea-override-redirect-compiz.patch: Refresh.
+    - d/patches/s390_hotspot_fix.diff: Extracted (instead of direct patch).
+  * Add Build-Depends on libattr1-dev.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Wed, 28 Sep 2011 17:19:33 +0200
 
 openjdk-7 (7~b147-2.0~pre5-1) unstable; urgency=low
 

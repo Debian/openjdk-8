@@ -1,0 +1,42 @@
+Description: Fix FTBFS on s390.
+ <URL:https://buildd.debian.org/status/fetch.php?pkg=openjdk-7&arch=s390&ver=7~b147-2.0~pre2-1&stamp=1312512238>
+ .
+ hotspot/src/share/vm/compiler/methodLiveness.cpp: In constructor 'MethodLiveness::BasicBlock::BasicBlock(MethodLiveness*, int, int)':
+ hotspot/src/share/vm/compiler/methodLiveness.cpp:585:22: error: call of overloaded 'BitMap(size_t*, int)' is ambiguous
+ hotspot/src/share/vm/compiler/methodLiveness.cpp:585:22: note: candidates are:
+ hotspot/src/share/vm/utilities/bitMap.hpp:124:3: note: BitMap::BitMap(BitMap::idx_t, bool) <near match>
+ hotspot/src/share/vm/utilities/bitMap.hpp:124:3: note:   no known conversion for argument 1 from 'size_t* {aka long unsigned int*}' to 'BitMap::idx_t {aka long unsigned int}'
+ hotspot/src/share/vm/utilities/bitMap.hpp:119:3: note: BitMap::BitMap(BitMap::bm_word_t*, BitMap::idx_t) <near match>
+ hotspot/src/share/vm/utilities/bitMap.hpp:119:3: note:   no known conversion for argument 1 from 'size_t* {aka long unsigned int*}' to 'BitMap::bm_word_t* {aka unsigned int*}'
+ .
+ It was initially a direct patch of patches/use-idx_t.patch.
+ It's now maintained in its own patch file since icedtea upstream as merged
+ patches into its mercurial repository.
+Author: Damien Raude-Morvan <drazzib@debian.org>
+Last-Update: 2011-09-28
+Forwarded: ???
+Index: openjdk/hotspot/src/share/vm/compiler/methodLiveness.cpp
+===================================================================
+--- openjdk/hotspot/src/share/vm/compiler/methodLiveness.cpp.orig
++++ openjdk/hotspot/src/share/vm/compiler/methodLiveness.cpp
+@@ -572,15 +572,15 @@
+ 
+ 
+ MethodLiveness::BasicBlock::BasicBlock(MethodLiveness *analyzer, int start, int limit) :
+-         _gen((size_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
++         _gen((uintptr_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
+                          analyzer->bit_map_size_bits()),
+-         _kill((size_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
++         _kill((uintptr_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
+                          analyzer->bit_map_size_bits()),
+-         _entry((size_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
++         _entry((uintptr_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
+                          analyzer->bit_map_size_bits()),
+-         _normal_exit((size_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
++         _normal_exit((uintptr_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
+                          analyzer->bit_map_size_bits()),
+-         _exception_exit((size_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
++         _exception_exit((uintptr_t*)analyzer->arena()->Amalloc(BytesPerWord * analyzer->bit_map_size_words()),
+                          analyzer->bit_map_size_bits()),
+          _last_bci(-1) {
+   _analyzer = analyzer;

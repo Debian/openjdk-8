@@ -17,9 +17,13 @@ Pre-requisites:
 
 0) Clone OpenJDK debian packaging:
  bzr branch lp:~openjdk/openjdk/openjdk7 openjdk7/
+   or update existing repository clone:
+ (cd openjdk7/; bzr pull --remember lp:~openjdk/openjdk/openjdk7)
 
 1) Clone IcedTea-7 HG:
  hg clone http://icedtea.classpath.org/hg/icedtea7 icedtea7/
+   or update existing repository clone:
+ (cd icedtea7/; hg pull -u)
 
 2) Download OpenJDK upstream tarballs and move them to $BUILD/
  export BUILD=b147
@@ -29,6 +33,7 @@ Pre-requisites:
    sh autogen.sh && ./configure --enable-jamvm
    make download
  )
+ 
  mv icedtea7/*.tar.gz icedtea7/drops $BUILD/
  (
    cd icedtea7/
@@ -39,7 +44,11 @@ Pre-requisites:
  sh openjdk7/generate-dfsg-zip.sh $BUILD/jdk.tar.gz
  sh openjdk7/generate-dfsg-zip.sh $BUILD/langtools.tar.gz
 
-4) Generate "pristine directory" and "pristine+debian directory"
+4) Check tarballs' name and version (for original directory name)
+   in openjdk7/generate-debian-orig.sh and package version in
+   openjdk7/changelog
+
+5) Generate "orig" directory and "orig+debian" directory
  sh openjdk7/generate-debian-orig.sh
 
 Support for DEB_BUILD_OPTIONS
