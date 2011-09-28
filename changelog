@@ -1,3 +1,11 @@
+openjdk-7 (7~b147-2.0~pre6-2) UNRELEASED; urgency=low
+
+  * d/rules: Fix java.policy to include jre/lib/ext/* files (instead of
+    non-existant ext/*). It'll restore privilegied access from sunpkcs11.jar
+    to sun.* code.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Thu, 29 Sep 2011 00:12:30 +0200
+
 openjdk-7 (7~b147-2.0~pre6-1) unstable; urgency=low
 
   * Update to IcedTea7 (20110928).

@@ -1589,10 +1589,10 @@ endif
 	    -e '        permission java.security.AllPermission;\' \
 	    -e '};\' \
 	    -e '\' \
-	    -e 'grant codeBase "file:/$(basedir)/ext/*" {\' \
+	    -e 'grant codeBase "file:/$(basedir)/jre/lib/ext/*" {\' \
 	    -e '        permission java.security.AllPermission;\' \
 	    -e '};\' \
-	    $(if $(DEB_HOST_MULTIARCH),-e 'grant codeBase "file:/$(commonbasedir)/ext/*" {\' \
+	    $(if $(DEB_HOST_MULTIARCH),-e 'grant codeBase "file:/$(commonbasedir)/jre/lib/ext/*" {\' \
 	    -e '        permission java.security.AllPermission;\' \
 	    -e '};\') \
 	    -e '\' \
