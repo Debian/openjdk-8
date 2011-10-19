@@ -1,3 +1,9 @@
+openjdk-7 (7~b147-2.0-1) unstable; urgency=low
+
+  * New upstream IcedTea7 release.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 01 Oct 2011 10:53:15 +0200
+
 openjdk-7 (7~b147-2.0~pre6-2) unstable; urgency=low
 
   * d/rules: Fix java.policy to include jre/lib/ext/* files (instead of

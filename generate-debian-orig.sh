@@ -3,12 +3,12 @@
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools-dfsg.tar.gz openjdk.tar.gz"
 jamvmtb=jamvm-310c491ddc14e92a6ffff27030a1a1821e6395a8.tar.gz
 tarballdir=b147
-version=7~b147-2.0~pre6
+version=7~b147-2.0
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
-icedtea_checkout=icedtea7
+icedtea_checkout=icedtea-2.0
 debian_checkout=openjdk7
 
 if [ -d $pkgdir ]; then
@@ -38,7 +38,6 @@ else
         for i in $tarballs; do
             cp -p $tarballdir/$i $pkgdir.orig/
         done
-        cp -a $tarballdir/drops $pkgdir.orig/
         cp -p $tarballdir/$jamvmtb $pkgdir.orig/
         #cp -a $tarballdir/cacao-*.tar.* $pkgdir.orig/
       ;;

@@ -1,22 +1,13 @@
---- Makefile.am
-+++ Makefile.am
-@@ -1332,6 +1332,7 @@
- 	set -e ; \
- 	if test "x$(NEED_JAXWS_SRC)" = "xtrue"; then \
- 	  (cd openjdk/jaxws ; \
-+	   JAVA_HOME=$(SYSTEM_JDK_DIR) \
- 	   $(ANT) -Ddrops.dir=$(abs_top_builddir)/drops \
- 	   -Doutput.dir=$(BUILD_OUTPUT_DIR)/jaxws \
- 	   source ; ) \
-@@ -1342,6 +1343,7 @@
- clean-extract-jaxws:
- 	if [ -d $(BUILD_OUTPUT_DIR)/jaxws ] ; then \
- 	  (cd openjdk/jaxws ; \
-+	   JAVA_HOME=$(SYSTEM_JDK_DIR) \
- 	   $(ANT) -Doutput.dir=$(BUILD_OUTPUT_DIR)/jaxws clobber ; \
- 	   cd ../../); \
-         fi
-@@ -2026,15 +2028,15 @@
+--- nss.cfg.in
++++ nss.cfg.in
+@@ -1,4 +1,3 @@
+ name = NSS
+-nssLibraryDirectory = @NSS_LIBDIR@
+ nssDbMode = noDb
+ attributes = compatibility
+--- Makefile.am.orig	2011-10-05 21:30:28.000000000 +0200
++++ Makefile.am	2011-10-05 21:31:01.000000000 +0200
+@@ -1841,15 +1841,15 @@
  stamps/pulse-java-headers.stamp: stamps/pulse-java-class.stamp
  	mkdir -p $(PULSE_JAVA_NATIVE_BUILDDIR)
  	$(BOOT_DIR)/bin/javah -d $(PULSE_JAVA_NATIVE_BUILDDIR) -classpath $(PULSE_JAVA_CLASS_DIR) \
@@ -37,10 +28,3 @@
  	mkdir -p stamps
  	touch $@
  
---- nss.cfg.in
-+++ nss.cfg.in
-@@ -1,4 +1,3 @@
- name = NSS
--nssLibraryDirectory = @NSS_LIBDIR@
- nssDbMode = noDb
- attributes = compatibility

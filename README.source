@@ -29,14 +29,14 @@ Pre-requisites:
  export BUILD=b147
  mkdir -p $BUILD/
  (
-   cd icedtea7/
+   cd icedtea-2.0/
    sh autogen.sh && ./configure --enable-jamvm
    make download
  )
  
- mv icedtea7/*.tar.gz icedtea7/drops $BUILD/
+ mv icedtea-2.0/*.tar.gz $BUILD/
  (
-   cd icedtea7/
+   cd icedtea-2.0/
    make distclean
  )
 
