@@ -189,7 +189,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
   endif
 else ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_openjdk_archs)))
   STAGE1_JAVA = openjdk
-  STAGE1_HOME = $(firstword $(wildcard /usr/lib/jvm/java-6-openjdk-$(DEB_HOST_ARCH) /usr/lib/jvm/java-1.6.0-openjdk))
+  STAGE1_HOME = $(firstword $(wildcard /usr/lib/jvm/java-6-openjdk-$(DEB_HOST_ARCH) /usr/lib/jvm/java-6-openjdk))
 else ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_cacao_archs)))
   STAGE1_JAVA = cacao
   STAGE1_HOME = /usr/lib/jvm/java-6-cacao
@@ -891,6 +891,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@altzero_archs@/$(altzero_archs)/g' \
 	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
 	      -e 's,@pkg_sversion@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${source:Version}),g' \
+	      -e 's/@op@/$(if $(filter Debian,$(distribution)),=,>=)/g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/control.in \
 	    $(if $(cacao_archs), debian/control.cacao-jre) \
@@ -1670,6 +1671,10 @@ endif
 	( \
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jdk); \
 	) > $(d_jdk).links
+# doesn't work, no package dependency
+#ifneq (,$(DEB_HOST_MULTIARCH))
+#	  echo '$(commonbasedir)/src.zip $(basedir)/src.zip' >> $(d_jdk).links
+#endif
 
 	: # create docdir symlinks for $(p_lib)
 	( \

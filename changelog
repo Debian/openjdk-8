@@ -20,6 +20,11 @@ openjdk-7 (7~b147-2.0-1) unstable; urgency=low
     - S7096936, CVE-2011-3560: missing checkSetFactory calls in
       HttpsURLConnection.
 
+  [ Matthias Klose ]
+  * Merge debian packaging r501 from openjdk-6:
+    - Tighten inter-package dependencies for Debian builds. Closes: #641240.
+  * Build-depend on wdiff.
+
  -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 01 Oct 2011 10:53:15 +0200
 
 openjdk-7 (7~b147-2.0~pre6-2) unstable; urgency=low

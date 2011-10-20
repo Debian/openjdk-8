@@ -3,7 +3,7 @@ Section: java
 Priority: optional
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
 Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>, Damien Raude-Morvan <drazzib@debian.org>
-Build-Depends: debhelper (>= 5), m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, @bd_fastjar@ @bd_compress@ @bd_autotools@ @bd_ant@ @bd_cacao@ @bd_jamvm@ @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_shark@ @bd_syslibs@ @bd_pulsejava@ @bd_nss@ @bd_systemtap@ @bd_mauve@ @bd_xvfb@
+Build-Depends: debhelper (>= 5), m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, wdiff, @bd_fastjar@ @bd_compress@ @bd_autotools@ @bd_ant@ @bd_cacao@ @bd_jamvm@ @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_shark@ @bd_syslibs@ @bd_pulsejava@ @bd_nss@ @bd_systemtap@ @bd_mauve@ @bd_xvfb@
 Standards-Version: 3.9.2
 Homepage: http://openjdk.java.net/
 Vcs-Bzr: http://bazaar.launchpad.net/~openjdk/openjdk/openjdk7
@@ -13,7 +13,7 @@ Package: @basename@-jdk
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre (>= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre (@op@ @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
 Recommends: libxt-dev
 Suggests: @basename@-demo, @basename@-source, visualvm
 Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk, java7-jdk, java-compiler
@@ -28,7 +28,7 @@ Package: @basename@-jre-headless
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}, ${multiarch:Depends}
-Depends: @basename@-jre-lib (>= @pkg_sversion@), ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre-lib (@op@ @pkg_sversion@), ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenjl:Recommends}, ${cacao:Recommends}, ${jamvm:Recommends}
 Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, java7-runtime-headless, ${defaultvm:Provides}, ${jvm:Provides}
@@ -44,7 +44,7 @@ Package: @basename@-jre
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre-headless (>= @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
+Depends: @basename@-jre-headless (@op@ @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
 Recommends: ${dlopenjre:Recommends}, @core_fonts@
 Suggests: icedtea6-plugin, ${pkg:pulseaudio}
 Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4)
@@ -72,7 +72,7 @@ Architecture: any
 Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre (>= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre (@op@ @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
 Description: Java runtime based on OpenJDK (demos and examples)
  OpenJDK Java runtime
  .
