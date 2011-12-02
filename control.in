@@ -58,6 +58,7 @@ Description: OpenJDK Java runtime, using ${vm:Name}
 
 Package: @basename@-jre-lib
 Architecture: @lib_arch@
+Multi-Arch: foreign
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (>= ${base:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
