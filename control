@@ -84,7 +84,7 @@ Package: openjdk-7-source
 Architecture: all
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-7-jre (>= ${source:Version}), openjdk-7-jdk (>= ${binary:Version}), ${misc:Depends}
+Depends: openjdk-7-jre (= ${source:Version}), openjdk-7-jdk (>= ${binary:Version}), ${misc:Depends}
 Description: OpenJDK Development Kit (JDK) source files
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.

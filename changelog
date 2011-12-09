@@ -1,8 +1,17 @@
 openjdk-7 (7~b147-2.0-2) UNRELEASED; urgency=low
 
+  [ Matthias Klose ]
   * openjdk-7-jre-lib: Mark as Multi-Arch: foreign.
 
- -- Matthias Klose <doko@ubuntu.com>  Fri, 02 Dec 2011 14:51:39 +0100
+  [ Damien Raude-Morvan ]
+  * Merge r501-504 from openjdk6:
+     - Fix plugin name in jinfo file.
+     - Fix build flags for cppInterpreter_arm.o.
+  * Make symbolic links to src.zip on /usr/lib/jvm/java-7-openjdk-amd64
+    like openjdk-6-jdk (Closes: #649618).
+  * Pass -n to gzip when compressing manpages to be Multi-Arch: same safe.
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Fri, 09 Dec 2011 19:51:51 +0100
 
 openjdk-7 (7~b147-2.0-1) unstable; urgency=low
 

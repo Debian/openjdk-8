@@ -129,7 +129,7 @@ else ifneq (,$(filter $(distrel),lenny))
 endif
 
 ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
-  cacao_archs = alpha amd64 armel i386 lpia powerpc m68k mips mipsel s390
+  cacao_archs = alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
 endif
 # Cacao FTBFS with b129 : http://server.complang.tuwien.ac.at/cgi-bin/bugzilla/show_bug.cgi?id=154
 cacao_archs =
@@ -253,6 +253,7 @@ else
 # GCJ_SUFFIX = -4.6
 endif
 
+ifneq (,$(filter $(DEB_HOST_ARCH), armel armhf))
 ifeq ($(distribution),Ubuntu)
   ifneq (,$(filter $(distrel),jaunty))
     OPT_CFLAGS/cppInterpreter_arm.o = -O2 -falign-functions=32 -falign-loops=8 -g0
@@ -263,6 +264,7 @@ else
   OPT_CFLAGS/cppInterpreter_arm.o = -O2 -falign-functions=32 -falign-loops=8 -g0
 endif
 export OPT_CFLAGS/cppInterpreter_arm.o
+endif
 
 ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
   with_pulse = yes
@@ -1378,7 +1380,7 @@ endif
 
 	: # compress manpages
 	find $(d)/$(basedir)/man $(d)/$(basedir)/jre/man -type f ! -type l \
-	  | xargs gzip -9v
+	  | xargs gzip -9v -n
 
 	: # replace common files in jdk and jre by symlinks
 	@cd $(d)/$(basedir); \
@@ -1672,9 +1674,9 @@ endif
 	  echo usr/share/doc/$(p_jre) usr/share/doc/$(p_jdk); \
 	) > $(d_jdk).links
 # doesn't work, no package dependency
-#ifneq (,$(DEB_HOST_MULTIARCH))
-#	  echo '$(commonbasedir)/src.zip $(basedir)/src.zip' >> $(d_jdk).links
-#endif
+ifneq (,$(DEB_HOST_MULTIARCH))
+	  echo '$(commonbasedir)/src.zip $(basedir)/src.zip' >> $(d_jdk).links
+endif
 
 	: # create docdir symlinks for $(p_lib)
 	( \
@@ -1744,7 +1746,7 @@ endif
 	    echo "jdk $$i /$(basedir)/bin/$$i"; \
 	  done; \
 	  for d in $(browser_plugin_dirs); do \
-	    echo "plugin $$b-javaplugin.so /$(basedir)/jre/lib/$(archdir)/$(plugin_name)"; \
+	    echo "plugin $$d-javaplugin.so /$(basedir)/jre/lib/$(archdir)/$(plugin_name)"; \
 	  done; \
 	) > $(d_jrehl)/$(TOP)/.$(jdiralias).jinfo
 
