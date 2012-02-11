@@ -3,8 +3,70 @@ Description: hotspot makes some assumptions about size_t, depending on the archi
  the fix is to add casts to size_t, as already done in other places.
 Forwarded: http://mail.openjdk.java.net/pipermail/hotspot-dev/2011-July/004301.html
 
---- openjdk/hotspot/src/share/vm/gc_implementation/parNew/parNewGeneration.cpp~	2011-05-19 11:27:44.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/gc_implementation/parNew/parNewGeneration.cpp	2011-06-02 10:11:42.000000000 +0000
+--- openjdk/hotspot/src/share/vm/gc_implementation/concurrentMarkSweep/compactibleFreeListSpace.cpp.orig
++++ openjdk/hotspot/src/share/vm/gc_implementation/concurrentMarkSweep/compactibleFreeListSpace.cpp
+@@ -2656,7 +2656,7 @@
+   if (ResizeOldPLAB && CMSOldPLABResizeQuicker) {
+     size_t multiple = _num_blocks[word_sz]/(CMSOldPLABToleranceFactor*CMSOldPLABNumRefills*n_blks);
+     n_blks +=  CMSOldPLABReactivityFactor*multiple*n_blks;
+-    n_blks = MIN2(n_blks, CMSOldPLABMax);
++    n_blks = MIN2(n_blks, (size_t) CMSOldPLABMax);
+   }
+   assert(n_blks > 0, "Error");
+   _cfls->par_get_chunk_of_blocks(word_sz, n_blks, fl);
+--- openjdk/hotspot/src/share/vm/gc_implementation/g1/concurrentMark.cpp.orig
++++ openjdk/hotspot/src/share/vm/gc_implementation/g1/concurrentMark.cpp
+@@ -481,7 +481,7 @@
+   _regionStack(),
+   // _finger set in set_non_marking_state
+ 
+-  _max_task_num(MAX2(ParallelGCThreads, (size_t)1)),
++  _max_task_num(MAX2((size_t)ParallelGCThreads, (size_t)1)),
+   // _active_tasks set in set_non_marking_state
+   // _tasks set inside the constructor
+   _task_queues(new CMTaskQueueSet((int) _max_task_num)),
+@@ -586,7 +586,7 @@
+       _sleep_factor             = sleep_factor;
+       _marking_task_overhead    = marking_task_overhead;
+     } else {
+-      _parallel_marking_threads = MAX2((ParallelGCThreads + 2) / 4, (size_t)1);
++      _parallel_marking_threads = MAX2((size_t)(ParallelGCThreads + 2) / 4, (size_t)1);
+       _sleep_factor             = 0.0;
+       _marking_task_overhead    = 1.0;
+     }
+@@ -3689,7 +3689,7 @@
+   // of things to do) or totally (at the very end).
+   size_t target_size;
+   if (partially) {
+-    target_size = MIN2((size_t)_task_queue->max_elems()/3, GCDrainStackTargetSize);
++    target_size = MIN2((size_t) (_task_queue->max_elems()/3), (size_t)GCDrainStackTargetSize);
+   } else {
+     target_size = 0;
+   }
+--- openjdk/hotspot/src/share/vm/gc_implementation/g1/g1CollectedHeap.cpp.orig
++++ openjdk/hotspot/src/share/vm/gc_implementation/g1/g1CollectedHeap.cpp
+@@ -1615,7 +1615,7 @@
+ 
+   verify_region_sets_optional();
+ 
+-  size_t expand_bytes = MAX2(word_size * HeapWordSize, MinHeapDeltaBytes);
++  size_t expand_bytes = MAX2((size_t) (word_size * HeapWordSize), (size_t)MinHeapDeltaBytes);
+   ergo_verbose1(ErgoHeapSizing,
+                 "attempt heap expansion",
+                 ergo_format_reason("allocation request failed")
+--- openjdk/hotspot/src/share/vm/gc_implementation/g1/heapRegionRemSet.cpp.orig
++++ openjdk/hotspot/src/share/vm/gc_implementation/g1/heapRegionRemSet.cpp
+@@ -1083,7 +1083,7 @@
+ // This can be done by either mutator threads together with the
+ // concurrent refinement threads or GC threads.
+ int HeapRegionRemSet::num_par_rem_sets() {
+-  return (int)MAX2(DirtyCardQueueSet::num_par_ids() + ConcurrentG1Refine::thread_num(), ParallelGCThreads);
++  return (int)MAX2((uintx)DirtyCardQueueSet::num_par_ids() + ConcurrentG1Refine::thread_num(), ParallelGCThreads);
+ }
+ 
+ HeapRegionRemSet::HeapRegionRemSet(G1BlockOffsetSharedArray* bosa,
+--- openjdk/hotspot/src/share/vm/gc_implementation/parNew/parNewGeneration.cpp.orig
++++ openjdk/hotspot/src/share/vm/gc_implementation/parNew/parNewGeneration.cpp
 @@ -188,7 +188,7 @@
    const size_t num_overflow_elems = of_stack->size();
    const size_t space_available = queue->max_elems() - queue->size();
@@ -14,8 +76,8 @@ Forwarded: http://mail.openjdk.java.net/pipermail/hotspot-dev/2011-July/004301.h
                                       num_overflow_elems);
    // Transfer the most recent num_take_elems from the overflow
    // stack to our work queue.
---- openjdk/hotspot/src/share/vm/gc_implementation/parallelScavenge/parMarkBitMap.cpp~	2011-05-19 11:27:44.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/gc_implementation/parallelScavenge/parMarkBitMap.cpp	2011-06-02 10:10:24.000000000 +0000
+--- openjdk/hotspot/src/share/vm/gc_implementation/parallelScavenge/parMarkBitMap.cpp.orig
++++ openjdk/hotspot/src/share/vm/gc_implementation/parallelScavenge/parMarkBitMap.cpp
 @@ -62,7 +62,7 @@
    if (_virtual_space != NULL && _virtual_space->expand_by(bytes)) {
      _region_start = covered_region.start();
@@ -25,101 +87,72 @@ Forwarded: http://mail.openjdk.java.net/pipermail/hotspot-dev/2011-July/004301.h
      _beg_bits.set_map(map);
      _beg_bits.set_size(bits / 2);
      _end_bits.set_map(map + words / 2);
---- openjdk/hotspot/src/share/vm/gc_implementation/g1/heapRegionRemSet.cpp~	2011-05-19 11:27:44.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/gc_implementation/g1/heapRegionRemSet.cpp	2011-06-02 09:29:49.000000000 +0000
-@@ -1078,7 +1078,7 @@
- // This can be done by either mutator threads together with the
- // concurrent refinement threads or GC threads.
- int HeapRegionRemSet::num_par_rem_sets() {
--  return (int)MAX2(DirtyCardQueueSet::num_par_ids() + ConcurrentG1Refine::thread_num(), ParallelGCThreads);
-+  return (int)MAX2((uintx)DirtyCardQueueSet::num_par_ids() + ConcurrentG1Refine::thread_num(), ParallelGCThreads);
- }
- 
- HeapRegionRemSet::HeapRegionRemSet(G1BlockOffsetSharedArray* bosa,
---- openjdk/hotspot/src/share/vm/gc_implementation/g1/concurrentMark.cpp~	2011-05-19 11:27:44.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/gc_implementation/g1/concurrentMark.cpp	2011-06-02 09:11:25.000000000 +0000
-@@ -471,7 +471,7 @@
-   _regionStack(),
-   // _finger set in set_non_marking_state
- 
--  _max_task_num(MAX2(ParallelGCThreads, (size_t)1)),
-+  _max_task_num(MAX2((size_t)ParallelGCThreads, (size_t)1)),
-   // _active_tasks set in set_non_marking_state
-   // _tasks set inside the constructor
-   _task_queues(new CMTaskQueueSet((int) _max_task_num)),
-@@ -575,7 +575,7 @@
-       _sleep_factor             = sleep_factor;
-       _marking_task_overhead    = marking_task_overhead;
+--- openjdk/hotspot/src/share/vm/memory/collectorPolicy.cpp.orig
++++ openjdk/hotspot/src/share/vm/memory/collectorPolicy.cpp
+@@ -354,7 +354,7 @@
+       // generally small compared to the NewRatio calculation.
+       _min_gen0_size = NewSize;
+       desired_new_size = NewSize;
+-      max_new_size = MAX2(max_new_size, NewSize);
++      max_new_size = MAX2(max_new_size, (size_t) NewSize);
      } else {
--      _parallel_marking_threads = MAX2((ParallelGCThreads + 2) / 4, (size_t)1);
-+      _parallel_marking_threads = MAX2((size_t)(ParallelGCThreads + 2) / 4, (size_t)1);
-       _sleep_factor             = 0.0;
-       _marking_task_overhead    = 1.0;
+       // For the case where NewSize is the default, use NewRatio
+       // to size the minimum and initial generation sizes.
+@@ -362,10 +362,10 @@
+       // NewRatio is overly large, the resulting sizes can be too
+       // small.
+       _min_gen0_size = MAX2(scale_by_NewRatio_aligned(min_heap_byte_size()),
+-                          NewSize);
++                          (size_t) NewSize);
+       desired_new_size =
+         MAX2(scale_by_NewRatio_aligned(initial_heap_byte_size()),
+-             NewSize);
++             (size_t) NewSize);
      }
-@@ -3631,7 +3631,7 @@
-   // of things to do) or totally (at the very end).
-   size_t target_size;
-   if (partially)
--    target_size = MIN2((size_t)_task_queue->max_elems()/3, GCDrainStackTargetSize);
-+    target_size = MIN2((size_t) (_task_queue->max_elems()/3), (size_t)GCDrainStackTargetSize);
-   else
-     target_size = 0;
  
---- openjdk/hotspot/src/share/vm/gc_implementation/g1/g1CollectedHeap.cpp~	2011-05-19 11:27:44.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/gc_implementation/g1/g1CollectedHeap.cpp	2011-06-02 09:26:12.000000000 +0000
-@@ -1792,7 +1792,7 @@
- 
-   verify_region_sets_optional();
- 
--  size_t expand_bytes = MAX2(word_size * HeapWordSize, MinHeapDeltaBytes);
-+  size_t expand_bytes = MAX2((size_t) (word_size * HeapWordSize), (size_t)MinHeapDeltaBytes);
-   if (expand(expand_bytes)) {
-     verify_region_sets_optional();
-     return attempt_allocation_at_safepoint(word_size,
---- openjdk/hotspot/src/share/vm/gc_implementation/concurrentMarkSweep/compactibleFreeListSpace.cpp~	2011-05-19 11:27:44.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/gc_implementation/concurrentMarkSweep/compactibleFreeListSpace.cpp	2011-06-02 09:08:04.000000000 +0000
-@@ -2647,7 +2647,7 @@
-   if (ResizeOldPLAB && CMSOldPLABResizeQuicker) {
-     size_t multiple = _num_blocks[word_sz]/(CMSOldPLABToleranceFactor*CMSOldPLABNumRefills*n_blks);
-     n_blks +=  CMSOldPLABReactivityFactor*multiple*n_blks;
--    n_blks = MIN2(n_blks, CMSOldPLABMax);
-+    n_blks = MIN2(n_blks, (size_t) CMSOldPLABMax);
+     assert(_min_gen0_size > 0, "Sanity check");
+@@ -420,14 +420,14 @@
+       // Adjust gen0 down to accomodate OldSize
+       *gen0_size_ptr = heap_size - min_gen0_size;
+       *gen0_size_ptr =
+-        MAX2((uintx)align_size_down(*gen0_size_ptr, min_alignment()),
++        MAX2((size_t)align_size_down(*gen0_size_ptr, min_alignment()),
+              min_alignment());
+       assert(*gen0_size_ptr > 0, "Min gen0 is too large");
+       result = true;
+     } else {
+       *gen1_size_ptr = heap_size - *gen0_size_ptr;
+       *gen1_size_ptr =
+-        MAX2((uintx)align_size_down(*gen1_size_ptr, min_alignment()),
++        MAX2((size_t)align_size_down(*gen1_size_ptr, min_alignment()),
+                        min_alignment());
+     }
    }
-   assert(n_blks > 0, "Error");
-   _cfls->par_get_chunk_of_blocks(word_sz, n_blks, fl);
---- openjdk/hotspot/src/share/vm/runtime/arguments.cpp~	2011-06-02 08:29:39.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/runtime/arguments.cpp	2011-06-02 08:55:15.000000000 +0000
-@@ -1170,7 +1170,7 @@
-       // so it's NewRatio x of NewSize.
-       if (FLAG_IS_DEFAULT(OldSize)) {
-         if (max_heap > NewSize) {
--          FLAG_SET_ERGO(uintx, OldSize, MIN2(NewRatio*NewSize, max_heap - NewSize));
-+          FLAG_SET_ERGO(uintx, OldSize, MIN2((size_t) (NewRatio*NewSize), (size_t) (max_heap - NewSize)));
-           if (PrintGCDetails && Verbose) {
-             // Too early to use gclog_or_tty
-             tty->print_cr("CMS ergo set OldSize: " SIZE_FORMAT, OldSize);
---- openjdk/hotspot/src/share/vm/utilities/bitMap.inline.hpp~	2011-05-19 11:27:44.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/utilities/bitMap.inline.hpp	2011-06-02 08:51:09.000000000 +0000
-@@ -52,7 +52,7 @@
+@@ -451,7 +451,7 @@
+   // for setting the gen1 maximum.
+   _max_gen1_size = max_heap_byte_size() - _max_gen0_size;
+   _max_gen1_size =
+-    MAX2((uintx)align_size_down(_max_gen1_size, min_alignment()),
++    MAX2((size_t)align_size_down(_max_gen1_size, min_alignment()),
+          min_alignment());
+   // If no explicit command line flag has been set for the
+   // gen1 size, use what is left for gen1.
+@@ -465,11 +465,11 @@
+       "gen0 has an unexpected minimum size");
+     set_min_gen1_size(min_heap_byte_size() - min_gen0_size());
+     set_min_gen1_size(
+-      MAX2((uintx)align_size_down(_min_gen1_size, min_alignment()),
++      MAX2((size_t)align_size_down(_min_gen1_size, min_alignment()),
+            min_alignment()));
+     set_initial_gen1_size(initial_heap_byte_size() - initial_gen0_size());
+     set_initial_gen1_size(
+-      MAX2((uintx)align_size_down(_initial_gen1_size, min_alignment()),
++      MAX2((size_t)align_size_down(_initial_gen1_size, min_alignment()),
+            min_alignment()));
  
- inline bool BitMap::par_set_bit(idx_t bit) {
-   verify_index(bit);
--  volatile idx_t* const addr = word_addr(bit);
-+  volatile idx_t* const addr = (idx_t *)word_addr(bit);
-   const idx_t mask = bit_mask(bit);
-   idx_t old_val = *addr;
- 
-@@ -73,7 +73,7 @@
- 
- inline bool BitMap::par_clear_bit(idx_t bit) {
-   verify_index(bit);
--  volatile idx_t* const addr = word_addr(bit);
-+  volatile idx_t* const addr = (idx_t *)word_addr(bit);
-   const idx_t mask = ~bit_mask(bit);
-   idx_t old_val = *addr;
- 
---- openjdk/hotspot/src/share/vm/oops/objArrayKlass.inline.hpp~	2011-05-19 11:27:44.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/oops/objArrayKlass.inline.hpp	2011-06-02 09:35:36.000000000 +0000
+   } else {
+--- openjdk/hotspot/src/share/vm/oops/objArrayKlass.inline.hpp.orig
++++ openjdk/hotspot/src/share/vm/oops/objArrayKlass.inline.hpp
 @@ -46,7 +46,7 @@
    const size_t beg_index = size_t(index);
    assert(beg_index < len || len == 0, "index too large");
@@ -138,68 +171,34 @@ Forwarded: http://mail.openjdk.java.net/pipermail/hotspot-dev/2011-July/004301.h
    const size_t end_index = beg_index + stride;
    T* const base = (T*)a->base();
    T* const beg = base + beg_index;
---- openjdk/hotspot/src/share/vm/memory/collectorPolicy.cpp~	2011-06-02 08:29:39.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/memory/collectorPolicy.cpp	2011-06-02 09:06:17.000000000 +0000
-@@ -356,7 +356,7 @@
-       // generally small compared to the NewRatio calculation.
-       _min_gen0_size = NewSize;
-       desired_new_size = NewSize;
--      max_new_size = MAX2(max_new_size, NewSize);
-+      max_new_size = MAX2(max_new_size, (size_t) NewSize);
-     } else {
-       // For the case where NewSize is the default, use NewRatio
-       // to size the minimum and initial generation sizes.
-@@ -364,10 +364,10 @@
-       // NewRatio is overly large, the resulting sizes can be too
-       // small.
-       _min_gen0_size = MAX2(scale_by_NewRatio_aligned(min_heap_byte_size()),
--                          NewSize);
-+                          (size_t) NewSize);
-       desired_new_size =
-         MAX2(scale_by_NewRatio_aligned(initial_heap_byte_size()),
--             NewSize);
-+             (size_t) NewSize);
-     }
+--- openjdk/hotspot/src/share/vm/runtime/arguments.cpp.orig
++++ openjdk/hotspot/src/share/vm/runtime/arguments.cpp
+@@ -1179,7 +1179,7 @@
+       // so it's NewRatio x of NewSize.
+       if (FLAG_IS_DEFAULT(OldSize)) {
+         if (max_heap > NewSize) {
+-          FLAG_SET_ERGO(uintx, OldSize, MIN2(NewRatio*NewSize, max_heap - NewSize));
++          FLAG_SET_ERGO(uintx, OldSize, MIN2((size_t) (NewRatio*NewSize), (size_t) (max_heap - NewSize)));
+           if (PrintGCDetails && Verbose) {
+             // Too early to use gclog_or_tty
+             tty->print_cr("CMS ergo set OldSize: " SIZE_FORMAT, OldSize);
+--- openjdk/hotspot/src/share/vm/utilities/bitMap.inline.hpp.orig
++++ openjdk/hotspot/src/share/vm/utilities/bitMap.inline.hpp
+@@ -52,7 +52,7 @@
  
-     assert(_min_gen0_size > 0, "Sanity check");
-@@ -422,14 +422,14 @@
-       // Adjust gen0 down to accomodate OldSize
-       *gen0_size_ptr = heap_size - min_gen0_size;
-       *gen0_size_ptr =
--        MAX2((uintx)align_size_down(*gen0_size_ptr, min_alignment()),
-+        MAX2((size_t)align_size_down(*gen0_size_ptr, min_alignment()),
-              min_alignment());
-       assert(*gen0_size_ptr > 0, "Min gen0 is too large");
-       result = true;
-     } else {
-       *gen1_size_ptr = heap_size - *gen0_size_ptr;
-       *gen1_size_ptr =
--        MAX2((uintx)align_size_down(*gen1_size_ptr, min_alignment()),
-+        MAX2((size_t)align_size_down(*gen1_size_ptr, min_alignment()),
-                        min_alignment());
-     }
-   }
-@@ -453,7 +453,7 @@
-   // for setting the gen1 maximum.
-   _max_gen1_size = max_heap_byte_size() - _max_gen0_size;
-   _max_gen1_size =
--    MAX2((uintx)align_size_down(_max_gen1_size, min_alignment()),
-+    MAX2((size_t)align_size_down(_max_gen1_size, min_alignment()),
-          min_alignment());
-   // If no explicit command line flag has been set for the
-   // gen1 size, use what is left for gen1.
-@@ -467,11 +467,11 @@
-       "gen0 has an unexpected minimum size");
-     set_min_gen1_size(min_heap_byte_size() - min_gen0_size());
-     set_min_gen1_size(
--      MAX2((uintx)align_size_down(_min_gen1_size, min_alignment()),
-+      MAX2((size_t)align_size_down(_min_gen1_size, min_alignment()),
-            min_alignment()));
-     set_initial_gen1_size(initial_heap_byte_size() - initial_gen0_size());
-     set_initial_gen1_size(
--      MAX2((uintx)align_size_down(_initial_gen1_size, min_alignment()),
-+      MAX2((size_t)align_size_down(_initial_gen1_size, min_alignment()),
-            min_alignment()));
+ inline bool BitMap::par_set_bit(idx_t bit) {
+   verify_index(bit);
+-  volatile idx_t* const addr = word_addr(bit);
++  volatile idx_t* const addr = (idx_t *)word_addr(bit);
+   const idx_t mask = bit_mask(bit);
+   idx_t old_val = *addr;
  
-   } else {
-
+@@ -73,7 +73,7 @@
+ 
+ inline bool BitMap::par_clear_bit(idx_t bit) {
+   verify_index(bit);
+-  volatile idx_t* const addr = word_addr(bit);
++  volatile idx_t* const addr = (idx_t *)word_addr(bit);
+   const idx_t mask = ~bit_mask(bit);
+   idx_t old_val = *addr;
+ 

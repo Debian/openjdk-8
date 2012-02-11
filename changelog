@@ -1,4 +1,6 @@
-openjdk-7 (7~b147-2.0-2) UNRELEASED; urgency=low
+openjdk-7 (7~u2-2.1~pre1-1) UNRELEASED; urgency=low
+
+  * Update to latest icedtea7 (20120210).
 
   [ Matthias Klose ]
   * openjdk-7-jre-lib: Mark as Multi-Arch: foreign.
@@ -9,9 +11,14 @@ openjdk-7 (7~b147-2.0-2) UNRELEASED; urgency=low
      - Fix build flags for cppInterpreter_arm.o.
   * Make symbolic links to src.zip on /usr/lib/jvm/java-7-openjdk-amd64
     like openjdk-6-jdk (Closes: #649618).
-  * Pass -n to gzip when compressing manpages to be Multi-Arch: same safe.
+  * d/rules: Pass -n to gzip when compressing manpages to be Multi-Arch: same safe.
+  * d/rules: Add build-arch/build-indep target.
+  * d/rules: Re-enable Cacao VM.
+  * d/{rules,control}: Only rhino 1.7R3 is supported by openjdk, update B-D.
+  * d/patches/hotspot-s390.diff: Update for latest Hotspot.
+  * d/patches/icedtea-patch.diff: Move nssLibraryDirectory handling to d/rules.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Fri, 09 Dec 2011 19:51:51 +0100
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 11 Feb 2012 13:55:02 +0100
 
 openjdk-7 (7~b147-2.0-1) unstable; urgency=low
 

@@ -131,9 +131,6 @@ endif
 ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
   cacao_archs = alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
 endif
-# Cacao FTBFS with b129 : http://server.complang.tuwien.ac.at/cgi-bin/bugzilla/show_bug.cgi?id=154
-cacao_archs =
-
 ifeq (,$(filter $(distrel),squeeze lenny karmic hardy dapper))
   # Keep this in sync with Architecture: of icedtea-7-jre-jamvm
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel kfreebsd-i386 kfreebsd-amd64
@@ -637,12 +634,7 @@ bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, \
 	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2-dev,libcups2-dev), \
 	libasound2-dev, liblcms$(lcms_version)-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, \
-	libxinerama-dev, xsltproc,
-ifneq (,$(strip $(foreach i, dapper hardy intrepid jaunty,$(findstring $(i),$(PKGVERSION)))))
-  bd_openjdk += rhino1.7,
-else
-  bd_openjdk += rhino (>= 1.7R3~),
-endif
+	libxinerama-dev, xsltproc, librhino-java (>= 1.7R3~),
 pkg_ffidev = $(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),dapper hardy),libffi4-dev,libffi-dev),libffi-dev)
 
 bd_zero = \
@@ -978,6 +970,10 @@ endif
 	mkdir -p build
 	chmod +x configure
 	cd build && $(EXTRA_BUILD_ENV) ../configure $(CONFIGURE_ARGS)
+
+	grep -v '^nssLibraryDirectory' build/nss.cfg > build/nss.cfg.new
+	mv -f build/nss.cfg.new build/nss.cfg
+
 	touch $@
 
 unpack: stamps/unpack
@@ -1085,6 +1081,8 @@ pre-build:
 #	false
 #endif
 
+build-arch: build
+build-indep: build
 build: pre-build $(build_stamps)
 	if [ -f buildwatch.pid ]; then \
 	  pid=$$(cat buildwatch.pid); \

@@ -1,14 +1,15 @@
 #!/bin/sh
 
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools-dfsg.tar.gz openjdk.tar.gz"
-jamvmtb=jamvm-310c491ddc14e92a6ffff27030a1a1821e6395a8.tar.gz
-tarballdir=b147
-version=7~b147-2.0
+jamvmtb=jamvm-4617da717ecb05654ea5bb9572338061106a414d.tar.gz
+cacaotb=cacao-a567bcb7f589.tar.gz
+tarballdir=7u2
+version=7~u2-2.1~pre1
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
-icedtea_checkout=icedtea-2.0
+icedtea_checkout=icedtea7
 debian_checkout=openjdk7
 
 if [ -d $pkgdir ]; then
@@ -38,8 +39,8 @@ else
         for i in $tarballs; do
             cp -p $tarballdir/$i $pkgdir.orig/
         done
+        cp -p $tarballdir/$cacaotb $pkgdir.orig/
         cp -p $tarballdir/$jamvmtb $pkgdir.orig/
-        #cp -a $tarballdir/cacao-*.tar.* $pkgdir.orig/
       ;;
     esac
     tar -c -f - -C $icedtea_checkout . | tar -x -f - -C $pkgdir.orig
@@ -58,6 +59,7 @@ rm -rf $pkgdir/debian/.bzr
 (
   cd $pkgdir
   debian/update-shasum.sh
+  debian/update-hgrev.sh
   patch -p0 < debian/patches/icedtea-patch.diff
   sh autogen.sh
   rm -rf autom4te.cache

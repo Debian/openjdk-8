@@ -26,17 +26,17 @@ Pre-requisites:
  (cd icedtea7/; hg pull -u)
 
 2) Download OpenJDK upstream tarballs and move them to $BUILD/
- export BUILD=b147
+ export BUILD=7u2
  mkdir -p $BUILD/
  (
-   cd icedtea-2.0/
-   sh autogen.sh && ./configure --enable-jamvm
+   cd icedtea7/
+   sh autogen.sh && ./configure --enable-jamvm --enable-cacao
    make download
  )
  
- mv icedtea-2.0/*.tar.gz $BUILD/
+ mv icedtea7/*.tar.gz $BUILD/
  (
-   cd icedtea-2.0/
+   cd icedtea7/
    make distclean
  )
 
