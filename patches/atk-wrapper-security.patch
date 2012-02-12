@@ -1,0 +1,11 @@
+--- openjdk/jdk/src/share/lib/security/java.security~	2009-08-05 18:50:24.000000000 +0200
++++ openjdk/jdk/src/share/lib/security/java.security	2009-08-05 18:53:51.000000000 +0200
+@@ -127,7 +127,7 @@
+ # passed to checkPackageAccess unless the
+ # corresponding RuntimePermission ("accessClassInPackage."+package) has
+ # been granted.
+-package.access=sun.,com.sun.xml.internal.ws.,com.sun.xml.internal.bind.,com.sun.imageio.
++package.access=sun.,com.sun.xml.internal.ws.,com.sun.xml.internal.bind.,com.sun.imageio.,org.GNOME.Accessibility.
+ 
+ #
+ # List of comma-separated packages that start with or equal this string

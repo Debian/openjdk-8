@@ -1,0 +1,17 @@
+Author: Xerxes Rånby xerxes at zafena.se
+From: http://mail.openjdk.java.net/pipermail/zero-dev/2011-August/000399.html
+
+--- openjdk/hotspot/src/share/vm/shark/llvmHeaders.hpp.orig
++++ openjdk/hotspot/src/share/vm/shark/llvmHeaders.hpp
+@@ -51,7 +51,11 @@
+ #else
+ #include <llvm/System/Threading.h>
+ #endif
++#if SHARK_LLVM_VERSION >= 30
++#include <llvm/Support/TargetSelect.h>
++#else
+ #include <llvm/Target/TargetSelect.h>
++#endif
+ #include <llvm/Type.h>
+ #include <llvm/ExecutionEngine/JITMemoryManager.h>
+ #include <llvm/Support/CommandLine.h>

@@ -20,8 +20,13 @@ configure)
     if [ -z "$2" ]; then
 	update_alternatives=y
     fi
-    if [ -n "$multiarch" ] && [ -n "$2" ] && dpkg --compare-versions "$2" lt 7~b147-2.0~pre3-3~; then
-	update_alternatives=y
+    if [ -n "$multiarch" ] && [ -n "$2" ]; then
+	for i in $jre_tools; do
+	    if [ -z `update-alternatives --list $i | grep "^$basedir/"` ]; then
+		update_alternatives=y
+		break
+	    fi
+	done
     fi
 
     if [ "$update_alternatives" = y ]; then

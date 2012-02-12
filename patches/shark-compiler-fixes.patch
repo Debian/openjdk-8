@@ -1,0 +1,12 @@
+Author: Damien Raude-Morvan
+
+--- openjdk/hotspot/src/share/vm/shark/sharkCompiler.cpp.orig
++++ openjdk/hotspot/src/share/vm/shark/sharkCompiler.cpp
+@@ -216,7 +216,6 @@
+                        &inc_table,
+                        this,
+                        env->comp_level(),
+-                       false,
+                        false);
+ }
+ 

@@ -8,8 +8,6 @@ Description: ZeroVM fix under IA32. Actual code in
 Author: Damien Raude-Morvan <drazzib@debian.org>
 Last-Update: 2011-08-02
 Forwarded: http://mail.openjdk.java.net/pipermail/zero-dev/2011-August/000398.html
-Index: openjdk/hotspot/src/os_cpu/linux_zero/vm/os_linux_zero.cpp
-===================================================================
 --- openjdk/hotspot/src/os_cpu/linux_zero/vm/os_linux_zero.cpp.orig
 +++ openjdk/hotspot/src/os_cpu/linux_zero/vm/os_linux_zero.cpp
 @@ -265,11 +265,12 @@

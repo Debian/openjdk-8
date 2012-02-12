@@ -1,0 +1,50 @@
+Author: Matthias Klose doko
+From: 
+
+--- openjdk/hotspot/src/share/vm/shark/sharkBuilder.cpp.orig
++++ openjdk/hotspot/src/share/vm/shark/sharkBuilder.cpp
+@@ -369,7 +369,7 @@
+ // acceptable to mimic this approach if your platform cannot
+ // perform these operations without delegating to a function.
+ 
+-#ifdef ARM
++#if defined(ARM) || SHARK_LLVM_VERSION >= 30
+ static jint zero_cmpxchg_int(volatile jint *ptr, jint oldval, jint newval) {
+   return Atomic::cmpxchg(newval, ptr, oldval);
+ }
+@@ -377,7 +377,7 @@
+ 
+ Value* SharkBuilder::cmpxchg_int() {
+   return make_function(
+-#ifdef ARM
++#if defined(ARM) || SHARK_LLVM_VERSION >= 30
+     (address) zero_cmpxchg_int,
+ #else
+     "llvm.atomic.cmp.swap.i32.p0i32",
+@@ -385,7 +385,7 @@
+     "Iii", "i");
+ }
+ 
+-#ifdef ARM
++#if defined(ARM) || SHARK_LLVM_VERSION >= 30
+ static intptr_t zero_cmpxchg_ptr(volatile intptr_t* ptr,
+                                  intptr_t           oldval,
+                                  intptr_t           newval) {
+@@ -395,7 +395,7 @@
+ 
+ Value* SharkBuilder::cmpxchg_ptr() {
+   return make_function(
+-#ifdef ARM
++#if defined(ARM) || SHARK_LLVM_VERSION >= 30
+     (address) zero_cmpxchg_ptr,
+ #else
+     "llvm.atomic.cmp.swap.i" LP64_ONLY("64") NOT_LP64("32") ".p0i" LP64_ONLY("64") NOT_LP64("32"),
+@@ -409,7 +409,7 @@
+ 
+ Value* SharkBuilder::memory_barrier() {
+   return make_function(
+-#ifdef ARM
++#if defined(ARM) || SHARK_LLVM_VERSION >= 30
+     (address) 0xffff0fa0, // __kernel_dmb
+ #else
+     "llvm.memory.barrier",

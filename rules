@@ -32,7 +32,7 @@ endif
 
 multiarch_dir = /$(DEB_HOST_MULTIARCH)
 ifneq (,$(DEB_HOST_MULTIARCH))
-  ifneq (,$(filter $(distrel),natty))
+  ifneq (,$(filter $(distrel),natty oneiric))
     DEB_HOST_MULTIARCH =
     multiarch_dir =
   endif
@@ -42,6 +42,8 @@ hotspot_archs	= amd64 i386 lpia sparc sparc64 kfreebsd-amd64 kfreebsd-i386
 # requires llvm; llvm in jaunty is recent enough, but in universe
 ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
   shark_archs	= amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386
+  # Shark build but just crash
+  shark_archs   =
 endif
 no_bootstrap_archs = alpha armel
 
@@ -96,7 +98,9 @@ endif
 #export ALT_PARALLEL_COMPILE_JOBS = 1
 
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
+ifneq (,$(filter $(DEB_HOST_ARCH), armel powerpc))
 with_check = disabled for this upload
+endif
 with_docs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),,yes)
 ifneq (,$(findstring cacao shark, $(PKGSOURCE)))
   with_docs = disabled for cacao and shark
@@ -104,8 +108,8 @@ endif
 
 with_wgy_zenhai = $(if $(filter $(distrel),lenny gutsy feisty edgy dapper),,yes)
 
-arch_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparc64 sh4=sh s390=s390 s390x=s390x ia64=ia64
-archdir_map	:= alpha=alpha arm=arm armel=arm amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparcv9 sh4=sh s390=s390 s390x=s390x ia64=ia64
+arch_map	:= alpha=alpha arm=arm armel=arm armhf=arm amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparc64 sh4=sh s390=s390 s390x=s390x ia64=ia64
+archdir_map	:= alpha=alpha arm=arm armel=arm armhf=arm amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparcv9 sh4=sh s390=s390 s390x=s390x ia64=ia64
 
 jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH_CPU)=%, %, \
 			$(filter $(DEB_HOST_ARCH_CPU)=%, $(arch_map))))
@@ -129,15 +133,11 @@ else ifneq (,$(filter $(distrel),lenny))
 endif
 
 ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
-  cacao_archs = alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
+  cacao_archs = alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390 kfreebsd-amd64 kfreebsd-i386
 endif
-ifeq (,$(filter $(distrel),squeeze lenny karmic hardy dapper))
+ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy dapper))
   # Keep this in sync with Architecture: of icedtea-7-jre-jamvm
-  jamvm_archs = amd64 armel armhf i386 lpia mips mipsel kfreebsd-i386 kfreebsd-amd64
-endif
-ifeq ($(distribution),Debian)
-  # disable for first build
-  jamvm_archs := $(filter-out armhf, $(jamvm_archs))
+  jamvm_archs = amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
 endif
 ifeq (,$(filter $(distrel),wheezy sid squeeze lenny maverick natty maverick lucid karmic hardy dapper))
   jamvm_defaults = armel armhf
@@ -145,8 +145,9 @@ endif
 
 # requires patched llvm-2.6
 ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
-  # FIXME: armel currently doesn't work
   altshark_archs = powerpc ppc64
+  # Shark build but just crash
+  altshark_archs   =
 endif
 altzero_archs = $(filter-out sparc sparc64, $(hotspot_archs)) $(altshark_archs)
 ifneq (,$(filter $(distrel),lenny dapper hardy intrepid))
@@ -269,9 +270,13 @@ endif
 
 ifneq (,$(filter $(distrel),dapper))
   with_bridge =
-else ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy))
-  with_bridge = yes
+else ifneq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy))
+  with_bridge =
+else ifneq (,$(filter $(distrel),squeeze karmic lucid maverick natty oneiric))
+  with_bridge = bridge
   with_jni_bridge = yes
+else
+  with_bridge = atk
 endif
 
 ifeq (,$(filter $(distrel),lenny karmic jaunty intrepid hardy gutsy feisty edgy dapper))
@@ -332,7 +337,17 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \
 	debian/patches/nonreparenting-wm.diff \
-	debian/patches/accessible-toolkit.patch \
+	debian/patches/accessible-toolkit.patch
+
+ifeq ($(with_bridge),atk)
+    DISTRIBUTION_PATCHES += \
+	debian/patches/atk-wrapper-security.patch
+else ifneq (,$(with_bridge))
+    DISTRIBUTION_PATCHES += \
+	debian/patches/java-access-bridge-security.patch
+endif
+
+DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-override-redirect-compiz.patch \
 	debian/patches/zero-only-use-floating-point-if-floating-poi.patch \
 	debian/patches/icedtea-4953367.patch \
@@ -344,7 +359,9 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/hotspot-sparc-arch.diff \
 	debian/patches/sparc-trapsfix.patch \
 	debian/patches/zero-fpu-control-is-noop.diff \
-	debian/patches/zero-missing-headers.diff
+	debian/patches/zero-missing-headers.diff \
+	debian/patches/hsx23-zero.patch \
+	debian/patches/zero-disable-objcopy.diff
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -367,6 +384,17 @@ ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
 else ifeq ($(DEB_HOST_ARCH),s390)
   # GCC PR target/41327
   DISTRIBUTION_PATCHES += debian/patches/gcc-jdk-opt-O2.diff
+endif
+
+ifneq (,$(filter $(distrel),wheezy sid precise))
+  DISTRIBUTION_PATCHES += \
+	debian/patches/0-sharkllvm30-targetselect-138450.patch \
+	debian/patches/1-sharkllvm30-de-const-type-135375.patch \
+	debian/patches/2-sharkllvm30-PHI-128537-Call-ArrayRef-135265.patch \
+	debian/patches/shark-removed-intrinsics.patch \
+	debian/patches/llvm-3.0-buildfix.patch \
+	debian/patches/shark-compiler-fixes.patch
+#	debian/patches/3-sharkllvm30-MCJIT.patch
 endif
 
 ifeq ($(distribution),Ubuntu)
@@ -470,10 +498,7 @@ CONFIGURE_ARGS += \
 	--with-jaxp-src-zip=$(CURDIR)/jaxp.tar.gz \
 	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
 	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
-	--with-langtools-src-zip=$(CURDIR)/langtools-dfsg.tar.gz \
-	--with-jaxp-drop-zip=$(CURDIR)/drops/jaxp145_01.zip \
-	--with-jaf-drop-zip=$(CURDIR)/drops/jdk7-jaf-2010_08_19.zip \
-	--with-jaxws-drop-zip=$(CURDIR)/drops/jdk7-jaxws2_2_4-b03-2011_05_27.zip
+	--with-langtools-src-zip=$(CURDIR)/langtools-dfsg.tar.gz
 
 ifneq (,$(filter $(DEB_HOST_ARCH), hppa))
 CONFIGURE_ARGS += \
@@ -564,7 +589,7 @@ jre_tools_alt	= $(filter-out kinit klist ktab, $(jre_tools))
 
 all_jdk_tools	= $(filter-out javaws, $(notdir $(wildcard build/$(sdkimg)/bin/*)))
 jdk_tools	= $(filter-out $(all_jre_tools), $(all_jdk_tools))
-jdk_tools_alt	= $(filter-out java-rmi.cgi, $(jdk_tools))
+jdk_tools_alt	= $(filter-out apt java-rmi.cgi, $(jdk_tools))
 
 ifeq ($(distribution),Ubuntu)
   ifeq ($(distrel),dapper)
@@ -652,8 +677,10 @@ ifneq (,$(shark_archs))
   else
     ifneq (,$(filter $(distrel),squeeze maverick natty))
       llvm_suffix = -2.7
-    else
+    else ifneq (,$(filter $(distrel),oneirc precise))
       llvm_suffix = -2.9
+    else
+      llvm_suffix = -3.0
     endif
     bd_shark = llvm$(llvm_suffix)-dev [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
     ifneq (,$(filter $(DEB_HOST_ARCH),$(shark_archs) $(altshark_archs)))
@@ -816,7 +843,9 @@ ifneq (,$(filter-out $(hotspot_archs), $(jamvm_archs)))
   endif
 endif
 
-ifeq ($(with_bridge),yes)
+ifeq ($(with_bridge),atk)
+  control_vars += '-Vdep:bridge=libatk-wrapper-java-jni (>= 0.30.4-0ubuntu2)'
+else ifeq ($(with_bridge),yes)
   ifneq (,$(DEB_HOST_MULTIARCH))
     control_vars += '-Vdep:bridge=libaccess-bridge-java-jni (>= 1.26.2-6)'
   else ifeq ($(with_jni_bridge),yes)
@@ -1000,7 +1029,7 @@ ifeq ($(with_check),yes)
     ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha ia64 mips mipsel powerpc powerpcspe ppc64 s390 sh4))
       with_mauve_check = $(default_vm)
     endif
-    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel ia64 mips mipsel powerpc powerpcspe ppc64 s390 s390x sh4))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel armhf ia64 mips mipsel powerpc powerpcspe ppc64 s390 s390x sh4))
       with_jtreg_check = $(default_vm)
     endif
 
@@ -1009,7 +1038,7 @@ ifeq ($(with_check),yes)
         # only activate after testing; problems on s390
         with_mauve_check += cacao
       endif
-      ifneq (,$(filter $(DEB_HOST_ARCH), alpha amd64 armel i386 lpia mips mipsel powerpc powerpcspe s390))
+      ifneq (,$(filter $(DEB_HOST_ARCH), alpha amd64 armel armhf i386 lpia mips mipsel powerpc powerpcspe s390))
         # only activate after testing; hangs several tests.
         with_jtreg_check += cacao
       endif
@@ -1053,10 +1082,10 @@ ifeq ($(with_check),yes)
   endif
 endif
 
-ifneq (,$(filter $(DEB_HOST_ARCH), alpha armel ia64 mips mipsel powerpc powerpcspe ppc64 s390))
+ifneq (,$(filter $(DEB_HOST_ARCH), alpha armel armhf ia64 mips mipsel powerpc powerpcspe ppc64 s390))
   JTREG_OPTIONS = -timeout:3
 endif
-ifneq (,$(filter $(DEB_HOST_ARCH), armel))
+ifneq (,$(filter $(DEB_HOST_ARCH), armel armhf))
   JTREG_OPTIONS += -Xmx256M -vmoption:-Xmx256M
 endif
 
@@ -1222,7 +1251,7 @@ jtreg_pids = ps x --no-headers -ww -o pid,ppid,args \
 
 stamps/jtreg-check-default: stamps/build stamps/xvfb-check
 	$(MAKE) -f debian/rules jtreg-run-check VMNAME=$(default_vm) VMARGS= \
-		$(if $(filter $(default_vm),hotspot),,TEST_SUITES='hotspot langtools')
+		$(if $(filter $(default_vm),hotspot),TEST_SUITES='hotspot langtools jdk',TEST_SUITES='hotspot langtools')
 	touch $@
 
 stamps/jtreg-check-cacao: stamps/build stamps/xvfb-check
@@ -1243,7 +1272,7 @@ stamps/jtreg-check-shark: stamps/build stamps/xvfb-check
 
 stamps/jtreg-check-zero: stamps/build stamps/xvfb-check
 	$(MAKE) -f debian/rules jtreg-run-check VMNAME=zero VMARGS='-vmoption:-zero' \
-		TEST_SUITES='hotspot langtools'
+		TEST_SUITES='langtools hotspot'
 	touch $@
 
 jtreg-run-check:
@@ -1260,7 +1289,7 @@ ifneq (,$(filter $(VMNAME), $(with_jtreg_check)))
 	@echo "BEGIN jtreg"
 	if [ -f bin/my-xvfb-run ]; then \
 	  time /bin/sh bin/my-xvfb-run $(MAKE) -C build -k jtregcheck \
-		$(if $(JTREG_CHECKS),jtreg_checks="$(JTREG_CHECKS)") \
+		$(if $(TEST_SUITES),TEST_SUITES="$(TEST_SUITES)") \
 		ICEDTEA_JTREG_OPTIONS='$(VMARGS) $(JTREG_OPTIONS)' \
 		2>&1 | tee jtreg_output-$(VMNAME); \
 	else \
@@ -1274,12 +1303,20 @@ ifneq (,$(filter $(VMNAME), $(with_jtreg_check)))
 	    build/$(sdkimg)/jre/lib/security/java.security; \
 	fi
 
+#	for i in check-hotspot.log check-jdk.log check-langtools.log jtreg-summary.log; do \
+#	  if [ -f build/test/$$i ]; then \
+	    mv build/test/$$i build/test/$${i%*.log}-$(VMNAME).log; \
+#	  else \
+#	    mkdir -p build/test; \
+#	    cp jtreg_output-$(VMNAME) build/test/$${i%*.log}-$(VMNAME).log; \
+#	  fi; \
+#	done
+
 	for i in check-hotspot.log check-jdk.log check-langtools.log jtreg-summary.log; do \
 	  if [ -f build/test/$$i ]; then \
 	    mv build/test/$$i build/test/$${i%*.log}-$(VMNAME).log; \
 	  else \
 	    mkdir -p build/test; \
-	    cp jtreg_output-$(VMNAME) build/test/$${i%*.log}-$(VMNAME).log; \
 	  fi; \
 	done
 
@@ -1341,6 +1378,13 @@ debian-clean:
 	  rm -f $$f2; \
 	done
 	rm -f debian/*.install debian/*.links debian/*.debhelper.log
+
+lib_ext_dirs = common $(filter-out $(DEB_HOST_ARCH), $(sort $(foreach arch,$(arch_map),$(firstword $(subst =,$(SPACE),$(arch))))))
+ifeq ($(distribution),Ubuntu)
+  lib_ext_dirs := $(filter-out arm hppa m68k mips% powerpcspe s390% sh%, $(lib_ext_dirs))
+else
+  lib_ext_dirs := $(filter-out arm hppa lpia, $(lib_ext_dirs))
+endif
 
 install: packaging-files
 	dh_testdir
@@ -1412,7 +1456,12 @@ endif
 	  mv $(d)/$(basedir)/jre/lib/$$i.template $(d)/$(etcdir)/$$i; \
 	done
 
+ifeq ($(with_bridge),atk)
+	cp -p debian/accessibility-atk.properties \
+		$(d)/$(basedir)/jre/lib/accessibility.properties
+else
 	cp -p debian/accessibility.properties $(d)/$(basedir)/jre/lib/
+endif
 	cp -p debian/swing.properties $(d)/$(basedir)/jre/lib/
 
 ifneq (,$(pkg_certs))
@@ -1593,9 +1642,10 @@ endif
 	    -e 'grant codeBase "file:/$(basedir)/jre/lib/ext/*" {\' \
 	    -e '        permission java.security.AllPermission;\' \
 	    -e '};\' \
-	    $(if $(DEB_HOST_MULTIARCH),-e 'grant codeBase "file:/$(commonbasedir)/jre/lib/ext/*" {\' \
+	    $(if $(DEB_HOST_MULTIARCH),$(foreach i, $(lib_ext_dirs), \
+	    -e 'grant codeBase "file:/$(TOP)/java-$(shortver)-$(origin)-$(i)/jre/lib/ext/*" {\' \
 	    -e '        permission java.security.AllPermission;\' \
-	    -e '};\') \
+	    -e '};\')) \
 	    -e '\' \
 	    -e '// Comment this out if you want to give all permissions to the\' \
 	    -e '// Debian Java repository too:\' \
@@ -1616,11 +1666,14 @@ endif
 		usr/share/mime-info \
 		usr/share/pixmaps
 
+# FIXME: desktop and menu files not ready for multiarch. #658321
+ifeq (,$(DEB_HOST_MULTIARCH))
 	: # add GNOME stuff
 	cp -p debian/$(basename)-policytool.desktop \
 	      $(d_jre)/usr/share/applications/
 	cp -p debian/$(basename)-java.desktop \
 	      $(d_jre)/usr/share/applications/
+endif
 
 	for i in archive; do \
 	  cp debian/$(basename)-$$i.applications \
@@ -1686,7 +1739,13 @@ endif
 	  echo usr/share/doc/$(p_jrehl) usr/share/doc/$(p_dbg); \
 	) > $(d_dbg).links
 
-ifeq ($(with_bridge),yes)
+ifeq ($(with_bridge),atk)
+	: # create links for the atk wrapper
+	echo "usr/share/java/java-atk-wrapper.jar $(basedir)/jre/lib/ext/java-atk-wrapper.jar" \
+	    >> $(d_jre).links
+	echo "usr/lib$(multiarch_dir)/jni/libatk-wrapper.so $(basedir)/jre/lib/ext/libatk-wrapper.so" \
+	    >> $(d_jre).links
+else ifeq ($(with_bridge),yes)
 	: # create links for the gnome accessibility bridge
 	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
 	    >> $(d_jre).links
@@ -1702,20 +1761,16 @@ ifeq ($(with_tzdata),yes)
 endif
 
 	: # create links for the config files
-	find $(d_jrehl)/$(etcdir) -type f ! -name jvm.cfg ! -name nss.cfg \
+	find $(d_jrehl)/$(etcdir) -type f ! -name jvm.cfg \
 	    -printf "$(etcdir)/%P $(basedir)/jre/lib/%P\n" >> $(d_jrehl).links
 ifneq (,$(DEB_HOST_MULTIARCH))
-	mv $(d_jrehl)/$(etcdir)/security/nss.cfg \
-	  $(d_jrehl)/$(etcdir)/security/nss-$(DEB_HOST_ARCH).cfg
 	mv $(d_jrehl)/$(etcdir)/jvm.cfg \
 	  $(d_jrehl)/$(etcdir)/jvm-$(DEB_HOST_ARCH).cfg
 	( \
-	  echo "$(etcdir)/security/nss-$(DEB_HOST_ARCH).cfg $(basedir)/jre/lib/security/nss.cfg"; \
 	  echo "$(etcdir)/jvm-$(DEB_HOST_ARCH).cfg $(basedir)/jre/lib/$(archdir)/jvm.cfg"; \
 	) >> $(d_jrehl).links
 else
 	( \
-	  echo "$(etcdir)/security/nss.cfg $(basedir)/jre/lib/security/nss.cfg"; \
 	  echo "$(etcdir)/jvm.cfg $(basedir)/jre/lib/$(archdir)/jvm.cfg"; \
 	) >> $(d_jrehl).links
 endif
@@ -1807,7 +1862,10 @@ ifeq ($(with_docs),yes)
 	  ln -sf ../$(p_jrehl)/$$b $(d_doc)/usr/share/doc/$(p_doc)/$$b; \
 	done
 endif
+# FIXME: desktop and menu files not ready for multiarch. #658321
+ifeq (,$(DEB_HOST_MULTIARCH))
 	dh_installmenu -i $(nodocs)
+endif
 	-dh_icons -i $(nodocs) || dh_iconcache -i $(nodocs)
 #	dh_installdebconf -i $(nodocs)
 	dh_link -i $(nodocs)
@@ -1862,7 +1920,10 @@ ifneq (,$(filter zero, $(alternate_vms)))
 	$(call install_test_results,zero)
 endif
 	dh_desktop -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)
+# FIXME: desktop and menu files not ready for multiarch. #658321
+ifeq (,$(DEB_HOST_MULTIARCH))
 	dh_installmenu -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)
+endif
 	-dh_icons -s $(nodemo) $(nojrec) $(nojrej) $(nojrez) \
 		|| dh_iconcache -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)
 #	dh_installdebconf -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)

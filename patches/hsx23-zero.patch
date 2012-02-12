@@ -1,0 +1,148 @@
+Author: Chris Philips
+From: http://integral-portal.lgonqn.org/temp/ChrisPhi/hsx23-zero--/webrev/
+
+--- openjdk/hotspot/make/linux/platform_zero.in.orig
++++ openjdk/hotspot/make/linux/platform_zero.in
+@@ -14,4 +14,4 @@
+ 
+ gnu_dis_arch = zero
+ 
+-sysdefs = -DLINUX -D_GNU_SOURCE -DCC_INTERP -DZERO -D@ZERO_ARCHDEF@ -DZERO_LIBARCH=\"@ZERO_LIBARCH@\"
++sysdefs = -DLINUX -D_GNU_SOURCE -DCC_INTERP -DZERO -DTARGET_ARCH_NYI_6939861=1 -D@ZERO_ARCHDEF@ -DZERO_LIBARCH=\"@ZERO_LIBARCH@\"
+--- openjdk/hotspot/src/cpu/zero/vm/methodHandles_zero.hpp.orig
++++ openjdk/hotspot/src/cpu/zero/vm/methodHandles_zero.hpp
+@@ -29,7 +29,7 @@
+   adapter_code_size = 0
+ };
+ 
+-#define TARGET_ARCH_NYI_6939861 
++//#define TARGET_ARCH_NYI_6939861 
+ // ..#ifdef TARGET_ARCH_NYI_6939861
+ // ..  // Here are some backward compatible declarations until the 6939861 ports are updated.
+ // ..  #define _adapter_flyby    (_EK_LIMIT + 10)
+@@ -69,3 +69,19 @@
+ // ..
+ // ..  static void trace_method_handle(MacroAssembler* _masm, const char* adaptername) PRODUCT_RETURN;
+ // ..#endif //TARGET_ARCH_NYI_6939861
++
++class RicochetFrame : public ResourceObj {
++  friend class MethodHandles;
++ private:
++  /*
++    RF field            x86                 SPARC
++    sender_pc           *(rsp+0)            I7-0x8
++    sender_link         rbp                 I6+BIAS
++    exact_sender_sp     rsi/r13             I5_savedSP
++    conversion          *(rcx+&amh_conv)    L5_conv
++    saved_args_base     rax                 L4_sab (cf. Gargs = G4)
++    saved_args_layout   #NULL               L3_sal
++    saved_target        *(rcx+&mh_vmtgt)    L2_stgt
++    continuation        #STUB_CON           L1_cont
++   */
++};
+--- openjdk/hotspot/src/cpu/zero/vm/sharedRuntime_zero.cpp.orig
++++ openjdk/hotspot/src/cpu/zero/vm/sharedRuntime_zero.cpp
+@@ -47,6 +47,7 @@
+ #endif
+ 
+ 
++
+ int SharedRuntime::java_calling_convention(const BasicType *sig_bt,
+                                            VMRegPair *regs,
+                                            int total_args_passed,
+@@ -96,19 +97,26 @@
+   ShouldNotCallThis();
+ }
+ 
++JRT_LEAF(void, zero_stub())
++  ShouldNotCallThis();
++JRT_END
++
++
+ static RuntimeStub* generate_empty_runtime_stub(const char* name) {
+-  CodeBuffer buffer(name, 0, 0);
+-  return RuntimeStub::new_runtime_stub(name, &buffer, 0, 0, NULL, false);
++  return CAST_FROM_FN_PTR(RuntimeStub*,zero_stub);
++//  return NULL;
+ }
+ 
+ static SafepointBlob* generate_empty_safepoint_blob() {
+-  CodeBuffer buffer("handler_blob", 0, 0);
+-  return SafepointBlob::create(&buffer, NULL, 0);
++//  CodeBuffer buffer("handler_blob", 0, 0);
++//  return SafepointBlob::create(&buffer, NULL, 0);
++  return NULL;
+ }
+ 
+ static DeoptimizationBlob* generate_empty_deopt_blob() {
+-  CodeBuffer buffer("handler_blob", 0, 0);
+-  return DeoptimizationBlob::create(&buffer, NULL, 0, 0, 0, 0);
++//  CodeBuffer buffer("handler_blob", 0, 0);
++//  return DeoptimizationBlob::create(&buffer, NULL, 0, 0, 0, 0);
++  return NULL;
+ }
+ 
+ void SharedRuntime::generate_deopt_blob() {
+--- openjdk/hotspot/src/share/vm/runtime/vmStructs.cpp.orig
++++ openjdk/hotspot/src/share/vm/runtime/vmStructs.cpp
+@@ -818,10 +818,10 @@
+   /* CodeBlobs (NOTE: incomplete, but only a little) */                                                                              \
+   /***************************************************/                                                                              \
+                                                                                                                                      \
+-  X86_ONLY(nonstatic_field(MethodHandles::RicochetFrame, _sender_pc,                                     address))                   \
+-  X86_ONLY(nonstatic_field(MethodHandles::RicochetFrame, _exact_sender_sp,                              intptr_t*))                  \
+-  X86_ONLY(nonstatic_field(MethodHandles::RicochetFrame, _sender_link,                                  intptr_t*))                  \
+-  X86_ONLY(nonstatic_field(MethodHandles::RicochetFrame, _saved_args_base,                              intptr_t*))                  \
++  NOT_ZERO(X86_ONLY(nonstatic_field(MethodHandles::RicochetFrame, _sender_pc,                                     address)))                   \
++  NOT_ZERO(X86_ONLY(nonstatic_field(MethodHandles::RicochetFrame, _exact_sender_sp,                              intptr_t*)))                  \
++  NOT_ZERO(X86_ONLY(nonstatic_field(MethodHandles::RicochetFrame, _sender_link,                                  intptr_t*)))                  \
++  NOT_ZERO(X86_ONLY(nonstatic_field(MethodHandles::RicochetFrame, _saved_args_base,                              intptr_t*)))                  \
+                                                                                                                                      \
+      static_field(SharedRuntime,               _ricochet_blob,                                RicochetBlob*)                         \
+                                                                                                                                      \
+@@ -2526,7 +2526,7 @@
+   /* frame              */                                                \
+   /**********************/                                                \
+                                                                           \
+-  X86_ONLY(declare_constant(frame::entry_frame_call_wrapper_offset))      \
++  NOT_ZERO(X86_ONLY(declare_constant(frame::entry_frame_call_wrapper_offset)))      \
+   declare_constant(frame::pc_return_offset)                               \
+                                                                           \
+   /*************/                                                         \
+--- openjdk/hotspot/src/share/vm/shark/sharkCompiler.cpp.orig
++++ openjdk/hotspot/src/share/vm/shark/sharkCompiler.cpp
+@@ -323,7 +323,8 @@
+   // finish with the exception of the VM thread, so we can consider
+   // ourself the owner of the execution engine lock even though we
+   // can't actually acquire it at this time.
+-  assert(Thread::current()->is_VM_thread(), "must be called by VM thread");
++  assert(JavaThread::current()->thread_state() == _thread_in_vm, "must run in vm mode");
++//assert(Thread::current()->is_VM_thread(), "must be called by VM thread");
+   assert(SafepointSynchronize::is_at_safepoint(), "must be at safepoint");
+ 
+   SharkEntry *entry = (SharkEntry *) code;
+--- openjdk/hotspot/src/share/vm/utilities/macros.hpp.orig
++++ openjdk/hotspot/src/share/vm/utilities/macros.hpp
+@@ -169,6 +169,22 @@
+ #define NOT_WIN64(code) code
+ #endif
+ 
++#if defined(ZERO)
++#define ZERO_ONLY(code) code
++#define NOT_ZERO(code)
++#else
++#define ZERO_ONLY(code) 
++#define NOT_ZERO(code) code
++#endif
++
++#if defined(SHARK)
++#define SHARK_ONLY(code) code
++#define NOT_SHARK(code)
++#else
++#define SHARK_ONLY(code) 
++#define NOT_SHARK(code) code
++#endif
++
+ #if defined(IA32) || defined(AMD64)
+ #define X86
+ #define X86_ONLY(code) code

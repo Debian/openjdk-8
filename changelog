@@ -1,6 +1,7 @@
 openjdk-7 (7~u2-2.1~pre1-1) UNRELEASED; urgency=low
 
-  * Update to latest icedtea7 (20120210).
+  * Update to latest icedtea7 (20120210):
+    - Check for logging to prevent wasted CPU (Closes: #651423).
 
   [ Matthias Klose ]
   * openjdk-7-jre-lib: Mark as Multi-Arch: foreign.
@@ -17,8 +18,23 @@ openjdk-7 (7~u2-2.1~pre1-1) UNRELEASED; urgency=low
   * d/{rules,control}: Only rhino 1.7R3 is supported by openjdk, update B-D.
   * d/patches/hotspot-s390.diff: Update for latest Hotspot.
   * d/patches/icedtea-patch.diff: Move nssLibraryDirectory handling to d/rules.
+  * d/rules: Remove --with-*-drop-zip options, as code drops are embedded.
+  * Merge r505-524 from openjdk6:
+    - Use java-atk-wrapper instead of java-access-bridge for accessibility.
+    - Make the java.policy file multi-arch installable.
+    - Don't install desktop and menu files for multiarch builds.
+      Needs a better solution.
+    - Don't install an alternative for the deprecated apt tool.
+    - Make the upgrade from a non-multiarch installation location more
+      robust; don't depend on version numbers, but check the path of the
+      alternatives.
+    - Disable test for armel and powerpc (broken on buildd)
+  * d/patches/hsx23-zero.patch, patches/shark-compiler-fixes.patch:
+    Fix FTBFS for Zero under Hotspot v23.
+  * d/patches/zero-disable-objcopy.diff: Disable objcopy strip during build as
+    we do this during dh_strip.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 11 Feb 2012 13:55:02 +0100
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sun, 12 Feb 2012 15:22:44 +0100
 
 openjdk-7 (7~b147-2.0-1) unstable; urgency=low
 

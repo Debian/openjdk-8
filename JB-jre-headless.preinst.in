@@ -12,11 +12,15 @@ jre_tools='java keytool pack200 rmid rmiregistry unpack200 orbd servertool tname
 
 case "$1" in
     upgrade)
-	if [ -n "$multiarch" ] && [ -n "$2" ] && dpkg --compare-versions "$2" lt 6b23~pre8-2~; then
+	if [ -n "$multiarch" ] && [ -n "$2" ]; then
 	    for i in $jre_tools; do
-		update-alternatives --remove $i $old_basedir/jre/bin/$i || true
+		if [ -n `update-alternatives --list $i | grep "^$old_basedir/"` ]; then
+		    update-alternatives --remove $i $old_basedir/jre/bin/$i || true
+		fi
 	    done
-	    update-alternatives --remove jexec $old_basedir/jre/lib/jexec || true
+	    if [ -n `update-alternatives --list jexec | grep "^$old_basedir/"` ]; then
+		update-alternatives --remove jexec $old_basedir/jre/lib/jexec || true
+	    fi
 	fi
 	;;
 esac
