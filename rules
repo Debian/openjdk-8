@@ -133,7 +133,7 @@ else ifneq (,$(filter $(distrel),lenny))
 endif
 
 ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
-  cacao_archs = alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390 kfreebsd-amd64 kfreebsd-i386
+  cacao_archs = alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
 endif
 ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy dapper))
   # Keep this in sync with Architecture: of icedtea-7-jre-jamvm

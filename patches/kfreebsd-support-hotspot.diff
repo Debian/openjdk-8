@@ -113,7 +113,7 @@ Index: openjdk/hotspot/agent/src/os/linux/libproc.h
  #include "proc_service.h"
  
  #if defined(sparc) || defined(sparcv9)
-@@ -87,6 +91,10 @@
+@@ -112,6 +116,10 @@
  #define user_regs_struct  pt_regs
  #endif
  
@@ -348,7 +348,7 @@ Index: openjdk/hotspot/make/linux/Makefile
 ===================================================================
 --- openjdk/hotspot/make/linux/Makefile.orig
 +++ openjdk/hotspot/make/linux/Makefile
-@@ -233,6 +233,9 @@
+@@ -234,6 +234,9 @@
  SUPPORTED_OS_VERSION = 2.4% 2.5% 2.6% 3%
  OS_VERSION := $(shell uname -r)
  EMPTY_IF_NOT_SUPPORTED = $(filter $(SUPPORTED_OS_VERSION),$(OS_VERSION))
@@ -449,7 +449,7 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
  // for timer info max values which include all bits
  #define ALL_64_BITS CONST64(0xFFFFFFFFFFFFFFFF)
  #define SEC_IN_NANOSECS  1000000000LL
-@@ -180,11 +189,22 @@
+@@ -208,11 +217,22 @@
  }
  
  julong os::Linux::available_memory() {
@@ -472,7 +472,7 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
  }
  
  julong os::physical_memory() {
-@@ -2122,18 +2142,22 @@
+@@ -2161,18 +2181,22 @@
    st->print("Memory:");
    st->print(" %dk page", os::vm_page_size()>>10);
  
@@ -495,7 +495,7 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
    st->cr();
  }
  
-@@ -5292,6 +5316,7 @@
+@@ -5389,6 +5413,7 @@
  int os::fork_and_exec(char* cmd) {
    const char * argv[4] = {"sh", "-c", cmd, NULL};
  
@@ -503,7 +503,7 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
    // fork() in LinuxThreads/NPTL is not async-safe. It needs to run
    // pthread_atfork handlers and reset pthread library. All we need is a
    // separate process to execve. Make a direct syscall to fork process.
-@@ -5299,6 +5324,9 @@
+@@ -5396,6 +5421,9 @@
    // the best...
    pid_t pid = NOT_IA64(syscall(__NR_fork);)
                IA64_ONLY(fork();)
@@ -513,7 +513,7 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
  
    if (pid < 0) {
      // fork failed
-@@ -5307,6 +5335,7 @@
+@@ -5404,6 +5432,7 @@
    } else if (pid == 0) {
      // child process
  
@@ -521,7 +521,7 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
      // execve() in LinuxThreads will call pthread_kill_other_threads_np()
      // first to kill every thread on the thread list. Because this list is
      // not reset by fork() (see notes above), execve() will instead kill
-@@ -5316,6 +5345,9 @@
+@@ -5413,6 +5442,9 @@
      // above.
      NOT_IA64(syscall(__NR_execve, "/bin/sh", argv, environ);)
      IA64_ONLY(execve("/bin/sh", (char* const*)argv, environ);)
@@ -834,7 +834,7 @@ Index: openjdk/hotspot/src/share/vm/memory/allocation.hpp
 ===================================================================
 --- openjdk/hotspot/src/share/vm/memory/allocation.hpp.orig
 +++ openjdk/hotspot/src/share/vm/memory/allocation.hpp
-@@ -214,9 +214,9 @@
+@@ -218,9 +218,9 @@
    void signal_out_of_memory(size_t request, const char* whence) const;
  
    void check_for_overflow(size_t request, const char* whence) const {

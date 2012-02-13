@@ -33,8 +33,9 @@ openjdk-7 (7~u2-2.1~pre1-1) UNRELEASED; urgency=low
     Fix FTBFS for Zero under Hotspot v23.
   * d/patches/zero-disable-objcopy.diff: Disable objcopy strip during build as
     we do this during dh_strip.
+  * d/patches/kfreebsd-*: Refreshed.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Sun, 12 Feb 2012 15:22:44 +0100
+ -- Damien Raude-Morvan <drazzib@debian.org>  Mon, 13 Feb 2012 22:38:44 +0100
 
 openjdk-7 (7~b147-2.0-1) unstable; urgency=low
 

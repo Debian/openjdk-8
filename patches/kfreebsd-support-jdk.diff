@@ -367,7 +367,7 @@ Index: openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h
 +#if defined(__linux__) || defined(__GLIBC__)
  #define __ieee754_sqrt          __j__ieee754_sqrt
  #define __ieee754_acos          __j__ieee754_acos
- #define __ieee754_acosh         __j__ieee754_acosh
+ #define __ieee754_log           __j__ieee754_log
 Index: openjdk/jdk/src/share/native/sun/security/ec/impl/ecc_impl.h
 ===================================================================
 --- openjdk/jdk/src/share/native/sun/security/ec/impl/ecc_impl.h.orig
@@ -716,7 +716,7 @@ Index: openjdk/jdk/src/solaris/native/java/lang/java_props_md.c
      if (lc == NULL) {
          return 0;
      }
-@@ -272,7 +272,7 @@
+@@ -273,7 +273,7 @@
           * in order to use optimizations. */
          *std_encoding = (*p != '\0') ? p : "ISO8859-1";
  
@@ -725,7 +725,7 @@ Index: openjdk/jdk/src/solaris/native/java/lang/java_props_md.c
          /*
           * Remap the encoding string to a different value for japanese
           * locales on linux so that customized converters are used instead
-@@ -437,7 +437,7 @@
+@@ -442,7 +442,7 @@
      sprops.display_variant = sprops.variant;
      sprops.sun_jnu_encoding = sprops.encoding;
  
@@ -1351,15 +1351,6 @@ Index: openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c
 ===================================================================
 --- openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c.orig
 +++ openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c
-@@ -31,7 +31,7 @@
- #include <errno.h>
- #include <stddef.h>
- 
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- #include <string.h>
- #include <dirent.h>
- #include <sys/stat.h>
 @@ -49,7 +49,7 @@
  #define fileclose       fclose
  #endif
@@ -1369,7 +1360,25 @@ Index: openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c
  
  static const char *ETC_TIMEZONE_FILE = "/etc/timezone";
  static const char *ZONEINFO_DIR = "/usr/share/zoneinfo";
-@@ -493,7 +493,7 @@
+@@ -122,7 +122,7 @@
+         return NULL;
+     }
+ 
+-#if defined(__linux__) || (defined(__solaris__) && (defined(_POSIX_PTHREAD_SEMANTICS) || \
++#if defined(__linux__) || defined(__GLIBC__) || (defined(__solaris__) && (defined(_POSIX_PTHREAD_SEMANTICS) || \
+                                                     defined(_LP64)))
+     while (readdir_r(dirp, entry, &dp) == 0 && dp != NULL) {
+ #else
+@@ -211,7 +211,7 @@
+     return tz;
+ }
+ 
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ 
+ /*
+  * Performs Linux specific mapping and returns a zone ID
+@@ -624,7 +624,7 @@
  
      tz = getenv("TZ");
  
@@ -1378,12 +1387,12 @@ Index: openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c
      if (tz == NULL) {
  #else
  #ifdef __solaris__
-@@ -508,7 +508,7 @@
-         if (*tz == ':') {
-             tz++;
-         }
+@@ -650,7 +650,7 @@
+ #endif
+ 
+     if (tz != NULL) {
 -#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
++#if defined(__linux__)  || defined(__GLIBC__)
          /*
           * Ignore "posix/" prefix.
           */
