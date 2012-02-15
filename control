@@ -3,7 +3,7 @@ Section: java
 Priority: optional
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
 Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>, Damien Raude-Morvan <drazzib@debian.org>
-Build-Depends: debhelper (>= 5), binutils-dev [armel armhf], m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, wdiff, fastjar (>= 2:0.96-0ubuntu2),  autoconf, automake, autotools-dev, ant, ant-optional, libtool, libtool, g++-4.6,  ecj-gcj [amd64 armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64], gcj-jdk [amd64 armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64], gcj-4.4-jdk [mips mipsel sparc sparc64], g++-4.4 [mips mipsel sparc sparc64], openjdk-6-jdk (>= 6b18) [alpha armel], libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, liblcms2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, libxinerama-dev, xsltproc, librhino-java (>= 1.7R3~), libffi-dev, llvm-3.0-dev [amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386 powerpc ppc64], libpng12-dev, zlib1g-dev, libattr1-dev,  libjpeg8-dev, libgif-dev, libpulse-dev (>= 0.9.12), libnss3-dev (>= 3.12.3),  mauve, xvfb, xauth, xfonts-base, libgl1-mesa-dri, twm | metacity, twm | dbus-x11, x11-xkb-utils,
+Build-Depends: debhelper (>= 5), binutils-dev [armel armhf], m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, wdiff, fastjar (>= 2:0.96-0ubuntu2),  autoconf, automake, autotools-dev, ant, ant-optional, libtool, libtool, g++-4.6,  ecj-gcj [amd64 armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64], gcj-jdk [amd64 armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64], gcj-4.4-jdk [mips mipsel sparc sparc64], g++-4.4 [mips mipsel sparc sparc64], openjdk-6-jdk (>= 6b18) [alpha armel], libxtst-dev, libxi-dev, libxt-dev, libxp-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, liblcms2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, libxinerama-dev, xsltproc, librhino-java (>= 1.7R3~), libffi-dev,  libpng12-dev, zlib1g-dev, libattr1-dev,  libjpeg8-dev, libgif-dev, libpulse-dev (>= 0.9.12), libnss3-dev (>= 3.12.3),  mauve, xvfb, xauth, xfonts-base, libgl1-mesa-dri, twm | metacity, twm | dbus-x11, x11-xkb-utils,
 Standards-Version: 3.9.2
 Homepage: http://openjdk.java.net/
 Vcs-Bzr: http://bazaar.launchpad.net/~openjdk/openjdk/openjdk7
@@ -84,7 +84,7 @@ Package: openjdk-7-source
 Architecture: all
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-7-jre (= ${source:Version}), openjdk-7-jdk (>= ${binary:Version}), ${misc:Depends}
+Depends: openjdk-7-jre (>= ${source:Version}), openjdk-7-jdk (>= ${binary:Version}), ${misc:Depends}
 Description: OpenJDK Development Kit (JDK) source files
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -130,7 +130,7 @@ Description: Java runtime based on OpenJDK (debugging symbols)
  from the IcedTea project.
 
 Package: icedtea-7-jre-cacao
-Architecture: alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390 kfreebsd-amd64 kfreebsd-i386
+Architecture: alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
 Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
@@ -158,7 +158,7 @@ Description: Alternative JVM for OpenJDK, using JamVM
  The VM is started with the option `-jamvm'. See the README.Debian for details.
 
 Package: openjdk-7-jre-zero
-Architecture: amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386 powerpc ppc64
+Architecture: amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386 
 Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}

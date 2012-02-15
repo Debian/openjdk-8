@@ -138,9 +138,9 @@ endif
 
 ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
   cacao_archs = alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
+  # TODO kfreebsd porting for cacao vm
 endif
 ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy dapper))
-  # Keep this in sync with Architecture: of icedtea-7-jre-jamvm
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
 endif
 ifeq (,$(filter $(distrel),wheezy sid squeeze lenny maverick natty maverick lucid karmic hardy dapper))

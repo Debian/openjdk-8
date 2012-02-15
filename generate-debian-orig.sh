@@ -3,8 +3,8 @@
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools-dfsg.tar.gz openjdk.tar.gz"
 jamvmtb=jamvm-4617da717ecb05654ea5bb9572338061106a414d.tar.gz
 cacaotb=cacao-a567bcb7f589.tar.gz
-tarballdir=7u2
-version=7~u2-2.1~pre1
+tarballdir=7u3
+version=7~u3-2.1
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
