@@ -97,6 +97,10 @@ endif
 #export HOTSPOT_BUILD_JOBS = 1
 #export ALT_PARALLEL_COMPILE_JOBS = 1
 
+# Extracting debug symbols done by dh_strip
+export ALT_OBJCOPY=fake
+export ALT_STRIP_POLICY=no_strip
+
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
 ifneq (,$(filter $(DEB_HOST_ARCH), armel powerpc))
 with_check = disabled for this upload
@@ -360,8 +364,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/sparc-trapsfix.patch \
 	debian/patches/zero-fpu-control-is-noop.diff \
 	debian/patches/zero-missing-headers.diff \
-	debian/patches/hsx23-zero.patch \
-	debian/patches/zero-disable-objcopy.diff
+	debian/patches/hsx23-zero.patch
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
