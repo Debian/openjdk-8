@@ -9,7 +9,7 @@ base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
-icedtea_checkout=icedtea7
+icedtea_checkout=icedtea-2.1
 debian_checkout=openjdk7
 
 if [ -d $pkgdir ]; then
