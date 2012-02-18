@@ -185,7 +185,6 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
   STAGE1_JAVA = gcj
   ifneq (,$(filter $(distrel),dapper))
     STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.5-snap
-    #STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.4
   else
     STAGE1_HOME = /usr/lib/jvm/java-gcj
   endif
@@ -206,7 +205,11 @@ OPENJDK_SRC_ZIP = openjdk-7-ea-src-$(OPENJDK_VERSION)-25_mar_2010-dfsg.tar.gz
 req_openjdk_bd_ver = 6b18
 req_openjdk_ver = 7~b130~pre0
 
-unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
+
+export CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
+export CFLAGS := $(shell dpkg-buildflags --get CFLAGS)
+export CXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS)
+export LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
 
 # This section should be in sync with "bd_gcc" definition
 ifneq (,$(filter $(distrel),dapper))
@@ -336,7 +339,6 @@ endif
 DISTRIBUTION_PATCHES += \
 	debian/patches/set-exec-name.diff \
 	debian/patches/shebang.diff \
-	debian/patches/jexec.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \

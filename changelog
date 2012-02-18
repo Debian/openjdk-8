@@ -1,3 +1,11 @@
+openjdk-7 (7~u3-2.1-2) UNRELEASED; urgency=low
+
+  * d/patches/jexec.diff: Dropped, uneeded and not compatible with multi-arch.
+  * d/rules: Use dpkg-buildflags --export=configure to enable hardened build.
+    (Closes: #660021).
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 18 Feb 2012 23:37:36 +0100
+
 openjdk-7 (7~u3-2.1-1) unstable; urgency=low
 
   * Update icedtea7 2.1 (OpenJDK7 ~u3 release):
@@ -7,11 +15,14 @@ openjdk-7 (7~u3-2.1-1) unstable; urgency=low
     - S7088367, CVE-2011-3563: Fix issues in java sound
     - S7110683, CVE-2012-0502: Issues with some KeyboardFocusManager method
     - S7110687, CVE-2012-0503: Issues with TimeZone class
-    - S7110700, CVE-2012-0505: Enhance exception throwing mechanism in ObjectStreamClass
+    - S7110700, CVE-2012-0505: Enhance exception throwing mechanism in
+      ObjectStreamClass
     - S7110704, CVE-2012-0506: Issues with some method in corba
     - S7112642, CVE-2012-0497: Incorrect checking for graphics rendering object
-    - S7118283, CVE-2012-0501: Better input parameter checking in zip file processing
-    - S7126960, CVE-2011-5035: Add property to limit number of request headers to the HTTP Server
+    - S7118283, CVE-2012-0501: Better input parameter checking in zip file
+      processing
+    - S7126960, CVE-2011-5035: Add property to limit number of request headers
+      to the HTTP Server
 
   [ Matthias Klose ]
   * openjdk-7-jre-lib: Mark as Multi-Arch: foreign.
