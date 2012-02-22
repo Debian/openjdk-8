@@ -210,6 +210,8 @@ export CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
 export CFLAGS := $(shell dpkg-buildflags --get CFLAGS)
 export CXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS)
 export LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
+# FIXME: picked up, and does it work?
+unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
 
 # This section should be in sync with "bd_gcc" definition
 ifneq (,$(filter $(distrel),dapper))
@@ -1384,7 +1386,7 @@ debian-clean:
 	done
 	rm -f debian/*.install debian/*.links debian/*.debhelper.log
 
-lib_ext_dirs = common $(filter-out $(DEB_HOST_ARCH), $(sort $(foreach arch,$(arch_map),$(firstword $(subst =,$(SPACE),$(arch))))))
+lib_ext_dirs = common $(sort $(foreach arch,$(arch_map),$(firstword $(subst =,$(SPACE),$(arch)))))
 ifeq ($(distribution),Ubuntu)
   lib_ext_dirs := $(filter-out arm hppa m68k mips% powerpcspe s390% sh%, $(lib_ext_dirs))
 else
@@ -1644,9 +1646,6 @@ endif
 	    -e '        permission java.security.AllPermission;\' \
 	    -e '};\' \
 	    -e '\' \
-	    -e 'grant codeBase "file:/$(basedir)/jre/lib/ext/*" {\' \
-	    -e '        permission java.security.AllPermission;\' \
-	    -e '};\' \
 	    $(if $(DEB_HOST_MULTIARCH),$(foreach i, $(lib_ext_dirs), \
 	    -e 'grant codeBase "file:/$(TOP)/java-$(shortver)-$(origin)-$(i)/jre/lib/ext/*" {\' \
 	    -e '        permission java.security.AllPermission;\' \
@@ -1678,7 +1677,6 @@ ifeq (,$(DEB_HOST_MULTIARCH))
 	      $(d_jre)/usr/share/applications/
 	cp -p debian/$(basename)-java.desktop \
 	      $(d_jre)/usr/share/applications/
-endif
 
 	for i in archive; do \
 	  cp debian/$(basename)-$$i.applications \
@@ -1686,6 +1684,7 @@ endif
 	  cp debian/$(basename)-$$i.keys $(d_jre)/usr/share/mime-info/; \
 	  cp debian/$(basename)-$$i.mime $(d_jre)/usr/share/mime-info/; \
 	done
+endif
 
 	cp -p debian/sun_java.xpm \
 		$(d_jre)/usr/share/pixmaps/$(basename).xpm

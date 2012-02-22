@@ -7,19 +7,26 @@ javac, javah, etc.
 Starting with java-common 0.23ubuntu1, the update-java-alternatives
 script can be used to set a bunch of jre/jdk alternatives:
 
-- Set all runtime tools to point to the @basename@ alternatives:
+First, you have to decide which Java implementation to default to.
 
-  update-java-alternatives --jre --set @jdirname@
+  update-java-alternatives --list
 
-- Set all runtime tools (headless only) to point to the @basename@
+tells about the available runtime and/or development environments. The
+first column shows the names to be used in for the following examples.
+
+- Set all runtime tools to point to the <jname> alternatives:
+
+  update-java-alternatives --jre --set <jname>
+
+- Set all runtime tools (headless only) to point to the <jname>
   alternatives:
 
-  update-java-alternatives --jre-headless --set @jdirname@
+  update-java-alternatives --jre-headless --set <jname>
 
-- Set all runtime and development tools to point to the @basename@
+- Set all runtime and development tools to point to the <jname>
   alternatives:
 
-  update-java-alternatives --set @jdirname@
+  update-java-alternatives --set <jname>
 
 - Set all runtime and development tools to auto mode:
 

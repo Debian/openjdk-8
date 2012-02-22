@@ -1,5 +1,5 @@
 java-archive
-        command=/@basedir@/bin/java -jar
+        command=/usr/bin/java -jar
         name=java-archive
         can_open_multiple_files=false
         requires_terminal=false
