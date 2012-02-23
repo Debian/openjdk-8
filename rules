@@ -1009,6 +1009,7 @@ endif
 
 	grep -v '^nssLibraryDirectory' build/nss.cfg > build/nss.cfg.new
 	mv -f build/nss.cfg.new build/nss.cfg
+	cat build/nss.cfg
 
 	touch $@
 
