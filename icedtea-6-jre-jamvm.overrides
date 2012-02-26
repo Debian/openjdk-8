@@ -1,2 +1,0 @@
-# Strip libjvm.so with --strip-debug instead of --strip-unneeded. LP: #574997.
-icedtea-6-jre-jamvm binary: unstripped-binary-or-object
