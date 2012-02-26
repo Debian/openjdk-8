@@ -366,6 +366,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/hotspot-sparc.diff \
 	debian/patches/hotspot-sparc-arch.diff \
 	debian/patches/sparc-trapsfix.patch \
+	debian/patches/sparc-stubgenerator.diff \
 	debian/patches/zero-fpu-control-is-noop.diff \
 	debian/patches/zero-missing-headers.diff \
 	debian/patches/hsx23-zero.patch
