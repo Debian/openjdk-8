@@ -373,6 +373,10 @@ DISTRIBUTION_PATCHES += \
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
 
+ifeq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid jaunty intrepid hardy gutsy feisty edgy dapper))
+  DISTRIBUTION_PATCHES += debian/patches/fontconfig-korean-nanum.diff
+endif
+
 #	debian/patches/sparc-inline.diff \
 #	debian/patches/pkcs11-secmod-debug.diff \
 
@@ -779,7 +783,11 @@ else ifneq (,$(filter $(distrel),lenny gutsy hardy intrepid jaunty karmic))
 else
   core_fonts = ttf-dejavu-extra
 endif
-cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
+ifeq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid jaunty intrepid hardy gutsy feisty edgy dapper))
+  cfk_fonts = fonts-nanum,
+else
+  cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
+endif
 cjk_fonts += ttf-sazanami-gothic | ttf-kochi-gothic,
 cjk_fonts += ttf-sazanami-mincho | ttf-kochi-mincho,
 cjk_fonts += $(if $(with_wgy_zenhai),ttf-wqy-microhei | ttf-wqy-zenhei,ttf-arphic-uming),
@@ -1006,10 +1014,6 @@ endif
 	mkdir -p build
 	chmod +x configure
 	cd build && $(EXTRA_BUILD_ENV) ../configure $(CONFIGURE_ARGS)
-
-	grep -v '^nssLibraryDirectory' build/nss.cfg > build/nss.cfg.new
-	mv -f build/nss.cfg.new build/nss.cfg
-	cat build/nss.cfg
 
 	touch $@
 
@@ -1475,6 +1479,11 @@ endif
 ifneq (,$(pkg_certs))
 	rm -f $(d)/$(basedir)/jre/lib/security/cacerts
 endif
+
+	grep -v '^nssLibraryDirectory' $(d)/$(basedir)/jre/lib/security/nss.cfg \
+		> $(d)/$(basedir)/jre/lib/security/nss.cfg.new
+	mv -f $(d)/$(basedir)/jre/lib/security/nss.cfg.new \
+		$(d)/$(basedir)/jre/lib/security/nss.cfg
 
 	: # move config files to $(etcdir) and symlink them.
 	for i in \
