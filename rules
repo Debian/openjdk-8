@@ -376,7 +376,9 @@ DISTRIBUTION_PATCHES += \
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
 
 ifeq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid jaunty intrepid hardy gutsy feisty edgy dapper))
-  DISTRIBUTION_PATCHES += debian/patches/fontconfig-korean-nanum.diff
+  DISTRIBUTION_PATCHES += \
+	debian/patches/fontconfig-korean-nanum.diff \
+	debian/patches/fontconfig-japanese.diff
 endif
 
 #	debian/patches/sparc-inline.diff \
@@ -787,11 +789,12 @@ else
 endif
 ifeq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid jaunty intrepid hardy gutsy feisty edgy dapper))
   cfk_fonts = fonts-nanum,
+  cjk_fonts += fonts-ipafont-gothic, fonts-ipafont-mincho,
 else
   cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
+  cjk_fonts += ttf-sazanami-gothic | ttf-kochi-gothic,
+  cjk_fonts += ttf-sazanami-mincho | ttf-kochi-mincho,
 endif
-cjk_fonts += ttf-sazanami-gothic | ttf-kochi-gothic,
-cjk_fonts += ttf-sazanami-mincho | ttf-kochi-mincho,
 cjk_fonts += $(if $(with_wgy_zenhai),ttf-wqy-microhei | ttf-wqy-zenhei,ttf-arphic-uming),
 ifneq (,$(filter $(distrel),lenny squeeze sid experimental))
   cjk_fonts += ttf-indic-fonts,
@@ -1977,4 +1980,4 @@ endif
 	dh_builddeb -s $(nodemo) $(nojrec) $(nojrej) $(nojrez) #$(bd_options)
 
 binary: binary-arch binary-indep
-.PHONY: build clean binary-indep binary-arch binary install
+.PHONY: build clean binary-indep binary-arch binary install packaging-files
