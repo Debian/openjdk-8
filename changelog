@@ -5,6 +5,7 @@ openjdk-7 (7~u3-2.1-2) UNRELEASED; urgency=low
   * Fix crash in java.net.NetworkInterface.getNetworkInterfaces() when 
     ifr_ifindex exceeds 255. LP: #925218. S7078386.
   * Use IPAfont as the preferred japanesse font. Closes: #646054.
+  * Build using gcj on alpha and armel. Closes: #655750.
 
   [ Damien Raude-Morvan ]
   * d/patches/sparc-stubgenerator.diff: Fix FTBFS on sparc on

@@ -45,7 +45,6 @@ ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper)
   # Shark build but just crash
   shark_archs   =
 endif
-no_bootstrap_archs = alpha armel
 
 VENDOR		= openjdk
 Vendor		= OpenJDK
@@ -122,8 +121,8 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH_CPU)=%, %, \
 
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 
-stage1_gcj_archs = amd64 armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64
-stage1_openjdk_archs = alpha armel
+stage1_gcj_archs = alpha amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64
+stage1_openjdk_archs =
 stage1_cacao_archs =
 ifneq (,$(filter nobootstrap, $(DEB_BUILD_OPTIONS)))
   stage1_openjdk_archs := $(stage1_openjdk_archs) $(stage1_gcj_archs)
