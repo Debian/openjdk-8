@@ -2,6 +2,8 @@ openjdk-7 (7~u3-2.1-2) UNRELEASED; urgency=low
 
   [ Matthias Klose ]
   * Use NanumMyeongjo as the preferred korean font. LP: #792471.
+  * Fix crash in java.net.NetworkInterface.getNetworkInterfaces() when 
+    ifr_ifindex exceeds 255. LP: #925218. S7078386.
 
   [ Damien Raude-Morvan ]
   * d/patches/sparc-stubgenerator.diff: Fix FTBFS on sparc on

@@ -369,7 +369,8 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/sparc-stubgenerator.diff \
 	debian/patches/zero-fpu-control-is-noop.diff \
 	debian/patches/zero-missing-headers.diff \
-	debian/patches/hsx23-zero.patch
+	debian/patches/hsx23-zero.patch \
+	debian/patches/enumipv6-fix.patch \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
