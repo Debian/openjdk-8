@@ -23,7 +23,7 @@ configure)
     fi
     if [ -n "$multiarch" ] && [ -n "$2" ]; then
 	for i in $jdk_tools; do
-	    if [ -z `update-alternatives --list $i 2>/dev/null | grep "^$basedir/"` ]; then
+	    if [ -z "$(update-alternatives --list $i 2>/dev/null | grep ^$basedir/)" ]; then
 		update_alternatives=y
 		break
 	    fi

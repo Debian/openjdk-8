@@ -10,7 +10,7 @@ case "$1" in
     upgrade)
 	if [ -n "$multiarch" ] && [ -n "$2" ]; then
 	    for i in $jdk_tools; do
-		if [ -n `update-alternatives --list $i 2>/dev/null | grep "^$old_basedir/"` ]; then
+		if [ -n "$(update-alternatives --list $i 2>/dev/null | grep ^$old_basedir/)" ]; then
 		    update-alternatives --remove $i $old_basedir/bin/$i || true
 		fi
 	    done
