@@ -1,6 +1,2 @@
-# the doc directory and the symlink are in @basename@-jre-headless
-@basename@-jre-zero binary: no-copyright-file
-@basename@-jre-zero binary: usr-share-doc-symlink-without-dependency
-
 # Strip libjvm.so with --strip-debug instead of --strip-unneeded. LP: #574997.
 @basename@-jre-zero binary: unstripped-binary-or-object

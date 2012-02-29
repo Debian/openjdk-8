@@ -1,16 +1,5 @@
-# It seems to be acceptable to use rpath for private libraries like the
-# jdk is doing it. Check http://wiki.debian.org/RpathIssue for more
-# information.
-@basename@-jre-headless binary: binary-or-shlib-defines-rpath
-
-# Allow executable stack in libjvm.so.
-@basename@-jre-headless binary: shlib-with-executable-stack
-
 # empty directory by intent
 @basename@-jre-headless binary: package-contains-empty-directory usr/share/binfmts/
 
 # Strip libjvm.so with --strip-debug instead of --strip-unneeded. LP: #574997.
 @basename@-jre-headless binary: unstripped-binary-or-object
-
-# lintian is plain wrong to complain
-@basename@-jre-headless binary: gzip-file-is-not-multi-arch-same-safe

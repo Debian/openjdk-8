@@ -1,2 +1,0 @@
-# The package *-jre-lib depends on *-jre via *-jre-headless. Lintian is wrong here.
-@basename@-dbg binary: usr-share-doc-symlink-without-dependency @basename@-jre

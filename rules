@@ -204,13 +204,17 @@ OPENJDK_SRC_ZIP = openjdk-7-ea-src-$(OPENJDK_VERSION)-25_mar_2010-dfsg.tar.gz
 req_openjdk_bd_ver = 6b18
 req_openjdk_ver = 7~b130~pre0
 
-
+# For all (cacao, jamvm and default g++...)
 export CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
 export CFLAGS := $(shell dpkg-buildflags --get CFLAGS)
 export CXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS)
 export LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
-# FIXME: picked up, and does it work?
-unexport CFLAGS CXXFLAGS CPPFLAGS FFLAGS LDFLAGS
+# Specific to Hotspot (from hotspot/make/linux/makefiles/vm.make)
+# and JDK (from jdk/make/common/Defs.gmk)
+export EXTRA_CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
+export EXTRA_CFLAGS := $(shell dpkg-buildflags --get CFLAGS)
+export EXTRA_CXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS)
+export EXTRA_LFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
 
 # This section should be in sync with "bd_gcc" definition
 ifneq (,$(filter $(distrel),dapper))
@@ -344,7 +348,8 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \
 	debian/patches/nonreparenting-wm.diff \
-	debian/patches/accessible-toolkit.patch
+	debian/patches/accessible-toolkit.patch \
+	debian/patches/fix_extra_flags.diff
 
 ifeq ($(with_bridge),atk)
     DISTRIBUTION_PATCHES += \
@@ -661,7 +666,7 @@ else ifneq (,$(filter $(distrel),natty))
 else
   bd_gcc = g++-4.6,
 endif
-bd_syslibs = libpng12-dev, zlib1g-dev, libattr1-dev, 
+bd_syslibs = libpng12-dev, zlib1g-dev, libattr1-dev,
 ifneq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
   bd_syslibs += libjpeg62-dev,
 else
@@ -763,7 +768,7 @@ ifneq ($(with_nss),no)
     dlopen_hl_depends += , libnss3-1d (>= 3.12.9+ckbi-1.82-0ubuntu4)
   endif
 endif
-dlopen_hl_recommends = \
+dlopen_hl_recommends =
 dlopen_jre_depends = \
 	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
 	libxrandr2, libxinerama1, libgl1-mesa-glx

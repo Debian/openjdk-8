@@ -1,4 +1,4 @@
-openjdk-7 (7~u3-2.1-2) UNRELEASED; urgency=low
+openjdk-7 (7~u3-2.1-2) unstable; urgency=low
 
   [ Matthias Klose ]
   * Use NanumMyeongjo as the preferred korean font. LP: #792471.
@@ -9,10 +9,17 @@ openjdk-7 (7~u3-2.1-2) UNRELEASED; urgency=low
 
   [ Damien Raude-Morvan ]
   * d/patches/sparc-stubgenerator.diff: Fix FTBFS on sparc on
-    stubGenerator_sparc.cpp by using explicit class typedef (Closes:
-    #660871).
+    stubGenerator_sparc.cpp by using explicit class typedef
+    (Closes: #660871).
+  * d/patches/fix_extra_flags.diff: Improve support for hardened build,
+    also send flags to jdk build and send -Wl,-z,relro during hotspot link.
+  * Bump Standards-Version to 3.9.3: no changes needed.
+  * d/control: Don't use nonexistent dlopenjl:Recommends substvar,
+    replaced by dlopenhl:Recommends.
+  * d/*.{prerm,postrm}: Use set -e inside script instead of sh -e shebang.
+  * Cleanup lintian-overrides.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Sun, 26 Feb 2012 14:00:31 +0100
+ -- Damien Raude-Morvan <drazzib@debian.org>  Wed, 29 Feb 2012 00:52:49 +0100
 
 openjdk-7 (7~u3-2.1-1ubuntu2) precise; urgency=low
 

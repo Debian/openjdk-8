@@ -1,0 +1,27 @@
+--- openjdk/hotspot/make/linux/makefiles/vm.make.orig
++++ openjdk/hotspot/make/linux/makefiles/vm.make
+@@ -114,7 +114,7 @@
+ 
+ # Extra flags from gnumake's invocation or environment
+ CFLAGS += $(EXTRA_CFLAGS)
+-LFLAGS += $(EXTRA_CFLAGS)
++LFLAGS += $(EXTRA_LFLAGS)
+ 
+ # Don't set excutable bit on stack segment
+ # the same could be done by separate execstack command
+--- openjdk/jdk/make/common/Defs.gmk.orig
++++ openjdk/jdk/make/common/Defs.gmk
+@@ -507,10 +507,10 @@
+ #
+ ASFLAGS         = $(ASFLAGS_$(VARIANT)) $(ASFLAGS_COMMON) $(OTHER_ASFLAGS)
+ CFLAGS          = $(CFLAGS_$(VARIANT)/BYFILE)   $(CFLAGS_COMMON) $(OTHER_CFLAGS) $(EXTRA_CFLAGS)
+-CXXFLAGS        = $(CXXFLAGS_$(VARIANT)/BYFILE) $(CXXFLAGS_COMMON) $(OTHER_CXXFLAGS) $(EXTRA_CFLAGS)
++CXXFLAGS        = $(CXXFLAGS_$(VARIANT)/BYFILE) $(CXXFLAGS_COMMON) $(OTHER_CXXFLAGS) $(EXTRA_CXXFLAGS)
+ CPPFLAGS        = $(CPPFLAGS_$(VARIANT)) $(CPPFLAGS_COMMON) $(OTHER_CPPFLAGS) \
+-		  $(DEFINES) $(OPTIONS:%=-D%)
+-LDFLAGS         = $(LDFLAGS_$(VARIANT)) $(LDFLAGS_COMMON) $(OTHER_LDFLAGS)
++		  $(DEFINES) $(OPTIONS:%=-D%) $(EXTRA_CPPFLAGS)
++LDFLAGS         = $(LDFLAGS_$(VARIANT)) $(LDFLAGS_COMMON) $(OTHER_LDFLAGS) $(EXTRA_LFLAGS)
+ LDLIBS          = $(OTHER_LDLIBS) $(LDLIBS_$(VARIANT)) $(LDLIBS_COMMON)
+ LINTFLAGS       = $(LINTFLAGS_$(VARIANT)) $(LINTFLAGS_COMMON) \
+ 		  $(OTHER_LINTFLAGS)
