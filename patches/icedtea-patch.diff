@@ -1,6 +1,22 @@
---- Makefile.am.orig	2011-10-05 21:30:28.000000000 +0200
-+++ Makefile.am	2011-10-05 21:31:01.000000000 +0200
-@@ -1841,15 +1841,15 @@
+Description: Handle EXTRA_* flags into icedtea
+ - Use -J-Xbootclasspath for javac of PulseAudio
+ - Append $EXTRA_CFLAGS to $IT_CFLAGS (use for PulseAudio native build)
+ - Append $EXTRA_LDFLAGS to PulseAudio native link
+ - Send all EXTRA_* flags to jamvm and cacao
+Author: Damien Raude-Morvan <drazzib@debian.org>
+ 
+--- Makefile.am.orig
++++ Makefile.am
+@@ -118,7 +118,7 @@
+ IT_JAVACFLAGS=$(IT_JAVAC_SETTINGS) -source $(IT_LANGUAGE_SOURCE_VERSION) -target $(IT_CLASS_TARGET_VERSION)
+ 
+ # Flags
+-IT_CFLAGS=$(CFLAGS) $(ARCHFLAG)
++IT_CFLAGS=$(CFLAGS) $(ARCHFLAG) $(EXTRA_CFLAGS)
+ 
+ # Conditional defintions
+ 
+@@ -1839,15 +1839,15 @@
  stamps/pulse-java-headers.stamp: stamps/pulse-java-class.stamp
  	mkdir -p $(PULSE_JAVA_NATIVE_BUILDDIR)
  	$(BOOT_DIR)/bin/javah -d $(PULSE_JAVA_NATIVE_BUILDDIR) -classpath $(PULSE_JAVA_CLASS_DIR) \
@@ -21,3 +37,32 @@
  	mkdir -p stamps
  	touch $@
  
+@@ -1856,7 +1856,7 @@
+ 	 -I$(PULSE_JAVA_NATIVE_BUILDDIR) -o $@ -c $<
+ 
+ $(PULSE_JAVA_NATIVE_BUILDDIR)/libpulse-java.so: $(PULSE_JAVA_NATIVE_OBJECTS)
+-	$(CC) $(LDFLAGS) -shared $(PULSE_JAVA_NATIVE_OBJECTS) $(LIBPULSE_LIBS) \
++	$(CC) $(LDFLAGS) $(EXTRA_LDFLAGS) -shared $(PULSE_JAVA_NATIVE_OBJECTS) $(LIBPULSE_LIBS) \
+ 	 -o $(PULSE_JAVA_NATIVE_BUILDDIR)/libpulse-java.so
+ 
+ endif
+@@ -1924,7 +1924,8 @@
+ if BUILD_JAMVM
+ 	cd jamvm/jamvm && \
+ 	./autogen.sh --with-java-runtime-library=openjdk \
+-	  --prefix=$(abs_top_builddir)/jamvm/install ; \
++	  --prefix=$(abs_top_builddir)/jamvm/install \
++	  CFLAGS='$(EXTRA_CFLAGS)' LDFLAGS='$(EXTRA_LFLAGS)' CPPFLAGS='$(EXTRA_CPPFLAGS)' CXXFLAGS='$(EXTRA_CXXFLAGS)'; \
+ 	$(MAKE) ; \
+ 	$(MAKE) install
+ 	mkdir -p $(abs_top_builddir)/jamvm/install/hotspot/jre/lib/$(INSTALL_ARCH_DIR)/server
+@@ -1993,7 +1994,8 @@
+ 	  --with-java-runtime-library=openjdk7 \
+ 	  --with-java-runtime-library-prefix=$(abs_top_builddir)/openjdk \
+ 	  --with-java-runtime-library-classes=$(RUNTIME) \
+-	  --enable-jre-layout $(CACAO_CONFIGURE_ARGS); \
++	  --enable-jre-layout $(CACAO_CONFIGURE_ARGS) \
++	  CFLAGS='$(EXTRA_CFLAGS)' LDFLAGS='$(EXTRA_LDFLAGS)' CPPFLAGS='$(EXTRA_CPPFLAGS)' CXXFLAGS='$(EXTRA_CXXFLAGS)'; \
+ 	$(ARCH_PREFIX) $(MAKE) -j$(PARALLEL_JOBS) install
+ 	ln -sf server $(abs_top_builddir)/cacao/install/jre/lib/$(INSTALL_ARCH_DIR)/client
+ 	touch $(abs_top_builddir)/cacao/install/jre/lib/$(INSTALL_ARCH_DIR)/server/Xusage.txt

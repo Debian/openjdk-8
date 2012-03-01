@@ -204,17 +204,15 @@ OPENJDK_SRC_ZIP = openjdk-7-ea-src-$(OPENJDK_VERSION)-25_mar_2010-dfsg.tar.gz
 req_openjdk_bd_ver = 6b18
 req_openjdk_ver = 7~b130~pre0
 
-# For all (cacao, jamvm and default g++...)
-export CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
-export CFLAGS := $(shell dpkg-buildflags --get CFLAGS)
-export CXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS)
-export LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
-# Specific to Hotspot (from hotspot/make/linux/makefiles/vm.make)
-# and JDK (from jdk/make/common/Defs.gmk)
+# DEB_XXX_MAINT_STRIP: disable override of O2 opt level and debug
+# as this is already done by upstream.
+#
+# Hint for Hotspot: hotspot/make/linux/makefiles/vm.make
+# Hint for JDK: jdk/make/common/Defs.gmk
 export EXTRA_CPPFLAGS := $(shell dpkg-buildflags --get CPPFLAGS)
-export EXTRA_CFLAGS := $(shell dpkg-buildflags --get CFLAGS)
-export EXTRA_CXXFLAGS := $(shell dpkg-buildflags --get CXXFLAGS)
-export EXTRA_LFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
+export EXTRA_CFLAGS := $(shell DEB_CFLAGS_MAINT_STRIP="-g -O2" dpkg-buildflags --get CFLAGS) $(EXTRA_CPPFLAGS)
+export EXTRA_CXXFLAGS := $(shell DEB_CXXFLAGS_MAINT_STRIP="-g -O2" dpkg-buildflags --get CXXFLAGS)
+export EXTRA_LDFLAGS := $(shell dpkg-buildflags --get LDFLAGS)
 
 # This section should be in sync with "bd_gcc" definition
 ifneq (,$(filter $(distrel),dapper))
