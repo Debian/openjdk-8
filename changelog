@@ -1,10 +1,15 @@
 openjdk-7 (7~u3-2.1-3) UNRELEASED; urgency=low
 
-  * Improve handling of dpkg-buildflags: don't overwrite CFLAGS
-    of hotspot but use EXTRA_* flags into icedtea Makefile.
+  * d/rules,Makefile.am: Improve handling of dpkg-buildflags: don't overwrite
+    CFLAGS of hotspot but use EXTRA_* flags into icedtea and openjdk Makefile.
     (Closes: #661695).
+  * d/rules: Build everything with -03 opt level (jamvm, cacao and jdk)
+  * d/patches/kfreebsd-support-*.diff: Refresh kfreebsd patches and
+    fix FTBFS on k-i386 (ie. at least on a sid VM).
+  * Backport S7104625 as d/patches/icedtea7-forest-jdk_7104625*.patch
+    to check for logging to prevent wasted CPU (Closes: #651423).
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Fri, 02 Mar 2012 00:16:00 +0100
+ -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 06 Mar 2012 00:46:00 +0100
 
 openjdk-7 (7~u3-2.1-2) unstable; urgency=low
 

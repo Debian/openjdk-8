@@ -1,6 +1,7 @@
 Description: Initial GNU/kFreeBSD support for openjdk-7 (Hotspot part)
  - Alter build system to consider GNU/kFreeBSD like linux
    since this port is libc based.
+   Also treat i386 arch has i686 (uname -m return i386 on BSD*)
    openjdk/hotspot/make/defs.make
  - Use LOCAL_PEERCRED (from kFreeBSD kernel) instead of
    SO_PEERCRED and alter related structs.
@@ -20,10 +21,8 @@ Description: Initial GNU/kFreeBSD support for openjdk-7 (Hotspot part)
    openjdk/hotspot/src/share/vm/memory/allocation.hpp
    openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp
 Author: Damien Raude-Morvan <drazzib@debian.org>
-Last-Update: 2011-08-05
+Last-Update: 2012-03-05
 Forwarded: no
-Index: openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c
-===================================================================
 --- openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c.orig
 +++ openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c
 @@ -316,7 +316,7 @@
@@ -98,8 +97,6 @@ Index: openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c
  #endif /* amd64 */
  
  #if defined(sparc) || defined(sparcv9)
-Index: openjdk/hotspot/agent/src/os/linux/libproc.h
-===================================================================
 --- openjdk/hotspot/agent/src/os/linux/libproc.h.orig
 +++ openjdk/hotspot/agent/src/os/linux/libproc.h
 @@ -27,6 +27,10 @@
@@ -124,8 +121,6 @@ Index: openjdk/hotspot/agent/src/os/linux/libproc.h
  // This C bool type must be int for compatibility with Linux calls and
  // it would be a mistake to equivalence it to C++ bool on many platforms
  
-Index: openjdk/hotspot/agent/src/os/linux/ps_core.c
-===================================================================
 --- openjdk/hotspot/agent/src/os/linux/ps_core.c.orig
 +++ openjdk/hotspot/agent/src/os/linux/ps_core.c
 @@ -539,11 +539,16 @@
@@ -195,8 +190,6 @@ Index: openjdk/hotspot/agent/src/os/linux/ps_core.c
  #endif
     }
  
-Index: openjdk/hotspot/agent/src/os/linux/ps_proc.c
-===================================================================
 --- openjdk/hotspot/agent/src/os/linux/ps_proc.c.orig
 +++ openjdk/hotspot/agent/src/os/linux/ps_proc.c
 @@ -37,6 +37,18 @@
@@ -329,8 +322,6 @@ Index: openjdk/hotspot/agent/src/os/linux/ps_proc.c
      print_debug("ptrace(PTRACE_DETACH, ..) failed for %d\n", pid);
      return false;
    } else {
-Index: openjdk/hotspot/make/defs.make
-===================================================================
 --- openjdk/hotspot/make/defs.make.orig
 +++ openjdk/hotspot/make/defs.make
 @@ -132,6 +132,10 @@
@@ -344,8 +335,6 @@ Index: openjdk/hotspot/make/defs.make
  # Determinations of default make arguments and platform specific settings
  MAKE_ARGS=
  
-Index: openjdk/hotspot/make/linux/Makefile
-===================================================================
 --- openjdk/hotspot/make/linux/Makefile.orig
 +++ openjdk/hotspot/make/linux/Makefile
 @@ -234,6 +234,9 @@
@@ -358,8 +347,17 @@ Index: openjdk/hotspot/make/linux/Makefile
  
  check_os_version:
  ifeq ($(DISABLE_HOTSPOT_OS_VERSION_CHECK)$(EMPTY_IF_NOT_SUPPORTED),)
-Index: openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp
-===================================================================
+--- openjdk/hotspot/make/linux/makefiles/defs.make.orig
++++ openjdk/hotspot/make/linux/makefiles/defs.make
+@@ -91,7 +91,7 @@
+ endif
+ 
+ # i686
+-ifeq ($(ARCH), i686)
++ifneq (,$(filter i686 i386, $(ARCH)))
+   ARCH_DATA_MODEL  = 32
+   PLATFORM         = linux-i586
+   VM_PLATFORM      = linux_i486
 --- openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp.orig
 +++ openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp
 @@ -39,6 +39,10 @@
@@ -406,8 +404,6 @@ Index: openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp
      }
  
      // peer credential look okay so we read the request
-Index: openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp
-===================================================================
 --- openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp.orig
 +++ openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp
 @@ -169,7 +169,9 @@
@@ -420,8 +416,6 @@ Index: openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp
  #ifdef SIGSYS
    "SYS",        SIGSYS          /* Bad system call. Only on some Linuxen! */
  #endif
-Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
-===================================================================
 --- openjdk/hotspot/src/os/linux/vm/os_linux.cpp.orig
 +++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp
 @@ -115,8 +115,13 @@
@@ -531,8 +525,6 @@ Index: openjdk/hotspot/src/os/linux/vm/os_linux.cpp
  
      // execve failed
      _exit(-1);
-Index: openjdk/hotspot/src/os/posix/launcher/java_md.c
-===================================================================
 --- openjdk/hotspot/src/os/posix/launcher/java_md.c.orig
 +++ openjdk/hotspot/src/os/posix/launcher/java_md.c
 @@ -41,7 +41,7 @@
@@ -589,8 +581,6 @@ Index: openjdk/hotspot/src/os/posix/launcher/java_md.c
      pthread_t tid;
      pthread_attr_t attr;
      pthread_attr_init(&attr);
-Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
-===================================================================
 --- openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp.orig
 +++ openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
 @@ -81,6 +81,7 @@
@@ -830,8 +820,6 @@ Index: openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
  
    st->cr();
  }
-Index: openjdk/hotspot/src/share/vm/memory/allocation.hpp
-===================================================================
 --- openjdk/hotspot/src/share/vm/memory/allocation.hpp.orig
 +++ openjdk/hotspot/src/share/vm/memory/allocation.hpp
 @@ -218,9 +218,9 @@
@@ -847,8 +835,6 @@ Index: openjdk/hotspot/src/share/vm/memory/allocation.hpp
   }
  
   public:
-Index: openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp
-===================================================================
 --- openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp.orig
 +++ openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp
 @@ -970,11 +970,11 @@

@@ -5,8 +5,6 @@ Description: Initial GNU/kFreeBSD support for openjdk-7 (Corba part)
 Author: Damien Raude-Morvan <drazzib@debian.org>
 Last-Update: 2011-06-28
 Forwarded: no
-Index: openjdk/corba/make/common/shared/Platform.gmk
-===================================================================
 --- openjdk/corba/make/common/shared/Platform.gmk.orig
 +++ openjdk/corba/make/common/shared/Platform.gmk
 @@ -147,7 +147,7 @@
