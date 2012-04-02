@@ -1,5 +1,9 @@
 openjdk-7 (7~u3-2.1-4) UNRELEASED; urgency=low
 
+  [ Matthias Klose ]
+  * Don't install the binary fontconfig file.
+
+  [ Damien Raude-Morvan ]
   * Remove libxp-dev check in configure.ac, it's not needed anymore
     (Closes: #657260) and so drop build dependency on libxp-dev.
   * Fix FTBFS with glib 2.32 by adding explicit dependency gthread-2.0.pc

@@ -382,6 +382,9 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/enumipv6-fix.patch \
 	debian/patches/icedtea7-forest-jdk_7104625-XEvent_wrap_logging_calls_with_if.patch
 
+#	debian/patches/gcc-lto.diff \
+#	debian/patches/gcc-no-visibility-hidden.diff \
+
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
 
@@ -1542,8 +1545,7 @@ endif
 
 	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.properties.src \
 		$(d)/$(etcdir)/fontconfig.properties
-	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.bfc \
-		$(d)/$(etcdir)/fontconfig.bfc
+	rm -f $(d)/$(basedir)/jre/lib/fontconfig*.bfc
 
 	: # remove files which we do not want to distribute
 	rm -f $(d)/$(basedir)/jre/lib/fontconfig*.properties.src
