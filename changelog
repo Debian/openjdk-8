@@ -1,3 +1,13 @@
+openjdk-7 (7~u3-2.1-4) UNRELEASED; urgency=low
+
+  * Remove libxp-dev check in configure.ac, it's not needed anymore
+    (Closes: #657260) and so drop build dependency on libxp-dev.
+  * Fix FTBFS with glib 2.32 by adding explicit dependency gthread-2.0.pc
+    (Closes: #665666).
+  * Use libpng-dev instead of libpng12-dev for wheezy/sid (Closes: #662453).
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 03 Apr 2012 00:45:28 +0200
+
 openjdk-7 (7~u3-2.1-3) unstable; urgency=low
 
   * d/rules,Makefile.am: Improve handling of dpkg-buildflags: don't overwrite
