@@ -1,4 +1,4 @@
-openjdk-7 (7~u3-2.1-4) UNRELEASED; urgency=low
+openjdk-7 (7~u3-2.1-4) unstable; urgency=low
 
   [ Matthias Klose ]
   * Don't install the binary fontconfig file.
@@ -10,7 +10,7 @@ openjdk-7 (7~u3-2.1-4) UNRELEASED; urgency=low
     (Closes: #665666).
   * Use libpng-dev instead of libpng12-dev for wheezy/sid (Closes: #662453).
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Tue, 03 Apr 2012 00:45:28 +0200
+ -- Damien Raude-Morvan <drazzib@debian.org>  Mon, 09 Apr 2012 00:21:20 +0200
 
 openjdk-7 (7~u3-2.1-3) unstable; urgency=low
 
