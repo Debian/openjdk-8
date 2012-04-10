@@ -1,0 +1,31 @@
+--- openjdk/jdk/src/solaris/classes/sun/security/smartcardio/PlatformPCSC.java~	2011-11-14 23:12:15.000000000 +0100
++++ openjdk/jdk/src/solaris/classes/sun/security/smartcardio/PlatformPCSC.java	2012-04-10 12:26:44.633272023 +0200
+@@ -48,6 +48,7 @@
+ 
+     private final static String PROP_NAME = "sun.security.smartcardio.library";
+ 
++    private final static String LIB0 = "libpcsclite.so.1";
+     private final static String LIB1 = "/usr/$LIBISA/libpcsclite.so";
+     private final static String LIB2 = "/usr/local/$LIBISA/libpcsclite.so";
+ 
+@@ -103,17 +104,9 @@
+         if (lib.length() != 0) {
+             return lib;
+         }
+-        lib = expand(LIB1);
+-        if (new File(lib).isFile()) {
+-            // if LIB1 exists, use that
+-            return lib;
+-        }
+-        lib = expand(LIB2);
+-        if (new File(lib).isFile()) {
+-            // if LIB2 exists, use that
+-            return lib;
+-        }
+-        throw new IOException("No PC/SC library found on this system");
++	// let dlopen do the work
++	lib = LIB0;
++	return lib;
+     }
+ 
+     private static native void initialize(String libraryName);

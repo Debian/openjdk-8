@@ -179,7 +179,7 @@
 +#sequence.fallback=uminghk,shanheisun,wqy-zenhei,japanese-ipafont-gothic,japanese-vlgothic,japanese-sazanami,korean-un,bengali,gujarati,hindi,oriya,punjabi,malayalam,tamil,telugu,sinhala
 +sequence.fallback=wqy-microhei,uminghk,shanheisun,wqy-zenhei,japanese-ipafont-gothic,japanese-vlgothic,japanese-sazanami,korean-nanumcoding,korean-nanum,bengali,gujarati,hindi,oriya,punjabi,tamil,telugu
 +
-++sequence.fallback=wqy-microhei,uminghk,shanheisun,wqy-zenhei,japanese-ipafont-gothic,japanese-ipafont-mincho,japanese-vlgothic,japanese-sazanami,korean-un,korean-baekmuk,bengali,gujarati,hindi,oriya,punjabi,tamil,telugu
++sequence.fallback=wqy-microhei,uminghk,shanheisun,wqy-zenhei,japanese-ipafont-gothic,japanese-ipafont-mincho,japanese-vlgothic,japanese-sazanami,korean-un,korean-baekmuk,bengali,gujarati,hindi,oriya,punjabi,tamil,telugu
  
  # Exclusion Ranges
  

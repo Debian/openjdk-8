@@ -255,13 +255,8 @@ else ifneq (,$(filter $(distrel),natty))
   export CXX = g++-4.5
   GCJ_SUFFIX = -4.5
 else ifneq (,$(filter $(distrel),wheezy sid))
-  export CC = gcc-4.6
-  export CXX = g++-4.6
-  ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel sparc sparc64))
-    export CC = gcc-4.4
-    export CXX = g++-4.4
-    GCJ_SUFFIX = -4.4
-  endif
+  export CC = gcc-4.7
+  export CXX = g++-4.7
 else
   export CC = gcc-4.6
   export CXX = g++-4.6
@@ -378,8 +373,8 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/sparc-stubgenerator.diff \
 	debian/patches/zero-fpu-control-is-noop.diff \
 	debian/patches/zero-missing-headers.diff \
-	debian/patches/hsx23-zero.patch \
 	debian/patches/enumipv6-fix.patch \
+	debian/patches/libpcsclite-dlopen.diff \
 	debian/patches/icedtea7-forest-jdk_7104625-XEvent_wrap_logging_calls_with_if.patch
 
 #	debian/patches/gcc-lto.diff \
@@ -648,9 +643,9 @@ ifneq (,$(stage1_gcj_archs))
 	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
 	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
   endif
-  ifneq (,$(filter $(distrel),wheezy sid))
-    bd_bootstrap += gcj-4.4-jdk [mips mipsel sparc sparc64], g++-4.4 [mips mipsel sparc sparc64],
-  endif
+  #ifneq (,$(filter $(distrel),wheezy sid))
+  #  bd_bootstrap += gcj-4.4-jdk [mips mipsel sparc sparc64], g++-4.4 [mips mipsel sparc sparc64],
+  #endif
 endif
 ifneq (,$(stage1_openjdk_archs))
   bd_bootstrap += \
@@ -672,19 +667,16 @@ else ifneq (,$(filter $(distrel),squeeze karmic lucid maverick))
   bd_gcc = g++-4.4 (>= 4.4.1),
 else ifneq (,$(filter $(distrel),natty))
   bd_gcc = g++-4.5,
-else
+else ifneq (,$(filter $(distrel), oneiric precise))
   bd_gcc = g++-4.6,
+else
+  bd_gcc = g++-4.7,
 endif
 bd_syslibs = zlib1g-dev, libattr1-dev,
-ifneq (,$(filter $(distrel),wheezy sid))
-  bd_syslibs += libpng-dev,
-else
-  bd_syslibs += libpng12-dev,
-endif
 ifneq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
-  bd_syslibs += libjpeg62-dev,
+  bd_syslibs += libpng12-dev, libjpeg62-dev,
 else
-  bd_syslibs += libjpeg8-dev,
+  bd_syslibs += libpng-dev, libjpeg8-dev,
 endif
 bd_syslibs += \
 	libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev),
@@ -782,6 +774,7 @@ ifneq ($(with_nss),no)
     dlopen_hl_depends += , libnss3-1d (>= 3.12.9+ckbi-1.82-0ubuntu4)
   endif
 endif
+dlopen_hl_depends += , libpcsclite1
 dlopen_hl_recommends =
 dlopen_jre_depends = \
 	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
@@ -791,10 +784,13 @@ dlopen_jre_recommends =
 plugin_name = IcedTeaPlugin.so
 browser_plugin_dirs = mozilla
 
+# .desktop files need to be multiarch installable
 java_launcher = /$(basedir)/bin/java
+java_launcher = /usr/bin/java
 ifeq ($(distribution),Ubuntu)
   ifeq (,$(filter $(distrel),karmic jaunty intrepid hardy gutsy feisty edgy dapper))
     java_launcher = cautious-launcher %f /$(basedir)/bin/java
+    java_launcher = cautious-launcher %f /usr/bin/java
   endif
 endif
 
@@ -808,6 +804,8 @@ endif
 ifeq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid jaunty intrepid hardy gutsy feisty edgy dapper))
   cfk_fonts = fonts-nanum,
   cjk_fonts += fonts-ipafont-gothic, fonts-ipafont-mincho,
+  # FIXME: find out why this b-d is needed, the fontconfig compiler fails without it
+  bd_openjdk += fonts-ipafont-mincho,
 else
   cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
   cjk_fonts += ttf-sazanami-gothic | ttf-kochi-gothic,
@@ -1702,8 +1700,6 @@ endif
 		usr/share/mime-info \
 		usr/share/pixmaps
 
-# FIXME: desktop and menu files not ready for multiarch. #658321
-ifeq (,$(DEB_HOST_MULTIARCH))
 	: # add GNOME stuff
 	cp -p debian/$(basename)-policytool.desktop \
 	      $(d_jre)/usr/share/applications/
@@ -1716,7 +1712,6 @@ ifeq (,$(DEB_HOST_MULTIARCH))
 	  cp debian/$(basename)-$$i.keys $(d_jre)/usr/share/mime-info/; \
 	  cp debian/$(basename)-$$i.mime $(d_jre)/usr/share/mime-info/; \
 	done
-endif
 
 	cp -p debian/sun_java.xpm \
 		$(d_jre)/usr/share/pixmaps/$(basename).xpm

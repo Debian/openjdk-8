@@ -2,6 +2,6 @@
 	needs="x11"\
 	section="Applications/System/Administration"\
 	title="@vendor@ Java @RELEASE@ Console"\
-	command="/@basedir@/bin/jconsole"\
+	command="/usr/bin/jconsole"\
 	icon="/usr/share/pixmaps/@basename@.xpm"\
 	hints="Java2"
