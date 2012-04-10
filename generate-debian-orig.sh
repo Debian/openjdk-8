@@ -4,7 +4,7 @@ tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz l
 jamvmtb=jamvm-4617da717ecb05654ea5bb9572338061106a414d.tar.gz
 cacaotb=cacao-a567bcb7f589.tar.gz
 tarballdir=7u3
-version=7~u3-2.1
+version=7~u3-2.1.1~pre1
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
@@ -49,17 +49,17 @@ else
       sh autogen.sh
       rm -rf autom4te.cache
     )
-    rm -rf $pkgdir.orig/.hg
     cp -a $pkgdir.orig $pkgdir
+    rm -rf $pkgdir.orig/.hg
 fi
 
 echo "Build debian diff in $pkgdir/"
 cp -a $debian_checkout $pkgdir/debian
-rm -rf $pkgdir/debian/.bzr
 (
   cd $pkgdir
   debian/update-shasum.sh
   debian/update-hgrev.sh
+  ls
   patch -p0 < debian/patches/icedtea-patch.diff
   sh autogen.sh
   rm -rf autom4te.cache
