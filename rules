@@ -364,7 +364,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/zero-only-use-floating-point-if-floating-poi.patch \
 	debian/patches/icedtea-4953367.patch \
 	debian/patches/fontconfig-wqy-microhei.patch \
-	$(if $(filter $(DEB_HOST_ARCH), amd64 i386),,debian/patches/hotspot-no-werror.diff) \
+	debian/patches/hotspot-no-werror.diff \
 	debian/patches/hotspot-s390.diff \
 	debian/patches/s390_hotspot_fix.diff \
 	debian/patches/hotspot-sparc.diff \
@@ -375,6 +375,8 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/zero-missing-headers.diff \
 	debian/patches/enumipv6-fix.patch \
 	debian/patches/libpcsclite-dlopen.diff \
+	debian/patches/arm-thumb-fix.diff \
+	debian/patches/gcc-4.7.diff \
 	debian/patches/icedtea7-forest-jdk_7104625-XEvent_wrap_logging_calls_with_if.patch
 
 #	debian/patches/gcc-lto.diff \

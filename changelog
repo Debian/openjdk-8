@@ -1,4 +1,4 @@
-openjdk-7 (7~u3-2.1.1~pre1-1) UNRELEASED; urgency=low
+openjdk-7 (7~u3-2.1.1~pre1-1) unstable; urgency=low
 
   * Update from the IcedTea7-2.1 release branch (20110410).
   * Install desktop files again, using the common /usr/bin/java
@@ -7,8 +7,9 @@ openjdk-7 (7~u3-2.1.1~pre1-1) UNRELEASED; urgency=low
   * Let dlopen handle finding the libpcsclite library. LP: #898689.
   * Build-depend on fonts-ipafont-mincho, fixing a build failure in the
     fontconfig compiler (find out why it breaks ...).
-  * Build using gcc-4.7/gcj-4.7 for sid/wheezy.
+  * Build using gcc-4.7/gcj-4.7 for sid/wheezy, fix build failure.
   * Remove `-icedtea' suffix from the release identification.
+  * Fix arm thumb build, update taken from IcedTea6.
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 10 Apr 2012 14:11:09 +0200
 

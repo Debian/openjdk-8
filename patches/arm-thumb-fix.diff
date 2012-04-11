@@ -1,0 +1,10 @@
+--- openjdk/hotspot/src/cpu/zero/vm/arm_cas.S	2012-03-15 14:07:01.000000000 +0100
++++ openjdk/hotspot/src/cpu/zero/vm/arm_cas.S	2012-04-10 18:05:46.393107662 +0200
+@@ -6,6 +6,7 @@
+ 	.pushsection .text
+ 	.global arm_val_compare_and_swap_long
+ #ifdef __thumb__
++	.syntax	unified
+ 	.thumb_func
+ #endif
+ 	.type arm_val_compare_and_swap_long, %function
