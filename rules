@@ -90,7 +90,7 @@ ifeq ($(STAGE1_JAVA),gcj)
 	--with-xalan2-serializer-jar=/usr/share/java/serializer.jar \
 	--with-openjdk-src-zip=$(OPENJDK_SRC_ZIP)
   build_target = icedtea-against-icedtea
-  req_openjdk_ver = $${binary:Version}
+  req_openjdk_ver = 6b08
 else ifeq ($(STAGE1_JAVA),openjdk)
   CONFIGURE_ARGS = \
 	$(if $(with_plugin),,--disable-gcjwebplugin) \
