@@ -70,7 +70,6 @@ Description: OpenJDK Java runtime (architecture independent libraries)
 
 Package: @basename@-demo
 Architecture: any
-Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre (@op@ @pkg_version@), ${shlibs:Depends}, ${misc:Depends}

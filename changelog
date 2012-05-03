@@ -1,3 +1,31 @@
+openjdk-7 (7~u3-2.1.1~pre1-2) unstable; urgency=low
+
+  * Don't mark the -demo package as Multi-Arch same. Closes: #670038.
+  * Build using gcc-4.4 on mips, mipsel.
+  * Build again with older gcj version on s390 (4.6).
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 03 May 2012 10:44:20 +0200
+
+openjdk-7 (7~u3-2.1.1~pre1-1ubuntu3) precise-proposed; urgency=low
+
+  * Default to the ARM assembler interpreter instead to JamVM on
+    ARM. LP: #993380.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 02 May 2012 17:58:20 +0200
+
+openjdk-7 (7~u3-2.1.1~pre1-1ubuntu2) precise; urgency=low
+
+  * Use the /usr/bin path for the policytool desktop file. LP: #980205.
+    Closes: #670037.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 12 Apr 2012 23:29:06 +0200
+
+openjdk-7 (7~u3-2.1.1~pre1-1ubuntu1) precise; urgency=low
+
+  * Regenerate the control file.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 11 Apr 2012 07:21:41 +0200
+
 openjdk-7 (7~u3-2.1.1~pre1-1) unstable; urgency=low
 
   * Update from the IcedTea7-2.1 release branch (20110410).

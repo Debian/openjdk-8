@@ -143,7 +143,7 @@ ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy dapper))
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
 endif
 ifeq (,$(filter $(distrel),wheezy sid squeeze lenny maverick natty maverick lucid karmic hardy dapper))
-  jamvm_defaults = armel armhf
+  jamvm_defaults =
 endif
 
 # requires patched llvm-2.6
@@ -257,10 +257,22 @@ else ifneq (,$(filter $(distrel),natty))
 else ifneq (,$(filter $(distrel),wheezy sid))
   export CC = gcc-4.7
   export CXX = g++-4.7
-else
+  GCJ_SUFFIX = -4.7
+  ifneq (,$(filter $(DEB_HOST_ARCH), mips mipsel))
+    export CC = gcc-4.4
+    export CXX = g++-4.4
+  endif
+  ifneq (,$(filter $(DEB_HOST_ARCH), s390))
+    GCJ_SUFFIX = -4.6
+  endif
+else ifneq (,$(filter $(distrel),precise))
   export CC = gcc-4.6
   export CXX = g++-4.6
-# GCJ_SUFFIX = -4.6
+  GCJ_SUFFIX = -4.6
+else
+  export CC = gcc-4.7
+  export CXX = g++-4.7
+  GCJ_SUFFIX = -4.7
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), armel armhf))
@@ -645,9 +657,9 @@ ifneq (,$(stage1_gcj_archs))
 	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
 	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
   endif
-  #ifneq (,$(filter $(distrel),wheezy sid))
-  #  bd_bootstrap += gcj-4.4-jdk [mips mipsel sparc sparc64], g++-4.4 [mips mipsel sparc sparc64],
-  #endif
+  ifneq (,$(filter $(distrel),wheezy sid))
+    bd_bootstrap += gcj-4.6-jdk [s390],
+  endif
 endif
 ifneq (,$(stage1_openjdk_archs))
   bd_bootstrap += \
@@ -671,6 +683,8 @@ else ifneq (,$(filter $(distrel),natty))
   bd_gcc = g++-4.5,
 else ifneq (,$(filter $(distrel), oneiric precise))
   bd_gcc = g++-4.6,
+else ifneq (,$(filter $(distrel), sid wheezy))
+  bd_gcc = g++-4.7, g++-4.4 [mips mipsel],
 else
   bd_gcc = g++-4.7,
 endif
