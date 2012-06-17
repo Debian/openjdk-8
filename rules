@@ -380,6 +380,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/hotspot-s390.diff \
 	debian/patches/s390_hotspot_fix.diff \
 	debian/patches/hotspot-sparc.diff \
+	debian/patches/icc_loading_with_symlink.diff \
 	debian/patches/hotspot-sparc-arch.diff \
 	debian/patches/sparc-trapsfix.patch \
 	debian/patches/sparc-stubgenerator.diff \
@@ -387,9 +388,8 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/zero-missing-headers.diff \
 	debian/patches/enumipv6-fix.patch \
 	debian/patches/libpcsclite-dlopen.diff \
-	debian/patches/arm-thumb-fix.diff \
-	debian/patches/gcc-4.7.diff \
-	debian/patches/icedtea7-forest-jdk_7104625-XEvent_wrap_logging_calls_with_if.patch
+	debian/patches/icedtea7-forest-jdk_7104625-XEvent_wrap_logging_calls_with_if.patch \
+	debian/patches/jni_md_h_JNIEXPORT_visibility.patch
 
 #	debian/patches/gcc-lto.diff \
 #	debian/patches/gcc-no-visibility-hidden.diff \
@@ -792,10 +792,8 @@ ifneq ($(with_nss),no)
 endif
 dlopen_hl_depends += , libpcsclite1
 dlopen_hl_recommends =
-dlopen_jre_depends = \
-	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
-	libxrandr2, libxinerama1, libgl1-mesa-glx
-dlopen_jre_recommends =
+dlopen_jre_depends = libgtk2.0-0, libxrandr2, libxinerama1, libgl1-mesa-glx
+dlopen_jre_recommends = libgnome2-0, libgnomevfs2-0, libgconf2-4
 
 plugin_name = IcedTeaPlugin.so
 browser_plugin_dirs = mozilla

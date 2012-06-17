@@ -21,7 +21,7 @@ Pre-requisites:
  (cd openjdk7/; bzr pull --remember lp:~openjdk/openjdk/openjdk7)
 
 1) Clone IcedTea-7 HG:
- hg clone http://icedtea.classpath.org/hg/icedtea7 icedtea7/
+ hg clone http://icedtea.classpath.org/hg/icedtea7 icedtea-2.1.1/
    or update existing repository clone:
  (cd icedtea7/; hg pull -u)
 
@@ -29,14 +29,14 @@ Pre-requisites:
  export BUILD=7u3
  mkdir -p $BUILD/
  (
-   cd icedtea-2.1/
+   cd icedtea-2.1.1/
    sh autogen.sh && ./configure --enable-jamvm --enable-cacao
    make download
  )
  
- mv icedtea-2.1/*.tar.gz $BUILD/
+ mv icedtea-2.1.1/*.tar.gz $BUILD/
  (
-   cd icedtea-2.1/
+   cd icedtea-2.1.1/
    make distclean
  )
 
@@ -71,9 +71,9 @@ contain several flags to change how a package is compiled and built.
   * noaltjamvm: don't build alternative Jamvm VM.
 
 Sample usage:
-DEB_BUILD_OPTIONS="parallel=5 nocheck" debuild
+DEB_BUILD_OPTIONS="parallel=5 nocheck" debuild -i"(\.hg|\.bzr)"
 
  Build with 5 parallel processes and don't run mauve/jtreg test suites.
 
 This also work with cowbuilder/pbuilder:
-DEB_BUILD_OPTIONS="parallel=5 nocheck" pdebuild --logfile ../build.log --pbuilder cowbuilder
+DEB_BUILD_OPTIONS="parallel=5 nocheck" pdebuild -i"(\.hg|\.bzr)" --logfile ../build.log --pbuilder cowbuilder

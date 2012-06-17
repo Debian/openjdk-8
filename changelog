@@ -1,3 +1,38 @@
+openjdk-7 (7~u3-2.1.1-1) unstable; urgency=medium
+
+  * New upstream release with security fixes (Closes: #677486):
+    - S7079902, CVE-2012-1711: Refine CORBA data models
+    - S7110720: Issue with vm config file loadingIssue with
+      vm config file loading
+    - S7143606, CVE-2012-1717: File.createTempFile should be improved
+      for temporary files created by the platform.
+    - S7143614, CVE-2012-1716: SynthLookAndFeel stability improvement
+    - S7143617, CVE-2012-1713: Improve fontmanager layout lookup operations
+    - S7143851, CVE-2012-1719: Improve IIOP stub and tie generation in RMIC
+    - S7143872, CVE-2012-1718: Improve certificate extension processing
+    - S7145239: Finetune package definition restriction
+    - S7152811, CVE-2012-1723: Issues in client compiler
+    - S7157609, CVE-2012-1724: Issues with loop
+    - S7160677: missing else in fix for 7152811
+    - S7160757, CVE-2012-1725: Problem with hotspot/runtime_classfile
+    - S7165628, CVE-2012-1726: Issues with
+      java.lang.invoke.MethodHandles.Lookup
+  * Patches merged upstream:
+    - debian/patches/arm-thumb-fix.diff
+    - debian/patches/gcc-4.7.diff
+
+  [ James Page ]
+  * Cherry picked patch from openjdk-6 to fix handling of 
+    ICC profiles (LP: #888123, #888129) (Closes: #676351).
+
+  [ Damien Raude-Morvan ]
+  * Move libgnome2-0, libgnomevfs2-0, libgconf2-4 from Depends of JRE package
+    to Recommends (Closes: #661465).
+  * New jni_md_h_JNIEXPORT_visibility.patch to allow JNIEXPORT definition
+    to work with -fvisibility=hidden. (Closes: #670896).
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Mon, 11 Jun 2012 21:01:10 +0200
+
 openjdk-7 (7~u3-2.1.1~pre1-2) unstable; urgency=low
 
   * Don't mark the -demo package as Multi-Arch same. Closes: #670038.
