@@ -205,11 +205,12 @@ req_openjdk_bd_ver = 6b18
 req_openjdk_ver = 7~b130~pre0
 
 # DEB_CFLAGS_MAINT_STRIP: disable override of -O2 opt level
-# DEB_CFLAGS_MAINT_APPEND: build everything with -03 opt level (jamvm, cacao and jdk)
 dpkg_buildflags = DEB_CFLAGS_MAINT_STRIP="-O2" DEB_CXXFLAGS_MAINT_STRIP="-O2"
-ifeq (,$(findstring noopt,$(DEB_BUILD_OPTIONS))) 
-dpkg_buildflags += DEB_CFLAGS_MAINT_APPEND="-O3" DEB_CXXFLAGS_MAINT_APPEND="-O3"
-endif
+# DEB_CFLAGS_MAINT_APPEND: build everything with -03 opt level (jamvm, cacao and jdk)
+# Disabled for now: cause wrong Math.* computations, see #679292 and #678228
+#ifeq (,$(findstring noopt,$(DEB_BUILD_OPTIONS))) 
+#dpkg_buildflags += DEB_CFLAGS_MAINT_APPEND="-O3" DEB_CXXFLAGS_MAINT_APPEND="-O3"
+#endif
 dpkg_buildflags += dpkg-buildflags
 
 # For usage of EXTRA_* variables, see
@@ -389,7 +390,9 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/enumipv6-fix.patch \
 	debian/patches/libpcsclite-dlopen.diff \
 	debian/patches/icedtea7-forest-jdk_7104625-XEvent_wrap_logging_calls_with_if.patch \
-	debian/patches/jni_md_h_JNIEXPORT_visibility.patch
+	debian/patches/jni_md_h_JNIEXPORT_visibility.patch \
+	debian/patches/7130140-MouseEvent-systemout.diff \
+	debian/patches/FreetypeFontScaler_getFontMetricsNative.diff
 
 #	debian/patches/gcc-lto.diff \
 #	debian/patches/gcc-no-visibility-hidden.diff \
@@ -763,8 +766,8 @@ endif
 ifeq ($(with_nss),yes)
   ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic hardy dapper))
     bd_nss = libnss3-dev (>= 3.12.3),
-  else ifneq (,$(filter $(distrel),squeeze wheezy sid))
-    bd_nss = libnss3-dev (>= 3.12.3),
+  else ifneq (,$(filter $(distrel),wheezy sid))
+    bd_nss = libnss3-dev (>= 2:3.13.4),
   else
     bd_nss = libnss3-dev (>= 3.12.9+ckbi-1.82-0ubuntu4),
   endif
@@ -784,8 +787,8 @@ dlopen_hl_depends = \
 ifneq ($(with_nss),no)
   ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic hardy dapper))
     dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
-  else ifneq (,$(filter $(distrel),squeeze wheezy sid))
-    dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
+  else ifneq (,$(filter $(distrel), wheezy sid))
+    dlopen_hl_depends += , libnss3 (>= 2:3.13.4)
   else
     dlopen_hl_depends += , libnss3-1d (>= 3.12.9+ckbi-1.82-0ubuntu4)
   endif

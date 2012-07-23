@@ -1,3 +1,20 @@
+openjdk-7 (7~u3-2.1.1-2) unstable; urgency=low
+
+  * d/rules: On Debian Wheezy/Sid bump Build-Depends on libnss3-dev
+    (>= 2:3.13.4) and Depends on libnss3 (>= 2:3.13.4) (ie. with epoch).
+    (Closes: #679465).
+  * d/control: Suggests icedtea-7-plugin instead of icedtea6-plugin
+    (Closes: #680284).
+  * d/patches/7130140-MouseEvent-systemout.diff: Remove "MEvent. CASE!" from
+    console output. (Closes: #679036).
+  * Disable -O3 compile: cause wrong Math.* computations.
+    (Closes: #679292 and Closes: #678228).
+  * debian/patches/FreetypeFontScaler_getFontMetricsNative.diff:
+    Fix "OpenJDK returns the text height greater than font size".
+    (Closes: #657854)
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Sat, 30 Jun 2012 18:17:51 +0200
+
 openjdk-7 (7~u3-2.1.1-1) unstable; urgency=medium
 
   * New upstream release with security fixes (Closes: #677486):
