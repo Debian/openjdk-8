@@ -1,3 +1,5 @@
+# unused patch
+
 --- openjdk/hotspot/build/linux/makefiles/gcc.make~	2007-11-24 16:52:59.077912783 +0100
 +++ openjdk/hotspot/build/linux/makefiles/gcc.make	2007-11-24 17:10:26.373711002 +0100
 @@ -69,7 +69,7 @@

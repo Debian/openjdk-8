@@ -1,3 +1,5 @@
+# unused patch
+
 --- openjdk/hotspot/src/os_cpu/linux_sparc/vm/vm_version_linux_sparc.cpp.orig	2009-10-14 17:13:15.000000000 +0000
 +++ openjdk/hotspot/src/os_cpu/linux_sparc/vm/vm_version_linux_sparc.cpp	2009-11-02 13:15:17.000000000 +0000
 @@ -27,6 +27,7 @@

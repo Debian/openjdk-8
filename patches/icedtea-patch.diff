@@ -1,7 +1,7 @@
 Description: Handle EXTRA_* flags into icedtea
  - Use -J-Xbootclasspath for javac of PulseAudio
- - Append $EXTRA_CFLAGS to $IT_CFLAGS (use for PulseAudio native build)
- - Append $EXTRA_LDFLAGS to PulseAudio native link
+ - Append $EXTRA_CFLAGS_IT to $IT_CFLAGS (use for PulseAudio native build)
+ - Append $EXTRA_LDFLAGS_IT to PulseAudio native link
  - Send all EXTRA_* flags to jamvm and cacao
  - Remove `-icedtea' from the release identifier
 Author: Damien Raude-Morvan <drazzib@debian.org>, Matthias Klose <doko@ubuntu.com>
@@ -13,7 +13,7 @@ Author: Damien Raude-Morvan <drazzib@debian.org>, Matthias Klose <doko@ubuntu.co
  
  # Flags
 -IT_CFLAGS=$(CFLAGS) $(ARCHFLAG)
-+IT_CFLAGS=$(CFLAGS) $(ARCHFLAG) $(EXTRA_CFLAGS)
++IT_CFLAGS=$(CFLAGS) $(ARCHFLAG) $(EXTRA_CFLAGS_IT)
  
  # Conditional defintions
  
@@ -53,7 +53,7 @@ Author: Damien Raude-Morvan <drazzib@debian.org>, Matthias Klose <doko@ubuntu.co
  
  $(PULSE_JAVA_NATIVE_BUILDDIR)/libpulse-java.so: $(PULSE_JAVA_NATIVE_OBJECTS)
 -	$(CC) $(LDFLAGS) -shared $(PULSE_JAVA_NATIVE_OBJECTS) $(LIBPULSE_LIBS) \
-+	$(CC) $(LDFLAGS) $(EXTRA_LDFLAGS) -shared $(PULSE_JAVA_NATIVE_OBJECTS) $(LIBPULSE_LIBS) \
++	$(CC) $(LDFLAGS) $(EXTRA_LDFLAGS_IT) -shared $(PULSE_JAVA_NATIVE_OBJECTS) $(LIBPULSE_LIBS) \
  	 -o $(PULSE_JAVA_NATIVE_BUILDDIR)/libpulse-java.so
  
  endif
@@ -63,7 +63,7 @@ Author: Damien Raude-Morvan <drazzib@debian.org>, Matthias Klose <doko@ubuntu.co
  	./autogen.sh --with-java-runtime-library=openjdk \
 -	  --prefix=$(abs_top_builddir)/jamvm/install ; \
 +	  --prefix=$(abs_top_builddir)/jamvm/install \
-+	  CFLAGS='$(EXTRA_CFLAGS)' LDFLAGS='$(EXTRA_LFLAGS)' CPPFLAGS='$(EXTRA_CPPFLAGS)' CXXFLAGS='$(EXTRA_CXXFLAGS)'; \
++	  CFLAGS='$(EXTRA_CFLAGS_JAMVM)' LDFLAGS='$(EXTRA_LDFLAGS_JAMVM)' CPPFLAGS='$(EXTRA_CPPFLAGS_JAMVM)' CXXFLAGS='$(EXTRA_CXXFLAGS_JAMVM)'; \
  	$(MAKE) ; \
  	$(MAKE) install
  	mkdir -p $(abs_top_builddir)/jamvm/install/hotspot/jre/lib/$(INSTALL_ARCH_DIR)/server
@@ -73,7 +73,7 @@ Author: Damien Raude-Morvan <drazzib@debian.org>, Matthias Klose <doko@ubuntu.co
  	  --with-java-runtime-library-classes=$(RUNTIME) \
 -	  --enable-jre-layout $(CACAO_CONFIGURE_ARGS); \
 +	  --enable-jre-layout $(CACAO_CONFIGURE_ARGS) \
-+	  CFLAGS='$(EXTRA_CFLAGS)' LDFLAGS='$(EXTRA_LDFLAGS)' CPPFLAGS='$(EXTRA_CPPFLAGS)' CXXFLAGS='$(EXTRA_CXXFLAGS)'; \
++	  CFLAGS='$(EXTRA_CFLAGS_CACAO)' LDFLAGS='$(EXTRA_LDFLAGS_CACAO)' CPPFLAGS='$(EXTRA_CPPFLAGS_CACAO)' CXXFLAGS='$(EXTRA_CXXFLAGS_CACAO)'; \
  	$(ARCH_PREFIX) $(MAKE) -j$(PARALLEL_JOBS) install
  	ln -sf server $(abs_top_builddir)/cacao/install/jre/lib/$(INSTALL_ARCH_DIR)/client
  	touch $(abs_top_builddir)/cacao/install/jre/lib/$(INSTALL_ARCH_DIR)/server/Xusage.txt

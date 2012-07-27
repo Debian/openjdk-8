@@ -204,23 +204,55 @@ OPENJDK_SRC_ZIP = openjdk-7-ea-src-$(OPENJDK_VERSION)-25_mar_2010-dfsg.tar.gz
 req_openjdk_bd_ver = 6b18
 req_openjdk_ver = 7~b130~pre0
 
-# DEB_CFLAGS_MAINT_STRIP: disable override of -O2 opt level
-dpkg_buildflags = DEB_CFLAGS_MAINT_STRIP="-O2" DEB_CXXFLAGS_MAINT_STRIP="-O2"
-# DEB_CFLAGS_MAINT_APPEND: build everything with -03 opt level (jamvm, cacao and jdk)
-# Disabled for now: cause wrong Math.* computations, see #679292 and #678228
-#ifeq (,$(findstring noopt,$(DEB_BUILD_OPTIONS))) 
-#dpkg_buildflags += DEB_CFLAGS_MAINT_APPEND="-O3" DEB_CXXFLAGS_MAINT_APPEND="-O3"
-#endif
-dpkg_buildflags += dpkg-buildflags
-
-# For usage of EXTRA_* variables, see
 # for Hotspot: hotspot/make/linux/makefiles/vm.make
+# Don't overwrite Hotspot opt level :
+# -O3 is already default option for hotspot
+dpkg_buildflags_hs = DEB_CFLAGS_MAINT_STRIP="-O2" DEB_CXXFLAGS_MAINT_STRIP="-O2"
+dpkg_buildflags_hs += dpkg-buildflags
+export EXTRA_CPPFLAGS_HS := $(shell $(dpkg_buildflags_hs) --get CPPFLAGS)
+export EXTRA_CFLAGS_HS := $(shell $(dpkg_buildflags_hs) --get CFLAGS) $(shell $(dpkg_buildflags_hs) --get CPPFLAGS)
+export EXTRA_CXXFLAGS_HS := $(shell $(dpkg_buildflags_hs) --get CXXFLAGS)
+export EXTRA_LDFLAGS_HS := $(shell $(dpkg_buildflags_hs) --get LDFLAGS)
+
 # for JDK: jdk/make/common/Defs.gmk
-export EXTRA_CPPFLAGS := $(shell $(dpkg_buildflags) --get CPPFLAGS)
-# Append CPPFLAGS to CFLAGS
-export EXTRA_CFLAGS := $(shell $(dpkg_buildflags) --get CFLAGS) $(EXTRA_CPPFLAGS)
-export EXTRA_CXXFLAGS := $(shell $(dpkg_buildflags) --get CXXFLAGS)
-export EXTRA_LDFLAGS := $(shell $(dpkg_buildflags) --get LDFLAGS)
+# Don't overwrite JDK opt level :
+# 1) with forced -03, it cause wrong Math.* computations, see #679292 and #678228
+# 2) JDK already use it's own OPTIMIZATION_LEVEL variable for each module
+dpkg_buildflags_jdk = DEB_CFLAGS_MAINT_STRIP="-O2" DEB_CXXFLAGS_MAINT_STRIP="-O2"
+dpkg_buildflags_jdk += dpkg-buildflags
+export EXTRA_CPPFLAGS_JDK := $(shell $(dpkg_buildflags_jdk) --get CPPFLAGS)
+export EXTRA_CFLAGS_JDK := $(shell $(dpkg_buildflags_jdk) --get CFLAGS) $(shell $(dpkg_buildflags_jdk) --get CPPFLAGS)
+export EXTRA_CXXFLAGS_JDK := $(shell $(dpkg_buildflags_jdk) --get CXXFLAGS)
+export EXTRA_LDFLAGS_JDK := $(shell $(dpkg_buildflags_jdk) --get LDFLAGS)
+
+#for Icedtea: Makefile.am
+dpkg_buildflags_it += dpkg-buildflags
+export EXTRA_CPPFLAGS_IT := $(shell $(dpkg_buildflags_it) --get CPPFLAGS)
+export EXTRA_CFLAGS_IT := $(shell $(dpkg_buildflags_it) --get CFLAGS)
+export EXTRA_CXXFLAGS_IT := $(shell $(dpkg_buildflags_it) --get CXXFLAGS)
+export EXTRA_LDFLAGS_IT := $(shell $(dpkg_buildflags_it) --get LDFLAGS)
+
+#for JamVM: Makefile.am
+ifeq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+dpkg_buildflags_jamvm += DEB_CFLAGS_MAINT_STRIP="-O2" DEB_CXXFLAGS_MAINT_STRIP="-O2"
+dpkg_buildflags_jamvm += DEB_CFLAGS_MAINT_APPEND="-O3" DEB_CXXFLAGS_MAINT_APPEND="-O3"
+endif
+dpkg_buildflags_jamvm += dpkg-buildflags
+export EXTRA_CPPFLAGS_JAMVM := $(shell $(dpkg_buildflags_jamvm) --get CPPFLAGS)
+export EXTRA_CFLAGS_JAMVM := $(shell $(dpkg_buildflags_jamvm) --get CFLAGS)
+export EXTRA_CXXFLAGS_JAMVM := $(shell $(dpkg_buildflags_jamvm) --get CXXFLAGS)
+export EXTRA_LDFLAGS_JAMVM := $(shell $(dpkg_buildflags_jamvm) --get LDFLAGS)
+
+#for CACAO: Makefile.am
+ifeq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
+dpkg_buildflags_cacao += DEB_CFLAGS_MAINT_STRIP="-O2" DEB_CXXFLAGS_MAINT_STRIP="-O2"
+dpkg_buildflags_cacao += DEB_CFLAGS_MAINT_APPEND="-O3" DEB_CXXFLAGS_MAINT_APPEND="-O3"
+endif
+dpkg_buildflags_cacao += dpkg-buildflags
+export EXTRA_CPPFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get CPPFLAGS)
+export EXTRA_CFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get CFLAGS)
+export EXTRA_CXXFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get CXXFLAGS)
+export EXTRA_LDFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get LDFLAGS)
 
 # This section should be in sync with "bd_gcc" definition
 ifneq (,$(filter $(distrel),dapper))
@@ -415,16 +447,6 @@ endif
 
 #	debian/patches/hotspot-warn-no-errformat.diff \
 #	debian/patches/gcc-mtune-generic.diff \
-
-ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
-  DISTRIBUTION_PATCHES += \
-	$(if $(filter $(DEB_HOST_ARCH), amd64), debian/patches/gcc-jdk-opt-O2.diff) \
-	$(if $(filter $(DEB_HOST_ARCH), powerpc), debian/patches/gcc-opt-O2.diff) \
-	$(if $(filter $(DEB_HOST_ARCH), powerpcspe), debian/patches/gcc-opt-O2.diff)
-else ifeq ($(DEB_HOST_ARCH),s390)
-  # GCC PR target/41327
-  DISTRIBUTION_PATCHES += debian/patches/gcc-jdk-opt-O2.diff
-endif
 
 ifneq (,$(filter $(distrel),wheezy sid precise))
   DISTRIBUTION_PATCHES += \
