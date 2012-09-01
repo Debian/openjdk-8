@@ -1,4 +1,4 @@
---- openjdk/jdk/make/common/shared/Platform.gmk.orig
+--- openjdk/jdk/make/common/shared/Platform.gmk
 +++ openjdk/jdk/make/common/shared/Platform.gmk
 @@ -230,7 +230,7 @@
    # Suffix for file bundles used in previous release
@@ -8,8 +8,8 @@
 +  MB_OF_MEMORY := $(shell m=`free -m | fgrep Mem: | sed -e 's@\ \ *@ @g' | cut -d' ' -f2`; if [ "$$m" -lt 384 ]; then echo 384; else echo $$m; fi)
  endif
  
- # Windows with and without CYGWIN will be slightly different
---- openjdk/corba/make/common/shared/Platform.gmk.orig
+ ifeq ($(SYSTEM_UNAME), Darwin)
+--- openjdk/corba/make/common/shared/Platform.gmk
 +++ openjdk/corba/make/common/shared/Platform.gmk
 @@ -237,7 +237,7 @@
      endif
@@ -19,4 +19,4 @@
 +  MB_OF_MEMORY := $(shell m=`free -m | fgrep Mem: | sed -e 's@\ \ *@ @g' | cut -d' ' -f2`; if [ "$$m" -lt 384 ]; then echo 384; else echo $$m; fi)
  endif
  
- # Windows with and without CYGWIN will be slightly different
+ ifeq ($(SYSTEM_UNAME), FreeBSD)

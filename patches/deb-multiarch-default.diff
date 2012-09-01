@@ -1,0 +1,28 @@
+--- openjdk/hotspot/make/linux/makefiles/vm.make.orig	2012-08-29 17:49:54.416537926 +0200
++++ openjdk/hotspot/make/linux/makefiles/vm.make	2012-08-29 17:51:30.092534514 +0200
+@@ -112,6 +112,11 @@
+ endif
+ endif
+ 
++DEB_MULTIARCH := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null || true)
++ifneq (,$(DEB_MULTIARCH))
++CPPFLAGS += -DDEB_MULTIARCH="\"$(DEB_MULTIARCH)\""
++endif
++
+ ifdef DISTRIBUTION_ID
+ CPPFLAGS += -DDISTRIBUTION_ID="\"$(DISTRIBUTION_ID)\""
+ endif
+--- openjdk/hotspot/src/os/linux/vm/os_linux.cpp.orig	2012-08-29 17:49:54.000000000 +0200
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2012-08-29 17:53:00.172543797 +0200
+@@ -382,7 +382,11 @@
+  *        ...
+  *        7: The default directories, normally /lib and /usr/lib.
+  */
++#ifdef DEB_MULTIARCH
++#define DEFAULT_LIBPATH	"/usr/lib/" DEB_MULTIARCH "/jni" ":/lib/" DEB_MULTIARCH ":/usr/lib/" DEB_MULTIARCH ":/usr/lib/jni:/lib:/usr/lib"
++#else
+ #define DEFAULT_LIBPATH	"/usr/lib/jni:/lib:/usr/lib"
++#endif
+ 
+ #define EXTENSIONS_DIR  "/lib/ext"
+ #define ENDORSED_DIR    "/lib/endorsed"

@@ -1,31 +1,25 @@
 --- openjdk/jdk/src/solaris/classes/sun/awt/X11/XWM.java.orig
 +++ openjdk/jdk/src/solaris/classes/sun/awt/X11/XWM.java
-@@ -102,11 +102,14 @@
-         METACITY_WM = 11,
+@@ -103,7 +103,8 @@
          COMPIZ_WM = 12,
          LG3D_WM = 13,
--        MUTTER_WM = 14;
-+        MUTTER_WM = 14,
-+        OTHER_NONREPARENTING_WM = 15;
+         CWM_WM = 14,
+-        MUTTER_WM = 15;
++        MUTTER_WM = 15,
++        OTHER_NONREPARENTING_WM = 16;
      public String toString() {
          switch  (WMID) {
            case NO_WM:
-               return "NO WM";
-+          case OTHER_NONREPARENTING_WM:
-+              return "Other non-reparenting WM";
-           case OTHER_WM:
-               return "Other WM";
-           case OPENLOOK_WM:
-@@ -576,7 +579,7 @@
+@@ -583,7 +584,7 @@
      // TODO: according to wikipedia, compiz is now reparenting. This should
      // probably be updated.
      static boolean isNonReparentingWM() {
--        return (XWM.getWMID() == XWM.COMPIZ_WM || XWM.getWMID() == XWM.LG3D_WM);
-+        return (XWM.getWMID() == XWM.COMPIZ_WM || XWM.getWMID() == XWM.LG3D_WM || XWM.getWMID() == XWM.OTHER_NONREPARENTING_WM);
+-        return (XWM.getWMID() == XWM.COMPIZ_WM || XWM.getWMID() == XWM.LG3D_WM || XWM.getWMID() == XWM.CWM_WM);
++        return (XWM.getWMID() == XWM.COMPIZ_WM || XWM.getWMID() == XWM.LG3D_WM || XWM.getWMID() == XWM.CWM_WM || XWM.getWMID() == XWM.OTHER_NONREPARENTING_WM);
      }
  
      /*
-@@ -762,9 +765,17 @@
+@@ -771,9 +772,17 @@
               * supports WIN or _NET wm spec.
               */
              else if (l_net_protocol.active()) {
@@ -45,7 +39,7 @@
              }
              /*
               * Check for legacy WMs.
-@@ -775,6 +786,8 @@
+@@ -784,6 +793,8 @@
                  awt_wmgr = XWM.MOTIF_WM;
              } else if (isOpenLook()) {
                  awt_wmgr = XWM.OPENLOOK_WM;
@@ -54,7 +48,7 @@
              } else {
                  awt_wmgr = XWM.OTHER_WM;
              }
-@@ -1289,6 +1302,7 @@
+@@ -1298,6 +1309,7 @@
                    res = new Insets(28, 6, 6, 6);
                    break;
                case NO_WM:

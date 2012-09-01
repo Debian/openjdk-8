@@ -120,9 +120,12 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH_CPU)=%, %, \
 			$(filter $(DEB_HOST_ARCH_CPU)=%, $(archdir_map))))
 
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
+hotspot_version = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),default,zero)
 
 stage1_gcj_archs = alpha amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64
 stage1_openjdk_archs =
+#stage1_gcj_archs = alpha armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64
+#stage1_openjdk_archs = amd64
 stage1_cacao_archs =
 ifneq (,$(filter nobootstrap, $(DEB_BUILD_OPTIONS)))
   stage1_openjdk_archs := $(stage1_openjdk_archs) $(stage1_gcj_archs)
@@ -387,14 +390,13 @@ ifeq (,$(filter $(distrel), dapper))
 	debian/patches/ld-symbolic-functions.diff
 endif
 DISTRIBUTION_PATCHES += \
-	debian/patches/set-exec-name.diff \
 	debian/patches/shebang.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \
 	debian/patches/nonreparenting-wm.diff \
 	debian/patches/accessible-toolkit.patch \
-	debian/patches/fix_extra_flags.diff
+	debian/patches/fix_extra_flags-$(hotspot_version).diff
 
 ifeq ($(with_bridge),atk)
     DISTRIBUTION_PATCHES += \
@@ -404,24 +406,30 @@ else ifneq (,$(with_bridge))
 	debian/patches/java-access-bridge-security.patch
 endif
 
+ifneq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
+  DISTRIBUTION_PATCHES += \
+	debian/patches/hotspot-s390.diff \
+	debian/patches/s390_hotspot_fix.diff
+endif
+
 DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-override-redirect-compiz.patch \
 	debian/patches/zero-only-use-floating-point-if-floating-poi.patch \
 	debian/patches/icedtea-4953367.patch \
 	debian/patches/fontconfig-wqy-microhei.patch \
-	debian/patches/hotspot-no-werror.diff \
-	debian/patches/hotspot-s390.diff \
-	debian/patches/s390_hotspot_fix.diff \
-	debian/patches/hotspot-sparc.diff \
+	debian/patches/hotspot-no-werror-$(hotspot_version).diff \
 	debian/patches/icc_loading_with_symlink.diff \
 	debian/patches/hotspot-sparc-arch.diff \
 	debian/patches/sparc-trapsfix.patch \
 	debian/patches/sparc-stubgenerator.diff \
 	debian/patches/zero-fpu-control-is-noop.diff \
-	debian/patches/zero-missing-headers.diff \
+
+# FIXME: Doesn't apply for the zero build
+#	debian/patches/zero-missing-headers.diff \
+
+DISTRIBUTION_PATCHES += \
 	debian/patches/enumipv6-fix.patch \
 	debian/patches/libpcsclite-dlopen.diff \
-	debian/patches/icedtea7-forest-jdk_7104625-XEvent_wrap_logging_calls_with_if.patch \
 	debian/patches/jni_md_h_JNIEXPORT_visibility.patch \
 	debian/patches/7130140-MouseEvent-systemout.diff \
 	debian/patches/FreetypeFontScaler_getFontMetricsNative.diff
@@ -443,7 +451,7 @@ endif
 
   DISTRIBUTION_PATCHES += \
 	debian/patches/default-libpath-original.diff \
-	debian/patches/deb-multiarch.diff
+	debian/patches/deb-multiarch-$(hotspot_version).diff
 
 #	debian/patches/hotspot-warn-no-errformat.diff \
 #	debian/patches/gcc-mtune-generic.diff \
@@ -468,7 +476,7 @@ ifeq ($(with_pulse),yes)
   # only in karmic and later the default
   ifeq (,$(filter $(distrel), lenny squeeze sid jaunty intrepid hardy gutsy feisty edgy dapper))
     DISTRIBUTION_PATCHES += \
-	debian/patches/jdk-pulseaudio-default.diff
+	debian/patches/jdk-pulseaudio.diff
   endif
 endif
 
@@ -555,12 +563,15 @@ endif
 
 CONFIGURE_ARGS += \
 	--with-openjdk-src-zip=$(CURDIR)/openjdk.tar.gz \
-	--with-hotspot-src-zip=$(CURDIR)/hotspot.tar.gz \
+	--with-hotspot-src-zip=$(CURDIR)/hotspot-$(hotspot_version).tar.gz \
 	--with-corba-src-zip=$(CURDIR)/corba.tar.gz \
 	--with-jaxp-src-zip=$(CURDIR)/jaxp.tar.gz \
 	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
-	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
-	--with-langtools-src-zip=$(CURDIR)/langtools-dfsg.tar.gz
+	--with-jdk-src-zip=$(CURDIR)/jdk.tar.gz \
+	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz
+
+#	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
+#	--with-langtools-src-zip=$(CURDIR)/langtools-dfsg.tar.gz
 
 ifneq (,$(filter $(DEB_HOST_ARCH), hppa))
 CONFIGURE_ARGS += \

@@ -1,15 +1,15 @@
 --- openjdk/jdk/src/share/bin/java.c.orig
 +++ openjdk/jdk/src/share/bin/java.c
-@@ -1652,7 +1652,7 @@
- ReadKnownVMs(const char *jrepath, const char * arch, jboolean speculative)
+@@ -1580,7 +1580,7 @@
+ ReadKnownVMs(const char *jvmCfgName, jboolean speculative)
  {
      FILE *jvmCfg;
--    char jvmCfgName[MAXPATHLEN+20];
-+    char jvmCfgName[MAXPATHLEN+30];
-     char line[MAXPATHLEN+20];
+-    char line[MAXPATHLEN+20];
++    char line[MAXPATHLEN+30];
      int cnt = 0;
      int lineno = 0;
-@@ -1670,6 +1670,10 @@
+     jlong start, end;
+@@ -1595,6 +1595,10 @@
  
      jvmCfg = fopen(jvmCfgName, "r");
      if (jvmCfg == NULL) {

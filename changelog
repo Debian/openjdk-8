@@ -1,10 +1,23 @@
+openjdk-7 (7u7-2.3.2-1) experimental; urgency=low
+
+  * New upstream IcedTea7 2.3.2 release.
+  * d/p/icedtea7-forest-jdk_7104625-XEvent_wrap_logging_calls_with_if.patch,
+    d/p/hotspot-sparc.diff: Remove, integrated upstream.
+  * d/p/{deb-multiarch,fix_extra_flags,hotspot-no-werror}.diff:
+    Add variants for hotspot and zero builds.
+  * d/p/default-jvm-cfg.diff, d/p/icedtea-4953367.patch,
+    d/p/icedtea-patch.diff, d/p/icedtea-pretend-memory.diff,
+    d/p/libpcsclite-dlopen.diff, d/p/nonreparenting-wm.diff:
+    Update for 2.3.2.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 01 Sep 2012 11:46:50 +0200
+
 openjdk-7 (7~u3-2.1.1-3) unstable; urgency=low
 
   * d/rules: Ensure we don't remove -02 (default) when -03 is disabled
     (fix jamvm FTBFS on armhf without -02).
   * d/patches/gcc-jdk-opt-O0.diff, d/patches/gcc-jdk-opt-O2.diff,
     d/patches/gcc-no-hardening.diff, d/patches/gcc-opt-O2.diff: removed.
-
 
  -- Damien Raude-Morvan <drazzib@debian.org>  Wed, 25 Jul 2012 21:18:15 +0200
 
