@@ -434,16 +434,16 @@ endif
 #	debian/patches/hotspot-warn-no-errformat.diff \
 #	debian/patches/gcc-mtune-generic.diff \
 
-ifneq (,$(filter $(distrel),wheezy sid precise))
-  DISTRIBUTION_PATCHES += \
-	debian/patches/0-sharkllvm30-targetselect-138450.patch \
-	debian/patches/1-sharkllvm30-de-const-type-135375.patch \
-	debian/patches/2-sharkllvm30-PHI-128537-Call-ArrayRef-135265.patch \
-	debian/patches/shark-removed-intrinsics.patch \
-	debian/patches/llvm-3.0-buildfix.patch \
-	debian/patches/shark-compiler-fixes.patch
-#	debian/patches/3-sharkllvm30-MCJIT.patch
-endif
+#ifneq (,$(filter $(distrel),wheezy sid precise))
+#  DISTRIBUTION_PATCHES += \
+#	debian/patches/0-sharkllvm30-targetselect-138450.patch \
+#	debian/patches/1-sharkllvm30-de-const-type-135375.patch \
+#	debian/patches/2-sharkllvm30-PHI-128537-Call-ArrayRef-135265.patch \
+#	debian/patches/shark-removed-intrinsics.patch \
+#	debian/patches/llvm-3.0-buildfix.patch \
+#	debian/patches/shark-compiler-fixes.patch
+##	debian/patches/3-sharkllvm30-MCJIT.patch
+#endif
 
 ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += \
