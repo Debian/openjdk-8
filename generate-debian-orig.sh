@@ -1,7 +1,6 @@
 #!/bin/sh
 
 tarballs="corba.tar.gz hotspot-default.tar.gz hotspot-zero.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools-dfsg.tar.gz openjdk.tar.gz"
-tarballs="corba.tar.gz hotspot-default.tar.gz hotspot-zero.tar.gz jaxp.tar.gz jaxws.tar.gz jdk.tar.gz langtools.tar.gz openjdk.tar.gz"
 jamvmtb=jamvm-e70f2450890b82c37422616cc85e1a23385f03cd.tar.gz
 cacaotb=cacao-a567bcb7f589.tar.gz
 tarballdir=7u7
@@ -58,7 +57,7 @@ echo "Build debian diff in $pkgdir/"
 cp -a $debian_checkout $pkgdir/debian
 (
   cd $pkgdir
-  #debian/update-shasum.sh
+  debian/update-shasum.sh
   #debian/update-hgrev.sh
   ls
   patch -p0 < debian/patches/icedtea-patch.diff

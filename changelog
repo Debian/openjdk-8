@@ -10,6 +10,7 @@ openjdk-7 (7u7-2.3.2-1) experimental; urgency=low
     d/p/libpcsclite-dlopen.diff, d/p/nonreparenting-wm.diff:
     Update for 2.3.2.
   * Remove build support for Ubuntu releases earlier than hardy.
+  * d/update-shasum.sh: Only update the shasums of the -dfsg tarballs.
 
  -- Matthias Klose <doko@ubuntu.com>  Sat, 01 Sep 2012 11:46:50 +0200
 

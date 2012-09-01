@@ -1,7 +1,7 @@
 #!/bin/bash
 
-tarballs=(corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools-dfsg.tar.gz openjdk.tar.gz)
-varshasum=(CORBA_SHA256SUM HOTSPOT_SHA256SUM JAXP_SHA256SUM JAXWS_SHA256SUM JDK_SHA256SUM LANGTOOLS_SHA256SUM OPENJDK_SHA256SUM)
+tarballs=(jdk-dfsg.tar.gz langtools-dfsg.tar.gz)
+varshasum=(JDK_SHA256SUM LANGTOOLS_SHA256SUM)
 tarballdir=.
 
 makefile1=Makefile.am
