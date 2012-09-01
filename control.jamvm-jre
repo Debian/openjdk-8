@@ -4,7 +4,7 @@ Architecture: @jamvm_archs@
 Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre-headless (= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Alternative JVM for OpenJDK, using JamVM
  The package provides an alternative runtime using the JamVM.  This is a
  somewhat faster alternative than the Zero port on architectures like armel,

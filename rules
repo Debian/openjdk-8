@@ -40,7 +40,7 @@ endif
 
 hotspot_archs	= amd64 i386 lpia sparc sparc64 kfreebsd-amd64 kfreebsd-i386
 # requires llvm; llvm in jaunty is recent enough, but in universe
-ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
+ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy))
   shark_archs	= amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386
   # Shark build but just crash
   shark_archs   =
@@ -109,7 +109,7 @@ ifneq (,$(findstring cacao shark, $(PKGSOURCE)))
   with_docs = disabled for cacao and shark
 endif
 
-with_wgy_zenhai = $(if $(filter $(distrel),lenny gutsy feisty edgy dapper),,yes)
+with_wgy_zenhai = $(if $(filter $(distrel),lenny),,yes)
 
 arch_map	:= alpha=alpha arm=arm armel=arm armhf=arm amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparc64 sh4=sh s390=s390 s390x=s390x ia64=ia64
 archdir_map	:= alpha=alpha arm=arm armel=arm armhf=arm amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparcv9 sh4=sh s390=s390 s390x=s390x ia64=ia64
@@ -138,25 +138,25 @@ else ifneq (,$(filter $(distrel),lenny))
   stage1_openjdk_archs := $(stage1_openjdk_archs) ia64
 endif
 
-ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
+ifeq (,$(filter $(distrel),lenny intrepid hardy))
   cacao_archs = alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
   # TODO kfreebsd porting for cacao vm
 endif
-ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy dapper))
+ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy))
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
 endif
-ifeq (,$(filter $(distrel),wheezy sid squeeze lenny maverick natty maverick lucid karmic hardy dapper))
+ifeq (,$(filter $(distrel),wheezy sid squeeze lenny maverick natty maverick lucid karmic hardy))
   jamvm_defaults =
 endif
 
 # requires patched llvm-2.6
-ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
+ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy))
   altshark_archs = powerpc ppc64
   # Shark build but just crash
   altshark_archs   =
 endif
 altzero_archs = $(filter-out sparc sparc64, $(hotspot_archs)) $(altshark_archs)
-ifneq (,$(filter $(distrel),lenny dapper hardy intrepid))
+ifneq (,$(filter $(distrel),lenny hardy intrepid))
   altzero_archs =
   altshark_archs =
 endif
@@ -185,11 +185,7 @@ endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
   STAGE1_JAVA = gcj
-  ifneq (,$(filter $(distrel),dapper))
-    STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.5-snap
-  else
-    STAGE1_HOME = /usr/lib/jvm/java-gcj
-  endif
+  STAGE1_HOME = /usr/lib/jvm/java-gcj
 else ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_openjdk_archs)))
   STAGE1_JAVA = openjdk
   STAGE1_HOME = $(firstword $(wildcard /usr/lib/jvm/java-6-openjdk-$(DEB_HOST_ARCH) /usr/lib/jvm/java-6-openjdk))
@@ -258,17 +254,7 @@ export EXTRA_CXXFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get CXXFLAGS)
 export EXTRA_LDFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get LDFLAGS)
 
 # This section should be in sync with "bd_gcc" definition
-ifneq (,$(filter $(distrel),dapper))
-  #GCJ_SUFFIX = -4.4
-  #ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
-  #  export CC = gcc-4.0
-  #  export CXX = g++-4.0
-  #endif
-  #ifneq (,$(filter $(DEB_HOST_ARCH), amd64 powerpc sparc))
-  #  export CC = gcc-4.0
-  #  export CXX = g++-4.0
-  #endif
-else ifneq (,$(filter $(distrel),hardy gutsy feisty edgy dapper))
+ifneq (,$(filter $(distrel),hardy))
   ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
     export CC = gcc-4.1
     export CXX = g++-4.1
@@ -324,13 +310,11 @@ endif
 export OPT_CFLAGS/cppInterpreter_arm.o
 endif
 
-ifeq (,$(filter $(distrel),lenny intrepid hardy gutsy feisty edgy dapper))
+ifeq (,$(filter $(distrel),lenny intrepid hardy))
   with_pulse = yes
 endif
 
-ifneq (,$(filter $(distrel),dapper))
-  with_bridge =
-else ifneq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy))
+ifneq (,$(filter $(distrel),lenny jaunty intrepid hardy))
   with_bridge =
 else ifneq (,$(filter $(distrel),squeeze karmic lucid maverick natty oneiric))
   with_bridge = bridge
@@ -339,15 +323,11 @@ else
   with_bridge = atk
 endif
 
-ifeq (,$(filter $(distrel),lenny karmic jaunty intrepid hardy gutsy feisty edgy dapper))
+ifeq (,$(filter $(distrel),lenny karmic jaunty intrepid hardy))
   with_nss = yes
 endif
 
-ifeq (,$(filter $(distrel), dapper))
-  with_tzdata = yes
-endif
-
-ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
+ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic jaunty intrepid hardy))
   lcms_version = 1
 else
   lcms_version = 2
@@ -369,7 +349,7 @@ else
     with_wm_args = -f $(CURDIR)/bin/jtreg.tmwrc
   endif
   bd_wm = metacity | twm,
-  ifeq (,$(filter $(distrel),etch dapper dapper))
+  ifeq (,$(filter $(distrel),etch))
     bd_wm += dbus-x11,
   endif
 endif
@@ -377,7 +357,7 @@ ifeq ($(with_wm),metacity)
   with_wm_prefix = dbus-launch --exit-with-session
 endif
 
-#ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
+#ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy))
 #  with_systemtap = yes
 #endif
 
@@ -385,10 +365,8 @@ ifneq (,$(filter $(DEB_HOST_ARCH), sparc64))
   export USE_PRECOMPILED_HEADER=0
 endif
 
-ifeq (,$(filter $(distrel), dapper))
-  DISTRIBUTION_PATCHES += \
+DISTRIBUTION_PATCHES += \
 	debian/patches/ld-symbolic-functions.diff
-endif
 DISTRIBUTION_PATCHES += \
 	debian/patches/shebang.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
@@ -440,7 +418,7 @@ DISTRIBUTION_PATCHES += \
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
 
-ifeq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid jaunty intrepid hardy gutsy feisty edgy dapper))
+ifeq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid jaunty intrepid hardy))
   DISTRIBUTION_PATCHES += \
 	debian/patches/fontconfig-korean-nanum.diff \
 	debian/patches/fontconfig-japanese.diff
@@ -474,7 +452,7 @@ endif
 
 ifeq ($(with_pulse),yes)
   # only in karmic and later the default
-  ifeq (,$(filter $(distrel), lenny squeeze sid jaunty intrepid hardy gutsy feisty edgy dapper))
+  ifeq (,$(filter $(distrel), lenny squeeze sid jaunty intrepid hardy))
     DISTRIBUTION_PATCHES += \
 	debian/patches/jdk-pulseaudio.diff
   endif
@@ -503,21 +481,12 @@ export DISTRIBUTION_PATCHES DISTRIBUTION_ECJ_PATCHES
 
 ifeq ($(STAGE1_JAVA),gcj)
   CONFIGURE_ARGS = \
-	--with-jdk-home=$(STAGE1_HOME)
-  ifeq (,$(filter $(distrel),dapper))
-    CONFIGURE_ARGS += \
-	--with-javac=/usr/bin/ecj \
-	--with-java=$(STAGE1_HOME)/bin/java \
-	--with-javah=/usr/bin/gjavah$(GCJ_SUFFIX) \
-	--with-rmic=/usr/bin/grmic$(GCJ_SUFFIX)
-  else
-    CONFIGURE_ARGS += \
+	--with-jdk-home=$(STAGE1_HOME) \
 	--with-ecj-jar=$(STAGE1_HOME)/lib/ecj.jar \
 	--with-javac=$(STAGE1_HOME)/bin/javac \
 	--with-java=$(STAGE1_HOME)/bin/java \
 	--with-javah=$(STAGE1_HOME)/bin/javah \
 	--with-rmic=$(STAGE1_HOME)/bin/rmic
-  endif
   ifeq (,$(filter ia64, $(DEB_HOST_ARCH)))
     CONFIGURE_ARGS += \
 	--with-jar=/usr/bin/fastjar
@@ -552,7 +521,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), hppa))
   CONFIGURE_ARGS += \
 	--without-rhino
 else
-  ifneq (,$(strip $(foreach i, dapper hardy intrepid jaunty,$(findstring $(i),$(PKGVERSION)))))
+  ifneq (,$(strip $(foreach i, hardy intrepid jaunty,$(findstring $(i),$(PKGVERSION)))))
   CONFIGURE_ARGS += \
 	--with-rhino=/usr/share/java/js-1.7R2.jar
   else
@@ -577,7 +546,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), hppa))
 CONFIGURE_ARGS += \
 	--without-rhino
 else
-  ifneq (,$(strip $(foreach i, dapper hardy intrepid jaunty,$(findstring $(i),$(PKGVERSION)))))
+  ifneq (,$(strip $(foreach i, hardy intrepid jaunty,$(findstring $(i),$(PKGVERSION)))))
 CONFIGURE_ARGS += \
 	--with-rhino=/usr/share/java/js-1.7R2.jar
   else
@@ -665,25 +634,18 @@ jdk_tools	= $(filter-out $(all_jre_tools), $(all_jdk_tools))
 jdk_tools_alt	= $(filter-out apt java-rmi.cgi, $(jdk_tools))
 
 ifeq ($(distribution),Ubuntu)
-  ifeq ($(distrel),dapper)
-    pkg_compress =
-  else
-    pkg_compress = lzma
-  endif
+  pkg_compress = lzma
 else
   pkg_compress  = bzip2
 endif
 pkg_compress =
 
 # build dependencies
-bd_autotools = autoconf, $(if $(filter $(distrel), dapper),automake1.9,automake), autotools-dev,
+bd_autotools = autoconf, automake, autotools-dev,
 # This section should be in sync with "GCJ_SUFFIX" definition
 bd_bootstrap =
 ifneq (,$(stage1_gcj_archs))
-  ifneq (,$(filter $(distrel),dapper))
-    bd_bootstrap += gcc-snapshot (>= 20100403-1~dapper3),
-    #bd_bootstrap += gcj-4.4-jdk,
-  else ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy))
+  ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy))
     bd_bootstrap += \
 	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
 	gcj-jdk [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
@@ -707,9 +669,7 @@ ifneq (,$(stage1_cacao_archs))
 endif
 
 # This section should be in sync with "CC/CXX" definition
-ifneq (,$(filter $(distrel),dapper))
-  bd_gcc = g++-4.0,
-else ifneq (,$(filter $(distrel),hardy gutsy feisty edgy))
+ifneq (,$(filter $(distrel),hardy))
   bd_gcc = g++-4.2 [amd64 powerpc sparc], g++-4.1 [i386 lpia],
 else ifneq (,$(filter $(distrel),lenny intrepid jaunty))
   bd_gcc = g++-4.3,
@@ -725,19 +685,19 @@ else
   bd_gcc = g++-4.7,
 endif
 bd_syslibs = zlib1g-dev, libattr1-dev,
-ifneq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
+ifneq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid karmic jaunty intrepid hardy))
   bd_syslibs += libpng12-dev, libjpeg62-dev,
 else
   bd_syslibs += libpng-dev, libjpeg8-dev,
 endif
 bd_syslibs += \
-	libgif-dev$(if $(filter $(distrel),etch dapper edgy feisty gutsy), | libungif4-dev),
+	libgif-dev$(if $(filter $(distrel),etch), | libungif4-dev),
 bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxaw7-dev, libxrender-dev, \
-	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2-dev,libcups2-dev), \
+	$(if $(filter $(distrel), etch hardy),libcupsys2-dev,libcups2-dev), \
 	libasound2-dev, liblcms$(lcms_version)-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, \
 	libxinerama-dev, xsltproc, librhino-java (>= 1.7R3~),
-pkg_ffidev = $(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),dapper hardy),libffi4-dev,libffi-dev),libffi-dev)
+pkg_ffidev = $(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev)
 
 bd_zero = \
 	$(pkg_ffidev) [$(foreach a,$(hotspot_archs),!$(a))],
@@ -781,15 +741,9 @@ bd_fastjar = fastjar (>= 2:0.96-0ubuntu2),
 ifneq (,$(filter $(distrel),lenny))
   bd_fastjar = fastjar (>= 2:0.95-4),
 endif
-ifneq (,$(filter $(distrel),dapper))
-  bd_compress = $(pkg_compress),
-endif
-bd_xvfb = xvfb, xauth, xfonts-base, libgl1-mesa-dri,
-bd_xvfb += $(bd_wm)
-ifeq (,$(filter $(distrel),dapper))
-  bd_xvfb += x11-xkb-utils,
-  bd_mauve = mauve,
-endif
+bd_compress = $(pkg_compress),
+bd_xvfb = xvfb, xauth, xfonts-base, libgl1-mesa-dri, $(bd_wm) x11-xkb-utils,
+bd_mauve = mauve,
 ifneq (,$(filter $(distrel),lenny))
   bd_xvfb += xkb-data, xserver-xorg-core,
 endif
@@ -797,7 +751,7 @@ ifeq ($(with_pulse),yes)
   bd_pulsejava = libpulse-dev (>= 0.9.12),
 endif
 ifeq ($(with_nss),yes)
-  ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic hardy dapper))
+  ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic hardy))
     bd_nss = libnss3-dev (>= 3.12.3),
   else ifneq (,$(filter $(distrel),wheezy sid))
     bd_nss = libnss3-dev (>= 2:3.13.4),
@@ -814,11 +768,11 @@ ifneq (,$(jamvm_archs))
 endif
 
 dlopen_hl_depends = \
-	$(if $(filter $(distrel), etch dapper edgy gutsy hardy),libcupsys2,libcups2), \
+	$(if $(filter $(distrel), etch),libcupsys2,libcups2), \
 	liblcms$(if $(filter 1,$(lcms_version)),1,2-2), \
 	$(if $(findstring jpeg8, $(bd_syslibs)),libjpeg8,libjpeg62)
 ifneq ($(with_nss),no)
-  ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic hardy dapper))
+  ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic hardy))
     dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
   else ifneq (,$(filter $(distrel), wheezy sid))
     dlopen_hl_depends += , libnss3 (>= 2:3.13.4)
@@ -838,20 +792,20 @@ browser_plugin_dirs = mozilla
 java_launcher = /$(basedir)/bin/java
 java_launcher = /usr/bin/java
 ifeq ($(distribution),Ubuntu)
-  ifeq (,$(filter $(distrel),karmic jaunty intrepid hardy gutsy feisty edgy dapper))
+  ifeq (,$(filter $(distrel),karmic jaunty intrepid hardy))
     java_launcher = cautious-launcher %f /$(basedir)/bin/java
     java_launcher = cautious-launcher %f /usr/bin/java
   endif
 endif
 
-ifneq (,$(filter $(distrel),etch dapper edgy feisty))
+ifneq (,$(filter $(distrel),etch))
   core_fonts = ttf-dejavu
-else ifneq (,$(filter $(distrel),lenny gutsy hardy intrepid jaunty karmic))
+else ifneq (,$(filter $(distrel),lenny hardy intrepid jaunty karmic))
   core_fonts = ttf-dejavu-core
 else
   core_fonts = ttf-dejavu-extra
 endif
-ifeq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid jaunty intrepid hardy gutsy feisty edgy dapper))
+ifeq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid jaunty intrepid hardy))
   cfk_fonts = fonts-nanum,
   cjk_fonts += fonts-ipafont-gothic, fonts-ipafont-mincho,
   # FIXME: find out why this b-d is needed, the fontconfig compiler fails without it
@@ -952,11 +906,11 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs) $(altshark_archs)))
   control_vars += '-Vzerovm:Provides=$(p_jre)-shark'
 endif
 
-ifneq (,$(filter $(distrel),lenny jaunty intrepid hardy gutsy feisty edgy dapper))
+ifneq (,$(filter $(distrel),lenny jaunty intrepid hardy))
   control_vars += '-Vjvm:Provides=java-virtual-machine'
 endif
 
-ifeq (,$(filter $(distrel), lenny dapper))
+ifeq (,$(filter $(distrel), lenny))
   pkg_certs = ca-certificates-java
 endif
 control_vars += '-Vcacert:Depends=$(pkg_certs)'
@@ -966,9 +920,7 @@ ifeq ($(with_tzdata),yes)
 endif
 control_vars += '-Vtzdata:Depends=$(pkg_tzdata)'
 
-ifeq (,$(filter $(distrel), dapper))
-  pkg_jcommon = java-common (>= 0.28)
-endif
+pkg_jcommon = java-common (>= 0.28)
 control_vars += '-Vjcommon:Depends=$(pkg_jcommon)'
 
 debian/control: debian/control.in debian/rules
@@ -998,9 +950,6 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@jamvm_archs@/$(jamvm_archs)/g' \
 	      -e 's/@hotspot_archs@/$(hotspot_archs)/g' \
 	      -e 's/@altzero_archs@/$(altzero_archs)/g' \
-	      -e 's,@pkg_version@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${binary:Version}),g' \
-	      -e 's,@pkg_sversion@,$(if $(filter $(distrel),etch dapper edgy feisty gutsy),$${Source-Version},$${source:Version}),g' \
-	      -e 's/@op@/$(if $(filter Debian,$(distribution)),=,>=)/g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/control.in \
 	    $(if $(cacao_archs), debian/control.cacao-jre) \
@@ -1073,12 +1022,6 @@ ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 hppa ppc64 s390x sparc64))
 	echo "UNAME checks"
 	uname -a
 	/bin/uname -a
-endif
-
-ifneq (,$(filter $(distrel),dapper))
-	ln -sf /bin/true bin/sha256sum
-# Needed for patches/ecj/icedtea.patch
-	ln -sf /usr/bin/gcj-4.4 bin/gcj
 endif
 
 	mkdir -p stamps
@@ -1160,9 +1103,6 @@ ifeq ($(with_check),yes)
         with_jtreg_check += zero
       endif
     endif
-  ifneq (,$(filter $(distrel), dapper))
-    with_mauve_check =
-  endif
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha armel armhf ia64 mips mipsel powerpc powerpcspe ppc64 s390))
@@ -1176,7 +1116,7 @@ build_stamps = stamps/build
 build_stamps +=  stamps/mauve-check-default stamps/jtreg-check-default
 #build_stamps += $(if $(filter cacao, $(alternate_vms)),stamps/mauve-check-cacao stamps/jtreg-check-cacao)
 build_stamps += $(if $(filter jamvm, $(alternate_vms)),stamps/mauve-check-jamvm stamps/jtreg-check-jamvm)
-ifeq (,$(filter $(distrel),lenny hardy gutsy feisty edgy dapper))
+ifeq (,$(filter $(distrel),lenny hardy))
   build_stamps += $(if $(filter zero, $(alternate_vms)),stamps/mauve-check-zero stamps/jtreg-check-zero)
   ifneq (,$(filter shark, $(alternate_vms)))
     ifneq (,$(filter $(DEB_HOST_ARCH),$(altshark_archs)))
@@ -1495,12 +1435,6 @@ install: packaging-files
 ifeq ($(with_tzdata),yes)
 	: # use the timezone files from tzdata-java
 	rm -rf $(d)/$(basedir)/jre/lib/zi
-endif
-
-ifneq (,$(filter $(distrel),dapper))
-	: # include the freetype library for the dapper build
-	cp -p /usr/lib/libfreetype.so.6.* $(d)/$(basedir)/jre/lib/$(archdir)/
-	cd $(d)/$(basedir)/jre/lib/$(archdir) && ln -s libfreetype.so.6.* libfreetype.so.6
 endif
 
 	: # compress manpages
@@ -2032,9 +1966,6 @@ endif
 	dh_shlibdeps -s $(nodemo) $(nojrec) $(nojrej) $(nojrez) -L $(p_jrehl) \
 		-l$(shlibdeps_ld_path) \
 		--
-ifneq (,$(filter $(distrel),dapper))
-	sed -i 's/, *libfreetype6[^,]*//' debian/$(p_jrehl).substvars
-endif
 	dh_installdeb -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)
 	dh_gencontrol -s $(nodemo) $(nojrec) $(nojrej) $(nojrez) \
 		-- $(control_vars)

@@ -4,7 +4,7 @@ Architecture: @cacao_archs@
 Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre-headless (= @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Provides: icedtea6-jre-cacao
 Description: Alternative JVM for OpenJDK, using Cacao
  The package provides an alternative runtime using the Cacao VM and the 

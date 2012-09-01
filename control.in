@@ -13,7 +13,7 @@ Package: @basename@-jdk
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre (@op@ @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Recommends: libxt-dev
 Suggests: @basename@-demo, @basename@-source, visualvm
 Provides: java-sdk, java2-sdk, java5-sdk, java6-sdk, java7-jdk, java-compiler
@@ -28,7 +28,7 @@ Package: @basename@-jre-headless
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}, ${multiarch:Depends}
-Depends: @basename@-jre-lib (@op@ @pkg_sversion@), ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre-lib (= ${source:Version}), ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
 Recommends: ${dlopenhl:Recommends}, ${cacao:Recommends}, ${jamvm:Recommends}
 Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, java7-runtime-headless, ${defaultvm:Provides}, ${jvm:Provides}
@@ -44,7 +44,7 @@ Package: @basename@-jre
 Architecture: any
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre-headless (@op@ @pkg_version@), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
+Depends: @basename@-jre-headless (= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
 Recommends: ${dlopenjre:Recommends}, @core_fonts@
 Suggests: icedtea-7-plugin, ${pkg:pulseaudio}
 Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4)
@@ -72,7 +72,7 @@ Package: @basename@-demo
 Architecture: any
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre (@op@ @pkg_version@), ${shlibs:Depends}, ${misc:Depends}
+Depends: @basename@-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
 Description: Java runtime based on OpenJDK (demos and examples)
  OpenJDK Java runtime
  .
@@ -83,7 +83,7 @@ Package: @basename@-source
 Architecture: all
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre (>= @pkg_sversion@), @basename@-jdk (>= @pkg_version@), ${misc:Depends}
+Depends: @basename@-jre (>= ${source:Version}), @basename@-jdk (>= ${binary:Version}), ${misc:Depends}
 Description: OpenJDK Development Kit (JDK) source files
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
@@ -116,9 +116,9 @@ Multi-Arch: same
 Priority: extra
 Section: debug
 Pre-Depends: ${dpkg:Depends}
-Depends: @basename@-jre-headless (= @pkg_version@), ${misc:Depends}
-Recommends: @basename@-jre (= @pkg_version@)
-Suggests: @basename@-jdk (= @pkg_version@)
+Depends: @basename@-jre-headless (= ${binary:Version}), ${misc:Depends}
+Recommends: @basename@-jre (= ${binary:Version})
+Suggests: @basename@-jdk (= ${binary:Version})
 Description: Java runtime based on OpenJDK (debugging symbols)
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
