@@ -1,6 +1,7 @@
 openjdk-7 (7u7-2.3.2-1) experimental; urgency=low
 
   * New upstream IcedTea7 2.3.2 release.
+  * Bump version to 7u7 (OpenJDK), 2.3.2 (IcedTea). Closes: #685276.
   * d/p/icedtea7-forest-jdk_7104625-XEvent_wrap_logging_calls_with_if.patch,
     d/p/hotspot-sparc.diff: Remove, integrated upstream.
   * d/p/{deb-multiarch,fix_extra_flags,hotspot-no-werror}.diff:
