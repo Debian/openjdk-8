@@ -536,11 +536,8 @@ CONFIGURE_ARGS += \
 	--with-corba-src-zip=$(CURDIR)/corba.tar.gz \
 	--with-jaxp-src-zip=$(CURDIR)/jaxp.tar.gz \
 	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
-	--with-jdk-src-zip=$(CURDIR)/jdk.tar.gz \
-	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz
-
-#	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
-#	--with-langtools-src-zip=$(CURDIR)/langtools-dfsg.tar.gz
+	--with-jdk-src-zip=$(CURDIR)/jdk-dfsg.tar.gz \
+	--with-langtools-src-zip=$(CURDIR)/langtools-dfsg.tar.gz
 
 ifneq (,$(filter $(DEB_HOST_ARCH), hppa))
 CONFIGURE_ARGS += \
