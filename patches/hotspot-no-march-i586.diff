@@ -1,0 +1,13 @@
+# Don't explicitly build with -march=i586 on i386 architectures.
+
+--- openjdk/hotspot/make/linux/makefiles/gcc.make~	2012-09-03 11:00:18.813744653 +0200
++++ openjdk/hotspot/make/linux/makefiles/gcc.make	2012-09-03 13:06:48.869916169 +0200
+@@ -112,7 +112,7 @@
+ endif
+ 
+ ARCHFLAG = $(ARCHFLAG/$(BUILDARCH))
+-ARCHFLAG/i486    = -m32 -march=i586
++ARCHFLAG/i486    = -m32
+ ARCHFLAG/amd64   = -m64
+ ARCHFLAG/ia64    =
+ ARCHFLAG/sparc   = -m32 -mcpu=v9
