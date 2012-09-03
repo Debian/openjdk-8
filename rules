@@ -517,6 +517,7 @@ else
 endif
 
 CONFIGURE_ARGS += \
+	--disable-downloading \
 	--with-openjdk-src-zip=$(CURDIR)/openjdk.tar.gz \
 	--with-hotspot-src-zip=$(CURDIR)/hotspot-$(hotspot_version).tar.gz \
 	--with-corba-src-zip=$(CURDIR)/corba.tar.gz \
