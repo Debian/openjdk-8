@@ -1,4 +1,4 @@
-# unused patch
+# unused patch (work in progress for PARISC support)
 
 --- openjdk/hotspot/src/os_cpu/linux_zero/vm/os_linux_zero.cpp.old	2010-01-06 16:30:02.000000000 +0100
 +++ openjdk/hotspot/src/os_cpu/linux_zero/vm/os_linux_zero.cpp	2010-01-06 23:14:47.000000000 +0100
