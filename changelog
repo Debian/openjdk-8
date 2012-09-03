@@ -1,6 +1,19 @@
 openjdk-7 (7u7-2.3.2-1) experimental; urgency=low
 
   * New upstream IcedTea7 2.3.2 release.
+  * Security fixes:
+    - CVE-2012-4681: Reintroduce PackageAccessible checks removed in 6788531.
+    - S7079902, CVE-2012-1711: Refine CORBA data models.
+    - S7143606, CVE-2012-1717: File.createTempFile should be improved
+      for temporary files created by the platform.
+    - S7143614, CVE-2012-1716: SynthLookAndFeel stability improvement.
+    - S7143617, CVE-2012-1713: Improve fontmanager layout lookup operations.
+    - S7143851, CVE-2012-1719: Improve IIOP stub and tie generation in RMIC.
+    - S7143872, CVE-2012-1718: Improve certificate extension processing.
+    - S7152811, CVE-2012-1723: Issues in client compiler.
+    - S7157609, CVE-2012-1724: Issues with loop.
+    - S7160757, CVE-2012-1725: Problem with hotspot/runtime_classfile.
+    - S7165628, CVE-2012-1726: Issues with java.lang.invoke.MethodHandles.Lookup.
   * Bump version to 7u7 (OpenJDK), 2.3.2 (IcedTea). Closes: #685276.
   * d/p/icedtea7-forest-jdk_7104625-XEvent_wrap_logging_calls_with_if.patch,
     d/p/hotspot-sparc.diff: Remove, integrated upstream.
