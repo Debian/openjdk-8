@@ -408,9 +408,6 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/7130140-MouseEvent-systemout.diff \
 	debian/patches/FreetypeFontScaler_getFontMetricsNative.diff
 
-#	debian/patches/gcc-lto.diff \
-#	debian/patches/gcc-no-visibility-hidden.diff \
-
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
 
@@ -428,7 +425,6 @@ endif
 	debian/patches/jdk-docs-vm-memory-$(hotspot_version).diff
 
 #	debian/patches/hotspot-warn-no-errformat.diff \
-#	debian/patches/gcc-mtune-generic.diff \
 
 ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += \
