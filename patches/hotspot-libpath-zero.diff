@@ -1,0 +1,30 @@
+--- openjdk/hotspot/make/linux/makefiles/vm.make.orig
++++ openjdk/hotspot/make/linux/makefiles/vm.make
+@@ -96,6 +96,11 @@
+ CPPFLAGS += -DDERIVATIVE_ID="\"$(DERIVATIVE_ID)\""
+ endif
+ 
++DEB_MULTIARCH := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null || true)
++ifneq (,$(DEB_MULTIARCH))
++CPPFLAGS += -DDEB_MULTIARCH="\"$(DEB_MULTIARCH)\""
++endif
++
+ ifdef DISTRIBUTION_ID
+ CPPFLAGS += -DDISTRIBUTION_ID="\"$(DISTRIBUTION_ID)\""
+ endif
+--- openjdk/hotspot/src/os/linux/vm/os_linux.cpp.orig
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp
+@@ -383,10 +383,10 @@
+  *        ...
+  *        7: The default directories, normally /lib and /usr/lib.
+  */
+-#if defined(AMD64) || defined(_LP64) && (defined(SPARC) || defined(PPC) || defined(S390))
+-#define DEFAULT_LIBPATH "/usr/lib64:/lib64:/lib:/usr/lib"
++#ifdef DEB_MULTIARCH
++#define DEFAULT_LIBPATH	"/usr/lib/" DEB_MULTIARCH "/jni" ":/lib/" DEB_MULTIARCH ":/usr/lib/" DEB_MULTIARCH ":/usr/lib/jni:/lib:/usr/lib"
+ #else
+-#define DEFAULT_LIBPATH "/lib:/usr/lib"
++#define DEFAULT_LIBPATH	"/usr/lib/jni:/lib:/usr/lib"
+ #endif
+ 
+ #define EXTENSIONS_DIR  "/lib/ext"
