@@ -429,7 +429,8 @@ endif
 
   DISTRIBUTION_PATCHES += \
 	debian/patches/default-libpath-original.diff \
-	debian/patches/deb-multiarch-$(hotspot_version).diff
+	debian/patches/deb-multiarch-$(hotspot_version).diff \
+	debian/patches/jdk-docs-vm-memory-$(hotspot_version).diff
 
 #	debian/patches/hotspot-warn-no-errformat.diff \
 #	debian/patches/gcc-mtune-generic.diff \
