@@ -11,6 +11,8 @@ openjdk-7 (7u7-2.3.2-2) UNRELEASED; urgency=low
   * Don't explicitly build with -march=i586 on i386 architectures.
   * Re-apply zero-missing-headers.diff.
   * Disable cacao builds, needs update for 7u7.
+  * For Ubuntu quantal, set priorities for alternatives higher than for
+    OpenJDK 6.
 
  -- Matthias Klose <doko@ubuntu.com>  Mon, 03 Sep 2012 12:28:26 +0200
 

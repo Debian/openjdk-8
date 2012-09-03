@@ -46,19 +46,25 @@ ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy))
   shark_archs   =
 endif
 
+ifneq (,$(filter $(distrel),hardy intrepid jaunty karmic lucid maverick natty oneiric precise lenny etch squeeze wheezy))
+  is_default = no
+else
+  is_default = yes
+endif
+
 VENDOR		= openjdk
 Vendor		= OpenJDK
 TOP		= usr/lib/jvm
 origin		= openjdk
 basename	= openjdk-$(shortver)
 ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
-  priority	= 1051
+  priority	= $(if $(filter yes, $(is_default)),1071,1051)
   vm_name	= Hotspot JIT
 else ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
-  priority	= 1045
+  priority	= $(if $(filter yes, $(is_default)),1065,1045)
   vm_name	= Hotspot Shark
 else
-  priority	= 1043
+  priority	= $(if $(filter yes, $(is_default)),1063,1043)
   vm_name	= Hotspot Zero
 endif
 p_lib_arch	= all
@@ -1080,6 +1086,8 @@ ifeq ($(with_check),yes)
         with_jtreg_check += zero
       endif
     endif
+
+    with_mauve_check =
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha armel armhf ia64 mips mipsel powerpc powerpcspe ppc64 s390))
