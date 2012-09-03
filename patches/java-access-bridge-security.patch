@@ -1,4 +1,4 @@
-# unused patch
+# patch only used for builds with java-access-bridge support
 
 --- openjdk/jdk/src/share/lib/security/java.security~	2009-08-05 18:50:24.000000000 +0200
 +++ openjdk/jdk/src/share/lib/security/java.security	2009-08-05 18:53:51.000000000 +0200
