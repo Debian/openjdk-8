@@ -401,11 +401,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/sparc-stubgenerator.diff \
 	debian/patches/zero-fpu-control-is-noop.diff \
 	debian/patches/hotspot-no-march-i586.diff \
-
-# FIXME: Doesn't apply for the zero build
-#	debian/patches/zero-missing-headers.diff \
-
-DISTRIBUTION_PATCHES += \
+	debian/patches/zero-missing-headers-$(hotspot_version).diff \
 	debian/patches/enumipv6-fix.patch \
 	debian/patches/libpcsclite-dlopen.diff \
 	debian/patches/jni_md_h_JNIEXPORT_visibility.patch \
