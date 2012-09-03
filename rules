@@ -366,8 +366,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), sparc64))
 endif
 
 DISTRIBUTION_PATCHES += \
-	debian/patches/ld-symbolic-functions.diff
-DISTRIBUTION_PATCHES += \
+	debian/patches/ld-symbolic-functions.diff \
 	debian/patches/shebang.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
