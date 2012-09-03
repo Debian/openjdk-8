@@ -140,6 +140,7 @@ ifeq (,$(filter $(distrel),lenny intrepid hardy))
   cacao_archs = alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
   # TODO kfreebsd porting for cacao vm
 endif
+cacao_archs =
 ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy))
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
 endif
