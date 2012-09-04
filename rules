@@ -396,7 +396,6 @@ endif
 
 DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-override-redirect-compiz.patch \
-	debian/patches/zero-only-use-floating-point-if-floating-poi.patch \
 	debian/patches/icedtea-4953367.patch \
 	debian/patches/fontconfig-wqy-microhei.patch \
 	debian/patches/hotspot-no-werror-$(hotspot_version).diff \
