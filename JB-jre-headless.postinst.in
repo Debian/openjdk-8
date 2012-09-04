@@ -42,6 +42,15 @@ configure)
 	    fi
 	done
     fi
+    if [ "$update_alternatives" != y ] && [ $priority -gt 1060 ]; then
+	for i in $jre_tools; do
+	    oldp=$(update-alternatives --query java | awk -v b=$basedir '/^Alternative:/ && $2~b {p=1} /^Priority:/ && p {print $2; exit}')
+	    if [ -n "$oldp" ] && [ "$oldp" -le 1060 ]; then
+		update_alternatives=y
+		break
+	    fi
+	done
+    fi
 
     if [ "$update_alternatives" = y ]; then
     if [ -n "$multiarch" ] && [ "$DPKG_MAINTSCRIPT_ARCH" != $(dpkg --print-architecture) ]; then
