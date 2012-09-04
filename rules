@@ -770,8 +770,10 @@ ifneq ($(with_nss),no)
 endif
 dlopen_hl_depends += , libpcsclite1
 dlopen_hl_recommends =
-dlopen_jre_depends = libgtk2.0-0, libxrandr2, libxinerama1, libgl1-mesa-glx
-dlopen_jre_recommends = libgnome2-0, libgnomevfs2-0, libgconf2-4
+dlopen_jre_depends = \
+	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
+	libxrandr2, libxinerama1, libgl1-mesa-glx
+dlopen_jre_recommends =
 
 plugin_name = IcedTeaPlugin.so
 browser_plugin_dirs = mozilla

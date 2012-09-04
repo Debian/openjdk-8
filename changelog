@@ -18,6 +18,10 @@ openjdk-7 (7u7-2.3.2-1ubuntu1) quantal; urgency=low
   * Configure with --disable-downloading.
   * Pass -avoid-version to libtool to create a JamVM libjvm.so without SONAME
     version numbers to match the Hotspot Server/Client libjvm.so. LP: #850433.
+  * Revert the following change: Move libgnome2-0, libgnomevfs2-0, libgconf2-4
+    from Depends of JRE package to Recommends (#661465).
+    The proper fix is to create a -jdk-headless package, or not depending on
+    these gnome packages at all (e.g. using XDG libraries).
 
  -- Matthias Klose <doko@ubuntu.com>  Tue, 04 Sep 2012 12:08:31 +0200
 
