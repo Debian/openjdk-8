@@ -449,6 +449,10 @@ ifneq (,$(filter $(DEB_HOST_ARCH), alpha))
 	debian/patches/alpha-float-const.diff
 endif
 
+ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
+  DISTRIBUTION_PATCHES += patches/jamvm-avoid-version-soname.patch
+endif
+
 ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
   DISTRIBUTION_PATCHES += \
         debian/patches/kfreebsd-support-jdk.diff \
