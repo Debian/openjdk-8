@@ -1,3 +1,9 @@
+openjdk-7 (7u7-2.3.2-2) UNRELEASED; urgency=low
+
+  * Make the avian VM a known runtime.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 05 Sep 2012 11:58:35 +0200
+
 openjdk-7 (7u7-2.3.2-1ubuntu1) quantal; urgency=low
 
   * Fix 32bit hotspot build, don't set maximal heap space lower than
