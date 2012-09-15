@@ -772,9 +772,14 @@ endif
 dlopen_hl_depends += , libpcsclite1
 dlopen_hl_recommends =
 dlopen_jre_depends = \
-	libgtk2.0-0, libgnome2-0, libgnomevfs2-0, libgconf2-4, \
-	libxrandr2, libxinerama1, libgl1-mesa-glx
+	libgtk2.0-0, libxrandr2, libxinerama1, libgl1-mesa-glx
 dlopen_jre_recommends =
+# these are not yet ready for multiarch
+ifneq (,$(DEB_HOST_MULTIARCH))
+  dlopen_jre_recommends += , libgnome2-0, libgnomevfs2-0, libgconf2-4
+else
+  dlopen_jre_depends += , libgnome2-0, libgnomevfs2-0, libgconf2-4
+endif
 
 plugin_name = IcedTeaPlugin.so
 browser_plugin_dirs = mozilla
@@ -908,6 +913,9 @@ control_vars += '-Vcacert:Depends=$(pkg_certs)'
 
 ifeq ($(with_tzdata),yes)
   pkg_tzdata = tzdata-java
+  ifneq (,$(filter $(distrel), precise))
+    pkg_tzdata += (>= 2012e-0ubuntu0.12.04.1)
+  endif
 endif
 control_vars += '-Vtzdata:Depends=$(pkg_tzdata)'
 

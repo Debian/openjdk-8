@@ -1,9 +1,13 @@
-openjdk-7 (7u7-2.3.2-1ubuntu3) quantal; urgency=low
+openjdk-7 (7u7-2.3.2a-0ubuntu1) quantal; urgency=low
 
+  * Repackage the source to drop the cacao tarball (and packaging files).
   * Depend again on system provided tzdata-java and restore the zi
     symlink on upgrade. LP: #1050404.
+  * libgnome2-0, libgnomevfs2-0, libgconf2-4 are not prepared for multiarch.
+    Don't depend on these so that openjdk-7 can be installed as a multiarch
+    package.
 
- -- Matthias Klose <doko@ubuntu.com>  Sat, 15 Sep 2012 14:34:01 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 15 Sep 2012 17:01:12 +0200
 
 openjdk-7 (7u7-2.3.2-1ubuntu2) quantal; urgency=low
 
