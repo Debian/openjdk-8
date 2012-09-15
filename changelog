@@ -1,4 +1,11 @@
-openjdk-7 (7u7-2.3.2-2) UNRELEASED; urgency=low
+openjdk-7 (7u7-2.3.2-1ubuntu3) quantal; urgency=low
+
+  * Depend again on system provided tzdata-java and restore the zi
+    symlink on upgrade. LP: #1050404.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 15 Sep 2012 14:34:01 +0200
+
+openjdk-7 (7u7-2.3.2-1ubuntu2) quantal; urgency=low
 
   * Make the avian VM a known runtime.
 
@@ -81,7 +88,7 @@ openjdk-7 (7~u3-2.1.1-2) unstable; urgency=low
   * d/patches/7130140-MouseEvent-systemout.diff: Remove "MEvent. CASE!" from
     console output. (Closes: #679036).
   * Disable -O3 compile: cause wrong Math.* computations.
-    (Closes: #679292 and Closes: #678228).
+    (Closes: #679292 and Closes: #678228). LP: #1044857.
   * debian/patches/FreetypeFontScaler_getFontMetricsNative.diff:
     Fix "OpenJDK returns the text height greater than font size".
     (Closes: #657854)
@@ -169,7 +176,7 @@ openjdk-7 (7~u3-2.1.1~pre1-1) unstable; urgency=low
 openjdk-7 (7~u3-2.1-4) unstable; urgency=low
 
   [ Matthias Klose ]
-  * Don't install the binary fontconfig file.
+  * Don't install the binary fontconfig file. LP: #964303.
 
   [ Damien Raude-Morvan ]
   * Remove libxp-dev check in configure.ac, it's not needed anymore

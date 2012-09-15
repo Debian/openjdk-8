@@ -116,6 +116,13 @@ configure)
 	rm -f $log
     esac
 
+    if [ -n "$multiarch" ]; then
+	if [ ! -h /@basedir@/jre/lib/zi ] && [ -d /@basedir@/jre/lib/zi ]; then
+	    rm -rf /@basedir@/jre/lib/zi
+	    ln -s ../../../../../share/javazi /@basedir@/jre/lib/zi
+	fi
+    fi
+
     ;;
 
 esac

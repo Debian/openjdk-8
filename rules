@@ -332,6 +332,8 @@ ifeq (,$(filter $(distrel),lenny karmic jaunty intrepid hardy))
   with_nss = yes
 endif
 
+with_tzdata = yes
+
 ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic jaunty intrepid hardy))
   lcms_version = 1
 else
