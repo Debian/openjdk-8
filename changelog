@@ -1,3 +1,9 @@
+openjdk-7 (7u7-2.3.2a-1) experimental; urgency=low
+
+  * Upload to experimental.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 15 Sep 2012 22:20:06 +0200
+
 openjdk-7 (7u7-2.3.2a-0ubuntu1) quantal; urgency=low
 
   * Repackage the source to drop the cacao tarball (and packaging files).
