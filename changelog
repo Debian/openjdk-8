@@ -1,3 +1,9 @@
+openjdk-7 (7u7-2.3.2a-1ubuntu1) quantal; urgency=low
+
+  * Build a transitional icedtea-7-jre-cacao package to ease upgrades.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 19 Sep 2012 17:42:39 +0200
+
 openjdk-7 (7u7-2.3.2a-1) experimental; urgency=low
 
   * Upload to experimental.
