@@ -1,8 +1,8 @@
-openjdk-7 (7u9-2.3.3-0ubuntu1~11.10) oneiric-security; urgency=low
+openjdk-7 (7u9-2.3.3-1) experimental; urgency=low
 
-  * Build IcedTea7 2.3.3 for oneiric.
+  * Upload to experimental.
 
- -- Matthias Klose <doko@ubuntu.com>  Wed, 17 Oct 2012 16:22:48 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 17 Oct 2012 15:16:51 +0200
 
 openjdk-7 (7u9-2.3.3-0ubuntu1) quantal-security; urgency=low
 
