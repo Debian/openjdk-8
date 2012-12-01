@@ -117,8 +117,8 @@ endif
 
 with_wgy_zenhai = $(if $(filter $(distrel),lenny),,yes)
 
-arch_map	:= alpha=alpha arm=arm armel=arm armhf=arm amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparc64 sh4=sh s390=s390 s390x=s390x ia64=ia64
-archdir_map	:= alpha=alpha arm=arm armel=arm armhf=arm amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparcv9 sh4=sh s390=s390 s390x=s390x ia64=ia64
+arch_map	:= alpha=alpha arm=arm armel=arm armhf=arm amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparc64 sh4=sh s390=s390 s390x=s390x ia64=ia64 m68k=m68k
+archdir_map	:= alpha=alpha arm=arm armel=arm armhf=arm amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparcv9 sh4=sh s390=s390 s390x=s390x ia64=ia64 m68k=m68k
 
 jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH_CPU)=%, %, \
 			$(filter $(DEB_HOST_ARCH_CPU)=%, $(arch_map))))
@@ -293,7 +293,7 @@ else ifneq (,$(filter $(distrel),wheezy sid))
     export CC = gcc-4.4
     export CXX = g++-4.4
   endif
-  ifneq (,$(filter $(DEB_HOST_ARCH), s390))
+  ifneq (,$(filter $(DEB_HOST_ARCH), m68k s390))
     GCJ_SUFFIX = -4.6
   endif
 else ifneq (,$(filter $(distrel),oneiric precise))
@@ -416,7 +416,8 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/libpcsclite-dlopen.diff \
 	debian/patches/jni_md_h_JNIEXPORT_visibility.patch \
 	debian/patches/7130140-MouseEvent-systemout.diff \
-	debian/patches/FreetypeFontScaler_getFontMetricsNative.diff
+	debian/patches/FreetypeFontScaler_getFontMetricsNative.diff \
+	debian/patches/text-relocations.diff
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -634,18 +635,18 @@ bd_autotools = autoconf, automake, autotools-dev,
 # This section should be in sync with "GCJ_SUFFIX" definition
 bd_bootstrap =
 ifneq (,$(stage1_gcj_archs))
+  bd_bootstrap += \
+	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
+  stage1_gcj46_archs = m68k s390
+  stage1_gcj_default_archs = $(filter-out $(stage1_gcj46_archs), $(stage1_gcj_archs))
   ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy))
     bd_bootstrap += \
-	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
-	gcj-jdk [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
+	gcj-jdk [$(strip $(foreach a,$(stage1_gcj_default_archs), $(a)))], \
+	gcj-4.6-jdk [$(strip $(foreach a,$(stage1_gcj46_archs), $(a)))],
   else
     bd_bootstrap += \
-	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
 	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
 	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
-  endif
-  ifneq (,$(filter $(distrel),wheezy sid))
-    bd_bootstrap += gcj-4.6-jdk [s390],
   endif
 endif
 ifneq (,$(stage1_openjdk_archs))
