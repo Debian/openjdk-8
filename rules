@@ -296,7 +296,7 @@ else ifneq (,$(filter $(distrel),wheezy sid))
   ifneq (,$(filter $(DEB_HOST_ARCH), s390))
     GCJ_SUFFIX = -4.6
   endif
-else ifneq (,$(filter $(distrel),precise))
+else ifneq (,$(filter $(distrel),oneiric precise))
   export CC = gcc-4.6
   export CXX = g++-4.6
   GCJ_SUFFIX = -4.6
@@ -452,10 +452,6 @@ endif
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha))
   DISTRIBUTION_ECJ_PATCHES += \
 	debian/patches/alpha-float-const.diff
-endif
-
-ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
-  DISTRIBUTION_PATCHES += debian/patches/jamvm-avoid-version-soname.patch
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))

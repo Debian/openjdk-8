@@ -1,10 +1,10 @@
 #!/bin/sh
 
 tarballs="corba.tar.gz hotspot-default.tar.gz hotspot-zero.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools-dfsg.tar.gz openjdk.tar.gz"
-jamvmtb=jamvm-e70f2450890b82c37422616cc85e1a23385f03cd.tar.gz
-cacaotb=cacao-a567bcb7f589.tar.gz
-tarballdir=7u7
-version=7u7-2.3.2a
+jamvmtb=jamvm-0972452d441544f7dd29c55d64f1ce3a5db90d82.tar.gz
+cacaotb=
+tarballdir=7u9
+version=7u9-2.3.3
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
@@ -39,7 +39,9 @@ else
         for i in $tarballs; do
             cp -p $tarballdir/$i $pkgdir.orig/
         done
-        cp -p $tarballdir/$cacaotb $pkgdir.orig/
+	if [ -n "$cacaotb" ]; then
+          cp -p $tarballdir/$cacaotb $pkgdir.orig/
+	fi
         cp -p $tarballdir/$jamvmtb $pkgdir.orig/
       ;;
     esac
