@@ -417,7 +417,8 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/jni_md_h_JNIEXPORT_visibility.patch \
 	debian/patches/7130140-MouseEvent-systemout.diff \
 	debian/patches/FreetypeFontScaler_getFontMetricsNative.diff \
-	debian/patches/text-relocations.diff
+	debian/patches/text-relocations.diff \
+	debian/patches/dnd-files.patch \
 
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
@@ -773,7 +774,7 @@ endif
 dlopen_hl_depends += , libpcsclite1
 dlopen_hl_recommends =
 dlopen_jre_depends = \
-	libgtk2.0-0, libxrandr2, libxinerama1, libgl1-mesa-glx
+	libgtk2.0-0, libxrandr2, libxinerama1, libgl1-mesa-glx | libgl1
 dlopen_jre_recommends =
 # these are not yet ready for multiarch
 ifneq (,$(DEB_HOST_MULTIARCH))

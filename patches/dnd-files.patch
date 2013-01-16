@@ -1,0 +1,21 @@
+diff -uNr openjdk-orig/jdk/src/solaris/classes/sun/awt/X11/XDataTransferer.java openjdk/jdk/src/solaris/classes/sun/awt/X11/XDataTransferer.java
+--- openjdk-orig/jdk/src/solaris/classes/sun/awt/X11/XDataTransferer.java	2012-10-16 22:36:45.000000000 +0200
++++ openjdk/jdk/src/solaris/classes/sun/awt/X11/XDataTransferer.java	2012-12-15 12:14:59.281673529 +0100
+@@ -283,14 +283,14 @@
+             reader = new BufferedReader(new InputStreamReader(stream, charset));
+             String line;
+             ArrayList<URI> uriList = new ArrayList<URI>();
+-            URI uri;
+             while ((line = reader.readLine()) != null) {
+                 try {
+-                    uri = new URI(line);
++                    if (!"\0".equals(line)) {
++                        uriList.add(new URI(line));
++                    }
+                 } catch (URISyntaxException uriSyntaxException) {
+                     throw new IOException(uriSyntaxException);
+                 }
+-                uriList.add(uri);
+             }
+             return uriList.toArray(new URI[uriList.size()]);
+         } finally {

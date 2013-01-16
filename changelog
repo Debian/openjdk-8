@@ -1,10 +1,25 @@
-openjdk-7 (7u9-2.3.3-2) UNRELEASED; urgency=low
+openjdk-7 (7u9-2.3.4-1) experimental; urgency=low
+
+  * IcedTea7 2.3.4 release.
+  * Security fixes
+    - S8004933, CVE-2012-3174: Improve MethodHandle interaction with libraries.
+    - S8006017, CVE-2013-0422: Improve lookup resolutions.
+    - S8006125: Update MethodHandles library interactions.
+  * Bug fixes
+    - S7197906: BlockOffsetArray::power_to_cards_back() needs to handle > 32 bit
+      shifts.
+    - G422525: Fix building with PaX enabled kernels.
+
+  [ Matthias Klose ]
+  * Loosen OpenGL dependency. Closes: #695028.
+  * Fix error parsing drop files parameter from pcmanfm (Alberto Fernández
+    Martínez). Closes: #695992.
 
   [ Thorsten Glaser ]
   * debian/rules: Use gcj-4.6-jdk for m68k builds.
   * d/patches/text-relocations.patch: build with -fPIC on all archs.
 
- -- Matthias Klose <doko@ubuntu.com>  Sat, 01 Dec 2012 18:23:29 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 15 Jan 2013 23:38:48 +0100
 
 openjdk-7 (7u9-2.3.3-1) experimental; urgency=low
 
