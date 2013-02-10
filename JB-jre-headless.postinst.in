@@ -115,6 +115,18 @@ configure)
 	fi
 	rm -f $log
     esac
+    case @archdir@ in amd64|i386|sparc)
+	rm -f $basedir/jre/lib/@archdir@/server/classes.jsa
+	log=$(tempfile)
+	if ! $basedir/bin/java -server -Xshare:dump > $log; then
+	    cat >&2 $log
+	    rm -f $log
+	    # this may fail on some machines/configurations, just ignore it.
+	    echo >&2 "ignoring dump failure"
+	    #exit 1
+	fi
+	rm -f $log
+    esac
 
     if [ -n "$multiarch" ]; then
 	if [ ! -h /@basedir@/jre/lib/zi ] && [ -d /@basedir@/jre/lib/zi ]; then

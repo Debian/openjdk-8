@@ -62,6 +62,7 @@ Multi-Arch: foreign
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (>= ${base:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
+Built-Using: ${rhino:Source}
 Description: OpenJDK Java runtime (architecture independent libraries)
  OpenJDK Java runtime, using ${vm:Name}.
  .

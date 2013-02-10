@@ -98,7 +98,7 @@
 -#monospaced.plain.korean-baekmuk.motif=Baekmuk Gulim
 -monospaced.plain.korean-un=UnDotum
 -#monospaced.plain.korean-un.motif=UnDotum
-+monospaced.plain.korean-nanumcoding=NanumGothicCoding
++monospaced.plain.korean-nanum=NanumGothicCoding
  
  monospaced.bold.latin-1=DejaVu Sans Mono Bold
  #monospaced.bold.latin-1.motif=LuxiMono-Bold
@@ -109,7 +109,7 @@
 -#monospaced.bold.korean-baekmuk.motif=Baekmuk Gulim
 -monospaced.bold.korean-un=UnDotum Bold
 -#monospaced.bold.korean-un.motif=UnDotum Bold
-+monospaced.bold.korean-nanumcoding=NanumGothicCoding Bold
++monospaced.bold.korean-nanum=NanumGothicCoding Bold
  
  monospaced.italic.latin-1=DejaVu Sans Mono Oblique
  #monospaced.italic.latin-1.motif=LuxiMono-Oblique
@@ -120,7 +120,7 @@
 -#monospaced.italic.korean-baekmuk.motif=Baekmuk Gulim
 -monospaced.italic.korean-un=UnDotum
 -#monospaced.italic.korean-un.motif=UnDotum
-+monospaced.italic.korean-nanumcoding=NanumGothicCoding
++monospaced.italic.korean-nanum=NanumGothicCoding
  
  monospaced.bolditalic.latin-1=DejaVu Sans Mono Bold Oblique
  #monospaced.bolditalic.latin-1.motif=LuxiMono-BoldOblique
@@ -131,7 +131,7 @@
 -#monospaced.bolditalic.korean-baekmuk.motif=Baekmuk Gulim
 -monospaced.bolditalic.korean-un=UnDotum Bold
 -#monospaced.bolditalic.korean-un.motif=UnDotum Bold
-+monospaced.bolditalic.korean-nanumcoding=NanumGothicCoding Bold
++monospaced.bolditalic.korean-nanum=NanumGothicCoding Bold
  
  dialog.plain.latin-1=DejaVu Sans
  #dialog.plain.latin-1.motif=LuxiSans-Regular
@@ -234,7 +234,7 @@
 -#sequence.fallback=uminghk,shanheisun,wqy-zenhei,japanese-vlgothic,japanese-kochi,japanese-sazanami,korean-un,korean-baekmuk,bengali,gujarati,hindi,oriya,punjabi,malayalam,tamil,telugu,sinhala
 -sequence.fallback=wqy-microhei,uminghk,shanheisun,wqy-zenhei,japanese-vlgothic,japanese-sazanami,japanese-kochi,korean-un,korean-baekmuk,bengali,gujarati,hindi,oriya,punjabi,tamil,telugu
 +#sequence.fallback=uminghk,shanheisun,wqy-zenhei,japanese-vlgothic,japanese-kochi,japanese-sazanami,korean-un,bengali,gujarati,hindi,oriya,punjabi,malayalam,tamil,telugu,sinhala
-+sequence.fallback=wqy-microhei,uminghk,shanheisun,wqy-zenhei,japanese-vlgothic,japanese-sazanami,japanese-kochi,korean-nanumcoding,korean-nanum,bengali,gujarati,hindi,oriya,punjabi,tamil,telugu
++sequence.fallback=wqy-microhei,uminghk,shanheisun,wqy-zenhei,japanese-vlgothic,japanese-sazanami,japanese-kochi,korean-nanum,bengali,gujarati,hindi,oriya,punjabi,tamil,telugu
  
  # Exclusion Ranges
  
@@ -257,11 +257,10 @@
  filename.Kochi_Gothic=/usr/share/fonts/truetype/kochi/kochi-gothic.ttf
  filename.Sazanami_Gothic=/usr/share/fonts/truetype/sazanami/sazanami-gothic.ttf
  filename.Kochi_Mincho=/usr/share/fonts/truetype/kochi/kochi-mincho.ttf
-@@ -346,5 +286,5 @@
+@@ -346,5 +286,4 @@
  awtfontpath.japanese-kochi=/usr/share/fonts/truetype/kochi
  awtfontpath.japanese-sazanami=/usr/share/fonts/truetype/sazanami
  awtfontpath.japanese-vlgothic=/usr/share/fonts/truetype/vlgothic
 -awtfontpath.korean-baekmuk=/usr/share/fonts/truetype/baekmuk
 -awtfontpath.korean-un=/usr/share/fonts/truetype/unfonts
 +awtfontpath.korean-nanum=/usr/share/fonts/truetype/nanum
-+awtfontpath.korean-nanumcoding=/usr/share/fonts/truetype/nanum-coding

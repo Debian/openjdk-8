@@ -6,6 +6,7 @@ basedir=/@basedir@
 jre_tools='@jre_hl_tools@'
 
 rm -f $basedir/jre/lib/@archdir@/client/classes.jsa
+rm -f $basedir/jre/lib/@archdir@/server/classes.jsa
 
 if [ "$1" = "remove" ] || [ "$1" = "deconfigure" ]; then
     for i in $jre_tools; do

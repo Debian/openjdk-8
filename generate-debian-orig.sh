@@ -4,12 +4,12 @@ tarballs="corba.tar.gz hotspot-default.tar.gz hotspot-zero.tar.gz jaxp.tar.gz ja
 jamvmtb=jamvm-0972452d441544f7dd29c55d64f1ce3a5db90d82.tar.gz
 cacaotb=
 tarballdir=7u9
-version=7u9-2.3.3
+version=7u9-2.3.5~pre1
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
-icedtea_checkout=icedtea-2.3
+icedtea_checkout=icedtea7-2.3
 debian_checkout=openjdk7
 
 if [ -d $pkgdir ]; then
