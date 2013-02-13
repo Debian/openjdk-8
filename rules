@@ -128,10 +128,8 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH_CPU)=%, %, \
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 hotspot_version = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),default,zero)
 
-#stage1_gcj_archs = alpha amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64
-#stage1_openjdk_archs =
-stage1_gcj_archs = alpha hppa ia64 lpia powerpcspe ppc64 m68k mips mipsel sh4 sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64
-stage1_openjdk_archs = amd64 armel armhf i386 ia64 powerpc sparc
+stage1_gcj_archs = alpha amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64
+stage1_openjdk_archs =
 stage1_cacao_archs =
 ifneq (,$(filter nobootstrap, $(DEB_BUILD_OPTIONS)))
   stage1_openjdk_archs := $(stage1_openjdk_archs) $(stage1_gcj_archs)

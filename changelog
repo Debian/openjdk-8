@@ -1,6 +1,6 @@
-openjdk-7 (7u9-2.3.5~pre1-1) experimental; urgency=low
+openjdk-7 (7u13-2.3.6-1) experimental; urgency=low
 
-  * IcedTea7 2.3.5 snapshot, taken from the icedtea7-2.3 branch.
+  * IcedTea7 2.3.6 release.
     - Disable bootstrap builds, currently broken in IcedTea.
   * Security fixes:
     - S6563318, CVE-2013-0424: RMI data sanitization.
@@ -43,7 +43,7 @@ openjdk-7 (7u9-2.3.5~pre1-1) experimental; urgency=low
   * Don't use concurrent features to rewrite the rhino jar file.
   * Enable class data sharing for the hotspot server VM.
 
- -- Matthias Klose <doko@ubuntu.com>  Sun, 10 Feb 2013 21:42:44 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 12 Feb 2013 20:59:48 +0100
 
 openjdk-7 (7u9-2.3.4-1) experimental; urgency=low
 

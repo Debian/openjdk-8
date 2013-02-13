@@ -75,3 +75,16 @@ Author: Damien Raude-Morvan <drazzib@debian.org>, Matthias Klose <doko@ubuntu.co
  
  stamps/add-zero.stamp: stamps/icedtea.stamp
  	mkdir -p stamps
+--- rewriter/com/redhat/rewriter/ClassRewriter.java
++++ rewriter/com/redhat/rewriter/ClassRewriter.java
+@@ -60,8 +60,8 @@
+   /**
+    * The executor for submitting rewriting jobs.
+    */
+-  private static final ExecutorService executor = DEBUG ?
+-    Executors.newSingleThreadExecutor() : Executors.newCachedThreadPool();
++  private static final ExecutorService executor = 
++    Executors.newSingleThreadExecutor();
+ 
+   /**
+    * The source directory, set once by main.
