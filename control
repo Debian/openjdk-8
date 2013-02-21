@@ -3,14 +3,14 @@ Section: java
 Priority: optional
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
 Uploaders: Torsten Werner <twerner@debian.org>, Matthias Klose <doko@ubuntu.com>, Damien Raude-Morvan <drazzib@debian.org>
-Build-Depends: debhelper (>= 5), binutils-dev [armel armhf], m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, wdiff, fastjar (>= 2:0.96-0ubuntu2),  autoconf, automake, autotools-dev, ant, ant-optional,  libtool, g++-4.7, g++-4.4 [mips mipsel],  ecj-gcj [alpha amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64], gcj-jdk [alpha amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 mips mipsel sh4 sparc sparc64 s390x kfreebsd-i386 kfreebsd-amd64], gcj-4.6-jdk [m68k s390], libxtst-dev, libxi-dev, libxt-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, liblcms2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, libxinerama-dev, xsltproc, librhino-java (>= 1.7R3~), fonts-ipafont-mincho, libffi-dev,  zlib1g-dev, libattr1-dev, libpng-dev, libjpeg8-dev, libgif-dev, libpulse-dev (>= 0.9.12), libnss3-dev (>= 2:3.13.4),  mauve, xvfb, xauth, xfonts-base, libgl1-mesa-dri, twm | metacity, twm | dbus-x11, x11-xkb-utils,
+Build-Depends: debhelper (>= 5), binutils-dev [armel armhf], m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, wdiff, fastjar (>= 2:0.96-0ubuntu2),  autoconf, automake, autotools-dev, ant, ant-optional,  libtool, g++-4.7, g++-4.4 [mips mipsel],  ecj-gcj [amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64], gcj-jdk [amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 mips mipsel sh4 sparc sparc64 s390x x32 kfreebsd-i386 kfreebsd-amd64], gcj-4.6-jdk [m68k s390], openjdk-7-jdk (>= 6b18) [alpha], libxtst-dev, libxi-dev, libxt-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, liblcms2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, libxinerama-dev, xsltproc, librhino-java (>= 1.7R3~), fonts-ipafont-mincho, libffi-dev,  zlib1g-dev, libattr1-dev, libpng-dev, libjpeg8-dev, libgif-dev, libpulse-dev (>= 0.9.12), libnss3-dev (>= 2:3.13.4),  mauve, xvfb, xauth, xfonts-base, libgl1-mesa-dri, twm | metacity, twm | dbus-x11, x11-xkb-utils,
 Standards-Version: 3.9.3
 Homepage: http://openjdk.java.net/
 Vcs-Bzr: http://bazaar.launchpad.net/~openjdk/openjdk/openjdk7
 Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk7
 
 Package: openjdk-7-jdk
-Architecture: any
+Architecture: amd64 armel armhf i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
@@ -25,7 +25,7 @@ Description: OpenJDK Development Kit (JDK)
  from the IcedTea project.
 
 Package: openjdk-7-jre-headless
-Architecture: any
+Architecture: amd64 armel armhf i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}, ${multiarch:Depends}
 Depends: openjdk-7-jre-lib (= ${source:Version}), ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
@@ -41,7 +41,7 @@ Description: OpenJDK Java runtime, using ${vm:Name} (headless)
  from the IcedTea project.
 
 Package: openjdk-7-jre
-Architecture: any
+Architecture: amd64 armel armhf i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
@@ -70,7 +70,7 @@ Description: OpenJDK Java runtime (architecture independent libraries)
  from the IcedTea project.
 
 Package: openjdk-7-demo
-Architecture: any
+Architecture: amd64 armel armhf i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
@@ -112,7 +112,7 @@ Description: OpenJDK Development Kit (JDK) documentation
  from the IcedTea project.
 
 Package: openjdk-7-dbg
-Architecture: any
+Architecture: amd64 armel armhf i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 Multi-Arch: same
 Priority: extra
 Section: debug
@@ -130,7 +130,7 @@ Description: Java runtime based on OpenJDK (debugging symbols)
  from the IcedTea project.
 
 Package: icedtea-7-jre-jamvm
-Architecture: amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
+Architecture: amd64 armel armhf i386 lpia powerpc kfreebsd-i386 kfreebsd-amd64
 Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}

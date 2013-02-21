@@ -1,3 +1,23 @@
+openjdk-7 (7u15-2.3.7-1) experimental; urgency=low
+
+  * IcedTea7 2.3.7 release.
+  * Security fixes:
+    - S8004937, CVE-2013-1484: Improve proxy construction.
+    - S8006439, CVE-2013-1485: Improve MethodHandles coverage.
+    - S8006446, CVE-2013-1486: Restrict MBeanServer access.
+    - S8006777, CVE-2013-0169: Improve TLS handling of invalid messages.
+    - S8007688: Blacklist known bad certificate.
+  * Backports:
+    - S8007393: Possible race condition after JDK-6664509.
+    - S8007611: logging behavior in applet changed.
+  * For zero builds, use the same hotspot version as in 2.1.6.
+  * Reenable bootstrap builds, except for alpha.
+  * Explicitly disable building on mips/mipsel.  Not supported by the
+    Debian OpenJDK maintainers, the Debian mips porters, or the Debian
+    Java team.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 20 Feb 2013 23:33:58 +0100
+
 openjdk-7 (7u13-2.3.6-1) experimental; urgency=low
 
   * IcedTea7 2.3.6 release.

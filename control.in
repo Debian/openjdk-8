@@ -10,7 +10,7 @@ Vcs-Bzr: http://bazaar.launchpad.net/~openjdk/openjdk/openjdk7
 Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk7
 
 Package: @basename@-jdk
-Architecture: any
+Architecture: @any_archs@
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
@@ -25,7 +25,7 @@ Description: OpenJDK Development Kit (JDK)
  from the IcedTea project.
 
 Package: @basename@-jre-headless
-Architecture: any
+Architecture: @any_archs@
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}, ${multiarch:Depends}
 Depends: @basename@-jre-lib (= ${source:Version}), ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
@@ -41,7 +41,7 @@ Description: OpenJDK Java runtime, using ${vm:Name} (headless)
  from the IcedTea project.
 
 Package: @basename@-jre
-Architecture: any
+Architecture: @any_archs@
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
@@ -70,7 +70,7 @@ Description: OpenJDK Java runtime (architecture independent libraries)
  from the IcedTea project.
 
 Package: @basename@-demo
-Architecture: any
+Architecture: @any_archs@
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
@@ -112,7 +112,7 @@ Description: OpenJDK Development Kit (JDK) documentation
  from the IcedTea project.
 
 Package: @basename@-dbg
-Architecture: any
+Architecture: @any_archs@
 Multi-Arch: same
 Priority: extra
 Section: debug

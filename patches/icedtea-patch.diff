@@ -88,3 +88,11 @@ Author: Damien Raude-Morvan <drazzib@debian.org>, Matthias Klose <doko@ubuntu.co
  
    /**
     * The source directory, set once by main.
+diff -r 4333294206f6 hotspot.map
+--- hotspot.map	Thu Feb 21 06:29:57 2013 +1100
++++ hotspot.map	Wed Feb 20 23:29:51 2013 +0100
+@@ -1,3 +1,3 @@
+ # version url changeset sha256sum
+ default http://icedtea.classpath.org/hg/release/icedtea7-forest-2.3/hotspot 104e2c65892d 203acf2f9737032fe4bb1096e2f81417fa8a92a7016d8220b54a70efd579711a
+-zero http://icedtea.classpath.org/hg/release/icedtea7-forest-2.1/hotspot 32569b4d36f4 455be170dcea6edbc9c74f9d67308bb6a1f39dadda0267e7d73ea6af3043f60c
++zero http://icedtea.classpath.org/hg/release/icedtea7-forest-2.1/hotspot d8b22e079abe 28883ebefcfff1ba8b356a7fabf8e449c25fe7fffe1d563f1f58f887100063f0

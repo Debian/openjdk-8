@@ -128,8 +128,12 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH_CPU)=%, %, \
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 hotspot_version = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),default,zero)
 
-stage1_gcj_archs = alpha amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x kfreebsd-i386 kfreebsd-amd64
-stage1_openjdk_archs =
+no_archs = mips mipsel
+any_archs = amd64 armel armhf i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
+any_archs := $(filter-out $(no_archs),$(any_archs))
+
+stage1_gcj_archs = amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
+stage1_openjdk_archs = alpha
 stage1_cacao_archs =
 ifneq (,$(filter nobootstrap, $(DEB_BUILD_OPTIONS)))
   stage1_openjdk_archs := $(stage1_openjdk_archs) $(stage1_gcj_archs)
@@ -144,6 +148,7 @@ endif
 
 ifeq (,$(filter $(distrel),lenny intrepid hardy))
   cacao_archs = alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
+  cacao_archs := $(filter-out $(no_archs),$(cacao_archs))
   # TODO kfreebsd porting for cacao vm
 endif
 cacao_archs =
@@ -153,6 +158,7 @@ endif
 
 ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy))
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
+  jamvm_archs := $(filter-out $(no_archs),$(jamvm_archs))
 endif
 ifeq (,$(filter $(distrel),wheezy sid squeeze lenny maverick natty maverick lucid karmic hardy))
   jamvm_defaults =
@@ -195,6 +201,9 @@ endif
 ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
   STAGE1_JAVA = gcj
   STAGE1_HOME = /usr/lib/jvm/java-gcj
+  ifneq (,$(filter $(DEB_HOST_ARCH), m68k s390))
+    STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.6
+  endif
 else ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_openjdk_archs)))
   STAGE1_JAVA = openjdk
   STAGE1_HOME = $(firstword $(wildcard /usr/lib/jvm/java-6-openjdk-$(DEB_HOST_ARCH) /usr/lib/jvm/java-6-openjdk))
@@ -747,6 +756,8 @@ endif
 bd_fastjar = fastjar (>= 2:0.96-0ubuntu2),
 ifneq (,$(filter $(distrel),lenny))
   bd_fastjar = fastjar (>= 2:0.95-4),
+else ifneq (,$(filter $(distrel),hardy))
+  bd_fastjar = fastjar (>= 2:0.95-1ubuntu2.1),
 endif
 bd_compress = $(pkg_compress),
 bd_xvfb = xvfb, xauth, xfonts-base, libgl1-mesa-dri, $(bd_wm) x11-xkb-utils,
@@ -967,6 +978,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_ant@/$(bd_ant)/g' \
 	      -e 's/@core_fonts@/$(core_fonts)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
+	      -e 's/@any_archs@/$(any_archs)/g' \
 	      -e 's/@cacao_archs@/$(cacao_archs)/g' \
 	      -e 's/@jamvm_archs@/$(jamvm_archs)/g' \
 	      -e 's/@hotspot_archs@/$(hotspot_archs)/g' \
@@ -1094,11 +1106,11 @@ ifeq ($(with_check),yes)
     endif
 
     ifneq (,$(filter jamvm, $(alternate_vms)))
-      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 ))
+      ifneq (,$(filter $(DEB_HOST_ARCH), ))
         # only activate after testing
         with_mauve_check += jamvm
       endif
-      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
+      ifneq (,$(filter $(DEB_HOST_ARCH), ))
         # only activate after testing; hangs several tests.
         with_jtreg_check += jamvm
       endif
