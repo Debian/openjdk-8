@@ -758,7 +758,7 @@ ifneq (,$(cacao_archs))
 endif
 
 ifneq (,$(filter $(distrel),lucid))
-  bd_ant = ant, ant1.8-optional,
+  bd_ant = ant1.8, ant1.8-optional,
 else
   bd_ant = ant, ant-optional,
 endif
