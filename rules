@@ -565,6 +565,10 @@ CONFIGURE_ARGS += \
 endif
 endif
 
+ifneq (,$(filter $(distrel), lenny lucid karmic jaunty intrepid hardy))
+  CONFIGURE_ARGS += \
+        --disable-system-gio --disable-system-zlib
+endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
   CONFIGURE_ARGS += \
