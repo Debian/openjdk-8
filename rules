@@ -128,10 +128,7 @@ archdir		:= $(strip $(patsubst $(DEB_HOST_ARCH_CPU)=%, %, \
 default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 hotspot_version = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),default,zero)
 
-no_archs = mips mipsel
 any_archs = amd64 armel armhf i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
-any_archs := $(filter-out $(no_archs),$(any_archs))
-
 stage1_gcj_archs = amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 stage1_openjdk_archs = alpha
 stage1_cacao_archs =
@@ -148,7 +145,6 @@ endif
 
 ifeq (,$(filter $(distrel),lenny intrepid hardy))
   cacao_archs = alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
-  cacao_archs := $(filter-out $(no_archs),$(cacao_archs))
   # TODO kfreebsd porting for cacao vm
 endif
 cacao_archs =
@@ -158,7 +154,6 @@ endif
 
 ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy))
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
-  jamvm_archs := $(filter-out $(no_archs),$(jamvm_archs))
 endif
 ifeq (,$(filter $(distrel),wheezy sid squeeze lenny maverick natty maverick lucid karmic hardy))
   jamvm_defaults =
@@ -459,7 +454,9 @@ endif
 
 ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += \
-	debian/patches/openjdk-ubuntu-branding.patch
+	debian/patches/openjdk-ubuntu-branding.patch \
+	debian/patches/8007014.patch \
+	debian/patches/8007675.patch
 endif
 
 ifeq ($(with_pulse),yes)
@@ -565,10 +562,6 @@ CONFIGURE_ARGS += \
 endif
 endif
 
-ifneq (,$(filter $(distrel), lenny lucid karmic jaunty intrepid hardy))
-  CONFIGURE_ARGS += \
-        --disable-system-gio --disable-system-zlib
-endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
   CONFIGURE_ARGS += \
@@ -712,13 +705,7 @@ bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxaw7-dev, libxrender-dev, \
 	$(if $(filter $(distrel), etch hardy),libcupsys2-dev,libcups2-dev), \
 	libasound2-dev, liblcms$(lcms_version)-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, \
-	libxinerama-dev, xsltproc,
-ifneq (,$(filter $(distrel),lenny lucid karmic jaunty intrepid hardy))
-  bd_openjdk += rhino (>= 1.7~),
-else
-  bd_openjdk += librhino-java (>= 1.7R3~),
-endif
-
+	libxinerama-dev, xsltproc, librhino-java (>= 1.7R3~),
 ifeq (,$(filter $(distrel),lenny squeeze quantal precise oneiric natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
   rhino_source := $(shell dpkg-query -f '$${source:Package} (= $${source:Version}), ' -W librhino-java)
 endif
@@ -758,7 +745,7 @@ ifneq (,$(cacao_archs))
 endif
 
 ifneq (,$(filter $(distrel),lucid))
-  bd_ant = ant1.8, ant1.8-optional,
+  bd_ant = ant, ant1.8-optional,
 else
   bd_ant = ant, ant-optional,
 endif
@@ -766,8 +753,6 @@ endif
 bd_fastjar = fastjar (>= 2:0.96-0ubuntu2),
 ifneq (,$(filter $(distrel),lenny))
   bd_fastjar = fastjar (>= 2:0.95-4),
-else ifneq (,$(filter $(distrel),hardy))
-  bd_fastjar = fastjar (>= 2:0.95-1ubuntu2.1),
 endif
 bd_compress = $(pkg_compress),
 bd_xvfb = xvfb, xauth, xfonts-base, libgl1-mesa-dri, $(bd_wm) x11-xkb-utils,
@@ -1116,11 +1101,11 @@ ifeq ($(with_check),yes)
     endif
 
     ifneq (,$(filter jamvm, $(alternate_vms)))
-      ifneq (,$(filter $(DEB_HOST_ARCH), ))
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 ))
         # only activate after testing
         with_mauve_check += jamvm
       endif
-      ifneq (,$(filter $(DEB_HOST_ARCH), ))
+      ifneq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
         # only activate after testing; hangs several tests.
         with_jtreg_check += jamvm
       endif

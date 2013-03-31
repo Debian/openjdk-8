@@ -1,3 +1,18 @@
+openjdk-7 (7u15-2.3.7-1ubuntu2) raring; urgency=low
+
+  * Security fixes:
+    - S8007014, CVE-2013-0809: Improve image handling
+    - S8007675, CVE-2013-1493: Improve color conversion
+    - debian/rules: updated to add 8007014.patch and 8007675.patch
+
+ -- Jamie Strandboge <jamie@ubuntu.com>  Wed, 06 Mar 2013 14:12:03 -0600
+
+openjdk-7 (7u15-2.3.7-1ubuntu1) raring; urgency=low
+
+  * Regenerate the control file.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 20 Feb 2013 23:59:54 +0100
+
 openjdk-7 (7u15-2.3.7-1) experimental; urgency=low
 
   * IcedTea7 2.3.7 release.
