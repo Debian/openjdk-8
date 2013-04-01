@@ -454,9 +454,7 @@ endif
 
 ifeq ($(distribution),Ubuntu)
   DISTRIBUTION_PATCHES += \
-	debian/patches/openjdk-ubuntu-branding.patch \
-	debian/patches/8007014.patch \
-	debian/patches/8007675.patch
+	debian/patches/openjdk-ubuntu-branding.patch
 endif
 
 ifeq ($(with_pulse),yes)

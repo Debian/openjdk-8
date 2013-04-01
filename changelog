@@ -1,3 +1,9 @@
+openjdk-7 (7u17-2.3.8-1ubuntu1) raring; urgency=low
+
+  * Regenerate the control file.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 31 Mar 2013 20:10:05 +0200
+
 openjdk-7 (7u17-2.3.8-1) experimental; urgency=low
 
   * IcedTea7 2.3.8 release.
