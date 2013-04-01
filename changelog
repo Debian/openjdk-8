@@ -1,3 +1,9 @@
+openjdk-7 (7u17-2.3.8-2) experimental; urgency=low
+
+  * Remove Torsten Werner as uploader.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 01 Apr 2013 00:39:58 +0200
+
 openjdk-7 (7u17-2.3.8-1ubuntu1) raring; urgency=low
 
   * Regenerate the control file.
