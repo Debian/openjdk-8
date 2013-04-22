@@ -1,11 +1,11 @@
---- openjdk/jdk/src/share/lib/security/java.security~	2013-02-06 22:32:25.890058433 +0100
-+++ openjdk/jdk/src/share/lib/security/java.security	2013-02-06 22:34:53.046054076 +0100
-@@ -133,7 +133,8 @@
-                com.sun.org.apache.xerces.internal.utils.,\
-                com.sun.org.apache.xalan.internal.utils.,\
-                com.sun.org.glassfish.external.,\
--               com.sun.org.glassfish.gmbal.
-+               com.sun.org.glassfish.gmbal.,\
+--- openjdk/jdk/src/share/lib/security/java.security
++++ openjdk/jdk/src/share/lib/security/java.security
+@@ -147,7 +147,8 @@
+                com.sun.org.apache.xml.internal.res.,\
+                com.sun.org.apache.xml.internal.serializer.utils.,\
+                com.sun.org.apache.xml.internal.utils.,\
+-               com.sun.org.glassfish.
++               com.sun.org.glassfish.,\
 +	       org.GNOME.Accessibility.
  
  #

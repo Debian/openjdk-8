@@ -15,7 +15,7 @@ Author: Damien Raude-Morvan <drazzib@debian.org>
 +                         $(LFLAGS_JSIG) $(JSIG_DEBUG_CFLAGS) $(EXTRA_CFLAGS_HS) -o $@ $< -ldl
  	$(QUIETLY) [ -f $(LIBJSIG_G) ] || { ln -s $@ $(LIBJSIG_G); }
  ifneq ($(OBJCOPY),)
- 	$(QUIETLY) $(OBJCOPY) --only-keep-debug $@ $(LIBJSIG_DEBUGINFO)
+   ifneq ($(STRIP_POLICY),no_strip)
 --- openjdk/hotspot/make/linux/makefiles/launcher.make.orig
 +++ openjdk/hotspot/make/linux/makefiles/launcher.make
 @@ -73,16 +73,16 @@

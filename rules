@@ -378,7 +378,8 @@ endif
 #endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), sparc64))
-  export USE_PRECOMPILED_HEADER=0
+  USE_PRECOMPILED_HEADER = 0
+  export USE_PRECOMPILED_HEADER
 endif
 
 DISTRIBUTION_PATCHES += \
@@ -424,6 +425,8 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/FreetypeFontScaler_getFontMetricsNative.diff \
 	debian/patches/text-relocations.diff \
 	debian/patches/dnd-files.patch \
+	debian/patches/no-pch-build.diff \
+	debian/patches/zero-opt.diff \
 
 # FIXME CACAO update needed
 #ifeq ($(DEB_HOST_ARCH),armel)
@@ -466,7 +469,7 @@ ifeq ($(with_pulse),yes)
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha))
-  DISTRIBUTION_ECJ_PATCHES += \
+  DISTRIBUTION_BOOT_PATCHES += \
 	debian/patches/alpha-float-const.diff
 endif
 
@@ -484,7 +487,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
   endif    
 endif
 
-export DISTRIBUTION_PATCHES DISTRIBUTION_ECJ_PATCHES
+export DISTRIBUTION_PATCHES DISTRIBUTION_BOOT_PATCHES
 
 ifeq ($(STAGE1_JAVA),gcj)
   CONFIGURE_ARGS = \
@@ -566,9 +569,9 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
 	--with-cacao-src-zip=$(firstword $(wildcard $(CURDIR)/cacao-*.tar.* /usr/src/cacao-*.tar.*))
   ifneq (,$(filter $(DEB_HOST_ARCH), armel))
     # TODO: test build done without --enable-softfloat
-    EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS='--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
+    EXTRA_BUILD_ENV += CACAO_CONFIGURE_ARGS='--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
   else
-    EXTRA_BUILD_ENV = CACAO_CONFIGURE_ARGS='--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
+    EXTRA_BUILD_ENV += CACAO_CONFIGURE_ARGS='--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
   endif
 endif
 
@@ -1176,9 +1179,7 @@ stamps/build: stamps/patch
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel armhf hppa ia64 m68k mips mipsel powerpc powerpcspe ppc64 s390 s390x sparc))
 	sh -c 'sh debian/buildwatch.sh $(CURDIR)/build &'
 endif
-	if $(EXTRA_BUILD_ENV) $(MAKE) -C build $(build_target); then \
-	  : ; \
-	elif $(EXTRA_BUILD_ENV) $(MAKE) -C build $(build_target); then \
+	if $(EXTRA_BUILD_ENV) $(MAKE) -C build $(build_target) $(EXTRA_MAKE_FLAGS); then \
 	  : ; \
 	else \
 	  if [ -f buildwatch.pid ]; then \
