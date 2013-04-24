@@ -3,7 +3,7 @@ Section: java
 Priority: optional
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
 Uploaders: Matthias Klose <doko@ubuntu.com>, Damien Raude-Morvan <drazzib@debian.org>
-Build-Depends: debhelper (>= 5), binutils-dev [armel armhf], m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, wdiff, fastjar (>= 2:0.96-0ubuntu2),  autoconf, automake, autotools-dev, ant, ant-optional,  libtool, g++-4.7, g++-4.4 [mips mipsel],  ecj-gcj [amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64], gcj-jdk [amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 mips mipsel sh4 sparc sparc64 s390x x32 kfreebsd-i386 kfreebsd-amd64], gcj-4.6-jdk [m68k s390], openjdk-7-jdk (>= 6b18) [alpha], libxtst-dev, libxi-dev, libxt-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, liblcms2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, libxinerama-dev, xsltproc, librhino-java (>= 1.7R3~), fonts-ipafont-mincho, libffi-dev,  zlib1g-dev, libattr1-dev, libpng-dev, libjpeg8-dev, libgif-dev, libpulse-dev (>= 0.9.12), libnss3-dev (>= 2:3.13.4),  mauve, xvfb, xauth, xfonts-base, libgl1-mesa-dri, twm | metacity, twm | dbus-x11, x11-xkb-utils,
+Build-Depends: debhelper (>= 5), binutils-dev [armel armhf], m4, lsb-release, wget, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, wdiff, fastjar (>= 2:0.96-0ubuntu2),  autoconf, automake, autotools-dev, ant, ant-optional, libtool, libtool, g++-4.7, g++-4.4 [mips mipsel],  ecj-gcj [amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64], gcj-jdk [amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 mips mipsel sh4 sparc sparc64 s390x x32 kfreebsd-i386 kfreebsd-amd64], gcj-4.6-jdk [m68k s390], gcj-4.7-jdk [ia64], openjdk-7-jdk (>= 6b18) [alpha], libxtst-dev, libxi-dev, libxt-dev, libxaw7-dev, libxrender-dev, libcups2-dev, libasound2-dev, liblcms2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, libxinerama-dev, xsltproc, librhino-java (>= 1.7R3~), fonts-ipafont-mincho, libffi-dev,  zlib1g-dev, libattr1-dev, libpng-dev, libjpeg8-dev, libgif-dev, libpulse-dev (>= 0.9.12), libnss3-dev (>= 2:3.13.4),  mauve, xvfb, xauth, xfonts-base, libgl1-mesa-dri, twm | metacity, twm | dbus-x11, x11-xkb-utils,
 Standards-Version: 3.9.3
 Homepage: http://openjdk.java.net/
 Vcs-Bzr: http://bazaar.launchpad.net/~openjdk/openjdk/openjdk7
@@ -29,8 +29,8 @@ Architecture: amd64 armel armhf i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}, ${multiarch:Depends}
 Depends: openjdk-7-jre-lib (= ${source:Version}), ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
-Recommends: ${dlopenhl:Recommends}, ${cacao:Recommends}, ${jamvm:Recommends}
-Suggests: libnss-mdns, sun-java6-fonts, ttf-dejavu-extra, fonts-ipafont-gothic, fonts-ipafont-mincho, ttf-wqy-microhei | ttf-wqy-zenhei, ttf-indic-fonts,
+Recommends: ${dlopenhl:Recommends}, ${jamvm:Recommends}
+Suggests: ${cacao:Recommends}, libnss-mdns, sun-java6-fonts, ttf-dejavu-extra, fonts-ipafont-gothic, fonts-ipafont-mincho, ttf-wqy-microhei | ttf-wqy-zenhei, ttf-indic-fonts,
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, java7-runtime-headless, ${defaultvm:Provides}, ${jvm:Provides}
 Conflicts: ${multiarch:Conflicts}
 Description: OpenJDK Java runtime, using ${vm:Name} (headless)
@@ -62,6 +62,7 @@ Multi-Arch: foreign
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (>= ${base:Version}), ${misc:Depends}
 Recommends: ${dlopen:Recommends}
+Built-Using: ${rhino:Source}
 Description: OpenJDK Java runtime (architecture independent libraries)
  OpenJDK Java runtime, using ${vm:Name}.
  .
@@ -127,6 +128,21 @@ Description: Java runtime based on OpenJDK (debugging symbols)
  .
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
+
+Package: icedtea-7-jre-cacao
+Architecture: alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
+Multi-Arch: same
+Priority: extra
+Pre-Depends: ${dpkg:Depends}
+Depends: openjdk-7-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Provides: icedtea6-jre-cacao
+Description: Alternative JVM for OpenJDK, using Cacao
+ The package provides an alternative runtime using the Cacao VM and the 
+ Cacao Just In Time Compiler (JIT).  This is a somewhat faster alternative
+ than the Zero port on architectures like alpha, armel, m68k, mips, mipsel,
+ powerpc and s390.
+ .
+ The VM is started with the option `-cacao'. See the README.Debian for details.
 
 Package: icedtea-7-jre-jamvm
 Architecture: amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64

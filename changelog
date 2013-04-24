@@ -1,3 +1,11 @@
+openjdk-7 (7u21-2.3.9-2) UNRELEASED; urgency=high
+
+  * On ia64, use gcj-4.7 for the bootstrap build.
+  * Drop the cacao jre from recommends to suggests.
+  * Re-enable cacao, was enabled in the 2.1.x series.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 22 Apr 2013 23:21:13 +0200
+
 openjdk-7 (7u21-2.3.9-1) unstable; urgency=high
 
   * IcedTea7 2.3.9 release.
@@ -312,6 +320,181 @@ openjdk-7 (7u7-2.3.2-1) experimental; urgency=low
   * Don't apply shark patches (not built anyway).
 
  -- Matthias Klose <doko@ubuntu.com>  Sat, 01 Sep 2012 11:46:50 +0200
+
+openjdk-7 (7u3-2.1.7-1) unstable; urgency=high
+
+  * IcedTea7 2.1.7 release:
+  * Security fixes:
+    - S8007014, CVE-2013-0809: Improve image handling.
+    - S8007675, CVE-2013-1493: Improve color conversion.
+  * Backports:
+    - S8002344: Krb5LoginModule config class does not return proper KDC list
+      from DNS.
+    - S8004344: Fix a crash in ToolkitErrorHandler() in XlibWrapper.c.
+    - S8006179: JSR292 MethodHandles lookup with interface using findVirtual().
+    - S8006882: Proxy generated classes in sun.proxy package breaks JMockit.
+  * Bug fixes:
+    - PR1303: Correct #ifdef to #if
+    - Stop libraries being stripped in the OpenJDK build.
+    - PR1340: Simplify the rhino class rewriter to avoid use of concurrency.
+    - Revert 7017193 and add the missing free call, until a better fix is ready.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 30 Mar 2013 11:31:12 +0100
+
+openjdk-7 (7u3-2.1.6-1) unstable; urgency=high
+
+  * IcedTea7 2.1.5 release:
+  * Security fixes:
+    - S6563318, CVE-2013-0424: RMI data sanitization.
+    - S6664509, CVE-2013-0425: Add logging context.
+    - S6664528, CVE-2013-0426: Find log level matching its name or value
+      given at construction time.
+    - S6776941: CVE-2013-0427: Improve thread pool shutdown.
+    - S7141694, CVE-2013-0429: Improving CORBA internals.
+    - S7173145: Improve in-memory representation of splashscreens.
+    - S7186945: Unpack200 improvement.
+    - S7186946: Refine unpacker resource usage.
+    - S7186948: Improve Swing data validation.
+    - S7186952, CVE-2013-0432: Improve clipboard access.
+    - S7186954: Improve connection performance.
+    - S7186957: Improve Pack200 data validation.
+    - S7192392, CVE-2013-0443: Better validation of client keys.
+    - S7192393, CVE-2013-0440: Better Checking of order of TLS Messages.
+    - S7192977, CVE-2013-0442: Issue in toolkit thread.
+    - S7197546, CVE-2013-0428: (proxy) Reflect about creating reflective
+      proxies.
+    - S7200491: Tighten up JTable layout code.
+    - S7200493, CVE-2013-0444: Improve cache handling.
+    - S7200499: Better data validation for options.
+    - S7200500: Launcher better input validation.
+    - S7201064: Better dialogue checking.
+    - S7201066, CVE-2013-0441: Change modifiers on unused fields.
+    - S7201068, CVE-2013-0435: Better handling of UI elements.
+    - S7201070: Serialization to conform to protocol.
+    - S7201071, CVE-2013-0433: InetSocketAddress serialization issue.
+    - S8000210: Improve JarFile code quality.
+    - S8000537, CVE-2013-0450: Contextualize RequiredModelMBean class.
+    - S8000539, CVE-2013-0431: Introspect JMX data handling.
+    - S8000540, CVE-2013-1475: Improve IIOP type reuse management.
+    - S8000631, CVE-2013-1476: Restrict access to class constructor.
+    - S8001235, CVE-2013-0434: Improve JAXP HTTP handling.
+    - S8001242: Improve RMI HTTP conformance.
+    - S8001307: Modify ACC_SUPER behavior.
+    - S8001972, CVE-2013-1478: Improve image processing.
+    - S8002325, CVE-2013-1480: Improve management of images.
+  * Backports:
+    - S7054590: (JSR-292) MethodHandleProxies.asInterfaceInstance()
+      accepts private/protected nested interfaces.
+    - S7175616: Port fix for TimeZone from JDK 8 to JDK 7.
+    - S8002068: Build broken: corba code changes unable to use new
+      JDK 7 classes.
+    - S8004341: Two JCK tests fails with 7u11 b06.
+    - S8005615: Java Logger fails to load tomcat logger implementation (JULI).
+  * IcedTea7 2.1.6 release:
+    * Security fixes:
+    - S8004937, CVE-2013-1484: Improve proxy construction.
+    - S8006439, CVE-2013-1485: Improve MethodHandles coverage.
+    - S8006446, CVE-2013-1486: Restrict MBeanServer access.
+    - S8006777, CVE-2013-0169: Improve TLS handling of invalid messages.
+    - S8007688: Blacklist known bad certificate.
+  * Backports:
+    - S7123519: problems with certification path.
+    - S8007393: Possible race condition after JDK-6664509.
+    - S8007611: logging behavior in applet changed.
+  * Fix font suggestion for indic fonts in wheezy.
+  * Fix fontconfig definitions for japanese and korean fonts, fixing
+    compilation of the fontconfig file.
+  * Add Built-Using: rhino attribute for the -lib package.
+  * Don't use concurrent features to rewrite the rhino jar file.
+  * Enable class data sharing for the hotspot server VM.
+  * Enable bootstrap builds for alpha.
+  * Explicitly disable building on mips/mipsel.  Not supported by the
+    Debian OpenJDK maintainers, the Debian mips porters, or the Debian
+    Java team.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 21 Feb 2013 03:38:13 +0100
+
+openjdk-7 (7u3-2.1.4-1) unstable; urgency=low
+
+  * IcedTea7 2.1.4 release.
+  * Security fixes
+    - S8004933, CVE-2012-3174: Improve MethodHandle interaction with libraries
+    - S8006017, CVE-2013-0422: Improve lookup resolutions
+    - S8006125: Update MethodHandles library interactions
+  * Loosen OpenGL dependency. Closes: #695028.
+  * Fix error parsing drop files parameter from pcmanfm (Alberto Fernández
+    Martínez). Closes: #695992.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 16 Jan 2013 11:46:20 +0100
+
+openjdk-7 (7u3-2.1.3-1) unstable; urgency=low
+
+  * IcedTea7 2.1.3 release.
+  * Security fixes
+    - S6631398, CVE-2012-3216: FilePermission improved path checking.
+    - S7093490: adjust package access in rmiregistry.
+    - S7143535, CVE-2012-5068: ScriptEngine corrected permissions.
+    - S7158796, CVE-2012-5070: Tighten properties checking in EnvHelp.
+    - S7158807: Revise stack management with volatile call sites.
+    - S7163198, CVE-2012-5076: Tightened package accessibility.
+    - S7167656, CVE-2012-5077: Multiple Seeders are being created.
+    - S7169884, CVE-2012-5073: LogManager checks do not work correctly for
+      sub-types.
+    - S7169887, CVE-2012-5074: Tightened package accessibility.
+    - S7169888, CVE-2012-5075: Narrowing resource definitions in JMX RMI
+      connector.
+    - S7172522, CVE-2012-5072: Improve DomainCombiner checking.
+    - S7186286, CVE-2012-5081: TLS implementation to better adhere to RFC.
+    - S7189103, CVE-2012-5069: Executors needs to maintain state.
+    - S7189490: More improvements to DomainCombiner checking.
+    - S7189567, CVE-2012-5085: java net obselete protocol.
+    - S7192975, CVE-2012-5071: Issue with JMX reflection.
+    - S7195194, CVE-2012-5084: Better data validation for Swing.
+    - S7195549, CVE-2012-5087: Better bean object persistence.
+    - S7195917, CVE-2012-5086: XMLDecoder parsing at close-time should be
+      improved.
+    - S7195919, CVE-2012-5979: (sl) ServiceLoader can throw CCE without
+      needing to create instance.
+    - S7196190, CVE-2012-5088: Improve method of handling MethodHandles.
+    - S7198296, CVE-2012-5089: Refactor classloader usage.
+    - S7158801: Improve VM CompileOnly option.
+    - S7158804: Improve config file parsing.
+    - S7198606, CVE-2012-4416: Improve VM optimization.
+  * Backports
+    - S7175845: "jar uf" changes file permissions unexpectedly.
+    - S7177216: native2ascii changes file permissions of input file.
+    - S7106773: 512 bits RSA key cannot work with SHA384 and SHA512.
+    - S7158800: Improve storage of symbol tables.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 17 Oct 2012 16:03:47 +0200
+
+openjdk-7 (7u3-2.1.2-2ubuntu1) precise-security; urgency=low
+
+  * Make the avian VM a known runtime.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 08 Sep 2012 16:01:31 +0200
+
+openjdk-7 (7u3-2.1.2-2) unstable; urgency=high
+
+  * Pass -avoid-version to libtool to create a JamVM libjvm.so without SONAME
+    version numbers to match the Hotspot Server/Client libjvm.so. LP: #850433.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 04 Sep 2012 17:55:43 +0200
+
+openjdk-7 (7u3-2.1.2-1) unstable; urgency=high
+
+  * IcedTea7 2.1.2 release.
+  * Security fixes
+    - CVE-2012-4681, S7162473: Reintroduce PackageAccessible checks removed
+      in 6788531.
+    - S7162476, CVE-2012-1682: XMLDecoder security issue via ClassFinder.
+    - S7194567, CVE-2012-3136: Improve long term persistence of java.beans
+      objects.
+    - S7163201, CVE-2012-0547: Simplify toolkit internals references.
+  * d/p/hotspot-sparc.diff: Remove, integrated upstream.
+  * Stop running the mauve tests.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 03 Sep 2012 23:17:11 +0200
 
 openjdk-7 (7~u3-2.1.1-3) unstable; urgency=low
 
