@@ -1042,8 +1042,9 @@ ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 hppa ppc64 s390x sparc64))
 	chmod +x bin/uname
 	echo "UNAME checks"
 	uname -a
-	/bin/uname -a
 endif
+	/bin/uname -a
+	lsb_release -a
 
 	mkdir -p stamps
 	mkdir -p build

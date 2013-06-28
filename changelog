@@ -1,3 +1,18 @@
+openjdk-7 (7u21-2.3.9-5) unstable; urgency=low
+
+  * Update kFreeBSD support (Guido Guenther). Closes: #708818.
+  * Stop building the transitional cacao package for sid.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 18 May 2013 20:13:33 +0200
+
+openjdk-7 (7u21-2.3.9-4) unstable; urgency=high
+
+  * Build the transitional cacao package for sid as well. Apparently
+    some buildds are not updated to list wheezy as the code name for
+    the current distribution.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 02 May 2013 03:27:44 +0200
+
 openjdk-7 (7u21-2.3.9-3) unstable; urgency=high
 
   * Disable the cacao build again, causing build failures on i386 and s390.

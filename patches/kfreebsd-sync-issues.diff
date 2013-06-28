@@ -1,21 +1,20 @@
-Description: Hack for GNU/kFreeBSD platform: add some sleep during build.
- We add some <sleep/> call in jaxp/jaxws/langtool ANT build.xml to get
- a build of those JAR archives with *all* classes.
- Without this hack, JAR contains only part of expected classes and so
- we have many random/unexpected build failures.
- TODO: I suspect some issue with jar tool and/or jar Ant task which might
- not handle correctly timestamp on UFS filesystem ?!
- <http://ant.apache.org/manual/Tasks/jar.html>
- TODO: We should drop this patch and found a proper fix.
-Author: Damien Raude-Morvan <drazzib@debian.org>
-Last-Update: 2011-08-02
-Forwarded: no
-Index: openjdk/jaxp/build.xml
-===================================================================
---- openjdk/jaxp/build.xml.orig
+From f7207a560cf5e137099455d6d926175a54b78483 Mon Sep 17 00:00:00 2001
+From: agx <agx@kfreebsd64.sigxcpu.org>
+Date: Tue, 7 May 2013 22:42:12 +0200
+Subject: [PATCH] kfreebsd-sync-issues.diff
+
+---
+ jaxp/build.xml           |    9 +++++++++
+ jaxws/build.xml          |    9 +++++++++
+ langtools/make/build.xml |    9 +++++++++
+ 3 files changed, 27 insertions(+)
+
+diff --git openjdk/jaxp/build.xml openjdk/jaxp/build.xml
+index 8ebf59b..7b93c17 100644
+--- openjdk/jaxp/build.xml
 +++ openjdk/jaxp/build.xml
-@@ -108,7 +108,13 @@
- 	    depends="init, -init-src-dirs, -dist-classes-jar-uptodate"
+@@ -92,7 +92,13 @@
+ 	    depends="init, -dist-classes-jar-uptodate"
              unless="dist.classes.jar.uptodate">
          <delete file="${dist.classes.jar}"/>
 +
@@ -28,9 +27,9 @@ Index: openjdk/jaxp/build.xml
      </target>
  
      <target name="-build-setup"
-@@ -136,6 +142,9 @@
+@@ -127,6 +133,9 @@
+             <compilerarg value="-J-Xbootclasspath/p:${javac.jar}"/>
              <compilerarg line="${javac.version.opt} ${javac.lint.opts} ${javac.no.jdk.warnings}"/>
-             <src refid="src.dir.id"/>
          </javac>
 +
 +<sleep seconds="70"/>
@@ -38,12 +37,12 @@ Index: openjdk/jaxp/build.xml
      </target>
  
      <!-- Test. (FIXME: Need to know how to run tests.) -->
-Index: openjdk/jaxws/build.xml
-===================================================================
---- openjdk/jaxws/build.xml.orig
+diff --git openjdk/jaxws/build.xml openjdk/jaxws/build.xml
+index d0946b4..5ff5d82 100644
+--- openjdk/jaxws/build.xml
 +++ openjdk/jaxws/build.xml
-@@ -108,7 +108,13 @@
- 	    depends="init, -init-src-dirs, -dist-classes-jar-uptodate"
+@@ -100,7 +100,13 @@
+ 	    depends="init, -dist-classes-jar-uptodate"
              unless="dist.classes.jar.uptodate">
          <delete file="${dist.classes.jar}"/>
 +
@@ -55,8 +54,8 @@ Index: openjdk/jaxws/build.xml
 +
      </target>
  
-     <target name="-build-setup"
-@@ -136,6 +142,9 @@
+     <!-- Special build area setup. -->
+@@ -149,6 +155,9 @@
              <compilerarg line="${javac.version.opt} ${javac.lint.opts} ${javac.no.jdk.warnings}"/>
              <src refid="src.dir.id"/>
          </javac>
@@ -66,9 +65,9 @@ Index: openjdk/jaxws/build.xml
      </target>
  
      <!-- Test. (FIXME: Need to know how to run tests.) -->
-Index: openjdk/langtools/make/build.xml
-===================================================================
---- openjdk/langtools/make/build.xml.orig
+diff --git openjdk/langtools/make/build.xml openjdk/langtools/make/build.xml
+index 6fbc7f9..957b03d 100644
+--- openjdk/langtools/make/build.xml
 +++ openjdk/langtools/make/build.xml
 @@ -234,6 +234,9 @@
              <include name="*"/>
@@ -100,3 +99,6 @@ Index: openjdk/langtools/make/build.xml
          <taskdef name="pcompile"
                   classname="CompilePropertiesTask"
                   classpath="${build.toolclasses.dir}/"/>
+-- 
+1.7.10.4
+
