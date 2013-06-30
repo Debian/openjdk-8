@@ -1,12 +1,12 @@
 --- openjdk/jdk/src/share/lib/security/java.security
 +++ openjdk/jdk/src/share/lib/security/java.security
-@@ -147,7 +147,8 @@
-                com.sun.org.apache.xml.internal.res.,\
-                com.sun.org.apache.xml.internal.serializer.utils.,\
+@@ -149,7 +149,8 @@
                 com.sun.org.apache.xml.internal.utils.,\
--               com.sun.org.glassfish.
-+               com.sun.org.glassfish.,\
-+	       org.GNOME.Accessibility.
+                com.sun.org.apache.xml.internal.security.,\
+                com.sun.org.glassfish.,\
+-               org.jcp.xml.dsig.internal.
++               org.jcp.xml.dsig.internal.,\
++               org.GNOME.Accessibility.
  
  #
  # List of comma-separated packages that start with or equal this string

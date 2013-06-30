@@ -155,7 +155,7 @@ endif
 ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic hardy))
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
 endif
-ifeq (,$(filter $(distrel),wheezy sid squeeze lenny maverick natty maverick lucid karmic hardy))
+ifeq (,$(filter $(distrel),wheezy squeeze lenny maverick natty maverick lucid karmic hardy))
   jamvm_defaults =
 endif
 
@@ -293,7 +293,7 @@ else ifneq (,$(filter $(distrel),natty))
   export CC = gcc-4.5
   export CXX = g++-4.5
   GCJ_SUFFIX = -4.5
-else ifneq (,$(filter $(distrel),wheezy sid))
+else ifneq (,$(filter $(distrel),wheezy quantal raring))
   export CC = gcc-4.7
   export CXX = g++-4.7
   GCJ_SUFFIX = -4.7
@@ -309,9 +309,9 @@ else ifneq (,$(filter $(distrel),oneiric precise))
   export CXX = g++-4.6
   GCJ_SUFFIX = -4.6
 else
-  export CC = gcc-4.7
-  export CXX = g++-4.7
-  GCJ_SUFFIX = -4.7
+  export CC = gcc-4.8
+  export CXX = g++-4.8
+  GCJ_SUFFIX = -4.8
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), armel armhf))
@@ -597,6 +597,8 @@ endif
 
 ifneq ($(lcms_version),2)
   CONFIGURE_ARGS += --disable-system-lcms
+else
+  CONFIGURE_ARGS += --enable-system-lcms
 endif
 
 ifeq ($(with_nss),yes)
@@ -646,15 +648,18 @@ ifneq (,$(stage1_gcj_archs))
 	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
   stage1_gcj46_archs = m68k s390
   stage1_gcj_default_archs = $(filter-out $(stage1_gcj46_archs), $(stage1_gcj_archs))
-  ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy))
+  ifneq (,$(filter $(distrel),lenny jaunty intrepid hardy))
+    bd_bootstrap += \
+	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
+	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
+  else ifneq (,$(filter $(distrel),squeeze wheezy karmic lucid maverick natty oneiric precise))
     bd_bootstrap += \
 	gcj-jdk [$(strip $(foreach a,$(stage1_gcj_default_archs), $(a)))], \
 	gcj-4.6-jdk [$(strip $(foreach a,$(stage1_gcj46_archs), $(a)))], \
 	gcj-4.7-jdk [ia64],
   else
     bd_bootstrap += \
-	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
-	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
+	gcj-jdk [$(strip $(foreach a,$(stage1_gcj_default_archs), $(a)))],
   endif
 endif
 ifneq (,$(stage1_openjdk_archs))
@@ -679,10 +684,12 @@ else ifneq (,$(filter $(distrel),natty))
   bd_gcc = g++-4.5,
 else ifneq (,$(filter $(distrel), oneiric precise))
   bd_gcc = g++-4.6,
-else ifneq (,$(filter $(distrel), sid wheezy))
+else ifneq (,$(filter $(distrel), wheezy))
   bd_gcc = g++-4.7, g++-4.4 [mips mipsel],
-else
+else ifneq (,$(filter $(distrel), quantal raring))
   bd_gcc = g++-4.7,
+else
+  bd_gcc = g++-4.8,
 endif
 bd_syslibs = zlib1g-dev, libattr1-dev,
 ifneq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid karmic jaunty intrepid hardy))

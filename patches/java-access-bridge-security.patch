@@ -2,12 +2,12 @@
 
 --- openjdk/jdk/src/share/lib/security/java.security
 +++ openjdk/jdk/src/share/lib/security/java.security
-@@ -147,7 +147,9 @@
-                com.sun.org.apache.xml.internal.res.,\
-                com.sun.org.apache.xml.internal.serializer.utils.,\
+@@ -149,7 +149,9 @@
                 com.sun.org.apache.xml.internal.utils.,\
--               com.sun.org.glassfish.
-+               com.sun.org.glassfish.,\
+                com.sun.org.apache.xml.internal.security.,\
+                com.sun.org.glassfish.,\
+-               org.jcp.xml.dsig.internal.
++               org.jcp.xml.dsig.internal.,\
 +               org.GNOME.Accessibility.,\
 +               org.GNOME.Bonobo.
  

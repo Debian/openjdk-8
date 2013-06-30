@@ -1,11 +1,14 @@
---- openjdk/hotspot/make/linux/makefiles/gcc.make.orig	2010-11-29 15:43:34.397188809 +0000
-+++ openjdk/hotspot/make/linux/makefiles/gcc.make	2010-11-29 17:44:05.507185775 +0000
-@@ -114,7 +114,7 @@
+--- openjdk/hotspot/make/linux/makefiles/gcc.make~	2013-06-28 17:34:51.780388910 +0200
++++ openjdk/hotspot/make/linux/makefiles/gcc.make	2013-06-28 17:53:10.531781345 +0200
+@@ -142,11 +142,6 @@
+   CFLAGS += -pipe
  endif
  
- # Compiler warnings are treated as errors
+-# Compiler warnings are treated as errors
+-ifneq ($(COMPILER_WARNINGS_FATAL),false)
 -WARNINGS_ARE_ERRORS = -Werror
-+WARNINGS_ARE_ERRORS =
- 
+-endif
+-
  # Except for a few acceptable ones
  # Since GCC 4.3, -Wconversion has changed its meanings to warn these implicit
+ # conversions which might affect the values. To avoid that, we need to turn
