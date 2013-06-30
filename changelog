@@ -1,3 +1,9 @@
+openjdk-7 (7u25-2.3.10-2) unstable; urgency=low
+
+  * Fix gcj-jdk build dependency on ia64.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 30 Jun 2013 17:12:28 +0200
+
 openjdk-7 (7u25-2.3.10-1) unstable; urgency=high
 
   * IcedTea7 2.3.10 release.

@@ -200,7 +200,9 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
     STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.6
   endif
   ifneq (,$(filter $(DEB_HOST_ARCH), ia64))
-    STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.7
+    ifneq (,$(filter $(distrel), wheezy))
+      STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.7-ia64
+    endif
   endif
 else ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_openjdk_archs)))
   STAGE1_JAVA = openjdk
