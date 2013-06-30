@@ -196,11 +196,11 @@ endif
 ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
   STAGE1_JAVA = gcj
   STAGE1_HOME = /usr/lib/jvm/java-gcj
-  ifneq (,$(filter $(DEB_HOST_ARCH), m68k s390))
-    STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.6
-  endif
-  ifneq (,$(filter $(DEB_HOST_ARCH), ia64))
-    ifneq (,$(filter $(distrel), wheezy))
+  ifneq (,$(filter $(distrel), wheezy))
+    ifneq (,$(filter $(DEB_HOST_ARCH), m68k s390))
+      STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.6
+    endif
+    ifneq (,$(filter $(DEB_HOST_ARCH), ia64))
       STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.7-ia64
     endif
   endif
