@@ -1,6 +1,10 @@
 openjdk-7 (7u25-2.3.10-2) unstable; urgency=low
 
+  [ Matthias Klose ]
   * Fix gcj-jdk build dependency on ia64 and s390.
+
+  [ Gianfranco Costamagna ]
+  * Fix build failure on kfreebsd (Closes: #714528)
 
  -- Matthias Klose <doko@ubuntu.com>  Sun, 30 Jun 2013 17:12:28 +0200
 

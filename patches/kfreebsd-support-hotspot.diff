@@ -17,9 +17,9 @@ Subject: [PATCH] kfreebsd-support-hotspot.diff
  src/os/linux/vm/os_linux.cpp             |   32 +++++++
  src/os/posix/launcher/java_md.c          |   12 +--
  src/os_cpu/linux_x86/vm/os_linux_x86.cpp |  150 ++++++++++++++++++++++++++++++
- src/share/vm/memory/allocation.hpp       |    6 +-
+ src/share/vm/memory/allocation.hpp       |    1 -
  src/share/vm/oops/generateOopMap.cpp     |   10 +-
- 14 files changed, 362 insertions(+), 24 deletions(-)
+ 14 files changed, 359 insertions(+), 22 deletions(-)
 
 diff --git openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c openjdk/agent/src/os/linux/LinuxDebuggerLocal.c
 index 5771fdd..5019266 100644
@@ -463,7 +463,7 @@ index 55f52c3..a82f627 100644
  # include <gnu/libc-version.h>
  # include <sys/ipc.h>
  # include <sys/shm.h>
-@@ -205,11 +214,22 @@ julong os::available_memory() {
+@@ -210,11 +218,22 @@ julong os::available_memory() {
  }
  
  julong os::Linux::available_memory() {
@@ -486,7 +486,7 @@ index 55f52c3..a82f627 100644
  }
  
  julong os::physical_memory() {
-@@ -2128,18 +2148,22 @@ void os::print_memory_info(outputStream* st) {
+@@ -2136,18 +2155,22 @@ void os::print_memory_info(outputStream* st) {
    st->print("Memory:");
    st->print(" %dk page", os::vm_page_size()>>10);
  
@@ -509,7 +509,7 @@ index 55f52c3..a82f627 100644
    st->cr();
  }
  
-@@ -5372,6 +5396,7 @@ extern char** environ;
+@@ -5380,6 +5404,7 @@ extern char** environ;
  int os::fork_and_exec(char* cmd) {
    const char * argv[4] = {"sh", "-c", cmd, NULL};
  
@@ -517,7 +517,7 @@ index 55f52c3..a82f627 100644
    // fork() in LinuxThreads/NPTL is not async-safe. It needs to run
    // pthread_atfork handlers and reset pthread library. All we need is a
    // separate process to execve. Make a direct syscall to fork process.
-@@ -5379,6 +5404,9 @@ int os::fork_and_exec(char* cmd) {
+@@ -5387,6 +5412,9 @@ int os::fork_and_exec(char* cmd) {
    // the best...
    pid_t pid = NOT_IA64(syscall(__NR_fork);)
                IA64_ONLY(fork();)
@@ -527,7 +527,7 @@ index 55f52c3..a82f627 100644
  
    if (pid < 0) {
      // fork failed
-@@ -5387,6 +5415,7 @@ int os::fork_and_exec(char* cmd) {
+@@ -5395,6 +5423,7 @@ int os::fork_and_exec(char* cmd) {
    } else if (pid == 0) {
      // child process
  
@@ -535,7 +535,7 @@ index 55f52c3..a82f627 100644
      // execve() in LinuxThreads will call pthread_kill_other_threads_np()
      // first to kill every thread on the thread list. Because this list is
      // not reset by fork() (see notes above), execve() will instead kill
-@@ -5396,6 +5425,9 @@ int os::fork_and_exec(char* cmd) {
+@@ -5404,6 +5433,9 @@ int os::fork_and_exec(char* cmd) {
      // above.
      NOT_IA64(syscall(__NR_execve, "/bin/sh", argv, environ);)
      IA64_ONLY(execve("/bin/sh", (char* const*)argv, environ);)
@@ -848,24 +848,19 @@ diff --git openjdk/hotspot/src/share/vm/memory/allocation.hpp openjdk/src/share/
 index 4c2f1e8..d2cbfe1 100644
 --- openjdk/hotspot/src/share/vm/memory/allocation.hpp
 +++ openjdk/hotspot/src/share/vm/memory/allocation.hpp
-@@ -218,9 +218,9 @@ protected:
-   void signal_out_of_memory(size_t request, const char* whence) const;
- 
-   void check_for_overflow(size_t request, const char* whence) const {
--    if (UINTPTR_MAX - request < (uintptr_t)_hwm) {
+@@ -230,7 +230,6 @@ protected:
+       if (alloc_failmode == AllocFailStrategy::RETURN_NULL) {
+         return false;
+       }
 -      signal_out_of_memory(request, whence);
--    }
-+//    if (UINTPTR_MAX - request < (uintptr_t)_hwm) {
-+//      signal_out_of_memory(request, whence);
-+//    }
+     }
+     return true;
   }
- 
-  public:
 diff --git openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp openjdk/src/share/vm/oops/generateOopMap.cpp
 index 58ef931..9448389 100644
 --- openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp
 +++ openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp
-@@ -970,11 +970,11 @@ void GenerateOopMap::init_basic_blocks() {
+@@ -979,11 +979,11 @@ void GenerateOopMap::init_basic_blocks() {
    // The product of bbNo and _state_len can get large if there are lots of
    // basic blocks and stack/locals/monitors.  Need to check to make sure
    // we don't overflow the capacity of a pointer.
@@ -880,8 +875,8 @@ index 58ef931..9448389 100644
 +//    return;
 +//  }
  
-   CellTypeState *basicBlockState =
-       NEW_RESOURCE_ARRAY(CellTypeState, bbNo * _state_len);
+   CellTypeState *basicBlockState;
+   ALLOC_RESOURCE_ARRAY(basicBlockState, CellTypeState, bbNo * _state_len);
 --- openjdk/hotspot/src/share/vm/ci/ciObject.hpp.orig	2013-05-12 18:20:12.688303624 +0200
 +++ openjdk/hotspot/src/share/vm/ci/ciObject.hpp	2013-05-12 18:20:18.500302224 +0200
 @@ -25,6 +25,7 @@

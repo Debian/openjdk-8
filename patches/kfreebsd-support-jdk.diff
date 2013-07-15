@@ -34,7 +34,6 @@ Subject: [PATCH] kfreebsd-support-jdk
  jdk/src/solaris/native/java/io/io_util_md.c        |    2 +-
  jdk/src/solaris/native/java/lang/UNIXProcess_md.c  |    4 +-
  jdk/src/solaris/native/java/lang/java_props_md.c   |   10 +-
- .../solaris/native/java/lang/java_props_md.c.orig  |    3 +-
  jdk/src/solaris/native/java/lang/locale_str.h      |   14 +-
  jdk/src/solaris/native/java/net/Inet4AddressImpl.c |    6 +-
  jdk/src/solaris/native/java/net/Inet6AddressImpl.c |    6 +-
@@ -76,7 +75,7 @@ Subject: [PATCH] kfreebsd-support-jdk
  .../native/sun/nio/fs/UnixNativeDispatcher.c       |    4 +-
  jdk/src/solaris/native/sun/xawt/XToolkit.c         |    4 +-
  jdk/src/solaris/transport/socket/socket_md.c       |    5 +-
- 72 files changed, 632 insertions(+), 151 deletions(-)
+ 71 files changed, 630 insertions(+), 150 deletions(-)
 
 diff --git openjdk/jdk/make/com/sun/nio/Makefile openjdk/jdk/make/com/sun/nio/Makefile
 index 288b629..25f387b 100644
@@ -699,27 +698,6 @@ index 1c3ed11..f016f36 100644
  #if __BYTE_ORDER == __LITTLE_ENDIAN
      sprops.unicode_encoding = "UnicodeLittle";
  #else
-diff --git openjdk/jdk/src/solaris/native/java/lang/java_props_md.c.orig openjdk/jdk/src/solaris/native/java/lang/java_props_md.c.orig
-index 6505e4f..1c3ed11 100644
---- openjdk/jdk/src/solaris/native/java/lang/java_props_md.c.orig
-+++ openjdk/jdk/src/solaris/native/java/lang/java_props_md.c.orig
-@@ -558,6 +558,7 @@ GetJavaProperties(JNIEnv *env)
-     sprops.path_separator = ":";
-     sprops.line_separator = "\n";
- 
-+#ifndef __linux__
- #if !defined(_ALLBSD_SOURCE)
-     /* Append CDE message and resource search path to NLSPATH and
-      * XFILESEARCHPATH, in order to pick localized message for
-@@ -566,7 +567,7 @@ GetJavaProperties(JNIEnv *env)
-     setPathEnvironment("NLSPATH=/usr/dt/lib/nls/msg/%L/%N.cat");
-     setPathEnvironment("XFILESEARCHPATH=/usr/dt/app-defaults/%L/Dt");
- #endif
--
-+#endif
- 
- #ifdef MACOSX
-     setProxyProperties(&sprops);
 diff --git openjdk/jdk/src/solaris/native/java/lang/locale_str.h openjdk/jdk/src/solaris/native/java/lang/locale_str.h
 index d63e26c..a7108b5 100644
 --- openjdk/jdk/src/solaris/native/java/lang/locale_str.h
@@ -788,7 +766,7 @@ diff --git openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c openjdk/jd
 index 278ce13..1508c8b 100644
 --- openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c
 +++ openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c
-@@ -340,7 +340,7 @@ Java_java_net_Inet4AddressImpl_getLocalHostName(JNIEnv *env, jobject this) {
+@@ -333,7 +333,7 @@ Java_java_net_Inet4AddressImpl_getLocalHostName(JNIEnv *env, jobject this) {
          /* Something went wrong, maybe networking is not setup? */
          strcpy(hostname, "localhost");
      } else {
@@ -797,7 +775,7 @@ index 278ce13..1508c8b 100644
          /* On Linux gethostname() says "host.domain.sun.com".  On
           * Solaris gethostname() says "host", so extra work is needed.
           */
-@@ -668,7 +668,7 @@ ping4(JNIEnv *env, jint fd, struct sockaddr_in* him, jint timeout,
+@@ -654,7 +654,7 @@ ping4(JNIEnv *env, jint fd, struct sockaddr_in* him, jint timeout,
        n = sendto(fd, sendbuf, plen, 0, (struct sockaddr *)him,
                   sizeof(struct sockaddr));
        if (n < 0 && errno != EINPROGRESS ) {
@@ -806,7 +784,7 @@ index 278ce13..1508c8b 100644
          if (errno != EINVAL)
            /*
             * On some Linuxes, when bound to the loopback interface, sendto
-@@ -826,7 +826,7 @@ Java_java_net_Inet4AddressImpl_isReachable0(JNIEnv *env, jobject this,
+@@ -812,7 +812,7 @@ Java_java_net_Inet4AddressImpl_isReachable0(JNIEnv *env, jobject this,
          case ENETUNREACH: /* Network Unreachable */
          case EAFNOSUPPORT: /* Address Family not supported */
          case EADDRNOTAVAIL: /* address is not available on  the  remote machine */
@@ -828,7 +806,7 @@ index ec2427d..a7687a7 100644
          /* On Linux/FreeBSD gethostname() says "host.domain.sun.com".  On
           * Solaris gethostname() says "host", so extra work is needed.
           */
-@@ -511,7 +511,7 @@ ping6(JNIEnv *env, jint fd, struct sockaddr_in6* him, jint timeout,
+@@ -504,7 +504,7 @@ ping6(JNIEnv *env, jint fd, struct sockaddr_in6* him, jint timeout,
        plen = sizeof(struct icmp6_hdr) + sizeof(tv);
        n = sendto(fd, sendbuf, plen, 0, (struct sockaddr*) him, sizeof(struct sockaddr_in6));
        if (n < 0 && errno != EINPROGRESS) {
@@ -837,7 +815,7 @@ index ec2427d..a7687a7 100644
          if (errno != EINVAL)
            /*
             * On some Linuxes, when bound to the loopback interface, sendto
-@@ -678,7 +678,7 @@ Java_java_net_Inet6AddressImpl_isReachable0(JNIEnv *env, jobject this,
+@@ -671,7 +671,7 @@ Java_java_net_Inet6AddressImpl_isReachable0(JNIEnv *env, jobject this,
          case ENETUNREACH: /* Network Unreachable */
          case EAFNOSUPPORT: /* Address Family not supported */
          case EADDRNOTAVAIL: /* address is not available on  the  remote machine */
@@ -1121,7 +1099,7 @@ index 2c81ca4..ec5e6f1 100644
  }
  #endif /* HEADLESS */
  
-@@ -1642,7 +1644,7 @@ Java_sun_awt_X11GraphicsEnvironment_getXineramaCenterPoint(JNIEnv *env,
+@@ -1645,7 +1647,7 @@ Java_sun_awt_X11GraphicsEnvironment_getXineramaCenterPoint(JNIEnv *env,
  {
      jobject point = NULL;
  #ifndef HEADLESS    /* return NULL in HEADLESS, Linux */
@@ -1399,7 +1377,7 @@ diff --git openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c openjdk/jdk/src/so
 index 97d57cd..7ebfdf3 100644
 --- openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c
 +++ openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c
-@@ -45,7 +45,7 @@
+@@ -46,7 +46,7 @@
  #include "wsutils.h"
  #include "list.h"
  #include "multiVis.h"
@@ -1491,7 +1469,7 @@ index 0dcdbc7..11790f5 100644
  #include <string.h>
  #endif /* __linux__ */
  #include <stdio.h>
-@@ -50,7 +50,7 @@
+@@ -52,7 +52,7 @@
  #define AWT_UNLOCK()
  #endif /* !HEADLESS */
  
@@ -1500,7 +1478,7 @@ index 0dcdbc7..11790f5 100644
  #define MAP_FAILED ((caddr_t)-1)
  #endif
  
-@@ -64,7 +64,7 @@ extern Display *awt_display;
+@@ -66,7 +66,7 @@ extern Display *awt_display;
  
  #define MAXFDIRS 512    /* Max number of directories that contain fonts */
  
@@ -1509,7 +1487,7 @@ index 0dcdbc7..11790f5 100644
  /*
   * This can be set in the makefile to "/usr/X11" if so desired.
   */
-@@ -381,7 +381,7 @@ static char **getX11FontPath ()
+@@ -388,7 +388,7 @@ static char **getX11FontPath ()
  
  #endif /* !HEADLESS */
  
@@ -1518,7 +1496,7 @@ index 0dcdbc7..11790f5 100644
  /* from awt_LoadLibrary.c */
  JNIEXPORT jboolean JNICALL AWTIsHeadless();
  #endif
-@@ -506,7 +506,7 @@ static char *getPlatformFontPathChars(JNIEnv *env, jboolean noType1) {
+@@ -513,7 +513,7 @@ static char *getPlatformFontPathChars(JNIEnv *env, jboolean noType1) {
       */
      fcdirs = getFontConfigLocations();
  
@@ -1527,7 +1505,7 @@ index 0dcdbc7..11790f5 100644
      knowndirs = fullLinuxFontPath;
  #elif defined(MACOSX)
      knowndirs = full_MACOSX_X11FontPath;
-@@ -520,7 +520,7 @@ static char *getPlatformFontPathChars(JNIEnv *env, jboolean noType1) {
+@@ -527,7 +527,7 @@ static char *getPlatformFontPathChars(JNIEnv *env, jboolean noType1) {
       * be initialised.
       */
  #ifndef HEADLESS
@@ -1536,7 +1514,7 @@ index 0dcdbc7..11790f5 100644
      /* There's no headless build on linux ... */
      if (!AWTIsHeadless()) { /* .. so need to call a function to check */
  #endif
-@@ -536,7 +536,7 @@ static char *getPlatformFontPathChars(JNIEnv *env, jboolean noType1) {
+@@ -543,7 +543,7 @@ static char *getPlatformFontPathChars(JNIEnv *env, jboolean noType1) {
          x11dirs = getX11FontPath();
      }
      AWT_UNLOCK();
@@ -1762,7 +1740,7 @@ index 45c09c3..799f2be 100644
  
  #ifndef IP_BLOCK_SOURCE
  
-@@ -259,7 +259,7 @@ Java_sun_nio_ch_Net_socket0(JNIEnv *env, jclass cl, jboolean preferIPv6,
+@@ -264,7 +264,7 @@ Java_sun_nio_ch_Net_socket0(JNIEnv *env, jclass cl, jboolean preferIPv6,
              return -1;
          }
      }
@@ -1771,7 +1749,7 @@ index 45c09c3..799f2be 100644
      /* By default, Linux uses the route default */
      if (domain == AF_INET6 && type == SOCK_DGRAM) {
          int arg = 1;
-@@ -576,7 +576,7 @@ Java_sun_nio_ch_Net_joinOrDrop6(JNIEnv *env, jobject this, jboolean join, jobjec
+@@ -581,7 +581,7 @@ Java_sun_nio_ch_Net_joinOrDrop6(JNIEnv *env, jobject this, jboolean join, jobjec
          optval = (void*)&mreq6;
          optlen = sizeof(mreq6);
      } else {
