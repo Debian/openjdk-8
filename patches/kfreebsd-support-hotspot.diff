@@ -1,26 +1,29 @@
-From 7268bef341b5668169892f5ac0569d5161d25ec9 Mon Sep 17 00:00:00 2001
-Message-Id: <7268bef341b5668169892f5ac0569d5161d25ec9.1368289639.git.agx@sigxcpu.org>
-From: =?UTF-8?q?Guido=20G=C3=BCnther?= <agx@sigxcpu.org>
-Date: Sat, 11 May 2013 18:26:43 +0200
-Subject: [PATCH] kfreebsd-support-hotspot.diff
-
----
- agent/src/os/linux/LinuxDebuggerLocal.c  |   44 ++++++++-
- agent/src/os/linux/libproc.h             |    8 ++
- agent/src/os/linux/ps_core.c             |   38 ++++++++
- agent/src/os/linux/ps_proc.c             |   54 +++++++++++
- make/defs.make                           |    7 +-
- make/linux/Makefile                      |    3 +
- make/linux/makefiles/defs.make           |    2 +-
- src/os/linux/vm/attachListener_linux.cpp |   18 +++-
- src/os/linux/vm/jvm_linux.cpp            |    2 +
- src/os/linux/vm/os_linux.cpp             |   32 +++++++
- src/os/posix/launcher/java_md.c          |   12 +--
- src/os_cpu/linux_x86/vm/os_linux_x86.cpp |  150 ++++++++++++++++++++++++++++++
- src/share/vm/memory/allocation.hpp       |    1 -
- src/share/vm/oops/generateOopMap.cpp     |   10 +-
- 14 files changed, 359 insertions(+), 22 deletions(-)
-
+Description: Initial GNU/kFreeBSD support for openjdk-7 (Hotspot part)
+ - Alter build system to consider GNU/kFreeBSD like linux
+   since this port is libc based.
+   Also treat i386 arch has i686 (uname -m return i386 on BSD*)
+   openjdk/hotspot/make/defs.make
+ - Use LOCAL_PEERCRED (from kFreeBSD kernel) instead of
+   SO_PEERCRED and alter related structs.
+   openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp
+ - Use sysctl call instead of sysinfo.
+   openjdk/hotspot/src/os/linux/vm/os_linux.cpp
+ - Change access to CPU register
+   openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp
+   openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c
+   openjdk/hotspot/agent/src/os/linux/libproc.h
+   openjdk/hotspot/agent/src/os/linux/ps_core.c
+   (from bsd-port)
+ - Fix ptrace usage under freebsd kernel
+   openjdk/hotspot/agent/src/os/linux/ps_proc.c
+ Should not be keep like this :
+ - Undefined UINTPTR_MAX
+   openjdk/hotspot/src/share/vm/memory/allocation.hpp
+   openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp
+Author: Damien Raude-Morvan <drazzib@debian.org>
+Author: Guido Günther <agx@sigxcpu.org>
+Last-Update: 2013-05-11
+Forwarded: no
 diff --git openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c openjdk/agent/src/os/linux/LinuxDebuggerLocal.c
 index 5771fdd..5019266 100644
 --- openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c

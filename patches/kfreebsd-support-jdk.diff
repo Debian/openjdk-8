@@ -1,82 +1,26 @@
-From 9aa64548defe505931bde75daf8709e252766504 Mon Sep 17 00:00:00 2001
-From: agx <agx@kfreebsd64.sigxcpu.org>
-Date: Tue, 7 May 2013 13:05:15 +0200
-Subject: [PATCH] kfreebsd-support-jdk
-
----
- jdk/make/com/sun/nio/Makefile                      |    4 +-
- jdk/make/common/shared/Defs-versions.gmk           |    4 +-
- jdk/make/common/shared/Platform.gmk                |    2 +-
- jdk/make/common/shared/Sanity-Settings.gmk         |    2 +
- jdk/make/common/shared/Sanity.gmk                  |    2 +
- jdk/make/java/nio/Makefile                         |   86 +++++-
- jdk/make/javax/sound/Makefile                      |    2 +
- .../classes/com/sun/servicetag/Installer.java      |    2 +-
- .../share/classes/com/sun/servicetag/Registry.java |    2 +-
- .../com/sun/servicetag/SystemEnvironment.java      |    2 +-
- .../classes/java/awt/GraphicsEnvironment.java      |    1 +
- jdk/src/share/classes/sun/font/FontUtilities.java  |    2 +-
- .../classes/sun/nio/cs/ext/ExtendedCharsets.java   |    1 +
- jdk/src/share/classes/sun/print/PSPrinterJob.java  |    4 +-
- .../classes/sun/security/jgss/GSSManagerImpl.java  |    1 +
- .../krb5/internal/ccache/FileCredentialsCache.java |    1 +
- .../native/java/lang/fdlibm/include/jfdlibm.h      |    2 +-
- .../share/native/sun/security/ec/impl/ecc_impl.h   |    2 +-
- jdk/src/solaris/bin/ergo_i586.c                    |    2 +-
- jdk/src/solaris/bin/jexec.c                        |   16 +-
- .../classes/sun/awt/X11/XScrollbarPeer.java        |    2 +-
- .../classes/sun/font/FcFontConfiguration.java      |    2 +-
- .../nio/ch/DefaultAsynchronousChannelProvider.java |    2 +-
- .../sun/nio/fs/DefaultFileSystemProvider.java      |    2 +-
- .../sun/nio/fs/LinuxDosFileAttributeView.java      |    3 -
- .../solaris/classes/sun/nio/fs/LinuxFileStore.java |    4 +-
- .../classes/sun/print/UnixPrintServiceLookup.java  |    1 +
- jdk/src/solaris/native/java/io/io_util_md.c        |    2 +-
- jdk/src/solaris/native/java/lang/UNIXProcess_md.c  |    4 +-
- jdk/src/solaris/native/java/lang/java_props_md.c   |   10 +-
- jdk/src/solaris/native/java/lang/locale_str.h      |   14 +-
- jdk/src/solaris/native/java/net/Inet4AddressImpl.c |    6 +-
- jdk/src/solaris/native/java/net/Inet6AddressImpl.c |    6 +-
- jdk/src/solaris/native/java/net/NetworkInterface.c |  313 ++++++++++++++++++++
- .../native/java/net/NetworkInterface.c.orig        |    2 +-
- .../native/java/net/PlainDatagramSocketImpl.c      |   13 +-
- jdk/src/solaris/native/java/net/PlainSocketImpl.c  |    6 +-
- jdk/src/solaris/native/java/net/net_util_md.c      |    5 +
- jdk/src/solaris/native/java/net/net_util_md.h      |    4 +-
- jdk/src/solaris/native/java/nio/MappedByteBuffer.c |    2 +-
- jdk/src/solaris/native/java/util/TimeZone_md.c     |   12 +-
- jdk/src/solaris/native/sun/awt/VDrawingArea.c      |    2 +-
- jdk/src/solaris/native/sun/awt/awt_Font.c          |    2 +-
- jdk/src/solaris/native/sun/awt/awt_GraphicsEnv.c   |   16 +-
- jdk/src/solaris/native/sun/awt/awt_InputMethod.c   |   56 ++--
- jdk/src/solaris/native/sun/awt/awt_MToolkit.c      |    4 +-
- jdk/src/solaris/native/sun/awt/awt_Robot.c         |    2 +-
- jdk/src/solaris/native/sun/awt/awt_util.c          |    4 +-
- jdk/src/solaris/native/sun/awt/awt_util.h          |    2 +-
- jdk/src/solaris/native/sun/awt/awt_xembed_server.c |    4 +-
- jdk/src/solaris/native/sun/awt/extutil.h           |    2 +-
- jdk/src/solaris/native/sun/awt/fontpath.c          |   14 +-
- jdk/src/solaris/native/sun/awt/multi_font.c        |    4 +-
- jdk/src/solaris/native/sun/java2d/j2d_md.h         |    3 +-
- .../native/sun/java2d/loops/vis_FuncArray.c        |    2 +-
- .../native/sun/net/dns/ResolverConfigurationImpl.c |    2 +-
- .../native/sun/net/spi/DefaultProxySelector.c      |    2 +-
- .../native/sun/nio/ch/DatagramChannelImpl.c        |    4 +-
- .../solaris/native/sun/nio/ch/DatagramDispatcher.c |    4 +-
- .../solaris/native/sun/nio/ch/FileChannelImpl.c    |   27 +-
- jdk/src/solaris/native/sun/nio/ch/NativeThread.c   |    8 +-
- jdk/src/solaris/native/sun/nio/ch/Net.c            |    6 +-
- jdk/src/solaris/native/sun/nio/ch/Sctp.h           |   32 +-
- .../solaris/native/sun/nio/ch/SctpChannelImpl.c    |    2 +-
- jdk/src/solaris/native/sun/nio/ch/SctpNet.c        |    2 +
- .../native/sun/nio/ch/ServerSocketChannelImpl.c    |    2 +-
- .../solaris/native/sun/nio/ch/SocketChannelImpl.c  |    2 +-
- .../native/sun/nio/fs/GnomeFileTypeDetector.c      |    2 +-
- .../native/sun/nio/fs/UnixNativeDispatcher.c       |    4 +-
- jdk/src/solaris/native/sun/xawt/XToolkit.c         |    4 +-
- jdk/src/solaris/transport/socket/socket_md.c       |    5 +-
- 71 files changed, 630 insertions(+), 150 deletions(-)
-
+Description: Initial GNU/kFreeBSD support for openjdk-7 (JDK part)
+ - Alter build system to consider GNU/kFreeBSD like linux
+   since this port is libc based.
+   openjdk/jdk/make/common/shared/Platform.gmk
+ - ENODATA is undefined :
+   openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java
+   openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java
+ - sendfile implementation :
+   openjdk/jdk/src/solaris/native/sun/nio/ch/FileChannelImpl.c
+   (from bsd-port)
+ - BSD network stack usage :
+   openjdk/jdk/src/solaris/native/java/net/*
+   (from bsd-port)
+ - Don't build sctp protocol
+   openjdk/jdk/make/com/sun/nio/Makefile
+ - Don't build jsoundalsa
+   openjdk/jdk/make/javax/sound/Makefile
+ - Disable epoll feature and so LinuxWatchService
+   openjdk/jdk/make/java/nio/Makefile
+Author: Damien Raude-Morvan <drazzib@debian.org>
+Author: Guido Günther <agx@sigxcpu.org>
+Last-Update: 2013-05-07
+Forwarded: no
 diff --git openjdk/jdk/make/com/sun/nio/Makefile openjdk/jdk/make/com/sun/nio/Makefile
 index 288b629..25f387b 100644
 --- openjdk/jdk/make/com/sun/nio/Makefile

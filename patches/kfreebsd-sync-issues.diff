@@ -1,14 +1,16 @@
-From f7207a560cf5e137099455d6d926175a54b78483 Mon Sep 17 00:00:00 2001
-From: agx <agx@kfreebsd64.sigxcpu.org>
-Date: Tue, 7 May 2013 22:42:12 +0200
-Subject: [PATCH] kfreebsd-sync-issues.diff
-
----
- jaxp/build.xml           |    9 +++++++++
- jaxws/build.xml          |    9 +++++++++
- langtools/make/build.xml |    9 +++++++++
- 3 files changed, 27 insertions(+)
-
+Description: Hack for GNU/kFreeBSD platform: add some sleep during build.
+ We add some <sleep/> call in jaxp/jaxws/langtool ANT build.xml to get
+ a build of those JAR archives with *all* classes.
+ Without this hack, JAR contains only part of expected classes and so
+ we have many random/unexpected build failures.
+ TODO: I suspect some issue with jar tool and/or jar Ant task which might
+ not handle correctly timestamp on UFS filesystem ?!
+ <http://ant.apache.org/manual/Tasks/jar.html>
+ TODO: We should drop this patch and found a proper fix.
+Author: Damien Raude-Morvan <drazzib@debian.org>
+Author: Guido Günther <agx@sigxcpu.org>
+Last-Update: 2013-05-07
+Forwarded: no
 diff --git openjdk/jaxp/build.xml openjdk/jaxp/build.xml
 index 8ebf59b..7b93c17 100644
 --- openjdk/jaxp/build.xml
