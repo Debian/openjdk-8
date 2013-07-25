@@ -898,6 +898,17 @@ Forwarded: no
  
    CellTypeState *basicBlockState;
    ALLOC_RESOURCE_ARRAY(basicBlockState, CellTypeState, bbNo * _state_len);
+--- openjdk/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp.orig
++++ openjdk/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp
+@@ -76,7 +76,7 @@
+ # include <sys/procfs.h>
+ # endif
+ 
+-#if defined(LINUX) || defined(_ALLBSD_SOURCE)
++#if defined(LINUX) || defined(_ALLBSD_SOURCE) || defined(__FreeBSD_kernel__)
+ #ifndef __STDC_LIMIT_MACROS
+ #define __STDC_LIMIT_MACROS
+ #endif // __STDC_LIMIT_MACROS
 --- openjdk/jdk/src/solaris/bin/java_md_solinux.c.orig
 +++ openjdk/jdk/src/solaris/bin/java_md_solinux.c
 @@ -298,7 +298,7 @@
