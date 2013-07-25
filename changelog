@@ -1,3 +1,9 @@
+openjdk-7 (7u25-2.3.10-3) UNRELEASED; urgency=low
+
+  * Update kfreebsd patches. 
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Wed, 24 Jul 2013 00:08:06 +0200
+
 openjdk-7 (7u25-2.3.10-2) unstable; urgency=low
 
   [ Matthias Klose ]

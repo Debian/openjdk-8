@@ -6,8 +6,6 @@ Description:
 Author: Damien Raude-Morvan <drazzib@debian.org>
 Last-Update: 2011-08-05
 Forwarded: no
-Index: jamvm/jamvm/configure.ac
-===================================================================
 --- jamvm/jamvm/configure.ac.orig
 +++ jamvm/jamvm/configure.ac
 @@ -38,6 +38,7 @@
@@ -18,8 +16,6 @@ Index: jamvm/jamvm/configure.ac
  hppa*-*-linux*) host_cpu=parisc host_os=linux ;;
  mips*-*-linux*) host_cpu=mips host_os=linux ;;
  x86_64-*-openbsd*) host_os=bsd libdl_needed=no ;;
-Index: jamvm/jamvm/src/classlib/openjdk/jvm.c
-===================================================================
 --- jamvm/jamvm/src/classlib/openjdk/jvm.c.orig
 +++ jamvm/jamvm/src/classlib/openjdk/jvm.c
 @@ -63,6 +63,10 @@
