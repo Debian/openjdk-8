@@ -869,35 +869,6 @@ Forwarded: no
  // no precompiled headers
  #include "classfile/vmSymbols.hpp"
  #include "gc_interface/collectedHeap.hpp"
---- openjdk/hotspot/src/share/vm/memory/allocation.hpp.orig
-+++ openjdk/hotspot/src/share/vm/memory/allocation.hpp
-@@ -230,7 +230,6 @@
-       if (alloc_failmode == AllocFailStrategy::RETURN_NULL) {
-         return false;
-       }
--      signal_out_of_memory(request, whence);
-     }
-     return true;
-  }
---- openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp.orig
-+++ openjdk/hotspot/src/share/vm/oops/generateOopMap.cpp
-@@ -979,11 +979,11 @@
-   // The product of bbNo and _state_len can get large if there are lots of
-   // basic blocks and stack/locals/monitors.  Need to check to make sure
-   // we don't overflow the capacity of a pointer.
--  if ((unsigned)bbNo > UINTPTR_MAX / sizeof(CellTypeState) / _state_len) {
--    report_error("The amount of memory required to analyze this method "
--                 "exceeds addressable range");
--    return;
--  }
-+//  if ((unsigned)bbNo > UINTPTR_MAX / sizeof(CellTypeState) / _state_len) {
-+//    report_error("The amount of memory required to analyze this method "
-+//                 "exceeds addressable range");
-+//    return;
-+//  }
- 
-   CellTypeState *basicBlockState;
-   ALLOC_RESOURCE_ARRAY(basicBlockState, CellTypeState, bbNo * _state_len);
 --- openjdk/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp.orig
 +++ openjdk/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp
 @@ -76,7 +76,7 @@
