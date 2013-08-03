@@ -75,3 +75,24 @@ Author: Damien Raude-Morvan <drazzib@debian.org>, Matthias Klose <doko@ubuntu.co
  
  stamps/add-zero.stamp: stamps/icedtea.stamp
  	mkdir -p stamps
+--- patches/jamvm/remove-sun.misc.Perf-debug-code.patch
++++ patches/jamvm/remove-sun.misc.Perf-debug-code.patch
+@@ -34,9 +34,9 @@
+              if (resolve) {
+ Index: openjdk/jdk/src/share/classes/java/util/zip/ZipFile.java
+ ===================================================================
+---- openjdk.orig/jdk/src/share/classes/java/util/zip/ZipFile.java	2011-06-28 18:56:56.994704556 +0200
+-+++ openjdk/jdk/src/share/classes/java/util/zip/ZipFile.java	2011-06-28 18:57:11.514776567 +0200
+-@@ -212,8 +212,6 @@
++--- openjdk/jdk/src/share/classes/java/util/zip/ZipFile.java~	2013-06-21 22:46:14.000000000 +0200
+++++ openjdk/jdk/src/share/classes/java/util/zip/ZipFile.java	2013-06-28 17:08:07.597635788 +0200
++@@ -213,8 +213,6 @@
+          this.zc = ZipCoder.get(charset);
+          long t0 = System.nanoTime();
+          jzfile = open(name, mode, file.lastModified(), usemmap);
+@@ -44,4 +44,4 @@
+ -        sun.misc.PerfCounter.getZipFileCount().increment();
+          this.name = name;
+          this.total = getTotal(jzfile);
+-     }
++         this.locsig = startsWithLOC(jzfile);

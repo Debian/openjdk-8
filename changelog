@@ -1,8 +1,26 @@
-openjdk-7 (7u25-2.3.10-3) UNRELEASED; urgency=low
+openjdk-7 (7u25-2.3.12-2) unstable; urgency=low
 
-  * Update kfreebsd patches. 
+  [ Matthias Klose ]
+  * Regenerate the hotspot-s390 patch.
 
- -- Damien Raude-Morvan <drazzib@debian.org>  Wed, 24 Jul 2013 00:08:06 +0200
+  [ Damien Raude-Morvan ]
+  * Update kfreebsd patches.
+
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 03 Aug 2013 13:16:08 +0200
+
+openjdk-7 (7u25-2.3.12-1) unstable; urgency=low
+
+  * IcedTea7 2.3.12 release.
+  * Don't build with pulseaudio on arm64.
+  * Disable bootstraped build on s390 and sparc.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 02 Aug 2013 15:55:01 +0200
+
+openjdk-7 (7u25-2.3.10-2ubuntu1) saucy; urgency=low
+
+  * Regenerate the control file.
+
+ -- Matthias Klose <doko@ubuntu.com>  Mon, 15 Jul 2013 23:59:45 +0200
 
 openjdk-7 (7u25-2.3.10-2) unstable; urgency=low
 

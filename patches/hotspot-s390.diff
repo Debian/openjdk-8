@@ -16,25 +16,25 @@ Forwarded: http://mail.openjdk.java.net/pipermail/hotspot-dev/2011-July/004301.h
    _cfls->par_get_chunk_of_blocks(word_sz, n_blks, fl);
 --- openjdk/hotspot/src/share/vm/gc_implementation/g1/concurrentMark.cpp.orig
 +++ openjdk/hotspot/src/share/vm/gc_implementation/g1/concurrentMark.cpp
-@@ -481,7 +481,7 @@
+@@ -571,7 +571,7 @@
    _regionStack(),
    // _finger set in set_non_marking_state
  
--  _max_task_num(MAX2(ParallelGCThreads, (size_t)1)),
+-  _max_task_num(MAX2((uint)ParallelGCThreads, 1U)),
 +  _max_task_num(MAX2((size_t)ParallelGCThreads, (size_t)1)),
    // _active_tasks set in set_non_marking_state
    // _tasks set inside the constructor
    _task_queues(new CMTaskQueueSet((int) _max_task_num)),
-@@ -586,7 +586,7 @@
-       _sleep_factor             = sleep_factor;
-       _marking_task_overhead    = marking_task_overhead;
-     } else {
--      _parallel_marking_threads = MAX2((ParallelGCThreads + 2) / 4, (size_t)1);
-+      _parallel_marking_threads = MAX2((size_t)(ParallelGCThreads + 2) / 4, (size_t)1);
+@@ -679,7 +679,7 @@
+       // notice that ConcGCThreads overwrites G1MarkingOverheadPercent
+       // if both are set
+ 
+-      _parallel_marking_threads = (uint) ConcGCThreads;
++      _parallel_marking_threads = (size_t) ConcGCThreads;
+       _max_parallel_marking_threads = _parallel_marking_threads;
        _sleep_factor             = 0.0;
        _marking_task_overhead    = 1.0;
-     }
-@@ -3689,7 +3689,7 @@
+@@ -4515,7 +4515,7 @@
    // of things to do) or totally (at the very end).
    size_t target_size;
    if (partially) {
