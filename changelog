@@ -6,7 +6,7 @@ openjdk-7 (7u25-2.3.12-2) unstable; urgency=low
   [ Damien Raude-Morvan ]
   * Update kfreebsd patches.
 
- -- Matthias Klose <doko@ubuntu.com>  Sat, 03 Aug 2013 13:16:08 +0200
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 03 Aug 2013 20:22:41 +0200
 
 openjdk-7 (7u25-2.3.12-1) unstable; urgency=low
 
