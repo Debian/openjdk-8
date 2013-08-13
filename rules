@@ -485,8 +485,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
   DISTRIBUTION_PATCHES += \
         debian/patches/kfreebsd-support-jdk.diff \
         debian/patches/kfreebsd-support-hotspot.diff \
-        debian/patches/kfreebsd-support-corba.diff \
-        debian/patches/kfreebsd-sync-issues.diff
+        debian/patches/kfreebsd-support-corba.diff
         
   ifeq (,$(filter noaltjamvm, $(DEB_BUILD_OPTIONS)))
     ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))

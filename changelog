@@ -1,3 +1,9 @@
+openjdk-7 (7u25-2.3.12-3) unstable; urgency=low
+
+  * Fix kFreeBSD builds (Thanks to Christoph Egger for his help).
+
+ -- Damien Raude-Morvan <drazzib@debian.org>  Mon, 12 Aug 2013 00:39:41 +0200
+
 openjdk-7 (7u25-2.3.12-2) unstable; urgency=low
 
   [ Matthias Klose ]
