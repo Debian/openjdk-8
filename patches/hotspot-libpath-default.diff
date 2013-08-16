@@ -1,12 +1,13 @@
 --- openjdk/hotspot/make/linux/makefiles/vm.make.orig
 +++ openjdk/hotspot/make/linux/makefiles/vm.make
-@@ -112,6 +112,11 @@
+@@ -112,6 +112,12 @@
  endif
  endif
  
 +DEB_MULTIARCH := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null || true)
 +ifneq (,$(DEB_MULTIARCH))
 +CPPFLAGS += -DDEB_MULTIARCH="\"$(DEB_MULTIARCH)\""
++CXXFLAGS += -DDEB_MULTIARCH="\"$(DEB_MULTIARCH)\""
 +endif
 +
  ifdef DISTRIBUTION_ID

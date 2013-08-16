@@ -1,0 +1,29 @@
+--- openjdk/jdk/make/jdk_generic_profile.sh~	2013-07-25 18:10:09.000000000 +0200
++++ openjdk/jdk/make/jdk_generic_profile.sh	2013-08-05 02:56:33.016845707 +0200
+@@ -269,7 +269,7 @@
+     i386|ppc|s390|sparc|arm|sh)
+       ARCH_DATA_MODEL=32
+       ;;
+-    amd64|ppc64|s390x|sparcv9|ia64|alpha)
++    aarch64|amd64|ppc64|s390x|sparcv9|ia64|alpha)
+       ARCH_DATA_MODEL=64
+       ;;
+     *)
+@@ -280,7 +280,7 @@
+ 
+   # ZERO_ENDIANNESS is the endianness of the processor
+   case "${ZERO_LIBARCH}" in
+-    i386|amd64|ia64|arm)
++    i386|amd64|ia64|arm|aarch64|mipsel)
+       ZERO_ENDIANNESS=little
+       ;;
+     ppc*|s390*|sparc*|alpha)
+@@ -307,7 +307,7 @@
+     s390)
+       ZERO_ARCHFLAG="-m31"
+       ;;
+-    arm)
++    arm|aarch64)
+       ZERO_ARCHFLAG="-D_LITTLE_ENDIAN"
+       ;;
+     *)

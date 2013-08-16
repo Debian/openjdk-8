@@ -1,6 +1,6 @@
 
 Package: icedtea-7-jre-cacao
-Architecture: alpha amd64 armel armhf i386 lpia powerpc m68k mips mipsel s390
+Architecture: alpha amd64 armel armhf i386 lpia powerpc powerpcspe m68k mips mipsel s390
 Multi-Arch: same
 Priority: extra
 Pre-Depends: ${dpkg:Depends}

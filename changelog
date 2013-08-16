@@ -1,3 +1,19 @@
+openjdk-7 (7u25-2.3.12-4) unstable; urgency=low
+
+  * Add the hotspot patches for AArch64, which apparently were not
+    included in the IcedTea release by intent.
+  * Don't interpret arm64 as an ARM architecture, but as AArch64. So
+    much for Debian calling this port arm64 ...
+  * Use host macros instead of build macros for corba and hotspot config.
+  * Re-add multiarch library directories to the default library path.
+    Closes: #712567.
+  * Enable the two-stage build on alpha. Closes: #719671.
+  * Build for powerpcspe (Roland Stigge). Closes: #712686.
+  * Recommend fonts-dejavu-extra instead of ttf-dejavu-extra for current
+    releases. Closes: #718839.
+
+ -- Matthias Klose <doko@ubuntu.com>  Thu, 15 Aug 2013 21:26:51 +0200
+
 openjdk-7 (7u25-2.3.12-3) unstable; urgency=low
 
   * Fix kFreeBSD builds (Thanks to Christoph Egger for his help).

@@ -1,0 +1,22 @@
+--- openjdk/jdk/make/common/shared/Platform.gmk.orig	2013-08-06 11:33:35.584904685 +0000
++++ openjdk/jdk/make/common/shared/Platform.gmk	2013-08-06 11:35:41.365862699 +0000
+@@ -161,7 +161,7 @@
+     mach := $(shell uname -m)
+   endif
+   ifneq (,$(wildcard /usr/bin/dpkg-architecture))
+-    mach := $(shell (dpkg-architecture -qDEB_BUILD_ARCH_CPU 2>/dev/null || echo $(mach)) | sed 's/powerpc$$/ppc/;s/hppa/parisc/')
++    mach := $(shell (dpkg-architecture -qDEB_HOST_ARCH_CPU 2>/dev/null || echo $(mach)) | sed 's/arm64/aarch64/;s/powerpc$$/ppc/;s/hppa/parisc/')
+   endif
+   archExpr = case "$(mach)" in \
+                 i[3-9]86) \
+--- openjdk/corba/make/common/shared/Platform.gmk.orig	2013-08-06 11:42:29.816950930 +0000
++++ openjdk/corba/make/common/shared/Platform.gmk	2013-08-06 11:42:34.945000504 +0000
+@@ -154,7 +154,7 @@
+   # Arch and OS name/version
+   mach := $(shell uname -m)
+   ifneq (,$(wildcard /usr/bin/dpkg-architecture))
+-    mach := $(shell (dpkg-architecture -qDEB_BUILD_ARCH_CPU 2>/dev/null || echo $(mach)) | sed 's/powerpc$$/ppc/;s/hppa/parisc/')
++    mach := $(shell (dpkg-architecture -qDEB_HOST_ARCH_CPU 2>/dev/null || echo $(mach)) | sed 's/arm64/aarch64/;s/powerpc$$/ppc/;s/hppa/parisc/')
+   endif
+   archExpr = case "$(mach)" in \
+                 i[3-9]86) \
