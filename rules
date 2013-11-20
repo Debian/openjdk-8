@@ -440,6 +440,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/no-pch-build.diff \
 	debian/patches/zero-opt.diff \
 	debian/patches/jdk-zero-arch.diff \
+	debian/patches/aarch64-detection.diff \
 	debian/patches/hotspot-powerpcspe.diff \
 
 # FIXME CACAO update needed

@@ -1,0 +1,11 @@
+--- openjdk/hotspot/src/os_cpu/linux_zero/vm/os_linux_zero.hpp~	2013-06-18 09:58:38.786866408 +0200
++++ openjdk/hotspot/src/os_cpu/linux_zero/vm/os_linux_zero.hpp	2013-06-18 10:00:41.446880095 +0200
+@@ -36,7 +36,7 @@
+ 
+   // Atomically copy 64 bits of data
+   static void atomic_copy64(volatile void *src, volatile void *dst) {
+-#if defined(PPC) && !defined(_LP64)
++#if defined(PPC) && !defined(_LP64) && !defined(__NO_FPRS__)
+     double tmp;
+     asm volatile ("lfd  %0, 0(%1)\n"
+                   "stfd %0, 0(%2)\n"

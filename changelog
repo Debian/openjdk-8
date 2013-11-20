@@ -1,3 +1,21 @@
+openjdk-7 (7u25-2.3.12-4ubuntu3) saucy; urgency=low
+
+  * Apply missing patch to fix arm64/AArch64 detection.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 11 Oct 2013 17:51:33 +0200
+
+openjdk-7 (7u25-2.3.12-4ubuntu2) saucy; urgency=low
+
+  * openjdk-jre-headless: Loosen the dependency on -jre-lib.
+
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 09 Oct 2013 16:29:15 +0200
+
+openjdk-7 (7u25-2.3.12-4ubuntu1) saucy; urgency=low
+
+  * Regenerate the control file.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 16 Aug 2013 12:09:47 +0200
+
 openjdk-7 (7u25-2.3.12-4) unstable; urgency=low
 
   * Add the hotspot patches for AArch64, which apparently were not
