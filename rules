@@ -399,7 +399,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/default-jvm-cfg.diff \
 	debian/patches/nonreparenting-wm.diff \
 	debian/patches/accessible-toolkit.patch \
-	debian/patches/fix_extra_flags-$(hotspot_version).diff
+	debian/patches/fix_extra_flags.diff
 
 ifeq ($(with_bridge),atk)
     DISTRIBUTION_PATCHES += \
@@ -422,7 +422,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-override-redirect-compiz.patch \
 	debian/patches/icedtea-4953367.patch \
 	debian/patches/fontconfig-wqy-microhei.patch \
-	debian/patches/hotspot-no-werror-$(hotspot_version).diff \
+	debian/patches/hotspot-no-werror.diff \
 	debian/patches/icc_loading_with_symlink.diff \
 	debian/patches/hotspot-sparc-arch.diff \
 	debian/patches/sparc-trapsfix.patch \
@@ -430,18 +430,15 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/zero-fpu-control-is-noop.diff \
 	debian/patches/hotspot-no-march-i586.diff \
 	debian/patches/zero-missing-headers.diff \
-	debian/patches/enumipv6-fix.patch \
 	debian/patches/libpcsclite-dlopen.diff \
 	debian/patches/jni_md_h_JNIEXPORT_visibility.patch \
 	debian/patches/7130140-MouseEvent-systemout.diff \
-	debian/patches/FreetypeFontScaler_getFontMetricsNative.diff \
 	debian/patches/text-relocations.diff \
 	debian/patches/dnd-files.patch \
 	debian/patches/no-pch-build.diff \
 	debian/patches/zero-opt.diff \
-	debian/patches/jdk-zero-arch.diff \
-	debian/patches/aarch64-detection.diff \
 	debian/patches/hotspot-powerpcspe.diff \
+	debian/patches/taskset.diff \
 
 # FIXME CACAO update needed
 #ifeq ($(DEB_HOST_ARCH),armel)
@@ -465,7 +462,7 @@ endif
 #	debian/patches/pkcs11-secmod-debug.diff \
 
   DISTRIBUTION_PATCHES += \
-	debian/patches/hotspot-libpath-$(hotspot_version).diff
+	debian/patches/hotspot-libpath.diff
 
 #	debian/patches/hotspot-warn-no-errformat.diff \
 

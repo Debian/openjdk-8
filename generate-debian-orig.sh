@@ -1,16 +1,16 @@
 #!/bin/sh
 
 tarballs="corba.tar.gz hotspot.tar.gz jaxp.tar.gz jaxws.tar.gz jdk-dfsg.tar.gz langtools-dfsg.tar.gz openjdk.tar.gz"
-jamvmtb=jamvm-0972452d441544f7dd29c55d64f1ce3a5db90d82.tar.gz
-cacaotb=cacao-a567bcb7f589.tar.gz
-tarballdir=7u25
-version=7u25-2.3.12
+jamvmtb=jamvm-ac22c9948434e528ece451642b4ebde40953ee7e.tar.gz
+cacaotb=cacao-e215e36be9fc.tar.gz
+tarballdir=7u45
+version=7u45-2.4.3
 base=openjdk-7
 pkgdir=$base-$version
 origtar=${base}_${version}.orig.tar.gz
 
 icedtea_checkout=icedtea7-2.3
-icedtea_checkout=icedtea7-2.3.12
+icedtea_checkout=icedtea7-2.4.3
 debian_checkout=openjdk7
 
 if [ -d $pkgdir ]; then

@@ -1,0 +1,55 @@
+--- openjdk/hotspot/make/linux/Makefile~	2013-10-16 16:17:08.000000000 +0200
++++ openjdk/hotspot/make/linux/Makefile	2013-11-21 09:55:30.096923604 +0100
+@@ -286,44 +286,46 @@
+ 
+ # Define INSTALL=y at command line to automatically copy JVM into JAVA_HOME
+ 
++taskset = taskset 0x00000001
++
+ $(TARGETS_C2):  $(SUBDIRS_C2)
+ 	cd $(OSNAME)_$(BUILDARCH)_compiler2/$@ && $(MAKE) $(MFLAGS)
+-	cd $(OSNAME)_$(BUILDARCH)_compiler2/$@ && ./test_gamma
++	cd $(OSNAME)_$(BUILDARCH)_compiler2/$@ && $(taskset) ./test_gamma
+ ifdef INSTALL
+ 	cd $(OSNAME)_$(BUILDARCH)_compiler2/$@ && $(MAKE) $(MFLAGS) install
+ endif
+ 
+ $(TARGETS_TIERED):  $(SUBDIRS_TIERED)
+ 	cd $(OSNAME)_$(BUILDARCH)_tiered/$(patsubst %tiered,%,$@) && $(MAKE) $(MFLAGS)
+-	cd $(OSNAME)_$(BUILDARCH)_tiered/$(patsubst %tiered,%,$@) && ./test_gamma
++	cd $(OSNAME)_$(BUILDARCH)_tiered/$(patsubst %tiered,%,$@) && $(taskset) ./test_gamma
+ ifdef INSTALL
+ 	cd $(OSNAME)_$(BUILDARCH)_tiered/$(patsubst %tiered,%,$@) && $(MAKE) $(MFLAGS) install
+ endif
+ 
+ $(TARGETS_C1):  $(SUBDIRS_C1)
+ 	cd $(OSNAME)_$(BUILDARCH)_compiler1/$(patsubst %1,%,$@) && $(MAKE) $(MFLAGS)
+-	cd $(OSNAME)_$(BUILDARCH)_compiler1/$(patsubst %1,%,$@) && ./test_gamma
++	cd $(OSNAME)_$(BUILDARCH)_compiler1/$(patsubst %1,%,$@) && $(taskset) ./test_gamma
+ ifdef INSTALL
+ 	cd $(OSNAME)_$(BUILDARCH)_compiler1/$(patsubst %1,%,$@) && $(MAKE) $(MFLAGS) install
+ endif
+ 
+ $(TARGETS_CORE):  $(SUBDIRS_CORE)
+ 	cd $(OSNAME)_$(BUILDARCH)_core/$(patsubst %core,%,$@) && $(MAKE) $(MFLAGS)
+-	cd $(OSNAME)_$(BUILDARCH)_core/$(patsubst %core,%,$@) && ./test_gamma
++	cd $(OSNAME)_$(BUILDARCH)_core/$(patsubst %core,%,$@) && $(taskset) ./test_gamma
+ ifdef INSTALL
+ 	cd $(OSNAME)_$(BUILDARCH)_core/$(patsubst %core,%,$@) && $(MAKE) $(MFLAGS) install
+ endif
+ 
+ $(TARGETS_ZERO):  $(SUBDIRS_ZERO)
+ 	cd $(OSNAME)_$(VARIANTARCH)_zero/$(patsubst %zero,%,$@) && $(MAKE) $(MFLAGS)
+-	cd $(OSNAME)_$(VARIANTARCH)_zero/$(patsubst %zero,%,$@) && ./test_gamma
++	cd $(OSNAME)_$(VARIANTARCH)_zero/$(patsubst %zero,%,$@) && $(taskset) ./test_gamma
+ ifdef INSTALL
+ 	cd $(OSNAME)_$(VARIANTARCH)_zero/$(patsubst %zero,%,$@) && $(MAKE) $(MFLAGS) install
+ endif
+ 
+ $(TARGETS_SHARK):  $(SUBDIRS_SHARK)
+ 	cd $(OSNAME)_$(VARIANTARCH)_shark/$(patsubst %shark,%,$@) && $(MAKE) $(MFLAGS)
+-	cd $(OSNAME)_$(VARIANTARCH)_shark/$(patsubst %shark,%,$@) && ./test_gamma
++	cd $(OSNAME)_$(VARIANTARCH)_shark/$(patsubst %shark,%,$@) && $(taskset) ./test_gamma
+ ifdef INSTALL
+ 	cd $(OSNAME)_$(VARIANTARCH)_shark/$(patsubst %shark,%,$@) && $(MAKE) $(MFLAGS) install
+ endif

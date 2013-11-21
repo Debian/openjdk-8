@@ -1,7 +1,7 @@
 --- openjdk/hotspot/make/linux/makefiles/vm.make.orig
 +++ openjdk/hotspot/make/linux/makefiles/vm.make
-@@ -112,6 +112,12 @@
- endif
+@@ -116,6 +116,12 @@
+ CFLAGS += -DINCLUDE_TRACE=1
  endif
  
 +DEB_MULTIARCH := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null || true)
@@ -15,11 +15,11 @@
  endif
 --- openjdk/hotspot/src/os/linux/vm/os_linux.cpp.orig
 +++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp
-@@ -382,10 +382,10 @@
+@@ -388,10 +388,10 @@
   *        ...
   *        7: The default directories, normally /lib and /usr/lib.
   */
--#if defined(AMD64) || defined(_LP64) && (defined(SPARC) || defined(PPC) || defined(S390))
+-#if defined(AMD64) || defined(_LP64) && (defined(SPARC) || defined(PPC) || defined(S390) || defined(AARCH64))
 -#define DEFAULT_LIBPATH "/usr/lib64:/lib64:/lib:/usr/lib"
 +#ifdef DEB_MULTIARCH
 +#define DEFAULT_LIBPATH	"/usr/lib/" DEB_MULTIARCH "/jni" ":/lib/" DEB_MULTIARCH ":/usr/lib/" DEB_MULTIARCH ":/usr/lib/jni:/lib:/usr/lib"
