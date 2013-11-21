@@ -129,7 +129,7 @@ default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 hotspot_version = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),default,zero)
 hotspot_version = default
 
-any_archs = amd64 armel armhf arm64 i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
+any_archs = amd64 armel armhf arm64 i386 ia64 lpia mips mipsel powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 stage1_gcj_archs = alpha amd64 armel armhf arm64 hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc64 s390x x32 kfreebsd-i386 kfreebsd-amd64
 stage1_openjdk_archs = s390 sparc
 stage1_cacao_archs =
@@ -438,6 +438,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/no-pch-build.diff \
 	debian/patches/zero-opt.diff \
 	debian/patches/hotspot-powerpcspe.diff \
+	debian/patches/hotspot-mips-align.diff \
 	debian/patches/taskset.diff \
 
 # FIXME CACAO update needed

@@ -10,7 +10,7 @@ Vcs-Bzr: http://bazaar.launchpad.net/~openjdk/openjdk/openjdk7
 Vcs-Browser: https://code.launchpad.net/~openjdk/openjdk/openjdk7
 
 Package: openjdk-7-jdk
-Architecture: amd64 armel armhf arm64 i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
+Architecture: amd64 armel armhf arm64 i386 ia64 lpia mips mipsel powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
@@ -25,7 +25,7 @@ Description: OpenJDK Development Kit (JDK)
  from the IcedTea project.
 
 Package: openjdk-7-jre-headless
-Architecture: amd64 armel armhf arm64 i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
+Architecture: amd64 armel armhf arm64 i386 ia64 lpia mips mipsel powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}, ${multiarch:Depends}
 Depends: openjdk-7-jre-lib (>= ${source:Version}), ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
@@ -42,7 +42,7 @@ Description: OpenJDK Java runtime, using ${vm:Name} (headless)
  from the IcedTea project.
 
 Package: openjdk-7-jre
-Architecture: amd64 armel armhf arm64 i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
+Architecture: amd64 armel armhf arm64 i386 ia64 lpia mips mipsel powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre-headless (= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
@@ -71,7 +71,7 @@ Description: OpenJDK Java runtime (architecture independent libraries)
  from the IcedTea project.
 
 Package: openjdk-7-demo
-Architecture: amd64 armel armhf arm64 i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
+Architecture: amd64 armel armhf arm64 i386 ia64 lpia mips mipsel powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 Priority: extra
 Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-7-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
@@ -113,7 +113,7 @@ Description: OpenJDK Development Kit (JDK) documentation
  from the IcedTea project.
 
 Package: openjdk-7-dbg
-Architecture: amd64 armel armhf arm64 i386 ia64 lpia powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
+Architecture: amd64 armel armhf arm64 i386 ia64 lpia mips mipsel powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
 Multi-Arch: same
 Priority: extra
 Section: debug

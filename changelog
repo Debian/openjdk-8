@@ -1,6 +1,7 @@
 openjdk-7 (7u45-2.4.3-1) UNRELEASED; urgency=medium
 
   * IcedTea7 2.4.3 release.
+  * Fix build failure on mips* (Aurelien Jarno). Closes: #729448).
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 20 Nov 2013 14:33:33 +0100
 
