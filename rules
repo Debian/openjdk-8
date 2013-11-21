@@ -1066,6 +1066,7 @@ endif
 
 	mkdir -p stamps
 	mkdir -p build
+	autoreconf -fi
 	chmod +x configure
 	cd build && $(EXTRA_BUILD_ENV) ../configure $(CONFIGURE_ARGS)
 
