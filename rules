@@ -75,6 +75,7 @@ ifneq (,$(DEB_HOST_MULTIARCH))
   jdiralias	= java-$(jvmver)-$(origin)-$(DEB_HOST_ARCH)
   basedir	= $(TOP)/$(jdirname)
   commonbasedir	= $(TOP)/java-$(shortver)-$(origin)-common
+  commonbasedir	= $(basedir)
   etcdir	= etc/java-$(shortver)-$(origin)
 else
   jdirname	= java-$(shortver)-$(origin)
@@ -167,6 +168,7 @@ ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy))
   altshark_archs   =
 endif
 altzero_archs = $(filter-out sparc sparc64, $(hotspot_archs)) $(altshark_archs)
+altzero_archs = $(filter-out amd64 i386 sparc sparc64, $(hotspot_archs)) $(altshark_archs)
 ifneq (,$(filter $(distrel),lenny hardy intrepid))
   altzero_archs =
   altshark_archs =
@@ -858,6 +860,7 @@ p_jrec	= icedtea-$(shortver)-jre-cacao
 p_jrej	= icedtea-$(shortver)-jre-jamvm
 p_jrez	= $(basename)-jre-zero
 p_lib	= $(basename)-jre-lib
+p_lib	= $(p_jrehl)
 p_jdk	= $(basename)-jdk
 p_demo	= $(basename)-demo
 p_src	= $(basename)-source
@@ -1578,7 +1581,10 @@ endif
 	: # remove empty directories
 	rmdir $(d)/$(basedir)/jre/lib/management
 	rmdir $(d)/$(basedir)/jre/lib/applet
-	rmdir $(d)/$(basedir)/jre/lib/security
+#	rmdir $(d)/$(basedir)/jre/lib/security
+
+	: # FIXME: fix, move and install tapset files
+	rm -rf $(d)/$(basedir)/tapset
 
 	: # TODO: why do we provide a custom font.properties.ja?
 	: # cp -p debian/font.properties.ja $(d_jbin)/$(etcdir)/.
@@ -1589,11 +1595,13 @@ endif
 	: # now move things to the packages. it is so ****** to create
 	: # .install files first. dh_movefiles did do the job perfectly
 
+	rm -f debian/$(p_lib).install
 	: # $(p_jrehl).install / $(p_jre).install
 	( \
 	  echo 'etc'; \
 	  echo '$(basedir)/jre/lib/jexec'; \
 	  echo '$(basedir)/jre/lib/rt.jar'; \
+	  echo '$(basedir)/jre/lib/security/*_policy.jar'; \
 	  echo '$(basedir)/jre/man/ja'; \
 	  echo '$(basedir)/man/ja'; \
 	  echo '$(basedir)/bin/java-rmi.cgi'; \
@@ -1646,7 +1654,7 @@ endif
 	    esac; \
 	    echo $$i $(commonbasedir)/jre/lib/; \
 	  done; \
-	) > debian/$(p_lib).install
+	) >> debian/$(p_lib).install
 
 	: # $(p_jdk).install
 	( \
@@ -1786,10 +1794,12 @@ ifneq (,$(DEB_HOST_MULTIARCH))
 	  echo '$(commonbasedir)/src.zip $(basedir)/src.zip' >> $(d_jdk).links
 endif
 
+ifneq ($(p_jrehl),$(p_lib))
 	: # create docdir symlinks for $(p_lib)
 	( \
 	  echo usr/share/doc/$(p_jrehl) usr/share/doc/$(p_lib); \
 	) > $(d_lib).links
+endif
 
 	: # create docdir symlinks for $(p_dbg)
 	( \
@@ -1883,13 +1893,15 @@ endif
 		$(d_lib)/$(commonbasedir)/jre/lib/
 
 ifneq (,$(DEB_HOST_MULTIARCH))
+  ifneq ($(p_jrehl),$(p_lib))
 	: # create symlinks for the files in $(p_lib)
 	find $(d_lib)/$(commonbasedir) \
 	    ! -name zi ! -name meta-index \( -name cmm -prune -o -type f \) \
 	    -printf "$(commonbasedir)/%P $(basedir)/%P\n" >> $(d_jrehl).links
-  ifeq ($(with_tzdata),yes)
+    ifeq ($(with_tzdata),yes)
 	echo usr/share/javazi $(basedir)/jre/lib/zi \
 	  >> $(d_jrehl).links
+    endif
   endif
 endif
 

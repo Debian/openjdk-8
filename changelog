@@ -3,6 +3,9 @@ openjdk-7 (7u45-2.4.3-1) UNRELEASED; urgency=medium
   * IcedTea7 2.4.3 release.
   * Fix build failure on mips* (Aurelien Jarno). Closes: #729448).
   * Run autoreconf. Closes: #724083.
+  * Merge the -jre-lib package into -jre-headless. Simplifies the packaging
+    and the savings were not as big as wanted, because the rt.jar is still
+    architecture dependant. Closes: #641049, #722510.
 
  -- Matthias Klose <doko@ubuntu.com>  Wed, 20 Nov 2013 14:33:33 +0100
 
