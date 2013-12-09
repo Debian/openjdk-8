@@ -1,0 +1,7 @@
+#! /bin/sh
+
+set -e
+
+if [ -h /usr/share/doc/@basename@-jre-lib ]; then
+        rm -f /usr/share/doc/@basename@-jre-lib
+fi

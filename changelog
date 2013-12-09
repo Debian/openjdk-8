@@ -1,13 +1,62 @@
-openjdk-7 (7u45-2.4.3-1) UNRELEASED; urgency=medium
+openjdk-7 (7u45-2.4.3-1) unstable; urgency=medium
 
   * IcedTea7 2.4.3 release.
+  * Security fixes:
+    - S8006900, CVE-2013-3829: Add new date/time capability.
+    - S8008589: Better MBean permission validation.
+    - S8011071, CVE-2013-5780: Better crypto provider handling.
+    - S8011081, CVE-2013-5772: Improve jhat.
+    - S8011157, CVE-2013-5814: Improve CORBA portablility.
+    - S8012071, CVE-2013-5790: Better Building of Beans.
+    - S8012147: Improve tool support.
+    - S8012277: CVE-2013-5849: Improve AWT DataFlavor.
+    - S8012425, CVE-2013-5802: Transform TransformerFactory.
+    - S8013503, CVE-2013-5851: Improve stream factories.
+    - S8013506: Better Pack200 data handling.
+    - S8013510, CVE-2013-5809: Augment image writing code.
+    - S8013514: Improve stability of cmap class.
+    - S8013739, CVE-2013-5817: Better LDAP resource management.
+    - S8013744, CVE-2013-5783: Better tabling for AWT.
+    - S8014085: Better serialization support in JMX classes.
+    - S8014093, CVE-2013-5782: Improve parsing of images.
+    - S8014098: Better profile validation.
+    - S8014102, CVE-2013-5778: Improve image conversion.
+    - S8014341, CVE-2013-5803: Better service from Kerberos servers.
+    - S8014349, CVE-2013-5840: (cl) Class.getDeclaredClass problematic
+      in some class loader configurations.
+    - S8014530, CVE-2013-5825: Better digital signature processing.
+    - S8014534: Better profiling support.
+    - S8014987, CVE-2013-5842: Augment serialization handling.
+    - S8015614: Update build settings.
+    - S8015731: Subject java.security.auth.subject to improvements.
+    - S8015743, CVE-2013-5774: Address internet addresses.
+    - S8016256: Make finalization final.
+    - S8016653, CVE-2013-5804: javadoc should ignore ignoreable characters
+      in names.
+    - S8016675, CVE-2013-5797: Make Javadoc pages more robust.
+    - S8017196, CVE-2013-5850: Ensure Proxies are handled appropriately.
+    - S8017287, CVE-2013-5829: Better resource disposal.
+    - S8017291, CVE-2013-5830: Cast Proxies Aside.
+    - S8017298, CVE-2013-4002: Better XML support.
+    - S8017300, CVE-2013-5784: Improve Interface Implementation.
+    - S8017505, CVE-2013-5820: Better Client Service.
+    - S8019292: Better Attribute Value Exceptions.
+    - S8019617: Better view of objects.
+    - S8020293: JVM crash.
+    - S8021275, CVE-2013-5805: Better screening for ScreenMenu.
+    - S8021282, CVE-2013-5806: Better recycling of object instances.
+    - S8021286: Improve MacOS resourcing.
+    - S8021290, CVE-2013-5823: Better signature validation.
+    - S8022931, CVE-2013-5800: Enhance Kerberos exceptions.
+    - S8022940: Enhance CORBA translations.
+    - S8023683: Enhance class file parsing.
   * Fix build failure on mips* (Aurelien Jarno). Closes: #729448).
   * Run autoreconf. Closes: #724083.
   * Merge the -jre-lib package into -jre-headless. Simplifies the packaging
     and the savings were not as big as wanted, because the rt.jar is still
     architecture dependant. Closes: #641049, #722510.
 
- -- Matthias Klose <doko@ubuntu.com>  Wed, 20 Nov 2013 14:33:33 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Sun, 08 Dec 2013 23:22:06 +0100
 
 openjdk-7 (7u25-2.3.12-4ubuntu3) saucy; urgency=low
 

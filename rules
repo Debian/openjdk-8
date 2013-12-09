@@ -1924,6 +1924,10 @@ endif
 binary-indep: build install
 	dh_testdir
 	dh_testroot
+ifeq ($(p_lib),$(p_jrehl))
+	dh_installchangelogs -p$(basename)-jre-lib
+	dh_installdocs -p$(basename)-jre-lib
+endif
 ifeq ($(with_docs),yes)
 	dh_installchangelogs -p$(p_doc)
 	dh_installdocs -p$(p_doc)
