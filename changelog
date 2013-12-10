@@ -1,3 +1,9 @@
+openjdk-7 (7u45-2.4.3-2) UNRELEASED; urgency=medium
+
+  * Disable bootstrap build on alpha. Closes: #719671.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 10 Dec 2013 11:47:55 +0100
+
 openjdk-7 (7u45-2.4.3-1) unstable; urgency=medium
 
   * IcedTea7 2.4.3 release.
