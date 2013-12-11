@@ -118,8 +118,8 @@ endif
 
 with_wgy_zenhai = $(if $(filter $(distrel),lenny),,yes)
 
-arch_map	:= alpha=alpha arm=arm armel=arm armhf=arm arm64=aarch64 amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparc64 sh4=sh s390=s390 s390x=s390x ia64=ia64 m68k=m68k
-archdir_map	:= alpha=alpha arm=arm armel=arm armhf=arm arm64=aarch64 amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 sparc=sparc sparc64=sparcv9 sh4=sh s390=s390 s390x=s390x ia64=ia64 m68k=m68k
+arch_map	:= alpha=alpha arm=arm armel=arm armhf=arm arm64=aarch64 amd64=amd64 hppa=parisc i386=i586 lpia=i586 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 ppc64el=ppc64 sparc=sparc sparc64=sparc64 sh4=sh s390=s390 s390x=s390x ia64=ia64 m68k=m68k
+archdir_map	:= alpha=alpha arm=arm armel=arm armhf=arm arm64=aarch64 amd64=amd64 hppa=parisc i386=i386 lpia=i386 m68k=m68k mips=mips mipsel=mipsel powerpc=ppc powerpcspe=ppc ppc64=ppc64 ppc64el=ppc64 sparc=sparc sparc64=sparcv9 sh4=sh s390=s390 s390x=s390x ia64=ia64 m68k=m68k
 
 jvmarch		:= $(strip $(patsubst $(DEB_HOST_ARCH_CPU)=%, %, \
 			$(filter $(DEB_HOST_ARCH_CPU)=%, $(arch_map))))
@@ -130,8 +130,8 @@ default_vm = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),hotspot,zero)
 hotspot_version = $(if $(filter $(DEB_HOST_ARCH), $(hotspot_archs)),default,zero)
 hotspot_version = default
 
-any_archs = alpha amd64 armel armhf arm64 i386 ia64 lpia mips mipsel powerpc powerpcspe ppc64 m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
-stage1_gcj_archs = alpha amd64 armel armhf arm64 hppa i386 ia64 lpia powerpc powerpcspe ppc64 m68k mips mipsel sh4 sparc64 s390x x32 kfreebsd-i386 kfreebsd-amd64
+any_archs = alpha amd64 armel armhf arm64 i386 ia64 lpia mips mipsel powerpc powerpcspe ppc64 ppc64el m68k sh4 sparc sparc64 s390 s390x x32 kfreebsd-i386 kfreebsd-amd64
+stage1_gcj_archs = alpha amd64 armel armhf arm64 hppa i386 ia64 lpia powerpc powerpcspe ppc64 ppc64el m68k mips mipsel sh4 sparc64 s390x x32 kfreebsd-i386 kfreebsd-amd64
 stage1_openjdk_archs = alpha s390 sparc
 stage1_cacao_archs =
 ifneq (,$(filter nobootstrap, $(DEB_BUILD_OPTIONS)))
@@ -396,6 +396,7 @@ endif
 DISTRIBUTION_PATCHES += \
 	debian/patches/ld-symbolic-functions.diff \
 	debian/patches/shebang.diff \
+	debian/patches/jexec.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg.diff \
@@ -411,13 +412,10 @@ else ifneq (,$(with_bridge))
 	debian/patches/java-access-bridge-security.patch
 endif
 
-ifneq (,$(filter $(DEB_HOST_ARCH), s390 s390x))
+ifneq (,$(filter $(DEB_HOST_ARCH), s390))
   DISTRIBUTION_PATCHES += \
 	debian/patches/hotspot-s390.diff \
 	debian/patches/s390_hotspot_fix.diff
-else ifneq (,$(filter $(DEB_HOST_ARCH), arm64))
-  DISTRIBUTION_PATCHES += \
-	debian/patches/hotspot-fork.diff
 endif
 
 DISTRIBUTION_PATCHES += \
@@ -536,7 +534,7 @@ CONFIGURE_ARGS += --with-pkgversion="$(PKGVERSION)"
 # see http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=217
 # only use it for zero ports except powerpc (which we assume as
 # fast enough to build.
-ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) ia64 powerpc powerpcspe ppc64))
+ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) ia64 powerpc powerpcspe ppc64 ppc64el))
   CONFIGURE_ARGS += --with-alt-jar=/usr/bin/fastjar
 endif
 
@@ -764,7 +762,7 @@ ifneq (,$(filter $(distrel),lenny))
   bd_fastjar = fastjar (>= 2:0.95-4),
 endif
 bd_compress = $(pkg_compress),
-bd_xvfb = xvfb, xauth, xfonts-base, libgl1-mesa-dri, $(bd_wm) x11-xkb-utils,
+bd_xvfb = xvfb, xauth, xfonts-base, libgl1-mesa-dri [!x32], $(bd_wm) x11-xkb-utils,
 bd_mauve = mauve,
 ifneq (,$(filter $(distrel),lenny))
   bd_xvfb += xkb-data, xserver-xorg-core,
@@ -1051,7 +1049,7 @@ stamps/icedtea-configure:
 	-cat /etc/hosts
 
 	mkdir -p bin
-ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 arm64 hppa ppc64 s390x sparc64))
+ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 arm64 hppa ppc64 ppc64el s390x sparc64 x32))
 	( \
 	  echo '#! /bin/sh'; \
 	  echo 'if [ -x /usr/bin/linux32 ]; then'; \
@@ -1066,6 +1064,8 @@ ifeq (,$(filter $(DEB_HOST_ARCH), alpha amd64 arm64 hppa ppc64 s390x sparc64))
 endif
 	/bin/uname -a
 	lsb_release -a
+
+	-cat /proc/sys/kernel/random/entropy_avail
 
 	mkdir -p stamps
 	mkdir -p build
@@ -1096,10 +1096,10 @@ endif
 	touch $@
 
 ifeq ($(with_check),yes)
-    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha ia64 mips mipsel powerpc powerpcspe ppc64 s390 sh4))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha ia64 mips mipsel powerpc powerpcspe ppc64 ppc64el s390 sh4))
       with_mauve_check = $(default_vm)
     endif
-    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel armhf ia64 mips mipsel powerpc powerpcspe ppc64 s390 s390x sh4))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel armhf ia64 mips mipsel powerpc powerpcspe ppc64 ppc64el s390 s390x sh4))
       with_jtreg_check = $(default_vm)
     endif
 
@@ -1151,7 +1151,7 @@ ifeq ($(with_check),yes)
     with_mauve_check =
 endif
 
-ifneq (,$(filter $(DEB_HOST_ARCH), alpha armel armhf ia64 mips mipsel powerpc powerpcspe ppc64 s390))
+ifneq (,$(filter $(DEB_HOST_ARCH), alpha armel armhf ia64 m68k mips mipsel powerpc powerpcspe ppc64 s390))
   JTREG_OPTIONS = -timeout:3
 endif
 ifneq (,$(filter $(DEB_HOST_ARCH), armel armhf))
@@ -1174,10 +1174,12 @@ ifeq (,$(filter $(distrel),lenny hardy))
 endif
 
 pre-build:
-#ifneq (,$(filter $(DEB_HOST_ARCH),armel))
+ifneq (,$(filter $(DEB_HOST_ARCH),s390))
+	@echo explicitely fail the build for $(DEB_HOST_ARCH), patches not updated
+#else ifneq (,$(filter $(DEB_HOST_ARCH),armel))
 #	@echo explicitely fail the build for $(DEB_HOST_ARCH), ARM assembler interpreter not yet ported
-#	false
-#endif
+	false
+endif
 
 build-arch: build
 build-indep: build
@@ -1189,7 +1191,7 @@ build: pre-build $(build_stamps)
 	rm -f buildwatch.pid
 
 stamps/build: stamps/patch
-ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel armhf hppa ia64 m68k mips mipsel powerpc powerpcspe ppc64 s390 s390x sparc))
+ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel armhf hppa arm64 ia64 m68k mips mipsel powerpc powerpcspe ppc64 ppc64el s390 s390x sparc sparc64))
 	sh -c 'sh debian/buildwatch.sh $(CURDIR)/build &'
 endif
 	if $(EXTRA_BUILD_ENV) $(MAKE) -C build $(build_target) $(EXTRA_MAKE_FLAGS); then \
@@ -1318,7 +1320,8 @@ jtreg_pids = ps x --no-headers -ww -o pid,ppid,args \
 
 stamps/jtreg-check-default: stamps/build stamps/xvfb-check
 	$(MAKE) -f debian/rules jtreg-run-check VMNAME=$(default_vm) VMARGS= \
-		$(if $(filter $(default_vm),hotspot),TEST_SUITES='hotspot langtools jdk',TEST_SUITES='hotspot langtools')
+		TEST_SUITES='hotspot langtools'
+#		$(if $(filter $(default_vm),hotspot),TEST_SUITES='hotspot langtools jdk',TEST_SUITES='hotspot langtools')
 	touch $@
 
 stamps/jtreg-check-cacao: stamps/build stamps/xvfb-check

@@ -1,8 +1,13 @@
-openjdk-7 (7u45-2.4.3-2) UNRELEASED; urgency=medium
+openjdk-7 (7u45-2.4.3-1ubuntu0.3) UNRELEASED; urgency=medium
 
   * Disable bootstrap build on alpha. Closes: #719671.
+  * Disable running the jdk jtreg tests on the hotspot architectures.
+    Hanging on the buildds.
+  * Re-enable the jexec patch, program logic confused by running jexec
+    outside the assumed java home. Closes: #731961.
+  * Don't apply the s390 patches on s390x. s390 is successfully dead.
 
- -- Matthias Klose <doko@ubuntu.com>  Tue, 10 Dec 2013 11:47:55 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 11 Dec 2013 19:08:18 +0100
 
 openjdk-7 (7u45-2.4.3-1) unstable; urgency=medium
 
