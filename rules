@@ -168,7 +168,6 @@ ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy))
   altshark_archs   =
 endif
 altzero_archs = $(filter-out sparc sparc64, $(hotspot_archs)) $(altshark_archs)
-altzero_archs = $(filter-out amd64 i386 sparc sparc64, $(hotspot_archs)) $(altshark_archs)
 ifneq (,$(filter $(distrel),lenny hardy intrepid))
   altzero_archs =
   altshark_archs =
@@ -440,6 +439,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/hotspot-powerpcspe.diff \
 	debian/patches/hotspot-mips-align.diff \
 	debian/patches/taskset.diff \
+	debian/patches/zero-little-endian.diff \
 
 # FIXME CACAO update needed
 #ifeq ($(DEB_HOST_ARCH),armel)
@@ -1007,7 +1007,7 @@ debian/control: debian/control.in debian/rules
 	fi
 
 packaging-files:
-	for f in debian/*.in; do \
+	for f in debian/*.in debian/patches/*.in; do \
 	  case "$$f" in debian/control.in) continue; esac; \
 	  f2=$$(echo $$f | sed 's/JB/$(basename)/;s/\.in$$//'); \
 	  sed -e 's/@JRE@/$(p_jre)/g' \
@@ -1077,6 +1077,8 @@ endif
 
 unpack: stamps/unpack
 stamps/unpack: stamps/icedtea-configure
+	$(MAKE) -f debian/rules packaging-files
+
 #	$(MAKE) -C build extract
 ifeq ($(STAGE1_JAVA),gcj)
 #	$(MAKE) -C build stamps/extract-ecj.stamp
@@ -1442,7 +1444,7 @@ debian-clean:
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	for f in debian/*.in; do \
+	for f in debian/*.in debian/patches/*.in; do \
 	  f2=$$(echo $$f | sed 's/JB/$(basename)/;s/\.in$$//'); \
 	  case "$$f2" in debian/control) continue; esac; \
 	  rm -f $$f2; \
