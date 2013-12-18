@@ -1,8 +1,8 @@
 openjdk-7 (7u45-2.4.3-3) UNRELEASED; urgency=low
 
-  * 
+  * Don't build on s390 anymore.
 
- -- Matthias Klose <doko@ubuntu.com>  Fri, 13 Dec 2013 10:45:56 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 13 Dec 2013 12:05:06 +0100
 
 openjdk-7 (7u45-2.4.3-2.3) unstable; urgency=medium
 
