@@ -1,0 +1,93 @@
+--- openjdk/hotspot/src/os_cpu/linux_zero/vm/globals_linux_zero.hpp~	2013-10-16 16:17:08.000000000 +0200
++++ openjdk/hotspot/src/os_cpu/linux_zero/vm/globals_linux_zero.hpp	2013-12-19 14:58:01.041010426 +0100
+@@ -34,7 +34,7 @@
+ define_pd_global(bool,  DontYieldALot,           false);
+ define_pd_global(intx,  ThreadStackSize,         1664);
+ #ifdef _LP64
+-define_pd_global(intx,  VMThreadStackSize,       1024);
++define_pd_global(intx,  VMThreadStackSize,       1664);
+ #else
+ define_pd_global(intx,  VMThreadStackSize,       512);
+ #endif // _LP64
+--- openjdk/corba/make/common/shared/Platform.gmk~	2013-12-19 14:53:15.987056600 +0100
++++ openjdk/corba/make/common/shared/Platform.gmk	2013-12-20 14:17:48.934820921 +0100
+@@ -164,7 +164,11 @@
+                     echo ia64 \
+                     ;; \
+                 x86_64) \
+-                    echo amd64 \
++                    if [ "`dpkg-architecure -qDEB_HOST_ARCH`" = x32 ]; then \
++                        echo x32; \
++                    else \
++                        echo amd64; \
++                    fi \
+                     ;; \
+                 sparc*) \
+                     echo sparc \
+--- openjdk/jdk/make/jdk_generic_profile.sh~	2013-12-19 14:56:16.628292867 +0100
++++ openjdk/jdk/make/jdk_generic_profile.sh	2013-12-20 14:20:49.040064728 +0100
+@@ -255,7 +255,12 @@
+   # subdirectory under $JAVA_HOME/jre/lib
+   arch=$(uname -m)
+   case "${arch}" in
+-    x86_64)  ZERO_LIBARCH=amd64     ;;
++    x86_64)
++          if [ "`dpkg-architecure -qDEB_HOST_ARCH`" = x32 ]; then
++              ZERO_LIBARCH=x32
++          else
++              ZERO_LIBARCH=amd64
++          fi
+     i?86)    ZERO_LIBARCH=i386      ;;
+     sparc64) ZERO_LIBARCH=sparcv9   ;;
+     arm*)    ZERO_LIBARCH=arm       ;;
+@@ -270,7 +275,7 @@
+     arm|i386|ppc|s390|sh|sparc)
+       ARCH_DATA_MODEL=32
+       ;;
+-    aarch64|alpha|amd64|ia64|ppc64*|s390x|sparcv9)
++    aarch64|alpha|amd64|ia64|ppc64*|s390x|sparcv9|x32)
+       ARCH_DATA_MODEL=64
+       ;;
+     *)
+@@ -281,7 +286,7 @@
+ 
+   # ZERO_ENDIANNESS is the endianness of the processor
+   case "${ZERO_LIBARCH}" in
+-    arm|aarch64|amd64|i386|ia64|mipsel|ppc64le)
++    arm|aarch64|amd64|i386|ia64|mipsel|ppc64le|x32)
+       ZERO_ENDIANNESS=little
+       ;;
+     ppc*|s390*|sparc*|alpha)
+@@ -299,6 +304,7 @@
+     ppc*)   ZERO_ARCHDEF=PPC   ;;
+     s390*)  ZERO_ARCHDEF=S390  ;;
+     sparc*) ZERO_ARCHDEF=SPARC ;;
++    x32)    ZERO_ARCHDEF=AMD64 ;;
+     *)      ZERO_ARCHDEF=$(echo "${ZERO_LIBARCH}" | tr a-z A-Z)
+   esac
+   export ZERO_ARCHDEF
+--- openjdk/jdk/make/common/shared/Platform.gmk~	2013-12-19 14:53:15.987056600 +0100
++++ openjdk/jdk/make/common/shared/Platform.gmk	2013-12-20 14:16:30.466277696 +0100
+@@ -171,7 +171,11 @@
+                     echo ia64 \
+                     ;; \
+                 x86_64) \
+-                    echo amd64 \
++                    if [ "`dpkg-architecure -qDEB_HOST_ARCH`" = x32 ]; then \
++                        echo x32; \
++                    else \
++                        echo amd64; \
++                    fi \
+                     ;; \
+                 sparc*) \
+                     echo sparc \
+@@ -211,6 +215,9 @@
+       ifeq ($(ARCH), s390x)
+         ARCH_DATA_MODEL=64
+       endif
++      ifeq ($(ARCH), x32)
++        ARCH_DATA_MODEL=64
++      endif
+       ifeq ($(ARCH), sh)
+         ARCH_DATA_MODEL=32
+       endif
