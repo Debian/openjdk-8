@@ -4,6 +4,7 @@ openjdk-7 (7u45-2.4.3-3) UNRELEASED; urgency=low
   * Update hotspot-mips-align patch (Aurelien Jarno). Closes: #732528).
   * Build for ppc64el.
   * Try to build zero on x32.
+  * Configure with --enable-zero on sparc and sparc64.
 
  -- Matthias Klose <doko@ubuntu.com>  Fri, 13 Dec 2013 12:05:06 +0100
 

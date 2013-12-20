@@ -39,6 +39,7 @@ ifneq (,$(DEB_HOST_MULTIARCH))
 endif
 
 hotspot_archs	= amd64 i386 lpia sparc sparc64 kfreebsd-amd64 kfreebsd-i386
+hotspot_archs	= amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386
 # requires llvm; llvm in jaunty is recent enough, but in universe
 ifeq (,$(filter $(distrel),lenny jaunty intrepid hardy))
   shark_archs	= amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386
