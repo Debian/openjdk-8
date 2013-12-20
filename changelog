@@ -1,4 +1,4 @@
-openjdk-7 (7u45-2.4.3-3) UNRELEASED; urgency=low
+openjdk-7 (7u45-2.4.3-3) unstable; urgency=low
 
   * Don't build on s390 anymore.
   * Update hotspot-mips-align patch (Aurelien Jarno). Closes: #732528).
@@ -6,7 +6,7 @@ openjdk-7 (7u45-2.4.3-3) UNRELEASED; urgency=low
   * Try to build zero on x32.
   * Configure with --enable-zero on sparc and sparc64.
 
- -- Matthias Klose <doko@ubuntu.com>  Fri, 13 Dec 2013 12:05:06 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 20 Dec 2013 14:42:38 +0100
 
 openjdk-7 (7u45-2.4.3-2.3) unstable; urgency=medium
 
