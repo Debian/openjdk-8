@@ -109,7 +109,7 @@ export ALT_OBJCOPY=fake
 export ALT_STRIP_POLICY=no_strip
 
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
-ifneq (,$(filter $(DEB_HOST_ARCH), armel powerpcspe))
+ifneq (,$(filter $(DEB_HOST_ARCH), armel))
   with_check = disabled running check on $(DEB_HOST_ARCH)
 endif
 with_docs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),,yes)
