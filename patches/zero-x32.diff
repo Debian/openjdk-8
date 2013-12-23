@@ -80,3 +80,14 @@
        ifeq ($(ARCH), sh)
          ARCH_DATA_MODEL=32
        endif
+--- openjdk/hotspot/src/os/linux/vm/os_linux.cpp~	2013-12-23 19:03:29.206670416 +0100
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2013-12-24 00:34:10.408021726 +0100
+@@ -1998,7 +1998,7 @@
+ 
+   #if  (defined IA32)
+     static  Elf32_Half running_arch_code=EM_386;
+-  #elif   (defined AMD64)
++  #elif  (defined AMD64) || (defined X32)
+     static  Elf32_Half running_arch_code=EM_X86_64;
+   #elif  (defined IA64)
+     static  Elf32_Half running_arch_code=EM_IA_64;
