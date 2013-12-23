@@ -109,8 +109,8 @@ export ALT_OBJCOPY=fake
 export ALT_STRIP_POLICY=no_strip
 
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
-ifneq (,$(filter $(DEB_HOST_ARCH), armel powerpc powerpcspe))
-with_check = disabled for this upload
+ifneq (,$(filter $(DEB_HOST_ARCH), armel powerpcspe))
+  with_check = disabled running check on $(DEB_HOST_ARCH)
 endif
 with_docs = $(if $(findstring nodocs, $(DEB_BUILD_OPTIONS)),,yes)
 ifneq (,$(findstring cacao shark, $(PKGSOURCE)))
@@ -375,9 +375,10 @@ else
   ifneq (,$(findstring twm, $(with_wm)))
     with_wm_args = -f $(CURDIR)/bin/jtreg.tmwrc
   endif
-  bd_wm = metacity | twm,
-  ifeq (,$(filter $(distrel),etch))
-    bd_wm += dbus-x11,
+  ifneq (,$(filter $(distrel),saucy raring quantal precise oneiric natty maverick lucid karmic jaunty intrepid hardy))
+    bd_wm = metacity | twm, dbus-x11,
+  else
+    bd_wm = twm,
   endif
 endif
 ifeq ($(with_wm),metacity)
@@ -1104,7 +1105,7 @@ ifeq ($(with_check),yes)
     ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha ia64 mips mipsel powerpc powerpcspe ppc64 ppc64el s390 sh4))
       with_mauve_check = $(default_vm)
     endif
-    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha armel armhf ia64 mips mipsel powerpc powerpcspe ppc64 ppc64el s390 s390x sh4))
+    ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha arm64 armel armhf ia64 mips mipsel powerpc powerpcspe ppc64 ppc64el s390 s390x sh4))
       with_jtreg_check = $(default_vm)
     endif
 
