@@ -1,8 +1,9 @@
 openjdk-7 (7u45-2.4.3-5) UNRELEASED; urgency=medium
 
   * Run the jtreg tests on powerpcspe, tested by Roland Stigge.
+  * Fix zero builds on 64k page kernel configs.
 
- -- Matthias Klose <doko@ubutu.com>  Tue, 24 Dec 2013 00:29:33 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Sat, 28 Dec 2013 21:52:05 +0100
 
 openjdk-7 (7u45-2.4.3-4) unstable; urgency=low
 

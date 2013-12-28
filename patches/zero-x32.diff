@@ -1,11 +1,24 @@
---- openjdk/corba/make/common/shared/Platform.gmk~	2013-12-19 14:53:15.987056600 +0100
-+++ openjdk/corba/make/common/shared/Platform.gmk	2013-12-20 14:17:48.934820921 +0100
-@@ -164,7 +164,11 @@
+--- openjdk/hotspot/src/os/linux/vm/os_linux.cpp.orig	2013-12-28 17:55:28.029217634 +0100
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2013-12-28 17:55:51.433389820 +0100
+@@ -1998,7 +1998,7 @@
+ 
+   #if  (defined IA32)
+     static  Elf32_Half running_arch_code=EM_386;
+-  #elif   (defined AMD64)
++  #elif  (defined AMD64) || (defined X32)
+     static  Elf32_Half running_arch_code=EM_X86_64;
+   #elif  (defined IA64)
+     static  Elf32_Half running_arch_code=EM_IA_64;
+--- openjdk/corba/make/common/shared/Platform.gmk.orig	2013-12-28 17:55:28.029217634 +0100
++++ openjdk/corba/make/common/shared/Platform.gmk	2013-12-28 17:57:17.154020459 +0100
+@@ -163,8 +163,12 @@
+                 ia64) \
                      echo ia64 \
                      ;; \
-                 x86_64) \
+-                x86_64) \
 -                    echo amd64 \
-+                    if [ "`dpkg-architecure -qDEB_HOST_ARCH`" = x32 ]; then \
++                amd64|x86_64) \
++                    if [ "`dpkg-architecture -qDEB_HOST_ARCH`" = x32 ]; then \
 +                        echo x32; \
 +                    else \
 +                        echo amd64; \
@@ -13,32 +26,33 @@
                      ;; \
                  sparc*) \
                      echo sparc \
---- openjdk/jdk/make/jdk_generic_profile.sh~	2013-12-19 14:56:16.628292867 +0100
-+++ openjdk/jdk/make/jdk_generic_profile.sh	2013-12-20 14:20:49.040064728 +0100
-@@ -255,7 +255,12 @@
+--- openjdk/jdk/make/jdk_generic_profile.sh.orig	2013-12-28 17:55:28.029217634 +0100
++++ openjdk/jdk/make/jdk_generic_profile.sh	2013-12-28 17:55:51.433389820 +0100
+@@ -255,7 +257,13 @@
    # subdirectory under $JAVA_HOME/jre/lib
    arch=$(uname -m)
    case "${arch}" in
 -    x86_64)  ZERO_LIBARCH=amd64     ;;
 +    x86_64)
-+          if [ "`dpkg-architecure -qDEB_HOST_ARCH`" = x32 ]; then
++          echo XXXXXXXXXXXXX `dpkg-architecture -qDEB_HOST_ARCH`
++          if [ "`dpkg-architecture -qDEB_HOST_ARCH`" = x32 ]; then
 +              ZERO_LIBARCH=x32
 +          else
 +              ZERO_LIBARCH=amd64
-+          fi
++          fi;;
      i?86)    ZERO_LIBARCH=i386      ;;
      sparc64) ZERO_LIBARCH=sparcv9   ;;
      arm*)    ZERO_LIBARCH=arm       ;;
-@@ -270,7 +275,7 @@
-     arm|i386|ppc|s390|sh|sparc)
+@@ -267,7 +275,7 @@
+ 
+   # ARCH_DATA_MODEL is the number of bits in a pointer
+   case "${ZERO_LIBARCH}" in
+-    arm|i386|ppc|s390|sh|sparc)
++    arm|i386|ppc|s390|sh|sparc|x32)
        ARCH_DATA_MODEL=32
        ;;
--    aarch64|alpha|amd64|ia64|ppc64*|s390x|sparcv9)
-+    aarch64|alpha|amd64|ia64|ppc64*|s390x|sparcv9|x32)
-       ARCH_DATA_MODEL=64
-       ;;
-     *)
-@@ -281,7 +286,7 @@
+     aarch64|alpha|amd64|ia64|ppc64*|s390x|sparcv9)
+@@ -281,7 +289,7 @@
  
    # ZERO_ENDIANNESS is the endianness of the processor
    case "${ZERO_LIBARCH}" in
@@ -47,7 +61,7 @@
        ZERO_ENDIANNESS=little
        ;;
      ppc*|s390*|sparc*|alpha)
-@@ -299,6 +304,7 @@
+@@ -299,6 +307,7 @@
      ppc*)   ZERO_ARCHDEF=PPC   ;;
      s390*)  ZERO_ARCHDEF=S390  ;;
      sparc*) ZERO_ARCHDEF=SPARC ;;
@@ -55,14 +69,16 @@
      *)      ZERO_ARCHDEF=$(echo "${ZERO_LIBARCH}" | tr a-z A-Z)
    esac
    export ZERO_ARCHDEF
---- openjdk/jdk/make/common/shared/Platform.gmk~	2013-12-19 14:53:15.987056600 +0100
-+++ openjdk/jdk/make/common/shared/Platform.gmk	2013-12-20 14:16:30.466277696 +0100
-@@ -171,7 +171,11 @@
+--- openjdk/jdk/make/common/shared/Platform.gmk.orig	2013-12-28 17:55:28.029217634 +0100
++++ openjdk/jdk/make/common/shared/Platform.gmk	2013-12-28 17:57:02.401911931 +0100
+@@ -170,8 +170,12 @@
+                 ia64) \
                      echo ia64 \
                      ;; \
-                 x86_64) \
+-                x86_64) \
 -                    echo amd64 \
-+                    if [ "`dpkg-architecure -qDEB_HOST_ARCH`" = x32 ]; then \
++                amd64|x86_64) \
++                    if [ "`dpkg-architecture -qDEB_HOST_ARCH`" = x32 ]; then \
 +                        echo x32; \
 +                    else \
 +                        echo amd64; \
@@ -75,19 +91,28 @@
          ARCH_DATA_MODEL=64
        endif
 +      ifeq ($(ARCH), x32)
-+        ARCH_DATA_MODEL=64
++        ARCH_DATA_MODEL=32
 +      endif
        ifeq ($(ARCH), sh)
          ARCH_DATA_MODEL=32
        endif
---- openjdk/hotspot/src/os/linux/vm/os_linux.cpp~	2013-12-23 19:03:29.206670416 +0100
-+++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2013-12-24 00:34:10.408021726 +0100
-@@ -1998,7 +1998,7 @@
+--- openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c
++++ openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c
+@@ -35,7 +35,6 @@
+ #endif
+ #ifdef __linux__
+ #include <unistd.h>
+-#include <sys/sysctl.h>
+ #include <sys/utsname.h>
+ #include <netinet/ip.h>
  
-   #if  (defined IA32)
-     static  Elf32_Half running_arch_code=EM_386;
--  #elif   (defined AMD64)
-+  #elif  (defined AMD64) || (defined X32)
-     static  Elf32_Half running_arch_code=EM_X86_64;
-   #elif  (defined IA64)
-     static  Elf32_Half running_arch_code=EM_IA_64;
+--- openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c
++++ openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c
+@@ -43,7 +43,6 @@
+ #endif
+ #ifdef __linux__
+ #include <unistd.h>
+-#include <sys/sysctl.h>
+ #endif
+ 
+ #include "jvm.h"
