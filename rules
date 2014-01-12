@@ -475,11 +475,6 @@ endif
 
 #	debian/patches/hotspot-warn-no-errformat.diff \
 
-ifeq ($(distribution),Ubuntu)
-  DISTRIBUTION_PATCHES += \
-	debian/patches/openjdk-ubuntu-branding.patch
-endif
-
 ifeq ($(with_pulse),yes)
   # only in karmic and later the default
   ifeq (,$(filter $(distrel), lenny squeeze sid jaunty intrepid hardy))

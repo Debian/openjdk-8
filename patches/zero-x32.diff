@@ -28,13 +28,12 @@
                      echo sparc \
 --- openjdk/jdk/make/jdk_generic_profile.sh.orig	2013-12-28 17:55:28.029217634 +0100
 +++ openjdk/jdk/make/jdk_generic_profile.sh	2013-12-28 17:55:51.433389820 +0100
-@@ -255,7 +257,13 @@
+@@ -255,7 +257,12 @@
    # subdirectory under $JAVA_HOME/jre/lib
    arch=$(uname -m)
    case "${arch}" in
 -    x86_64)  ZERO_LIBARCH=amd64     ;;
 +    x86_64)
-+          echo XXXXXXXXXXXXX `dpkg-architecture -qDEB_HOST_ARCH`
 +          if [ "`dpkg-architecture -qDEB_HOST_ARCH`" = x32 ]; then
 +              ZERO_LIBARCH=x32
 +          else
