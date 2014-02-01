@@ -21,337 +21,9 @@ Author: Damien Raude-Morvan <drazzib@debian.org>
 Author: Guido Günther <agx@sigxcpu.org>
 Last-Update: 2013-05-07
 Forwarded: no
---- openjdk/hotspot/src/share/vm/asm/assembler.hpp.orig
-+++ openjdk/hotspot/src/share/vm/asm/assembler.hpp
-@@ -25,6 +25,7 @@
- #ifndef SHARE_VM_ASM_ASSEMBLER_HPP
- #define SHARE_VM_ASM_ASSEMBLER_HPP
- 
-+#include "utilities/globalDefinitions.hpp"
- #include "code/oopRecorder.hpp"
- #include "code/relocInfo.hpp"
- #include "memory/allocation.hpp"
---- openjdk/jdk/make/com/sun/nio/Makefile.orig
-+++ openjdk/jdk/make/com/sun/nio/Makefile
-@@ -38,7 +38,7 @@
- 
- 
- all build clean clobber::
--	$(SUBDIRS-loop)
-+#	$(SUBDIRS-loop)
- 
- clean clobber::
--	$(RM) -r $(CLASSDESTDIR)/com/sun/nio
-+#	$(RM) -r $(CLASSDESTDIR)/com/sun/nio
---- openjdk/jdk/make/common/shared/Defs-versions.gmk.orig
-+++ openjdk/jdk/make/common/shared/Defs-versions.gmk
-@@ -153,7 +153,9 @@
-   REQUIRED_OS_VERSION         = 2.6
-   REQUIRED_OS_VARIANT_NAME    = Fedora
-   REQUIRED_OS_VARIANT_VERSION = 9
--  REQUIRED_ALSA_VERSION       = 0.9.1
-+ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
-+   REQUIRED_ALSA_VERSION       = 0.9.1
-+endif
-   REQUIRED_COMPILER_NAME      = GCC4
-   REQUIRED_COMPILER_VERSION   = GCC4
-   REQUIRED_GCC_VER            = 2.95
---- openjdk/jdk/make/common/shared/Platform.gmk.orig
-+++ openjdk/jdk/make/common/shared/Platform.gmk
-@@ -152,7 +152,7 @@
- endif
- 
- # Platform settings specific to Linux
--ifeq ($(SYSTEM_UNAME), Linux)
-+ifneq (,$(filter Linux GNU/kFreeBSD, $(SYSTEM_UNAME)))
-   PLATFORM = linux
-   # Arch and OS name/version
-   ifdef CROSS_COMPILE_ARCH
---- openjdk/jdk/make/common/shared/Sanity-Settings.gmk.orig
-+++ openjdk/jdk/make/common/shared/Sanity-Settings.gmk
-@@ -186,8 +186,10 @@
- endif
- ifeq ($(PLATFORM),linux)
-   ifdef REQUIRED_ALSA_VERSION
-+  ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
-     ALL_SETTINGS+=$(call addRequiredSetting,ALSA_VERSION)
-   endif
-+  endif
- endif
- ALL_SETTINGS+=$(call addRequiredVersionSetting,OS_VERSION)
- ALL_SETTINGS+=$(call addOptionalSetting,OS_VARIANT_NAME)
---- openjdk/jdk/make/common/shared/Sanity.gmk.orig
-+++ openjdk/jdk/make/common/shared/Sanity.gmk
-@@ -114,12 +114,14 @@
-     elif [ -f /etc/lsb-release ] ; then \
-       $(EGREP) DISTRIB_RELEASE /etc/lsb-release | $(SED) -e 's@.*DISTRIB_RELEASE=\(.*\)@\1@'; \
-     fi)
-+ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
-   ALSA_INCLUDE=/usr/include/alsa/version.h
-   ALSA_LIBRARY=/usr/lib/libasound.so
-   _ALSA_VERSION := $(shell $(EGREP) SND_LIB_VERSION_STR $(ALSA_INCLUDE) | \
-            $(SED) -e 's@.*"\(.*\)".*@\1@' )
-   ALSA_VERSION := $(call GetVersion,$(_ALSA_VERSION))
- endif
-+endif
- 
- ifeq ($(PLATFORM), macosx)
-   # What kind of system we are using
---- openjdk/jdk/make/java/nio/Makefile.orig
-+++ openjdk/jdk/make/java/nio/Makefile
-@@ -94,6 +94,70 @@
- 
- else
- 
-+ifeq ($(SYSTEM_UNAME),GNU/kFreeBSD)
-+
-+FILES_java += \
-+        sun/nio/ch/AbstractPollSelectorImpl.java \
-+        sun/nio/ch/DevPollArrayWrapper.java \
-+        sun/nio/ch/DevPollSelectorImpl.java \
-+        sun/nio/ch/DevPollSelectorProvider.java \
-+        sun/nio/ch/InheritedChannel.java \
-+        sun/nio/ch/LinuxAsynchronousChannelProvider.java \
-+        sun/nio/ch/PollSelectorProvider.java \
-+        sun/nio/ch/PollSelectorImpl.java \
-+        sun/nio/ch/Port.java \
-+        sun/nio/ch/SimpleAsynchronousFileChannelImpl.java \
-+        sun/nio/ch/SolarisAsynchronousChannelProvider.java \
-+        sun/nio/ch/SolarisEventPort.java \
-+        sun/nio/ch/UnixAsynchronousServerSocketChannelImpl.java \
-+        sun/nio/ch/UnixAsynchronousSocketChannelImpl.java \
-+        \
-+        sun/nio/fs/GnomeFileTypeDetector.java \
-+        sun/nio/fs/LinuxDosFileAttributeView.java \
-+        sun/nio/fs/LinuxFileStore.java \
-+        sun/nio/fs/LinuxFileSystem.java \
-+        sun/nio/fs/LinuxFileSystemProvider.java \
-+        sun/nio/fs/LinuxUserDefinedFileAttributeView.java \
-+        sun/nio/fs/LinuxNativeDispatcher.java \
-+        sun/nio/fs/PollingWatchService.java \
-+        sun/nio/fs/SolarisNativeDispatcher.java \
-+        sun/nio/fs/SolarisWatchService.java \
-+        sun/nio/fs/UnixChannelFactory.java \
-+        sun/nio/fs/UnixCopyFile.java \
-+        sun/nio/fs/UnixDirectoryStream.java \
-+        sun/nio/fs/UnixException.java \
-+        sun/nio/fs/UnixFileAttributeViews.java \
-+        sun/nio/fs/UnixFileAttributes.java \
-+        sun/nio/fs/UnixFileKey.java \
-+        sun/nio/fs/UnixFileModeAttribute.java \
-+        sun/nio/fs/UnixFileStore.java \
-+        sun/nio/fs/UnixFileStoreAttributes.java \
-+        sun/nio/fs/UnixFileSystem.java \
-+        sun/nio/fs/UnixFileSystemProvider.java \
-+        sun/nio/fs/UnixMountEntry.java \
-+        sun/nio/fs/UnixNativeDispatcher.java \
-+        sun/nio/fs/UnixPath.java \
-+        sun/nio/fs/UnixSecureDirectoryStream.java \
-+        sun/nio/fs/UnixUriUtils.java \
-+        sun/nio/fs/UnixUserPrincipals.java
-+
-+FILES_export += \
-+        sun/nio/ch/DevPollArrayWrapper.java \
-+        sun/nio/ch/InheritedChannel.java \
-+        sun/nio/ch/NativeThread.java \
-+        sun/nio/ch/SolarisEventPort.java \
-+        sun/nio/ch/UnixAsynchronousServerSocketChannelImpl.java \
-+        sun/nio/ch/UnixAsynchronousSocketChannelImpl.java \
-+        \
-+        sun/nio/fs/GnomeFileTypeDetector.java \
-+        sun/nio/fs/LinuxNativeDispatcher.java \
-+        sun/nio/fs/SolarisNativeDispatcher.java \
-+        sun/nio/fs/SolarisWatchService.java \
-+        sun/nio/fs/UnixCopyFile.java \
-+        sun/nio/fs/UnixNativeDispatcher.java
-+
-+else
-+
- FILES_java += \
-         sun/nio/ch/AbstractPollSelectorImpl.java \
- 	sun/nio/ch/DevPollArrayWrapper.java \
-@@ -164,10 +228,12 @@
- 	sun/nio/fs/UnixCopyFile.java \
- 	sun/nio/fs/UnixNativeDispatcher.java
- 
-+endif # kFreeBSD
-+
- FILES_gen += \
- 	sun/nio/fs/UnixConstants.java
- 
--endif
-+endif # else
- 
- ifeq ($(PLATFORM), solaris)
- 
-@@ -213,6 +279,22 @@
- 
- ifeq ($(PLATFORM), linux)
- 
-+ifeq ($(SYSTEM_UNAME),GNU/kFreeBSD)
-+
-+FILES_c += \
-+        InheritedChannel.c \
-+        NativeThread.c \
-+        PollArrayWrapper.c \
-+        UnixAsynchronousServerSocketChannelImpl.c \
-+        UnixAsynchronousSocketChannelImpl.c \
-+        \
-+        GnomeFileTypeDetector.c \
-+        LinuxNativeDispatcher.c \
-+        UnixCopyFile.c \
-+        UnixNativeDispatcher.c
-+
-+else
-+
- FILES_c += \
- 	EPoll.c \
- 	EPollArrayWrapper.c \
-@@ -229,6 +311,8 @@
- 	UnixCopyFile.c \
- 	UnixNativeDispatcher.c
- 
-+endif # kFreeBSD
-+
- ifndef USE_SYSTEM_GIO
- FILES_c += \
- 	gio_fp.c
---- openjdk/jdk/make/javax/sound/Makefile.orig
-+++ openjdk/jdk/make/javax/sound/Makefile
-@@ -105,10 +105,12 @@
- endif # PLATFORM win32
- 
- ifeq ($(PLATFORM), linux)
-+ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
-   # ALSA handles directaudio, ports, and MIDI
-   SUBDIRS += jsoundalsa
-   EXTRA_SOUND_JNI_LIBS += jsoundalsa
-   #MXSPP_ADD = $(PLATFORM)-$(ARCH)/
-+endif # kFreeBSD
- endif # PLATFORM linux
- 
- ifeq ($(PLATFORM), macosx)
---- openjdk/jdk/src/share/classes/com/sun/servicetag/Installer.java.orig
-+++ openjdk/jdk/src/share/classes/com/sun/servicetag/Installer.java
-@@ -549,7 +549,7 @@
-         Set<String> archs = new HashSet<String>();
- 
-         String os = System.getProperty("os.name");
--        if (os.equals("SunOS") || os.equals("Linux")) {
-+        if (os.equals("SunOS") || os.equals("Linux") || os.equals("GNU/kFreeBSD")) {
-             // Traverse the directories under <JRE>/lib.
-             // If <JRE>/lib/<arch>/libjava.so exists, add <arch>
-             // to the product defined ID
---- openjdk/jdk/src/share/classes/com/sun/servicetag/Registry.java.orig
-+++ openjdk/jdk/src/share/classes/com/sun/servicetag/Registry.java
-@@ -84,7 +84,7 @@
-             String os = System.getProperty("os.name");
-             if (os.equals("SunOS")) {
-                 stclient = new File(STCLIENT_SOLARIS);
--            } else if (os.equals("Linux")) {
-+            } else if (os.equals("Linux") || os.equals("GNU/kFreeBSD")) {
-                 stclient = new File(STCLIENT_LINUX);
-             } else if (os.startsWith("Windows")) {
-                 stclient = getWindowsStClientFile();
---- openjdk/jdk/src/share/classes/com/sun/servicetag/SystemEnvironment.java.orig
-+++ openjdk/jdk/src/share/classes/com/sun/servicetag/SystemEnvironment.java
-@@ -61,7 +61,7 @@
-             String os = System.getProperty("os.name");
-             if (os.equals("SunOS")) {
-                 sysEnv = new SolarisSystemEnvironment();
--            } else if (os.equals("Linux")) {
-+            } else if (os.equals("Linux") || os.equals("GNU/kFreeBSD")) {
-                 sysEnv = new LinuxSystemEnvironment();
-             } else if (os.startsWith("Windows")) {
-                 sysEnv = new WindowsSystemEnvironment();
---- openjdk/jdk/src/share/classes/java/awt/GraphicsEnvironment.java.orig
-+++ openjdk/jdk/src/share/classes/java/awt/GraphicsEnvironment.java
-@@ -178,6 +178,7 @@
-                             } else {
-                                 headless = defaultHeadless =
-                                     Boolean.valueOf(("Linux".equals(osName) ||
-+                                                     "GNU/kFreeBSD".equals(osName) ||
-                                                      "SunOS".equals(osName) ||
-                                                      "FreeBSD".equals(osName) ||
-                                                      "NetBSD".equals(osName) ||
---- openjdk/jdk/src/share/classes/sun/font/FontUtilities.java.orig
-+++ openjdk/jdk/src/share/classes/sun/font/FontUtilities.java
-@@ -76,7 +76,7 @@
-                 String osName = System.getProperty("os.name", "unknownOS");
-                 isSolaris = osName.startsWith("SunOS");
- 
--                isLinux = osName.startsWith("Linux");
-+                isLinux = osName.startsWith("Linux") || osName.equals("GNU/kFreeBSD");
- 
-                 isMacOSX = osName.contains("OS X"); // TODO: MacOSX
- 
---- openjdk/jdk/src/share/classes/sun/nio/cs/ext/ExtendedCharsets.java.orig
-+++ openjdk/jdk/src/share/classes/sun/nio/cs/ext/ExtendedCharsets.java
-@@ -1280,6 +1280,7 @@
-         String osName = AccessController.doPrivileged(
-             new GetPropertyAction("os.name"));
-         if ("SunOS".equals(osName) || "Linux".equals(osName)
-+               || "GNU/kFreeBSD".equals(osName)
-                || osName.contains("OS X")) {
-             charset("x-COMPOUND_TEXT", "COMPOUND_TEXT",
-                     new String[] {
---- openjdk/jdk/src/share/classes/sun/print/PSPrinterJob.java.orig
-+++ openjdk/jdk/src/share/classes/sun/print/PSPrinterJob.java
-@@ -1537,7 +1537,9 @@
-         }
- 
-        String osname = System.getProperty("os.name");
--       if (osname.equals("Linux") || osname.contains("OS X")) {
-+       if (osname.equals("Linux") ||
-+           osname.equals("GNU/kFreeBSD") ||
-+           osname.contains("OS X")) {
-             execCmd = new String[ncomps];
-             execCmd[n++] = "/usr/bin/lpr";
-             if ((pFlags & PRINTER) != 0) {
---- openjdk/jdk/src/share/classes/sun/security/jgss/GSSManagerImpl.java.orig
-+++ openjdk/jdk/src/share/classes/sun/security/jgss/GSSManagerImpl.java
-@@ -48,6 +48,7 @@
-                     public Boolean run() {
-                             String osname = System.getProperty("os.name");
-                             if (osname.startsWith("SunOS") ||
-+                                osname.startsWith("GNU/kFreeBSD") ||
-                                 osname.startsWith("Linux")) {
-                                 return new Boolean(System.getProperty
-                                     (USE_NATIVE_PROP));
---- openjdk/jdk/src/share/classes/sun/security/krb5/internal/ccache/FileCredentialsCache.java.orig
-+++ openjdk/jdk/src/share/classes/sun/security/krb5/internal/ccache/FileCredentialsCache.java
-@@ -403,6 +403,7 @@
-             long uid = 0;
- 
-             if (osname.startsWith("SunOS") ||
-+                osname.startsWith("GNU/kFreeBSD") ||
-                 (osname.startsWith("Linux"))) {
-                 try {
-                     Class<?> c = Class.forName
---- openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h.orig
-+++ openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h
-@@ -61,7 +61,7 @@
- #define log1p   jlog1p
- #define expm1   jexpm1
- 
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
- #define __ieee754_sqrt          __j__ieee754_sqrt
- #define __ieee754_acos          __j__ieee754_acos
- #define __ieee754_acosh         __j__ieee754_acosh
---- openjdk/jdk/src/share/native/sun/security/ec/impl/ecc_impl.h.orig
-+++ openjdk/jdk/src/share/native/sun/security/ec/impl/ecc_impl.h
-@@ -49,7 +49,7 @@
- /*
-  * Multi-platform definitions
-  */
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- #define B_FALSE FALSE
- #define B_TRUE TRUE
- typedef unsigned char uint8_t;
---- openjdk/jdk/src/solaris/bin/ergo_i586.c.orig
-+++ openjdk/jdk/src/solaris/bin/ergo_i586.c
+
+--- openjdk/jdk/src/solaris/bin/ergo_i586.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/bin/ergo_i586.c	2014-01-15 13:29:32.816570862 +0100
 @@ -106,7 +106,7 @@
  
  #endif /* __solaris__ */
@@ -361,8 +33,8 @@ Forwarded: no
  
  /*
   * A utility method for asking the CPU about itself.
---- openjdk/jdk/src/solaris/bin/jexec.c.orig
-+++ openjdk/jdk/src/solaris/bin/jexec.c
+--- openjdk/jdk/src/solaris/bin/jexec.c.orig	2014-01-15 10:57:03.473190024 +0100
++++ openjdk/jdk/src/solaris/bin/jexec.c	2014-01-15 13:29:32.816570862 +0100
 @@ -76,7 +76,7 @@
  #include <string.h>
  #include <limits.h>
@@ -408,7 +80,7 @@ Forwarded: no
  const char * isJar(const char * path);
  #endif
  
-@@ -171,7 +171,7 @@
+@@ -172,7 +172,7 @@
      nargv = (const char **) malloc((argc + 2) * (sizeof (const char *)));
      nargv[nargc++] = java;
  
@@ -417,7 +89,7 @@ Forwarded: no
      /* The "-jar" flag is already in the original args list on Solaris,
       * so it only needs to be added on Linux. */
      nargv[nargc++] = JAR_FLAG;
-@@ -181,7 +181,7 @@
+@@ -182,7 +182,7 @@
          const char * jarfile = argv[argi++];
          const char * message = NULL;
  
@@ -426,7 +98,7 @@ Forwarded: no
          /* On Linux we also need to make sure argv[1] is really a JAR
           * file (this will also resolve any symlinks, which helps). */
          char jarPath[PATH_MAX + 1];
-@@ -290,7 +290,7 @@
+@@ -291,7 +291,7 @@
  }
  
  
@@ -435,87 +107,8 @@ Forwarded: no
  /*
   * Check if the given file is a JAR file.
   *
---- openjdk/jdk/src/solaris/classes/sun/awt/X11/XScrollbarPeer.java.orig
-+++ openjdk/jdk/src/solaris/classes/sun/awt/X11/XScrollbarPeer.java
-@@ -74,7 +74,7 @@
-      * Currently uses hardcoded values
-      */
-     private int getDefaultDimension() {
--        if (System.getProperty("os.name").equals("Linux")) {
-+        if (System.getProperty("os.name").equals("Linux") || System.getProperty("os.name").equals("GNU/kFreeBSD")) {
-             return DEFAULT_WIDTH_LINUX;
-         } else {
-             return DEFAULT_WIDTH_SOLARIS;
---- openjdk/jdk/src/solaris/classes/sun/font/FcFontConfiguration.java.orig
-+++ openjdk/jdk/src/solaris/classes/sun/font/FcFontConfiguration.java
-@@ -295,7 +295,7 @@
- 
-         super.setOsNameAndVersion();
- 
--        if (!osName.equals("Linux")) {
-+        if (!(osName.equals("Linux") || osName.equals("GNU/kFreeBSD"))) {
-             return;
-         }
-         try {
---- openjdk/jdk/src/solaris/classes/sun/nio/ch/DefaultAsynchronousChannelProvider.java.orig
-+++ openjdk/jdk/src/solaris/classes/sun/nio/ch/DefaultAsynchronousChannelProvider.java
-@@ -48,7 +48,7 @@
-             .doPrivileged(new GetPropertyAction("os.name"));
-         if (osname.equals("SunOS"))
-             return new SolarisAsynchronousChannelProvider();
--        if (osname.equals("Linux"))
-+        if (osname.equals("Linux") || osname.equals("GNU/kFreeBSD"))
-             return new LinuxAsynchronousChannelProvider();
-         if (osname.contains("OS X"))
-             return new BsdAsynchronousChannelProvider();
---- openjdk/jdk/src/solaris/classes/sun/nio/fs/DefaultFileSystemProvider.java.orig
-+++ openjdk/jdk/src/solaris/classes/sun/nio/fs/DefaultFileSystemProvider.java
-@@ -66,7 +66,7 @@
-             .doPrivileged(new GetPropertyAction("os.name"));
-         if (osname.equals("SunOS"))
-             return createProvider("sun.nio.fs.SolarisFileSystemProvider");
--        if (osname.equals("Linux"))
-+        if (osname.equals("Linux") || osname.equals("GNU/kFreeBSD"))
-             return createProvider("sun.nio.fs.LinuxFileSystemProvider");
-         if (osname.equals("Darwin") || osname.contains("OS X"))
-             return createProvider("sun.nio.fs.BsdFileSystemProvider");
---- openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java.orig
-+++ openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java
-@@ -238,9 +238,6 @@
-             }
-             throw new UnixException("Value of " + DOS_XATTR_NAME + " attribute is invalid");
-         } catch (UnixException x) {
--            // default value when attribute does not exist
--            if (x.errno() == ENODATA)
--                return 0;
-             throw x;
-         } finally {
-             buffer.release();
---- openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java.orig
-+++ openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java
-@@ -101,9 +101,7 @@
-                 LinuxNativeDispatcher.fgetxattr(fd, "user.java".getBytes(), 0L, 0);
-                 return true;
-             } catch (UnixException e) {
--                // attribute does not exist
--                if (e.errno() == UnixConstants.ENODATA)
--                    return true;
-+                return false;
-             } finally {
-                 UnixNativeDispatcher.close(fd);
-             }
---- openjdk/jdk/src/solaris/classes/sun/print/UnixPrintServiceLookup.java.orig
-+++ openjdk/jdk/src/solaris/classes/sun/print/UnixPrintServiceLookup.java
-@@ -125,6 +125,7 @@
- 
-     static boolean isBSD() {
-         return (osname.equals("Linux") ||
-+                osname.equals("GNU/kFreeBSD") ||
-                 osname.contains("OS X"));
-     }
- 
---- openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.c.orig
-+++ openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.c
+--- openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/com/sun/management/UnixOperatingSystem_md.c	2014-01-15 13:29:32.816570862 +0100
 @@ -212,7 +212,7 @@
  
      JVM_Close(fd);
@@ -525,443 +118,313 @@ Forwarded: no
      FILE *fp;
      unsigned long vsize = 0;
  
---- openjdk/jdk/src/solaris/native/java/io/io_util_md.c.orig
-+++ openjdk/jdk/src/solaris/native/java/io/io_util_md.c
-@@ -73,7 +73,7 @@
-     WITH_PLATFORM_STRING(env, path, ps) {
-         FD fd;
- 
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
-         /* Remove trailing slashes, since the kernel won't */
-         char *p = (char *)ps + strlen(ps) - 1;
-         while ((p > ps) && (*p == '/'))
---- openjdk/jdk/src/solaris/native/java/lang/UNIXProcess_md.c.orig
-+++ openjdk/jdk/src/solaris/native/java/lang/UNIXProcess_md.c
-@@ -102,7 +102,7 @@
- #define START_CHILD_USE_CLONE 0  /* clone() currently disabled; see above. */
- 
- #ifndef START_CHILD_USE_CLONE
--  #ifdef __linux__
-+  #if defined(__linux__) || defined(__GLIBC__)
-     #define START_CHILD_USE_CLONE 1
-   #else
-     #define START_CHILD_USE_CLONE 0
-@@ -111,7 +111,7 @@
- 
- /* By default, use vfork() on Linux. */
- #ifndef START_CHILD_USE_VFORK
--  #ifdef __linux__
-+  #if defined(__linux__) || defined(__GLIBC__)
-     #define START_CHILD_USE_VFORK 1
-   #else
-     #define START_CHILD_USE_VFORK 0
---- openjdk/jdk/src/solaris/native/java/lang/java_props_md.c.orig
-+++ openjdk/jdk/src/solaris/native/java/lang/java_props_md.c
-@@ -23,7 +23,7 @@
-  * questions.
+--- openjdk/jdk/src/solaris/native/sun/nio/fs/UnixNativeDispatcher.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/nio/fs/UnixNativeDispatcher.c	2014-01-15 13:29:32.824570921 +0100
+@@ -26,7 +26,7 @@
+ /**
+  * fstatat in glibc requires _ATFILE_SOURCE to be defined.
   */
- 
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
- #include <stdio.h>
- #include <ctype.h>
- #endif
-@@ -57,7 +57,7 @@
- #include "java_props.h"
- 
- #if !defined(_ALLBSD_SOURCE)
--#ifdef __linux__
-+#ifdef __linux__ || defined(__GLIBC__)
-   #ifndef CODESET
-   #define CODESET _NL_CTYPE_CODESET_NAME
-   #endif
-@@ -151,7 +151,7 @@
-     lc = setlocale(cat, NULL);
+-#if defined(__linux__)
++#if defined(__linux__) || defined(__GLIBC__)
+ #define _ATFILE_SOURCE
  #endif
  
--#ifndef __linux__
-+#if !defined(__linux__) && !defined(__GLIBC__)
-     if (lc == NULL) {
-         return 0;
-     }
-@@ -293,7 +293,7 @@
-          * in order to use optimizations. */
-         *std_encoding = (*p != '\0') ? p : "ISO8859-1";
- 
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-         /*
-          * Remap the encoding string to a different value for japanese
-          * locales on linux so that customized converters are used instead
-@@ -512,7 +512,7 @@
-      sprops.unicode_encoding = "UnicodeBig";
-  #endif
- #else /* !_ALLBSD_SOURCE */
--#ifdef __linux__
-+#ifdef __linux__ || defined(__GLIBC__)
- #if __BYTE_ORDER == __LITTLE_ENDIAN
-     sprops.unicode_encoding = "UnicodeLittle";
- #else
---- openjdk/jdk/src/solaris/native/java/lang/locale_str.h.orig
-+++ openjdk/jdk/src/solaris/native/java/lang/locale_str.h
-@@ -48,7 +48,7 @@
-     "gl", "gl_ES",
-     "he", "iw_IL",
-     "hr", "hr_HR",
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-     "hs", "en_US", // used on Linux, not clear what it stands for
- #endif
-     "hu", "hu_HU",
-@@ -78,14 +78,14 @@
-     "sv", "sv_SE",
-     "th", "th_TH",
-     "tr", "tr_TR",
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-     "ua", "en_US", // used on Linux, not clear what it stands for
- #endif
-     "uk", "uk_UA",
-     "vi", "vi_VN",
-     "wa", "wa_BE",
-     "zh", "zh_CN",
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-     "bokmal", "nb_NO",
-     "bokm\xE5l", "nb_NO",
-     "catalan", "ca_ES",
-@@ -146,13 +146,13 @@
-     "POSIX", "en",
-     "cz", "cs",
-     "he", "iw",
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-     "hs", "en", // used on Linux, not clear what it stands for
- #endif
-     "id", "in",
-     "sh", "sr", // sh is deprecated
-     "su", "fi",
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-     "ua", "en", // used on Linux, not clear what it stands for
-     "catalan", "ca",
-     "croatian", "hr",
-@@ -195,7 +195,7 @@
-  * Linux/Solaris script string to Java script name mapping table.
-  */
- static char *script_names[] = {
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-     "cyrillic", "Cyrl",
-     "devanagari", "Deva",
-     "iqtelif", "Latn",
-@@ -208,7 +208,7 @@
-  * Linux/Solaris country string to ISO3166 string mapping table.
-  */
- static char *country_names[] = {
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-     "RN", "US", // used on Linux, not clear what it stands for
- #endif
-     "YU", "CS", // YU has been removed from ISO 3166
---- openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c.orig
-+++ openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c
-@@ -333,7 +333,7 @@
-         /* Something went wrong, maybe networking is not setup? */
-         strcpy(hostname, "localhost");
-     } else {
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-         /* On Linux gethostname() says "host.domain.sun.com".  On
-          * Solaris gethostname() says "host", so extra work is needed.
-          */
-@@ -654,7 +654,7 @@
-       n = sendto(fd, sendbuf, plen, 0, (struct sockaddr *)him,
-                  sizeof(struct sockaddr));
-       if (n < 0 && errno != EINPROGRESS ) {
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-         if (errno != EINVAL)
-           /*
-            * On some Linuxes, when bound to the loopback interface, sendto
-@@ -812,7 +812,7 @@
-         case ENETUNREACH: /* Network Unreachable */
-         case EAFNOSUPPORT: /* Address Family not supported */
-         case EADDRNOTAVAIL: /* address is not available on  the  remote machine */
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-         case EINVAL:
-           /*
-            * On some Linuxes, when bound to the loopback interface, connect
---- openjdk/jdk/src/solaris/native/java/net/Inet6AddressImpl.c.orig
-+++ openjdk/jdk/src/solaris/native/java/net/Inet6AddressImpl.c
-@@ -73,7 +73,7 @@
-     } else {
-         // ensure null-terminated
-         hostname[NI_MAXHOST] = '\0';
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
-         /* On Linux/FreeBSD gethostname() says "host.domain.sun.com".  On
-          * Solaris gethostname() says "host", so extra work is needed.
-          */
-@@ -504,7 +504,7 @@
-       plen = sizeof(struct icmp6_hdr) + sizeof(tv);
-       n = sendto(fd, sendbuf, plen, 0, (struct sockaddr*) him, sizeof(struct sockaddr_in6));
-       if (n < 0 && errno != EINPROGRESS) {
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-         if (errno != EINVAL)
-           /*
-            * On some Linuxes, when bound to the loopback interface, sendto
-@@ -671,7 +671,7 @@
-         case ENETUNREACH: /* Network Unreachable */
-         case EAFNOSUPPORT: /* Address Family not supported */
-         case EADDRNOTAVAIL: /* address is not available on  the  remote machine */
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-         case EINVAL:
-           /*
-            * On some Linuxes, when bound to the loopback interface, connect
---- openjdk/jdk/src/solaris/native/java/net/NetworkInterface.c.orig
-+++ openjdk/jdk/src/solaris/native/java/net/NetworkInterface.c
-@@ -56,17 +56,17 @@
- #define _PATH_PROCNET_IFINET6           "/proc/net/if_inet6"
+@@ -49,7 +49,7 @@
+ #include <strings.h>
  #endif
  
--#if defined(_ALLBSD_SOURCE)
-+#if defined(_ALLBSD_SOURCE) || defined(__FreeBSD_kernel__)
- #include <sys/param.h>
- #include <sys/ioctl.h>
- #include <sys/sockio.h>
--#if defined(__APPLE__)
-+#if defined(__APPLE__) || defined(__FreeBSD_kernel__)
- #include <net/ethernet.h>
- #include <net/if_var.h>
- #include <net/if_dl.h>
- #include <netinet/in_var.h>
--#include <ifaddrs.h>
- #endif
-+#include <ifaddrs.h>
- #endif
- 
- #include "jvm.h"
-@@ -1590,7 +1590,11 @@
-      * try the old way.
-      */
-     memset(&lif, 0, sizeof(lif));
-+#if defined(__FreeBSD_kernel__)
-+    strcpy(lif.lifr_name, ifname);
-+#else
-     strlcpy(lif.lifr_name, ifname, sizeof(lif.lifr_name));
-+#endif
- 
-     if (ioctl(sock, SIOCGLIFHWADDR, &lif) != -1) {
-         struct sockaddr_dl *sp;
-@@ -1675,7 +1679,7 @@
- 
- 
- /** BSD **/
--#ifdef _ALLBSD_SOURCE
-+#if defined(_ALLBSD_SOURCE) || defined(__FreeBSD_kernel__)
- /* Open socket for further ioct calls, try v4 socket first and
-  * if it falls return v6 socket
-  */
-@@ -1804,7 +1808,11 @@
-             continue;
- 
-         memset(&ifr6, 0, sizeof(ifr6));
-+#if defined(__FreeBSD_kernel__)
-+        strcpy(ifr6.ifr_name, ifa->ifa_name);
-+#else
-         strlcpy(ifr6.ifr_name, ifa->ifa_name, sizeof(ifr6.ifr_name));
-+#endif
-         memcpy(&ifr6.ifr_addr, ifa->ifa_addr, MIN(sizeof(ifr6.ifr_addr), ifa->ifa_addr->sa_len));
- 
-         if (ioctl(sock, SIOCGIFNETMASK_IN6, (caddr_t)&ifr6) < 0) {
---- openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c.orig
-+++ openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c
-@@ -33,7 +33,7 @@
- #ifdef __solaris__
- #include <fcntl.h>
- #endif
 -#ifdef __linux__
 +#if defined(__linux__) || defined(__GLIBC__)
- #include <unistd.h>
- #include <sys/sysctl.h>
- #include <sys/utsname.h>
-@@ -336,7 +336,7 @@
-     /* The fdObj'fd */
-     jint fd;
- 
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
-     SOCKADDR addr;
-     int len;
+ #include <string.h>
  #endif
-@@ -346,7 +346,7 @@
-     }
-     fd = (*env)->GetIntField(env, fdObj, IO_fd_fdID);
  
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
- #ifdef __linux__
-     if (isOldKernel) {
-         int t = 1;
-@@ -357,14 +357,21 @@
- #ifdef AF_INET6
-         if (ipv6_available()) {
-             struct sockaddr_in6 *him6 = (struct sockaddr_in6 *)&addr;
+--- openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c.orig	2014-01-15 13:29:32.824570921 +0100
++++ openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c	2014-01-15 13:33:52.030476488 +0100
+@@ -35,7 +35,7 @@
+ #include <strings.h>
+ #endif
+ 
+-#if defined(__linux__)
++#if defined(__linux__) || defined(__GLIBC__)
+ #include <string.h>
+ #endif
+ 
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/FileChannelImpl.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/FileChannelImpl.c	2014-01-15 13:29:32.824570921 +0100
+@@ -39,7 +39,7 @@
+ 
+ #if defined(__linux__) || defined(__solaris__)
+ #include <sys/sendfile.h>
+-#elif defined(_ALLBSD_SOURCE)
++#elif defined(_ALLBSD_SOURCE) || defined(__FreeBSD_kernel__)
+ #include <sys/types.h>
+ #include <sys/socket.h>
+ #include <sys/uio.h>
+@@ -213,6 +213,31 @@
+ 
+     if (numBytes > 0)
+         return numBytes;
++
++    if (result == -1) {
++        if (errno == EAGAIN)
++            return IOS_UNAVAILABLE;
++        if (errno == EOPNOTSUPP || errno == ENOTSOCK || errno == ENOTCONN)
++            return IOS_UNSUPPORTED_CASE;
++        if ((errno == EINVAL) && ((ssize_t)count >= 0))
++            return IOS_UNSUPPORTED_CASE;
++        if (errno == EINTR)
++            return IOS_INTERRUPTED;
++        JNU_ThrowIOExceptionWithLastError(env, "Transfer failed");
++        return IOS_THROWN;
++    }
++
++    return result;
++#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
++    off_t numBytes;
++    int result;
++
++    numBytes = count;
++
++    result = sendfile(srcFD, dstFD, position, count, NULL, &numBytes, 0);
++
++    if (numBytes > 0)
++        return numBytes;
+ 
+     if (result == -1) {
+         if (errno == EAGAIN)
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/Sctp.h.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/Sctp.h	2014-01-15 13:29:32.824570921 +0100
+@@ -319,8 +319,36 @@
+ typedef int sctp_bindx_func(int sd, struct sockaddr *addrs, int addrcnt, int flags);
+ typedef int sctp_peeloff_func(int sock, sctp_assoc_t id);
+ 
++#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+ 
+-#endif /* __linux__ */
++#include <stdint.h>
++#include <sys/types.h>
++#include <sys/socket.h>
++#include <bsd/sys/cdefs.h>
++#include <netinet/sctp.h>
++#include <netinet/sctp_peeloff.h>
++#include <netinet/sctp_uio.h>
++#include "jni.h"
++
++#define nio_sctp_getladdrs sctp_getladdrs
++#define nio_sctp_freeladdrs sctp_freeladdrs
++#define nio_sctp_getpaddrs sctp_getpaddrs
++#define nio_sctp_freepaddrs sctp_freepaddrs
++#define nio_sctp_bindx  sctp_bindx
++#define nio_sctp_peeloff sctp_peeloff
++
++#endif /* __FreeBSD_kernel__ || __FreeBSD_kernel__ */
++
 +#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-+            him6->sin6_family = AF_INET6;
++
++#define nio_sctp_getladdrs sctp_getladdrs
++#define nio_sctp_freeladdrs sctp_freeladdrs
++#define nio_sctp_getpaddrs sctp_getpaddrs
++#define nio_sctp_freepaddrs sctp_freepaddrs
++#define nio_sctp_bindx  sctp_bindx
++#define nio_sctp_peeloff sctp_peeloff
++
 +#else
-             him6->sin6_family = AF_UNSPEC;
-+#endif
-             len = sizeof(struct sockaddr_in6);
-         } else
- #endif
-         {
-             struct sockaddr_in *him4 = (struct sockaddr_in*)&addr;
-+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-             him4->sin_family = AF_UNSPEC;
-+#else
-             len = sizeof(struct sockaddr_in);
-+#endif
-         }
-         JVM_Connect(fd, (struct sockaddr *)&addr, len);
  
---- openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c.orig
-+++ openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c
-@@ -32,7 +32,7 @@
- #endif
- #include <netinet/tcp.h>        /* Defines TCP_NODELAY, needed for 2.6 */
- #include <netinet/in.h>
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- #include <netinet/ip.h>
- #endif
- #include <netdb.h>
-@@ -41,7 +41,7 @@
- #ifdef __solaris__
- #include <fcntl.h>
- #endif
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- #include <unistd.h>
- #include <sys/sysctl.h>
- #endif
-@@ -468,7 +468,7 @@
-     /* report the appropriate exception */
-     if (connect_rv < 0) {
+ sctp_getladdrs_func* nio_sctp_getladdrs;
+ sctp_freeladdrs_func* nio_sctp_freeladdrs;
+@@ -329,6 +357,8 @@
+ sctp_bindx_func* nio_sctp_bindx;
+ sctp_peeloff_func* nio_sctp_peeloff;
  
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-         /*
-          * Linux/GNU distribution setup /etc/hosts so that
-          * InetAddress.getLocalHost gets back the loopback address
---- openjdk/jdk/src/solaris/native/java/net/net_util_md.c.orig
-+++ openjdk/jdk/src/solaris/native/java/net/net_util_md.c
-@@ -56,6 +56,11 @@
- #include <net/route.h>
- #include <sys/utsname.h>
- 
-+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-+#include <sys/param.h>
-+#include <sys/sysctl.h>
 +#endif
 +
- #ifndef IPV6_FLOWINFO_SEND
- #define IPV6_FLOWINFO_SEND      33
- #endif
---- openjdk/jdk/src/solaris/native/java/net/net_util_md.h.orig
-+++ openjdk/jdk/src/solaris/native/java/net/net_util_md.h
-@@ -37,7 +37,7 @@
- #endif
+ jboolean loadSocketExtensionFuncs(JNIEnv* env);
  
+ #endif /* !SUN_NIO_CH_SCTP_H */
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/SctpChannelImpl.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/SctpChannelImpl.c	2014-01-15 13:29:32.824570921 +0100
+@@ -441,7 +441,7 @@
+             } else if (errno == EINTR) {
+                 return IOS_INTERRUPTED;
  
--#if defined(__linux__) || defined(MACOSX)
-+#if defined(__linux__) || defined(MACOSX) || defined(__GLIBC__)
- extern int NET_Timeout(int s, long timeout);
- extern int NET_Read(int s, void* buf, size_t len);
- extern int NET_RecvFrom(int s, void *buf, int len, unsigned int flags,
-@@ -147,7 +147,7 @@
- /************************************************************************
-  *  Utilities
-  */
--#ifdef __linux__
-+#if defined(__linux__)
- extern int kernelIsV22();
- extern int kernelIsV24();
- #endif
---- openjdk/jdk/src/solaris/native/java/nio/MappedByteBuffer.c.orig
-+++ openjdk/jdk/src/solaris/native/java/nio/MappedByteBuffer.c
-@@ -40,7 +40,7 @@
-     int result = 0;
-     int i = 0;
-     void *a = (void *) jlong_to_ptr(address);
 -#ifdef __linux__
 +#if defined(__linux__) || defined(__GLIBC__)
-     unsigned char *vec = (unsigned char *)malloc(numPages * sizeof(char));
- #else
-     char *vec = (char *)malloc(numPages * sizeof(char));
---- openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c.orig
-+++ openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c
-@@ -49,7 +49,7 @@
- #define fileclose       fclose
+             } else if (errno == ENOTCONN) {
+                 /* ENOTCONN when EOF reached */
+                 rv = 0;
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramChannelImpl.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramChannelImpl.c	2014-01-15 13:29:32.824570921 +0100
+@@ -35,7 +35,7 @@
+ #include <string.h>
+ #include <errno.h>
+ 
+-#if defined(__linux__) || defined(_ALLBSD_SOURCE)
++#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
+ #include <netinet/in.h>
+ #endif
+ 
+@@ -81,7 +81,7 @@
+     rv = connect(fd, 0, 0);
  #endif
  
 -#if defined(__linux__) || defined(_ALLBSD_SOURCE)
 +#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
- 
- 
- static const char *ETC_TIMEZONE_FILE = "/etc/timezone";
-@@ -123,7 +123,7 @@
-         return NULL;
+     {
+         int len;
+         SOCKADDR sa;
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/Net.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/Net.c	2014-01-15 13:29:32.824570921 +0100
+@@ -192,7 +192,7 @@
+             return -1;
+         }
      }
+-#if defined(__linux__) && defined(AF_INET6)
++#if ( defined(__linux__) || defined(__GLIBC__) ) && defined(AF_INET6)
+     /* By default, Linux uses the route default */
+     if (domain == AF_INET6 && type == SOCK_DGRAM) {
+         int arg = 1;
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/NativeThread.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/NativeThread.c	2014-01-15 13:29:32.824570921 +0100
+@@ -33,7 +33,7 @@
+ #include "nio_util.h"
  
--#if defined(__linux__) || defined(MACOSX) || (defined(__solaris__) \
-+#if defined(__linux__) || defined(__GLIBC__) || defined(MACOSX) || (defined(__solaris__) \
-     && (defined(_POSIX_PTHREAD_SEMANTICS) || defined(_LP64)))
-     while (readdir_r(dirp, entry, &dp) == 0 && dp != NULL) {
+ 
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ #include <pthread.h>
+ #include <sys/signal.h>
+ 
+@@ -51,7 +51,7 @@
+ JNIEXPORT void JNICALL
+ Java_sun_nio_ch_NativeThread_init(JNIEnv *env, jclass cl)
+ {
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ 
+     /* Install the null handler for INTERRUPT_SIGNAL.  This might overwrite the
+      * handler previously installed by java/net/linux_close.c, but that's okay
+@@ -74,7 +74,7 @@
+ JNIEXPORT jlong JNICALL
+ Java_sun_nio_ch_NativeThread_current(JNIEnv *env, jclass cl)
+ {
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     return (long)pthread_self();
  #else
-@@ -212,7 +212,7 @@
-     return tz;
+     return -1;
+@@ -84,7 +84,7 @@
+ JNIEXPORT void JNICALL
+ Java_sun_nio_ch_NativeThread_signal(JNIEnv *env, jclass cl, jlong thread)
+ {
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     if (pthread_kill((pthread_t)thread, INTERRUPT_SIGNAL))
+         JNU_ThrowIOExceptionWithLastError(env, "Thread signal failed");
+ #endif
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/SocketChannelImpl.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/SocketChannelImpl.c	2014-01-15 13:29:32.824570921 +0100
+@@ -31,7 +31,7 @@
+ #include <string.h>
+ #include <poll.h>
+ 
+-#if __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ #include <netinet/in.h>
+ #endif
+ 
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/ServerSocketChannelImpl.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/ServerSocketChannelImpl.c	2014-01-15 13:29:32.824570921 +0100
+@@ -28,7 +28,7 @@
+ #include <sys/types.h>
+ #include <sys/socket.h>
+ 
+-#if __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ #include <netinet/in.h>
+ #endif
+ 
+--- openjdk/jdk/src/solaris/native/sun/nio/ch/SctpNet.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/nio/ch/SctpNet.c	2014-01-15 13:29:32.824570921 +0100
+@@ -58,6 +58,7 @@
+  */
+ jboolean loadSocketExtensionFuncs
+   (JNIEnv* env) {
++#if !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__)
+     if (dlopen(nativeSctpLib, RTLD_GLOBAL | RTLD_LAZY) == NULL) {
+         JNU_ThrowByName(env, "java/lang/UnsupportedOperationException",
+               dlerror());
+@@ -105,6 +106,7 @@
+               dlerror());
+         return JNI_FALSE;
+     }
++#endif /* __FreeBSD__ */
+ 
+     funcsLoaded = JNI_TRUE;
+     return JNI_TRUE;
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_util.h.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_util.h	2014-01-15 13:29:32.820570891 +0100
+@@ -200,7 +200,7 @@
+ 
+ 
+ 
+-#if defined(__linux__) || defined(MACOSX)
++#if defined(__linux__) || defined(MACOSX) || defined(__GLIBC__)
+ typedef struct _XmImRefRec {
+   Cardinal      num_refs;       /* Number of referencing widgets. */
+   Cardinal      max_refs;       /* Maximum length of refs array. */
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_util.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_util.c	2014-01-15 13:29:32.820570891 +0100
+@@ -605,7 +605,7 @@
+ 
+   return answer;
  }
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ 
+ 
+ #define MAXARGS 10
+@@ -676,7 +676,7 @@
+     return w;
+ }
+ 
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ static XRectangle geometryRect;
+ XVaNestedList awt_util_getXICStatusAreaList(Widget w)
+ {
+--- openjdk/jdk/src/solaris/native/sun/awt/multi_font.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/multi_font.c	2014-01-15 13:29:32.820570891 +0100
+@@ -348,7 +348,7 @@
+     return JNI_TRUE;
+ }
+ #ifndef XAWT
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ XmString
+ unicodeXmStringCreate(char* text, char* tag, int len) {
+     XmString ret_val;
+@@ -433,7 +433,7 @@
+             char *offsetStringData;
+ 
+             offsetStringData = stringData + (4 * sizeof(char));
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+             len = buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3];
+             /* Motif XmStringCreate() API requests "text must be a NULL-terminated
+                string" and its implementation uses "strlen()" to calculate the length
+--- openjdk/jdk/src/solaris/native/sun/awt/extutil.h.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/extutil.h	2014-01-15 13:29:32.820570891 +0100
+@@ -58,7 +58,7 @@
+  */
+ /* $XFree86: xc/include/extensions/extutil.h,v 1.5 2001/01/17 17:53:20 dawes Exp $ */
  
 -#if defined(__linux__) || defined(MACOSX)
 +#if defined(__linux__) || defined(MACOSX) || defined(__GLIBC__)
  
- /*
-  * Performs Linux specific mapping and returns a zone ID
-@@ -228,7 +228,7 @@
-     char *buf;
-     size_t size;
- 
--#ifdef __linux__
-+#ifdef __linux__ || defined(__GLIBC__)
-     /*
-      * Try reading the /etc/timezone file for Debian distros. There's
-      * no spec of the file format available. This parsing assumes that
-@@ -633,7 +633,7 @@
- 
-     tz = getenv("TZ");
- 
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
-     if (tz == NULL) {
- #else
- #ifdef __solaris__
-@@ -659,7 +659,7 @@
- #endif
- 
-     if (tz != NULL) {
--#ifdef __linux__
-+#if defined(__linux__)  || defined(__GLIBC__)
-         /*
-          * Ignore "posix/" prefix.
-          */
---- openjdk/jdk/src/solaris/native/sun/awt/VDrawingArea.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/VDrawingArea.c
+ #ifndef _EXTUTIL_H_
+ #define _EXTUTIL_H_
+--- openjdk/jdk/src/solaris/native/sun/awt/VDrawingArea.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/VDrawingArea.c	2014-01-15 13:29:32.820570891 +0100
 @@ -33,7 +33,7 @@
  #include <stdio.h>
  #include <stdlib.h>
@@ -971,19 +434,8 @@ Forwarded: no
  /* XXX: Shouldn't be necessary. */
  #include "awt_p.h"
  #endif /* __linux__ */
---- openjdk/jdk/src/solaris/native/sun/awt/awt_Font.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_Font.c
-@@ -334,7 +334,7 @@
-             if (strcmp(style, "regular") == 0) {
-                 altstyle = "roman";
-             }
--#if defined(__linux__) || defined(MACOSX)
-+#if defined(__linux__) || defined(MACOSX) || defined(__GLIBC__)
-             if (!strcmp(family, "lucidasans")) {
-                 family = "lucida";
-             }
---- openjdk/jdk/src/solaris/native/sun/awt/awt_GraphicsEnv.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_GraphicsEnv.c
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_GraphicsEnv.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_GraphicsEnv.c	2014-01-15 13:29:32.820570891 +0100
 @@ -123,7 +123,8 @@
   */
  
@@ -1045,8 +497,19 @@ Forwarded: no
      int x,y;
  
      AWT_LOCK();
---- openjdk/jdk/src/solaris/native/sun/awt/awt_InputMethod.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_InputMethod.c
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_Font.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_Font.c	2014-01-15 13:29:32.820570891 +0100
+@@ -334,7 +334,7 @@
+             if (strcmp(style, "regular") == 0) {
+                 altstyle = "roman";
+             }
+-#if defined(__linux__) || defined(MACOSX)
++#if defined(__linux__) || defined(MACOSX) || defined(__GLIBC__)
+             if (!strcmp(family, "lucidasans")) {
+                 family = "lucida";
+             }
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_InputMethod.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_InputMethod.c	2014-01-15 13:29:32.820570891 +0100
 @@ -67,7 +67,7 @@
                                  XIMPreeditDrawCallbackStruct *);
  static void PreeditCaretCallback(XIC, XPointer,
@@ -1286,8 +749,8 @@ Forwarded: no
      AWT_LOCK();
      adjustStatusWindow(window);
      AWT_UNLOCK();
---- openjdk/jdk/src/solaris/native/sun/awt/awt_MToolkit.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_MToolkit.c
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_MToolkit.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_MToolkit.c	2014-01-15 13:29:32.820570891 +0100
 @@ -63,7 +63,7 @@
  extern JavaVM *jvm;
  
@@ -1306,50 +769,8 @@ Forwarded: no
                statusWindowEventHandler(xev);
  #endif
                xembed_eventHandler(&xev);
---- openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c
-@@ -46,7 +46,7 @@
- #include "wsutils.h"
- #include "list.h"
- #include "multiVis.h"
--#if defined(__linux__) || defined(MACOSX)
-+#if defined(__linux__) || defined(MACOSX) || defined(__GLIBC__)
- #include <sys/socket.h>
- #endif
- 
---- openjdk/jdk/src/solaris/native/sun/awt/awt_util.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_util.c
-@@ -605,7 +605,7 @@
- 
-   return answer;
- }
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- 
- 
- #define MAXARGS 10
-@@ -676,7 +676,7 @@
-     return w;
- }
- 
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- static XRectangle geometryRect;
- XVaNestedList awt_util_getXICStatusAreaList(Widget w)
- {
---- openjdk/jdk/src/solaris/native/sun/awt/awt_util.h.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_util.h
-@@ -200,7 +200,7 @@
- 
- 
- 
--#if defined(__linux__) || defined(MACOSX)
-+#if defined(__linux__) || defined(MACOSX) || defined(__GLIBC__)
- typedef struct _XmImRefRec {
-   Cardinal      num_refs;       /* Number of referencing widgets. */
-   Cardinal      max_refs;       /* Maximum length of refs array. */
---- openjdk/jdk/src/solaris/native/sun/awt/awt_xembed_server.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/awt_xembed_server.c
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_xembed_server.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_xembed_server.c	2014-01-15 13:29:32.820570891 +0100
 @@ -35,7 +35,7 @@
  #include <X11/Xlib.h>
  #include <X11/Xatom.h>
@@ -1368,19 +789,8 @@ Forwarded: no
  void
  print_stack (void)
  {
---- openjdk/jdk/src/solaris/native/sun/awt/extutil.h.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/extutil.h
-@@ -58,7 +58,7 @@
-  */
- /* $XFree86: xc/include/extensions/extutil.h,v 1.5 2001/01/17 17:53:20 dawes Exp $ */
- 
--#if defined(__linux__) || defined(MACOSX)
-+#if defined(__linux__) || defined(MACOSX) || defined(__GLIBC__)
- 
- #ifndef _EXTUTIL_H_
- #define _EXTUTIL_H_
---- openjdk/jdk/src/solaris/native/sun/awt/fontpath.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/fontpath.c
+--- openjdk/jdk/src/solaris/native/sun/awt/fontpath.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/fontpath.c	2014-01-15 13:29:32.820570891 +0100
 @@ -23,7 +23,7 @@
   * questions.
   */
@@ -1444,28 +854,19 @@ Forwarded: no
      }
  #endif
  #endif /* !HEADLESS */
---- openjdk/jdk/src/solaris/native/sun/awt/multi_font.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/awt/multi_font.c
-@@ -348,7 +348,7 @@
-     return JNI_TRUE;
- }
- #ifndef XAWT
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- XmString
- unicodeXmStringCreate(char* text, char* tag, int len) {
-     XmString ret_val;
-@@ -433,7 +433,7 @@
-             char *offsetStringData;
+--- openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/awt/awt_Robot.c	2014-01-15 13:29:32.820570891 +0100
+@@ -46,7 +46,7 @@
+ #include "wsutils.h"
+ #include "list.h"
+ #include "multiVis.h"
+-#if defined(__linux__) || defined(MACOSX)
++#if defined(__linux__) || defined(MACOSX) || defined(__GLIBC__)
+ #include <sys/socket.h>
+ #endif
  
-             offsetStringData = stringData + (4 * sizeof(char));
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-             len = buf[0] << 24 | buf[1] << 16 | buf[2] << 8 | buf[3];
-             /* Motif XmStringCreate() API requests "text must be a NULL-terminated
-                string" and its implementation uses "strlen()" to calculate the length
---- openjdk/jdk/src/solaris/native/sun/java2d/j2d_md.h.orig
-+++ openjdk/jdk/src/solaris/native/sun/java2d/j2d_md.h
+--- openjdk/jdk/src/solaris/native/sun/java2d/j2d_md.h.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/java2d/j2d_md.h	2014-01-15 13:29:32.824570921 +0100
 @@ -30,7 +30,8 @@
  /*
   * Linux and MACOSX's version of <sys/types.h> does not define intptr_t
@@ -1476,8 +877,8 @@ Forwarded: no
  #include <stdint.h>
  #endif /* __linux__ || MACOSX */
  
---- openjdk/jdk/src/solaris/native/sun/java2d/loops/vis_FuncArray.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/java2d/loops/vis_FuncArray.c
+--- openjdk/jdk/src/solaris/native/sun/java2d/loops/vis_FuncArray.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/java2d/loops/vis_FuncArray.c	2014-01-15 13:29:32.824570921 +0100
 @@ -804,7 +804,7 @@
  static int initialized;
  static int usevis = JNI_TRUE;
@@ -1487,8 +888,8 @@ Forwarded: no
  #   define ULTRA_CHIP   "sparc64"
  #else
  #   define ULTRA_CHIP   "sun4u"
---- openjdk/jdk/src/solaris/native/sun/net/dns/ResolverConfigurationImpl.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/net/dns/ResolverConfigurationImpl.c
+--- openjdk/jdk/src/solaris/native/sun/net/dns/ResolverConfigurationImpl.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/net/dns/ResolverConfigurationImpl.c	2014-01-15 13:29:32.824570921 +0100
 @@ -33,7 +33,7 @@
  #include <strings.h>
  #endif
@@ -1498,8 +899,8 @@ Forwarded: no
  #include <string.h>
  #endif
  
---- openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c
+--- openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/net/spi/DefaultProxySelector.c	2014-01-15 13:29:32.824570921 +0100
 @@ -29,7 +29,7 @@
  #include "jlong.h"
  #include "sun_net_spi_DefaultProxySelector.h"
@@ -1509,289 +910,8 @@ Forwarded: no
  #include <string.h>
  #else
  #include <strings.h>
---- openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramChannelImpl.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramChannelImpl.c
-@@ -35,7 +35,7 @@
- #include <string.h>
- #include <errno.h>
- 
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
- #include <netinet/in.h>
- #endif
- 
-@@ -81,7 +81,7 @@
-     rv = connect(fd, 0, 0);
- #endif
- 
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
-     {
-         int len;
-         SOCKADDR sa;
---- openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramDispatcher.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/DatagramDispatcher.c
-@@ -73,7 +73,7 @@
-     m.msg_accrightslen = 0;
- #endif
- 
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
-     m.msg_control = NULL;
-     m.msg_controllen = 0;
- #endif
-@@ -121,7 +121,7 @@
-     m.msg_accrightslen = 0;
- #endif
- 
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
-     m.msg_control = NULL;
-     m.msg_controllen = 0;
- #endif
---- openjdk/jdk/src/solaris/native/sun/nio/ch/FileChannelImpl.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/FileChannelImpl.c
-@@ -39,7 +39,7 @@
- 
- #if defined(__linux__) || defined(__solaris__)
- #include <sys/sendfile.h>
--#elif defined(_ALLBSD_SOURCE)
-+#elif defined(_ALLBSD_SOURCE) || defined(__FreeBSD_kernel__)
- #include <sys/types.h>
- #include <sys/socket.h>
- #include <sys/uio.h>
-@@ -213,6 +213,31 @@
- 
-     if (numBytes > 0)
-         return numBytes;
-+
-+    if (result == -1) {
-+        if (errno == EAGAIN)
-+            return IOS_UNAVAILABLE;
-+        if (errno == EOPNOTSUPP || errno == ENOTSOCK || errno == ENOTCONN)
-+            return IOS_UNSUPPORTED_CASE;
-+        if ((errno == EINVAL) && ((ssize_t)count >= 0))
-+            return IOS_UNSUPPORTED_CASE;
-+        if (errno == EINTR)
-+            return IOS_INTERRUPTED;
-+        JNU_ThrowIOExceptionWithLastError(env, "Transfer failed");
-+        return IOS_THROWN;
-+    }
-+
-+    return result;
-+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-+    off_t numBytes;
-+    int result;
-+
-+    numBytes = count;
-+
-+    result = sendfile(srcFD, dstFD, position, count, NULL, &numBytes, 0);
-+
-+    if (numBytes > 0)
-+        return numBytes;
- 
-     if (result == -1) {
-         if (errno == EAGAIN)
---- openjdk/jdk/src/solaris/native/sun/nio/ch/NativeThread.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/NativeThread.c
-@@ -33,7 +33,7 @@
- #include "nio_util.h"
- 
- 
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- #include <pthread.h>
- #include <sys/signal.h>
- 
-@@ -51,7 +51,7 @@
- JNIEXPORT void JNICALL
- Java_sun_nio_ch_NativeThread_init(JNIEnv *env, jclass cl)
- {
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- 
-     /* Install the null handler for INTERRUPT_SIGNAL.  This might overwrite the
-      * handler previously installed by java/net/linux_close.c, but that's okay
-@@ -74,7 +74,7 @@
- JNIEXPORT jlong JNICALL
- Java_sun_nio_ch_NativeThread_current(JNIEnv *env, jclass cl)
- {
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-     return (long)pthread_self();
- #else
-     return -1;
-@@ -84,7 +84,7 @@
- JNIEXPORT void JNICALL
- Java_sun_nio_ch_NativeThread_signal(JNIEnv *env, jclass cl, jlong thread)
- {
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-     if (pthread_kill((pthread_t)thread, INTERRUPT_SIGNAL))
-         JNU_ThrowIOExceptionWithLastError(env, "Thread signal failed");
- #endif
---- openjdk/jdk/src/solaris/native/sun/nio/ch/Net.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/Net.c
-@@ -86,7 +86,7 @@
- #endif  /* __solaris__ */
- 
- 
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- 
- #ifndef IP_BLOCK_SOURCE
- 
-@@ -264,7 +264,7 @@
-             return -1;
-         }
-     }
--#if defined(__linux__) && defined(AF_INET6)
-+#if ( defined(__linux__) || defined(__GLIBC__) ) && defined(AF_INET6)
-     /* By default, Linux uses the route default */
-     if (domain == AF_INET6 && type == SOCK_DGRAM) {
-         int arg = 1;
-@@ -581,7 +581,7 @@
-         optval = (void*)&mreq6;
-         optlen = sizeof(mreq6);
-     } else {
--#if defined (__linux__) || defined(MACOSX)
-+#if defined (__linux__) || defined(MACOSX) || defined(__GLIBC__)
-         /* Include-mode filtering broken on Mac OS & Linux at least to 2.6.24 */
-         return IOS_UNAVAILABLE;
- #else
---- openjdk/jdk/src/solaris/native/sun/nio/ch/Sctp.h.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/Sctp.h
-@@ -319,8 +319,36 @@
- typedef int sctp_bindx_func(int sd, struct sockaddr *addrs, int addrcnt, int flags);
- typedef int sctp_peeloff_func(int sock, sctp_assoc_t id);
- 
-+#elif defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
- 
--#endif /* __linux__ */
-+#include <stdint.h>
-+#include <sys/types.h>
-+#include <sys/socket.h>
-+#include <bsd/sys/cdefs.h>
-+#include <netinet/sctp.h>
-+#include <netinet/sctp_peeloff.h>
-+#include <netinet/sctp_uio.h>
-+#include "jni.h"
-+
-+#define nio_sctp_getladdrs sctp_getladdrs
-+#define nio_sctp_freeladdrs sctp_freeladdrs
-+#define nio_sctp_getpaddrs sctp_getpaddrs
-+#define nio_sctp_freepaddrs sctp_freepaddrs
-+#define nio_sctp_bindx  sctp_bindx
-+#define nio_sctp_peeloff sctp_peeloff
-+
-+#endif /* __FreeBSD_kernel__ || __FreeBSD_kernel__ */
-+
-+#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
-+
-+#define nio_sctp_getladdrs sctp_getladdrs
-+#define nio_sctp_freeladdrs sctp_freeladdrs
-+#define nio_sctp_getpaddrs sctp_getpaddrs
-+#define nio_sctp_freepaddrs sctp_freepaddrs
-+#define nio_sctp_bindx  sctp_bindx
-+#define nio_sctp_peeloff sctp_peeloff
-+
-+#else
- 
- sctp_getladdrs_func* nio_sctp_getladdrs;
- sctp_freeladdrs_func* nio_sctp_freeladdrs;
-@@ -329,6 +357,8 @@
- sctp_bindx_func* nio_sctp_bindx;
- sctp_peeloff_func* nio_sctp_peeloff;
- 
-+#endif
-+
- jboolean loadSocketExtensionFuncs(JNIEnv* env);
- 
- #endif /* !SUN_NIO_CH_SCTP_H */
---- openjdk/jdk/src/solaris/native/sun/nio/ch/SctpChannelImpl.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/SctpChannelImpl.c
-@@ -441,7 +441,7 @@
-             } else if (errno == EINTR) {
-                 return IOS_INTERRUPTED;
- 
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
-             } else if (errno == ENOTCONN) {
-                 /* ENOTCONN when EOF reached */
-                 rv = 0;
---- openjdk/jdk/src/solaris/native/sun/nio/ch/SctpNet.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/SctpNet.c
-@@ -58,6 +58,7 @@
-  */
- jboolean loadSocketExtensionFuncs
-   (JNIEnv* env) {
-+#if !defined(__FreeBSD__) && !defined(__FreeBSD_kernel__)
-     if (dlopen(nativeSctpLib, RTLD_GLOBAL | RTLD_LAZY) == NULL) {
-         JNU_ThrowByName(env, "java/lang/UnsupportedOperationException",
-               dlerror());
-@@ -105,6 +106,7 @@
-               dlerror());
-         return JNI_FALSE;
-     }
-+#endif /* __FreeBSD__ */
- 
-     funcsLoaded = JNI_TRUE;
-     return JNI_TRUE;
---- openjdk/jdk/src/solaris/native/sun/nio/ch/ServerSocketChannelImpl.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/ServerSocketChannelImpl.c
-@@ -28,7 +28,7 @@
- #include <sys/types.h>
- #include <sys/socket.h>
- 
--#if __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- #include <netinet/in.h>
- #endif
- 
---- openjdk/jdk/src/solaris/native/sun/nio/ch/SocketChannelImpl.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/ch/SocketChannelImpl.c
-@@ -31,7 +31,7 @@
- #include <string.h>
- #include <poll.h>
- 
--#if __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- #include <netinet/in.h>
- #endif
- 
---- openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/fs/GnomeFileTypeDetector.c
-@@ -38,7 +38,7 @@
- #include <strings.h>
- #endif
- 
--#if defined(__linux__) || defined(__APPLE__)
-+#if defined(__linux__) || defined(__APPLE__) || defined(__GLIBC__)
- #include <string.h>
- #endif
- 
---- openjdk/jdk/src/solaris/native/sun/nio/fs/UnixNativeDispatcher.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/nio/fs/UnixNativeDispatcher.c
-@@ -26,7 +26,7 @@
- /**
-  * fstatat in glibc requires _ATFILE_SOURCE to be defined.
-  */
--#if defined(__linux__)
-+#if defined(__linux__) || defined(__GLIBC__)
- #define _ATFILE_SOURCE
- #endif
- 
-@@ -51,7 +51,7 @@
- #include <sys/mkdev.h>
- #endif
- 
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- #include <string.h>
- #include <mntent.h>
- #endif
---- openjdk/jdk/src/solaris/native/sun/xawt/XToolkit.c.orig
-+++ openjdk/jdk/src/solaris/native/sun/xawt/XToolkit.c
+--- openjdk/jdk/src/solaris/native/sun/xawt/XToolkit.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/sun/xawt/XToolkit.c	2014-01-15 13:29:32.824570921 +0100
 @@ -27,7 +27,7 @@
  #include <X11/Xutil.h>
  #include <X11/Xos.h>
@@ -1810,24 +930,778 @@ Forwarded: no
  void print_stack(void)
  {
    void *array[10];
---- openjdk/jdk/src/solaris/transport/socket/socket_md.c.orig
-+++ openjdk/jdk/src/solaris/transport/socket/socket_md.c
-@@ -36,7 +36,7 @@
+--- openjdk/jdk/src/solaris/native/java/nio/MappedByteBuffer.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/nio/MappedByteBuffer.c	2014-01-15 13:29:32.820570891 +0100
+@@ -40,7 +40,7 @@
+     int result = 0;
+     int i = 0;
+     void *a = (void *) jlong_to_ptr(address);
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     unsigned char *vec = (unsigned char *)malloc(numPages * sizeof(char));
+ #else
+     char *vec = (char *)malloc(numPages * sizeof(char));
+--- openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/util/TimeZone_md.c	2014-01-15 13:29:32.820570891 +0100
+@@ -49,7 +49,7 @@
+ #define fileclose       fclose
+ #endif
+ 
+-#if defined(__linux__) || defined(_ALLBSD_SOURCE)
++#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
+ 
+ 
+ static const char *ETC_TIMEZONE_FILE = "/etc/timezone";
+@@ -125,7 +125,7 @@
+         return NULL;
+     }
+ 
+-#if defined(__linux__) || defined(MACOSX) || (defined(__solaris__) \
++#if defined(__linux__) || defined(__GLIBC__) || defined(MACOSX) || (defined(__solaris__) \
+     && (defined(_POSIX_PTHREAD_SEMANTICS) || defined(_LP64)))
+     while (readdir_r(dirp, entry, &dp) == 0 && dp != NULL) {
+ #else
+@@ -214,7 +214,7 @@
+     return tz;
+ }
+ 
+-#if defined(__linux__) || defined(MACOSX)
++#if defined(__linux__) || defined(MACOSX) || defined(__GLIBC__)
+ 
+ /*
+  * Performs Linux specific mapping and returns a zone ID
+@@ -230,7 +230,7 @@
+     char *buf;
+     size_t size;
+ 
+-#ifdef __linux__
++#ifdef __linux__ || defined(__GLIBC__)
+     /*
+      * Try reading the /etc/timezone file for Debian distros. There's
+      * no spec of the file format available. This parsing assumes that
+@@ -697,7 +697,7 @@
+ 
+     tz = getenv("TZ");
+ 
+-#if defined(__linux__) || defined(_ALLBSD_SOURCE)
++#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
+     if (tz == NULL) {
+ #else
  #ifdef __solaris__
- #include <thread.h>
- #endif
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
- #include <pthread.h>
- #include <sys/poll.h>
- #endif
-@@ -308,7 +308,8 @@
- 
+@@ -723,7 +723,7 @@
  #endif
  
+     if (tz != NULL) {
+-#ifdef __linux__
++#if defined(__linux__)  || defined(__GLIBC__)
+         /*
+          * Ignore "posix/" prefix.
+          */
+--- openjdk/jdk/src/solaris/native/java/io/io_util_md.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/io/io_util_md.c	2014-01-15 13:29:32.816570862 +0100
+@@ -68,7 +68,7 @@
+     WITH_PLATFORM_STRING(env, path, ps) {
+         FD fd;
+ 
 -#if defined(__linux__) || defined(_ALLBSD_SOURCE)
 +#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
+         /* Remove trailing slashes, since the kernel won't */
+         char *p = (char *)ps + strlen(ps) - 1;
+         while ((p > ps) && (*p == '/'))
+--- openjdk/jdk/src/solaris/native/java/lang/locale_str.h.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/lang/locale_str.h	2014-01-15 13:29:32.816570862 +0100
+@@ -48,7 +48,7 @@
+     "gl", "gl_ES",
+     "he", "iw_IL",
+     "hr", "hr_HR",
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     "hs", "en_US", // used on Linux, not clear what it stands for
+ #endif
+     "hu", "hu_HU",
+@@ -78,14 +78,14 @@
+     "sv", "sv_SE",
+     "th", "th_TH",
+     "tr", "tr_TR",
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     "ua", "en_US", // used on Linux, not clear what it stands for
+ #endif
+     "uk", "uk_UA",
+     "vi", "vi_VN",
+     "wa", "wa_BE",
+     "zh", "zh_CN",
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     "bokmal", "nb_NO",
+     "bokm\xE5l", "nb_NO",
+     "catalan", "ca_ES",
+@@ -146,13 +146,13 @@
+     "POSIX", "en",
+     "cz", "cs",
+     "he", "iw",
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     "hs", "en", // used on Linux, not clear what it stands for
+ #endif
+     "id", "in",
+     "sh", "sr", // sh is deprecated
+     "su", "fi",
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     "ua", "en", // used on Linux, not clear what it stands for
+     "catalan", "ca",
+     "croatian", "hr",
+@@ -195,7 +195,7 @@
+  * Linux/Solaris script string to Java script name mapping table.
+  */
+ static char *script_names[] = {
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     "cyrillic", "Cyrl",
+     "devanagari", "Deva",
+     "iqtelif", "Latn",
+@@ -208,7 +208,7 @@
+  * Linux/Solaris country string to ISO3166 string mapping table.
+  */
+ static char *country_names[] = {
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+     "RN", "US", // used on Linux, not clear what it stands for
+ #endif
+     "YU", "CS", // YU has been removed from ISO 3166
+--- openjdk/jdk/src/solaris/native/java/lang/UNIXProcess_md.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/lang/UNIXProcess_md.c	2014-01-15 13:29:32.816570862 +0100
+@@ -102,7 +102,7 @@
+ #define START_CHILD_USE_CLONE 0  /* clone() currently disabled; see above. */
+ 
+ #ifndef START_CHILD_USE_CLONE
+-  #ifdef __linux__
++  #if defined(__linux__) || defined(__GLIBC__)
+     #define START_CHILD_USE_CLONE 1
+   #else
+     #define START_CHILD_USE_CLONE 0
+@@ -111,7 +111,7 @@
+ 
+ /* By default, use vfork() on Linux. */
+ #ifndef START_CHILD_USE_VFORK
+-  #ifdef __linux__
++  #if defined(__linux__) || defined(__GLIBC__)
+     #define START_CHILD_USE_VFORK 1
+   #else
+     #define START_CHILD_USE_VFORK 0
+--- openjdk/jdk/src/solaris/native/java/lang/java_props_md.c.orig	2014-01-15 10:57:03.553190612 +0100
++++ openjdk/jdk/src/solaris/native/java/lang/java_props_md.c	2014-01-15 13:29:32.816570862 +0100
+@@ -23,7 +23,7 @@
+  * questions.
+  */
+ 
+-#if defined(__linux__) || defined(_ALLBSD_SOURCE)
++#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
+ #include <stdio.h>
+ #include <ctype.h>
+ #endif
+@@ -57,7 +57,7 @@
+ #include "java_props.h"
+ 
+ #if !defined(_ALLBSD_SOURCE)
+-#ifdef __linux__
++#ifdef __linux__ || defined(__GLIBC__)
+   #ifndef CODESET
+   #define CODESET _NL_CTYPE_CODESET_NAME
+   #endif
+@@ -151,7 +151,7 @@
+     lc = setlocale(cat, NULL);
+ #endif
+ 
+-#ifndef __linux__
++#if !defined(__linux__) && !defined(__GLIBC__)
+     if (lc == NULL) {
+         return 0;
+     }
+@@ -293,7 +293,7 @@
+          * in order to use optimizations. */
+         *std_encoding = (*p != '\0') ? p : "ISO8859-1";
+ 
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+         /*
+          * Remap the encoding string to a different value for japanese
+          * locales on linux so that customized converters are used instead
+@@ -517,7 +517,7 @@
+      sprops.unicode_encoding = "UnicodeBig";
+  #endif
+ #else /* !_ALLBSD_SOURCE */
+-#ifdef __linux__
++#ifdef __linux__ || defined(__GLIBC__)
+ #if __BYTE_ORDER == __LITTLE_ENDIAN
+     sprops.unicode_encoding = "UnicodeLittle";
+ #else
+--- openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c.orig	2014-01-15 10:57:03.733191937 +0100
++++ openjdk/jdk/src/solaris/native/java/net/PlainDatagramSocketImpl.c	2014-01-15 13:29:32.820570891 +0100
+@@ -33,7 +33,7 @@
+ #ifdef __solaris__
+ #include <fcntl.h>
+ #endif
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ #include <unistd.h>
+ #include <sys/utsname.h>
+ #include <netinet/ip.h>
+@@ -335,7 +335,7 @@
+     /* The fdObj'fd */
+     jint fd;
+ 
+-#if defined(__linux__) || defined(_ALLBSD_SOURCE)
++#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
+     SOCKADDR addr;
+     int len;
+ #endif
+@@ -345,7 +345,7 @@
+     }
+     fd = (*env)->GetIntField(env, fdObj, IO_fd_fdID);
+ 
+-#if defined(__linux__) || defined(_ALLBSD_SOURCE)
++#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
+ #ifdef __linux__
+     if (isOldKernel) {
+         int t = 1;
+@@ -356,14 +356,21 @@
+ #ifdef AF_INET6
+         if (ipv6_available()) {
+             struct sockaddr_in6 *him6 = (struct sockaddr_in6 *)&addr;
++#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
++            him6->sin6_family = AF_INET6;
++#else
+             him6->sin6_family = AF_UNSPEC;
++#endif
+             len = sizeof(struct sockaddr_in6);
+         } else
+ #endif
+         {
+             struct sockaddr_in *him4 = (struct sockaddr_in*)&addr;
++#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+             him4->sin_family = AF_UNSPEC;
++#else
+             len = sizeof(struct sockaddr_in);
++#endif
+         }
+         JVM_Connect(fd, (struct sockaddr *)&addr, len);
+ 
+--- openjdk/jdk/src/solaris/native/java/net/Inet6AddressImpl.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/net/Inet6AddressImpl.c	2014-01-15 13:29:32.820570891 +0100
+@@ -73,7 +73,7 @@
+     } else {
+         // ensure null-terminated
+         hostname[NI_MAXHOST] = '\0';
+-#if defined(__linux__) || defined(_ALLBSD_SOURCE)
++#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
+         /* On Linux/FreeBSD gethostname() says "host.domain.sun.com".  On
+          * Solaris gethostname() says "host", so extra work is needed.
+          */
+@@ -670,7 +670,7 @@
+         case ENETUNREACH: /* Network Unreachable */
+         case EAFNOSUPPORT: /* Address Family not supported */
+         case EADDRNOTAVAIL: /* address is not available on  the  remote machine */
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+         case EINVAL:
+         case EHOSTUNREACH:
+           /*
+--- openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/net/Inet4AddressImpl.c	2014-01-15 13:29:32.816570862 +0100
+@@ -333,7 +333,7 @@
+         /* Something went wrong, maybe networking is not setup? */
+         strcpy(hostname, "localhost");
+     } else {
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+         /* On Linux gethostname() says "host.domain.sun.com".  On
+          * Solaris gethostname() says "host", so extra work is needed.
+          */
+@@ -819,7 +819,7 @@
+         case ENETUNREACH: /* Network Unreachable */
+         case EAFNOSUPPORT: /* Address Family not supported */
+         case EADDRNOTAVAIL: /* address is not available on  the  remote machine */
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+         case EINVAL:
+         case EHOSTUNREACH:
+           /*
+--- openjdk/jdk/src/solaris/native/java/net/NetworkInterface.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/net/NetworkInterface.c	2014-01-15 13:29:32.820570891 +0100
+@@ -56,17 +56,17 @@
+ #define _PATH_PROCNET_IFINET6           "/proc/net/if_inet6"
+ #endif
+ 
+-#if defined(_ALLBSD_SOURCE)
++#if defined(_ALLBSD_SOURCE) || defined(__FreeBSD_kernel__)
+ #include <sys/param.h>
+ #include <sys/ioctl.h>
+ #include <sys/sockio.h>
+-#if defined(__APPLE__)
++#if defined(__APPLE__) || defined(__FreeBSD_kernel__)
+ #include <net/ethernet.h>
+ #include <net/if_var.h>
+ #include <net/if_dl.h>
+ #include <netinet/in_var.h>
+-#include <ifaddrs.h>
+ #endif
++#include <ifaddrs.h>
+ #endif
+ 
+ #include "jvm.h"
+@@ -1596,7 +1596,11 @@
+      * try the old way.
+      */
+     memset(&lif, 0, sizeof(lif));
++#if defined(__FreeBSD_kernel__)
++    strcpy(lif.lifr_name, ifname);
++#else
+     strlcpy(lif.lifr_name, ifname, sizeof(lif.lifr_name));
++#endif
+ 
+     if (ioctl(sock, SIOCGLIFHWADDR, &lif) != -1) {
+         struct sockaddr_dl *sp;
+@@ -1682,7 +1686,7 @@
+ 
+ 
+ /** BSD **/
+-#ifdef _ALLBSD_SOURCE
++#if defined(_ALLBSD_SOURCE) || defined(__FreeBSD_kernel__)
+ /* Open socket for further ioct calls, try v4 socket first and
+  * if it falls return v6 socket
+  */
+@@ -1811,7 +1815,11 @@
+             continue;
+ 
+         memset(&ifr6, 0, sizeof(ifr6));
++#if defined(__FreeBSD_kernel__)
++        strcpy(ifr6.ifr_name, ifa->ifa_name);
++#else
+         strlcpy(ifr6.ifr_name, ifa->ifa_name, sizeof(ifr6.ifr_name));
++#endif
+         memcpy(&ifr6.ifr_addr, ifa->ifa_addr, MIN(sizeof(ifr6.ifr_addr), ifa->ifa_addr->sa_len));
+ 
+         if (ioctl(sock, SIOCGIFNETMASK_IN6, (caddr_t)&ifr6) < 0) {
+--- openjdk/jdk/src/solaris/native/java/net/net_util_md.c.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/net/net_util_md.c	2014-01-15 13:29:32.820570891 +0100
+@@ -56,6 +56,11 @@
+ #include <net/route.h>
+ #include <sys/utsname.h>
+ 
++#if defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
++#include <sys/param.h>
++#include <sys/sysctl.h>
++#endif
 +
- int
- dbgsysTlsAlloc() {
-     pthread_key_t key;
+ #ifndef IPV6_FLOWINFO_SEND
+ #define IPV6_FLOWINFO_SEND      33
+ #endif
+--- openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c.orig	2014-01-15 10:57:03.733191937 +0100
++++ openjdk/jdk/src/solaris/native/java/net/PlainSocketImpl.c	2014-01-15 13:29:32.820570891 +0100
+@@ -32,7 +32,7 @@
+ #endif
+ #include <netinet/tcp.h>        /* Defines TCP_NODELAY, needed for 2.6 */
+ #include <netinet/in.h>
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ #include <netinet/ip.h>
+ #endif
+ #include <netdb.h>
+@@ -41,7 +41,7 @@
+ #ifdef __solaris__
+ #include <fcntl.h>
+ #endif
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+ #include <unistd.h>
+ #endif
+ 
+@@ -467,7 +467,7 @@
+     /* report the appropriate exception */
+     if (connect_rv < 0) {
+ 
+-#ifdef __linux__
++#if defined(__linux__) || defined(__GLIBC__)
+         /*
+          * Linux/GNU distribution setup /etc/hosts so that
+          * InetAddress.getLocalHost gets back the loopback address
+--- openjdk/jdk/src/solaris/native/java/net/net_util_md.h.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/native/java/net/net_util_md.h	2014-01-15 13:29:32.820570891 +0100
+@@ -37,7 +37,7 @@
+ #endif
+ 
+ 
+-#if defined(__linux__) || defined(MACOSX)
++#if defined(__linux__) || defined(MACOSX) || defined(__GLIBC__)
+ extern int NET_Timeout(int s, long timeout);
+ extern int NET_Read(int s, void* buf, size_t len);
+ extern int NET_RecvFrom(int s, void *buf, int len, unsigned int flags,
+@@ -147,7 +147,7 @@
+ /************************************************************************
+  *  Utilities
+  */
+-#ifdef __linux__
++#if defined(__linux__)
+ extern int kernelIsV22();
+ extern int kernelIsV24();
+ #endif
+--- openjdk/jdk/src/solaris/classes/sun/font/FcFontConfiguration.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/classes/sun/font/FcFontConfiguration.java	2014-01-15 13:29:32.816570862 +0100
+@@ -295,7 +295,7 @@
+ 
+         super.setOsNameAndVersion();
+ 
+-        if (!osName.equals("Linux")) {
++        if (!(osName.equals("Linux") || osName.equals("GNU/kFreeBSD"))) {
+             return;
+         }
+         try {
+--- openjdk/jdk/src/solaris/classes/sun/print/UnixPrintServiceLookup.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/classes/sun/print/UnixPrintServiceLookup.java	2014-01-15 13:29:32.816570862 +0100
+@@ -129,6 +129,7 @@
+ 
+     static boolean isBSD() {
+         return (osname.equals("Linux") ||
++                osname.equals("GNU/kFreeBSD") ||
+                 osname.contains("OS X"));
+     }
+ 
+--- openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxFileStore.java	2014-01-15 13:29:32.816570862 +0100
+@@ -101,9 +101,7 @@
+                 LinuxNativeDispatcher.fgetxattr(fd, "user.java".getBytes(), 0L, 0);
+                 return true;
+             } catch (UnixException e) {
+-                // attribute does not exist
+-                if (e.errno() == UnixConstants.ENODATA)
+-                    return true;
++                return false;
+             } finally {
+                 UnixNativeDispatcher.close(fd);
+             }
+--- openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/classes/sun/nio/fs/LinuxDosFileAttributeView.java	2014-01-15 13:29:32.816570862 +0100
+@@ -238,9 +238,6 @@
+             }
+             throw new UnixException("Value of " + DOS_XATTR_NAME + " attribute is invalid");
+         } catch (UnixException x) {
+-            // default value when attribute does not exist
+-            if (x.errno() == ENODATA)
+-                return 0;
+             throw x;
+         } finally {
+             buffer.release();
+--- openjdk/jdk/src/solaris/classes/sun/nio/fs/DefaultFileSystemProvider.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/classes/sun/nio/fs/DefaultFileSystemProvider.java	2014-01-15 13:29:32.816570862 +0100
+@@ -66,7 +66,7 @@
+             .doPrivileged(new GetPropertyAction("os.name"));
+         if (osname.equals("SunOS"))
+             return createProvider("sun.nio.fs.SolarisFileSystemProvider");
+-        if (osname.equals("Linux"))
++        if (osname.equals("Linux") || osname.equals("GNU/kFreeBSD"))
+             return createProvider("sun.nio.fs.LinuxFileSystemProvider");
+         if (osname.equals("Darwin") || osname.contains("OS X"))
+             return createProvider("sun.nio.fs.MacOSXFileSystemProvider");
+--- openjdk/jdk/src/solaris/classes/sun/nio/ch/DefaultAsynchronousChannelProvider.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/classes/sun/nio/ch/DefaultAsynchronousChannelProvider.java	2014-01-15 13:29:32.816570862 +0100
+@@ -48,7 +48,7 @@
+             .doPrivileged(new GetPropertyAction("os.name"));
+         if (osname.equals("SunOS"))
+             return new SolarisAsynchronousChannelProvider();
+-        if (osname.equals("Linux"))
++        if (osname.equals("Linux") || osname.equals("GNU/kFreeBSD"))
+             return new LinuxAsynchronousChannelProvider();
+         if (osname.contains("OS X"))
+             return new BsdAsynchronousChannelProvider();
+--- openjdk/jdk/src/solaris/classes/sun/awt/X11/XScrollbarPeer.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/solaris/classes/sun/awt/X11/XScrollbarPeer.java	2014-01-15 13:29:32.816570862 +0100
+@@ -74,7 +74,7 @@
+      * Currently uses hardcoded values
+      */
+     private int getDefaultDimension() {
+-        if (System.getProperty("os.name").equals("Linux")) {
++        if (System.getProperty("os.name").equals("Linux") || System.getProperty("os.name").equals("GNU/kFreeBSD")) {
+             return DEFAULT_WIDTH_LINUX;
+         } else {
+             return DEFAULT_WIDTH_SOLARIS;
+--- openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/share/native/java/lang/fdlibm/include/jfdlibm.h	2014-01-15 13:29:32.816570862 +0100
+@@ -61,7 +61,7 @@
+ #define log1p   jlog1p
+ #define expm1   jexpm1
+ 
+-#if defined(__linux__) || defined(_ALLBSD_SOURCE)
++#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
+ #define __ieee754_sqrt          __j__ieee754_sqrt
+ #define __ieee754_acos          __j__ieee754_acos
+ #define __ieee754_acosh         __j__ieee754_acosh
+--- openjdk/jdk/src/share/classes/sun/font/FontUtilities.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/share/classes/sun/font/FontUtilities.java	2014-01-15 13:29:32.816570862 +0100
+@@ -76,7 +76,7 @@
+                 String osName = System.getProperty("os.name", "unknownOS");
+                 isSolaris = osName.startsWith("SunOS");
+ 
+-                isLinux = osName.startsWith("Linux");
++                isLinux = osName.startsWith("Linux") || osName.equals("GNU/kFreeBSD");
+ 
+                 isMacOSX = osName.contains("OS X"); // TODO: MacOSX
+ 
+--- openjdk/jdk/src/share/classes/sun/print/PSPrinterJob.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/share/classes/sun/print/PSPrinterJob.java	2014-01-15 13:29:32.816570862 +0100
+@@ -1568,7 +1568,9 @@
+         }
+ 
+        String osname = System.getProperty("os.name");
+-       if (osname.equals("Linux") || osname.contains("OS X")) {
++       if (osname.equals("Linux") ||
++           osname.equals("GNU/kFreeBSD") ||
++           osname.contains("OS X")) {
+             execCmd = new String[ncomps];
+             execCmd[n++] = "/usr/bin/lpr";
+             if ((pFlags & PRINTER) != 0) {
+--- openjdk/jdk/src/share/classes/sun/nio/cs/ext/ExtendedCharsets.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/share/classes/sun/nio/cs/ext/ExtendedCharsets.java	2014-01-15 13:29:32.816570862 +0100
+@@ -1298,6 +1298,7 @@
+         String osName = AccessController.doPrivileged(
+             new GetPropertyAction("os.name"));
+         if ("SunOS".equals(osName) || "Linux".equals(osName)
++               || "GNU/kFreeBSD".equals(osName)
+                || osName.contains("OS X")) {
+             charset("x-COMPOUND_TEXT", "COMPOUND_TEXT",
+                     new String[] {
+--- openjdk/jdk/src/share/classes/sun/security/jgss/GSSManagerImpl.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/share/classes/sun/security/jgss/GSSManagerImpl.java	2014-01-15 13:29:32.816570862 +0100
+@@ -48,6 +48,7 @@
+                     public Boolean run() {
+                             String osname = System.getProperty("os.name");
+                             if (osname.startsWith("SunOS") ||
++                                osname.startsWith("GNU/kFreeBSD") ||
+                                 osname.startsWith("Linux")) {
+                                 return new Boolean(System.getProperty
+                                     (USE_NATIVE_PROP));
+--- openjdk/jdk/src/share/classes/sun/security/krb5/internal/ccache/FileCredentialsCache.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/share/classes/sun/security/krb5/internal/ccache/FileCredentialsCache.java	2014-01-15 13:29:32.816570862 +0100
+@@ -413,6 +413,7 @@
+ 
+         if (osname != null) {
+             if (osname.startsWith("SunOS") ||
++                osname.startsWith("GNU/kFreeBSD") ||
+                 (osname.startsWith("Linux"))) {
+                 try {
+                     // Load the native code if necessary
+--- openjdk/jdk/src/share/classes/java/awt/GraphicsEnvironment.java.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/src/share/classes/java/awt/GraphicsEnvironment.java	2014-01-15 13:29:32.816570862 +0100
+@@ -178,6 +178,7 @@
+                             } else {
+                                 headless = defaultHeadless =
+                                     Boolean.valueOf(("Linux".equals(osName) ||
++                                                     "GNU/kFreeBSD".equals(osName) ||
+                                                      "SunOS".equals(osName) ||
+                                                      "FreeBSD".equals(osName) ||
+                                                      "NetBSD".equals(osName) ||
+--- openjdk/jdk/make/com/sun/nio/Makefile.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/make/com/sun/nio/Makefile	2014-01-15 13:29:32.792570687 +0100
+@@ -38,7 +38,7 @@
+ 
+ 
+ all build clean clobber::
+-	$(SUBDIRS-loop)
++#	$(SUBDIRS-loop)
+ 
+ clean clobber::
+-	$(RM) -r $(CLASSDESTDIR)/com/sun/nio
++#	$(RM) -r $(CLASSDESTDIR)/com/sun/nio
+--- openjdk/jdk/make/java/nio/Makefile.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/make/java/nio/Makefile	2014-01-15 13:30:51.545149630 +0100
+@@ -94,6 +94,70 @@
+ 
+ else
+ 
++ifeq ($(SYSTEM_UNAME),GNU/kFreeBSD)
++
++FILES_java += \
++        sun/nio/ch/AbstractPollSelectorImpl.java \
++        sun/nio/ch/DevPollArrayWrapper.java \
++        sun/nio/ch/DevPollSelectorImpl.java \
++        sun/nio/ch/DevPollSelectorProvider.java \
++        sun/nio/ch/InheritedChannel.java \
++        sun/nio/ch/LinuxAsynchronousChannelProvider.java \
++        sun/nio/ch/PollSelectorProvider.java \
++        sun/nio/ch/PollSelectorImpl.java \
++        sun/nio/ch/Port.java \
++        sun/nio/ch/SimpleAsynchronousFileChannelImpl.java \
++        sun/nio/ch/SolarisAsynchronousChannelProvider.java \
++        sun/nio/ch/SolarisEventPort.java \
++        sun/nio/ch/UnixAsynchronousServerSocketChannelImpl.java \
++        sun/nio/ch/UnixAsynchronousSocketChannelImpl.java \
++        \
++        sun/nio/fs/GnomeFileTypeDetector.java \
++        sun/nio/fs/LinuxDosFileAttributeView.java \
++        sun/nio/fs/LinuxFileStore.java \
++        sun/nio/fs/LinuxFileSystem.java \
++        sun/nio/fs/LinuxFileSystemProvider.java \
++        sun/nio/fs/LinuxUserDefinedFileAttributeView.java \
++        sun/nio/fs/LinuxNativeDispatcher.java \
++        sun/nio/fs/PollingWatchService.java \
++        sun/nio/fs/SolarisNativeDispatcher.java \
++        sun/nio/fs/SolarisWatchService.java \
++        sun/nio/fs/UnixChannelFactory.java \
++        sun/nio/fs/UnixCopyFile.java \
++        sun/nio/fs/UnixDirectoryStream.java \
++        sun/nio/fs/UnixException.java \
++        sun/nio/fs/UnixFileAttributeViews.java \
++        sun/nio/fs/UnixFileAttributes.java \
++        sun/nio/fs/UnixFileKey.java \
++        sun/nio/fs/UnixFileModeAttribute.java \
++        sun/nio/fs/UnixFileStore.java \
++        sun/nio/fs/UnixFileStoreAttributes.java \
++        sun/nio/fs/UnixFileSystem.java \
++        sun/nio/fs/UnixFileSystemProvider.java \
++        sun/nio/fs/UnixMountEntry.java \
++        sun/nio/fs/UnixNativeDispatcher.java \
++        sun/nio/fs/UnixPath.java \
++        sun/nio/fs/UnixSecureDirectoryStream.java \
++        sun/nio/fs/UnixUriUtils.java \
++        sun/nio/fs/UnixUserPrincipals.java
++
++FILES_export += \
++        sun/nio/ch/DevPollArrayWrapper.java \
++        sun/nio/ch/InheritedChannel.java \
++        sun/nio/ch/NativeThread.java \
++        sun/nio/ch/SolarisEventPort.java \
++        sun/nio/ch/UnixAsynchronousServerSocketChannelImpl.java \
++        sun/nio/ch/UnixAsynchronousSocketChannelImpl.java \
++        \
++        sun/nio/fs/GnomeFileTypeDetector.java \
++        sun/nio/fs/LinuxNativeDispatcher.java \
++        sun/nio/fs/SolarisNativeDispatcher.java \
++        sun/nio/fs/SolarisWatchService.java \
++        sun/nio/fs/UnixCopyFile.java \
++        sun/nio/fs/UnixNativeDispatcher.java
++
++else
++
+ FILES_java += \
+         sun/nio/ch/AbstractPollSelectorImpl.java \
+ 	sun/nio/ch/DevPollArrayWrapper.java \
+@@ -164,6 +228,8 @@
+ 	sun/nio/fs/UnixCopyFile.java \
+ 	sun/nio/fs/UnixNativeDispatcher.java
+ 
++endif # kFreeBSD
++
+ FILES_gen += \
+ 	sun/nio/fs/UnixConstants.java
+ 
+@@ -172,7 +238,7 @@
+ 	syscalls_fp.c
+ endif
+ 
+-endif
++endif # else
+ 
+ ifeq ($(PLATFORM), solaris)
+ 
+@@ -221,6 +287,22 @@
+ 
+ ifeq ($(PLATFORM), linux)
+ 
++ifeq ($(SYSTEM_UNAME),GNU/kFreeBSD)
++
++FILES_c += \
++        InheritedChannel.c \
++        NativeThread.c \
++        PollArrayWrapper.c \
++        UnixAsynchronousServerSocketChannelImpl.c \
++        UnixAsynchronousSocketChannelImpl.c \
++        \
++        GnomeFileTypeDetector.c \
++        LinuxNativeDispatcher.c \
++        UnixCopyFile.c \
++        UnixNativeDispatcher.c
++
++else
++
+ FILES_c += \
+ 	EPoll.c \
+ 	EPollArrayWrapper.c \
+@@ -237,6 +319,8 @@
+ 	UnixCopyFile.c \
+ 	UnixNativeDispatcher.c
+ 
++endif # kFreeBSD
++
+ ifndef USE_SYSTEM_GIO
+ FILES_c += \
+ 	gio_fp.c
+--- openjdk/jdk/make/common/shared/Sanity.gmk.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/make/common/shared/Sanity.gmk	2014-01-15 13:29:32.792570687 +0100
+@@ -114,12 +114,14 @@
+     elif [ -f /etc/lsb-release ] ; then \
+       $(EGREP) DISTRIB_RELEASE /etc/lsb-release | $(SED) -e 's@.*DISTRIB_RELEASE=\(.*\)@\1@'; \
+     fi)
++ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
+   ALSA_INCLUDE=/usr/include/alsa/version.h
+   ALSA_LIBRARY=/usr/lib/libasound.so
+   _ALSA_VERSION := $(shell $(EGREP) SND_LIB_VERSION_STR $(ALSA_INCLUDE) | \
+            $(SED) -e 's@.*"\(.*\)".*@\1@' )
+   ALSA_VERSION := $(call GetVersion,$(_ALSA_VERSION))
+ endif
++endif
+ 
+ ifeq ($(PLATFORM), macosx)
+   # What kind of system we are using
+--- openjdk/jdk/make/common/shared/Defs-versions.gmk.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/make/common/shared/Defs-versions.gmk	2014-01-15 13:29:32.792570687 +0100
+@@ -153,7 +153,9 @@
+   REQUIRED_OS_VERSION         = 2.6
+   REQUIRED_OS_VARIANT_NAME    = Fedora
+   REQUIRED_OS_VARIANT_VERSION = 9
+-  REQUIRED_ALSA_VERSION       = 0.9.1
++ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
++   REQUIRED_ALSA_VERSION       = 0.9.1
++endif
+   REQUIRED_COMPILER_NAME      = GCC4
+   REQUIRED_COMPILER_VERSION   = GCC4
+   REQUIRED_GCC_VER            = 2.95
+--- openjdk/jdk/make/common/shared/Platform.gmk.orig	2014-01-15 10:57:03.733191937 +0100
++++ openjdk/jdk/make/common/shared/Platform.gmk	2014-01-15 13:29:32.792570687 +0100
+@@ -152,7 +152,7 @@
+ endif
+ 
+ # Platform settings specific to Linux
+-ifeq ($(SYSTEM_UNAME), Linux)
++ifneq (,$(filter Linux GNU/kFreeBSD, $(SYSTEM_UNAME)))
+   PLATFORM = linux
+   # Arch and OS name/version
+   ifdef CROSS_COMPILE_ARCH
+--- openjdk/jdk/make/common/shared/Sanity-Settings.gmk.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/make/common/shared/Sanity-Settings.gmk	2014-01-15 13:29:32.792570687 +0100
+@@ -186,8 +186,10 @@
+ endif
+ ifeq ($(PLATFORM),linux)
+   ifdef REQUIRED_ALSA_VERSION
++  ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
+     ALL_SETTINGS+=$(call addRequiredSetting,ALSA_VERSION)
+   endif
++  endif
+ endif
+ ALL_SETTINGS+=$(call addRequiredVersionSetting,OS_VERSION)
+ ALL_SETTINGS+=$(call addOptionalSetting,OS_VARIANT_NAME)
+--- openjdk/jdk/make/javax/sound/Makefile.orig	2014-01-14 22:26:36.000000000 +0100
++++ openjdk/jdk/make/javax/sound/Makefile	2014-01-15 13:29:32.816570862 +0100
+@@ -105,10 +105,12 @@
+ endif # PLATFORM win32
+ 
+ ifeq ($(PLATFORM), linux)
++ifneq ($(SYSTEM_UNAME),GNU/kFreeBSD)
+   # ALSA handles directaudio, ports, and MIDI
+   SUBDIRS += jsoundalsa
+   EXTRA_SOUND_JNI_LIBS += jsoundalsa
+   #MXSPP_ADD = $(PLATFORM)-$(ARCH)/
++endif # kFreeBSD
+ endif # PLATFORM linux
+ 
+ ifeq ($(PLATFORM), macosx)

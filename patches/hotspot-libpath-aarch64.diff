@@ -1,0 +1,31 @@
+--- openjdk/hotspot/src/os/linux/vm/os_linux.cpp~	2014-01-27 11:43:42.000000000 +0000
++++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2014-01-30 16:20:36.380134449 +0000
+@@ -358,10 +358,10 @@
+  *        ...
+  *        7: The default directories, normally /lib and /usr/lib.
+  */
+-#if defined(AMD64) || defined(_LP64) && (defined(SPARC) || defined(PPC) || defined(S390)) || defined(BUILTIN_SIM)
+-#define DEFAULT_LIBPATH "/usr/lib64:/lib64:/lib:/usr/lib"
++#ifdef DEB_MULTIARCH
++#define DEFAULT_LIBPATH	"/usr/lib/" DEB_MULTIARCH "/jni" ":/lib/" DEB_MULTIARCH ":/usr/lib/" DEB_MULTIARCH ":/usr/lib/jni:/lib:/usr/lib"
+ #else
+-#define DEFAULT_LIBPATH "/lib:/usr/lib"
++#define DEFAULT_LIBPATH	"/usr/lib/jni:/lib:/usr/lib"
+ #endif
+ 
+ #define EXTENSIONS_DIR  "/lib/ext"
+--- openjdk/hotspot/make/linux/makefiles/vm.make~	2014-01-30 16:15:04.841676826 +0000
++++ openjdk/hotspot/make/linux/makefiles/vm.make	2014-01-30 16:18:59.927432311 +0000
+@@ -98,6 +98,12 @@
+   ${HS_LIB_ARCH}     \
+   ${VM_DISTRO}
+ 
++DEB_MULTIARCH := $(shell dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null || true)
++ifneq (,$(DEB_MULTIARCH))
++CPPFLAGS += -DDEB_MULTIARCH="\"$(DEB_MULTIARCH)\""
++CXXFLAGS += -DDEB_MULTIARCH="\"$(DEB_MULTIARCH)\""
++endif
++
+ # This is VERY important! The version define must only be supplied to vm_version.o
+ # If not, ccache will not re-use the cache at all, since the version string might contain
+ # a time and date.

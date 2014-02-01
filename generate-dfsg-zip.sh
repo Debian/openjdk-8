@@ -10,6 +10,9 @@ echo $jdkdir
 
 dist=$(lsb_release -is)
 
+echo "not needed anymore. 2.4.4 has both jdk and langtools cleaned up"
+exit 1
+
 # Untar openjdk source zip.
 rm -rf openjdk
 case "$1" in

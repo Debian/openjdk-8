@@ -1,8 +1,59 @@
-openjdk-7 (7u45-2.4.3-6) UNRELEASED; urgency=medium
+openjdk-7 (7u51-2.4.5-1) unstable; urgency=medium
 
+  * IcedTea7 2.4.5 release.
+  * Build Hotspot client and server vms for AArch64.
+
+ -- Matthias Klose <doko@ubuntu.com>  Fri, 31 Jan 2014 06:13:20 -0500
+
+openjdk-7 (7u51-2.4.4-1) unstable; urgency=medium
+
+  * IcedTea7 2.4.4 release.
+  * Security fixes
+    - S6727821: Enhance JAAS Configuration.
+    - S7068126, CVE-2014-0373: Enhance SNMP statuses.
+    - S8010935: Better XML handling.
+    - S8011786, CVE-2014-0368: Better applet networking.
+    - S8021257, S8025022, CVE-2013-5896 : com.sun.corba.se.** should be
+      on restricted package list.
+    - S8021271, S8021266, CVE-2014-0408: Better buffering in ObjC code.
+    - S8022904: Enhance JDBC Parsers.
+    - S8022927: Input validation for byte/endian conversions.
+    - S8022935: Enhance Apache resolver classes.
+    - S8022945: Enhance JNDI implementation classes.
+    - S8023057: Enhance start up image display.
+    - S8023069, CVE-2014-0411: Enhance TLS connections.
+    - S8023245, CVE-2014-0423: Enhance Beans decoding.
+    - S8023301: Enhance generic classes.
+    - S8023338: Update jarsigner to encourage timestamping.
+    - S8023672: Enhance jar file validation.
+    - S8024302: Clarify jar verifications.
+    - S8024306, CVE-2014-0416: Enhance Subject consistency.
+    - S8024530: Enhance font process resilience.
+    - S8024867: Enhance logging start up.
+    - S8025014: Enhance Security Policy.
+    - S8025018, CVE-2014-0376: Enhance JAX-P set up.
+    - S8025026, CVE-2013-5878: Enhance canonicalization.
+    - S8025034, CVE-2013-5907: Improve layout lookups.
+    - S8025448: Enhance listening events.
+    - S8025758, CVE-2014-0422: Enhance Naming management.
+    - S8025767, CVE-2014-0428: Enhance IIOP Streams.
+    - S8026172: Enhance UI Management.
+    - S8026176: Enhance document printing.
+    - S8026193, CVE-2013-5884: Enhance CORBA stub factories.
+    - S8026204: Enhance auth login contexts.
+    - S8026417, CVE-2013-5910: Enhance XML canonicalization.
+    - S8026502: java/lang/invoke/MethodHandleConstants.java fails on all
+      platforms.
+    - S8027201, CVE-2014-0376: Enhance JAX-P set up.
+    - S8029507, CVE-2013-5893: Enhance JVM method processing.
+    - S8029533: REGRESSION: closed/java/lang/invoke/8008140/Test8008140.java
+      fails agains.
   * Remove alpha from stage1_gcj_archs.
+  * Use the langtools and jdk tarballs as provided by IcedTea.
+  * Hotspot is dead on sparc. Build the zero interpreter as the default.
+  * Blindly update the KF***BSD patches.
 
- -- Matthias Klose <doko@ubuntu.com>  Sun, 12 Jan 2014 10:28:30 +0100
+ -- Matthias Klose <doko@ubuntu.com>  Wed, 15 Jan 2014 10:34:34 +0100
 
 openjdk-7 (7u45-2.4.3-5) unstable; urgency=medium
 

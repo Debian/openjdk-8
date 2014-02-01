@@ -1,0 +1,49 @@
+Description: Handle EXTRA_* flags into openjdk
+ - jsig: Add $EXTRA_CFLAGS to CC
+ - launcher: Add $EXTRA_CFLAGS/$EXTRA_LDFLAGS to CC/LD
+ - hotspot: Fix typo on EXTRA_LDFLAGS
+ - jdk: Append EXTRA_* to exisint flags
+Author: Damien Raude-Morvan <drazzib@debian.org>
+
+--- openjdk/hotspot/make/linux/makefiles/jsig.make.orig	2014-01-30 16:02:54.916360002 +0000
++++ openjdk/hotspot/make/linux/makefiles/jsig.make	2014-01-30 16:03:53.192824457 +0000
+@@ -54,7 +54,7 @@
+ $(LIBJSIG): $(JSIGSRCDIR)/jsig.c $(LIBJSIG_MAPFILE)
+ 	@echo Making signal interposition lib...
+ 	$(QUIETLY) $(CC) $(SYMFLAG) $(ARCHFLAG) $(SHARED_FLAG) $(PICFLAG) \
+-                         $(LFLAGS_JSIG) $(JSIG_DEBUG_CFLAGS) $(EXTRA_CFLAGS) -o $@ $< -ldl
++                         $(LFLAGS_JSIG) $(JSIG_DEBUG_CFLAGS) $(EXTRA_CFLAGS) $(EXTRA_CFLAGS_HS) -o $@ $< -ldl
+ ifeq ($(ENABLE_FULL_DEBUG_SYMBOLS),1)
+ 	$(QUIETLY) $(OBJCOPY) --only-keep-debug $@ $(LIBJSIG_DEBUGINFO)
+ 	$(QUIETLY) $(OBJCOPY) --add-gnu-debuglink=$(LIBJSIG_DEBUGINFO) $@
+--- openjdk/hotspot/make/linux/makefiles/vm.make.orig	2014-01-27 11:43:44.000000000 +0000
++++ openjdk/hotspot/make/linux/makefiles/vm.make	2014-01-30 16:02:56.880440997 +0000
+@@ -120,8 +120,8 @@
+ CFLAGS += $(CFLAGS/NOEX)
+ 
+ # Extra flags from gnumake's invocation or environment
+-CFLAGS += $(EXTRA_CFLAGS)
+-LFLAGS += $(EXTRA_CFLAGS)
++CFLAGS += $(EXTRA_CFLAGS_HS)
++LFLAGS += $(EXTRA_LDFLAGS_HS)
+ 
+ # Don't set excutable bit on stack segment
+ # the same could be done by separate execstack command
+--- openjdk/jdk/make/common/Defs.gmk.orig	2014-01-28 18:02:26.000000000 +0000
++++ openjdk/jdk/make/common/Defs.gmk	2014-01-30 16:02:56.880440997 +0000
+@@ -538,11 +538,11 @@
+ # EXTRA_CFLAGS are used to define cross-compilation options
+ #
+ ASFLAGS         = $(ASFLAGS_$(VARIANT)) $(ASFLAGS_COMMON) $(OTHER_ASFLAGS)
+-CFLAGS          = $(CFLAGS_$(VARIANT)/BYFILE)   $(CFLAGS_COMMON) $(OTHER_CFLAGS) $(EXTRA_CFLAGS)
+-CXXFLAGS        = $(CXXFLAGS_$(VARIANT)/BYFILE) $(CXXFLAGS_COMMON) $(OTHER_CXXFLAGS) $(EXTRA_CFLAGS)
++CFLAGS          = $(CFLAGS_$(VARIANT)/BYFILE)   $(CFLAGS_COMMON) $(OTHER_CFLAGS) $(EXTRA_CFLAGS_JDK)
++CXXFLAGS        = $(CXXFLAGS_$(VARIANT)/BYFILE) $(CXXFLAGS_COMMON) $(OTHER_CXXFLAGS) $(EXTRA_CXXFLAGS_JDK)
+ CPPFLAGS        = $(CPPFLAGS_$(VARIANT)) $(CPPFLAGS_COMMON) $(OTHER_CPPFLAGS) \
+-		  $(DEFINES) $(OPTIONS:%=-D%)
+-LDFLAGS         = $(LDFLAGS_$(VARIANT)) $(LDFLAGS_COMMON) $(OTHER_LDFLAGS)
++		  $(DEFINES) $(OPTIONS:%=-D%) $(EXTRA_CPPFLAGS_JDK)
++LDFLAGS         = $(LDFLAGS_$(VARIANT)) $(LDFLAGS_COMMON) $(OTHER_LDFLAGS) $(EXTRA_LDFLAGS_JDK)
+ LDLIBS          = $(OTHER_LDLIBS) $(LDLIBS_$(VARIANT)) $(LDLIBS_COMMON)
+ LINTFLAGS       = $(LINTFLAGS_$(VARIANT)) $(LINTFLAGS_COMMON) \
+ 		  $(OTHER_LINTFLAGS)
