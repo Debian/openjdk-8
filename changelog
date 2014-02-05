@@ -1,3 +1,9 @@
+openjdk-7 (7u51-2.4.5-2) unstable; urgency=medium
+
+  * Update the KFreeBSD patch (Steven Chamberlain). Closes: #736291.
+
+ -- Matthias Klose <doko@ubuntu.com>  Tue, 04 Feb 2014 13:28:10 +0100
+
 openjdk-7 (7u51-2.4.5-1) unstable; urgency=medium
 
   * IcedTea7 2.4.5 release.

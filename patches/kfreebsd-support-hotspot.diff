@@ -658,7 +658,7 @@
  
 --- openjdk/hotspot/agent/src/os/linux/ps_proc.c.orig	2014-01-28 17:58:08.000000000 +0000
 +++ openjdk/hotspot/agent/src/os/linux/ps_proc.c	2014-01-30 14:32:29.981605347 +0000
-@@ -38,6 +38,18 @@
+@@ -38,6 +38,22 @@
  #define __WALL          0x40000000  // Copied from /usr/include/linux/wait.h
  #endif
  
@@ -672,6 +672,10 @@
 +
 +#ifndef PTRACE_DETACH
 +#define PTRACE_DETACH PT_DETACH
++#endif
++
++#ifndef PTRACE_CONT
++#define PTRACE_CONT PT_CONTINUE
 +#endif
 +
  // This file has the libproc implementation specific to live process
