@@ -1,3 +1,10 @@
+openjdk-7 (7u51-2.4.5-3) UNRELEASED; urgency=medium
+
+  * Fix icedtea-web build failure on kfreebsd-* (unable to find
+    sun.security.util.SecurityConstants). Steven Chamberlain. Closes: #739032.
+
+ -- Matthias Klose <doko@18xx.org>  Wed, 05 Mar 2014 06:52:53 +0100
+
 openjdk-7 (7u51-2.4.5-2) unstable; urgency=medium
 
   * Update the KFreeBSD patch (Steven Chamberlain). Closes: #736291.

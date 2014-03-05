@@ -1705,3 +1705,35 @@ Forwarded: no
  endif # PLATFORM linux
  
  ifeq ($(PLATFORM), macosx)
+--- openjdk/jdk/src/solaris/native/sun/net/portconfig.c	2014-01-28 18:02:26.000000000 +0000
++++ openjdk/jdk/src/solaris/native/sun/net/portconfig.c	2014-02-15 02:58:07.102243089 +0000
+@@ -28,7 +28,7 @@
+ #include <unistd.h>
+ #include <errno.h>
+ 
+-#if defined(_ALLBSD_SOURCE)
++#if defined(_ALLBSD_SOURCE) || defined (__FreeBSD_kernel__)
+ #include <sys/sysctl.h>
+ #endif
+ 
+@@ -66,7 +66,7 @@
+         range->higher = net_getParam("/dev/tcp", "tcp_largest_anon_port");
+         return 0;
+     }
+-#elif defined(_ALLBSD_SOURCE)
++#elif defined(_ALLBSD_SOURCE) || defined (__FreeBSD_kernel__)
+     {
+         int ret;
+         size_t size = sizeof(range->lower);
+--- openjdk/jdk/src/solaris/classes/sun/net/PortConfig.java	2014-01-28 18:02:26.000000000 +0000
++++ openjdk/jdk/src/solaris/classes/sun/net/PortConfig.java	2014-02-15 21:57:57.534279073 +0000
+@@ -55,6 +55,9 @@
+                     } else if (os.contains("OS X")) {
+                         defaultLower = 49152;
+                         defaultUpper = 65535;
++                    } else if (os.contains("FreeBSD")) {
++                        defaultLower = 10000;
++                        defaultUpper = 65535;
+                     } else {
+                         throw new InternalError(
+                             "sun.net.PortConfig: unknown OS");
