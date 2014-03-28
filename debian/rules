@@ -69,8 +69,8 @@ else
   vm_name	= Hotspot Zero
 endif
 p_lib_arch	= all
-jvmver		= 1.7.0
-shortver	= 7
+jvmver		= 1.8.0
+shortver	= 8
 ifneq (,$(DEB_HOST_MULTIARCH))
   jdirname	= java-$(shortver)-$(origin)-$(DEB_HOST_ARCH)
   jdiralias	= java-$(jvmver)-$(origin)-$(DEB_HOST_ARCH)

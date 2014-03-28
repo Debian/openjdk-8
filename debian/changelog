@@ -1,3 +1,10 @@
+openjdk-8 (8u0~b132-1) UNRELEASED; urgency=medium
+
+  * Initial OpenJDK 8 package derived from the OpenJDK 7 package
+    (Closes: #742864)
+
+ -- Emmanuel Bourg <ebourg@apache.org>  Fri, 28 Mar 2014 23:24:02 +0100
+
 openjdk-7 (7u51-2.4.5-3) UNRELEASED; urgency=medium
 
   * Fix icedtea-web build failure on kfreebsd-* (unable to find
