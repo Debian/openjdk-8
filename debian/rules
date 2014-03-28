@@ -760,12 +760,6 @@ ifneq (,$(cacao_archs))
   bd_cacao = libtool,
 endif
 
-ifneq (,$(filter $(distrel),lucid))
-  bd_ant = ant, ant1.8-optional,
-else
-  bd_ant = ant, ant-optional,
-endif
-
 bd_fastjar = fastjar (>= 2:0.96-0ubuntu2),
 ifneq (,$(filter $(distrel),lenny))
   bd_fastjar = fastjar (>= 2:0.95-4),
@@ -988,7 +982,6 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@bd_nss@/$(bd_nss)/g' \
 	      -e 's/@bd_systemtap@/$(bd_systemtap)/g' \
 	      -e 's/@bd_shark@/$(bd_shark)/g' \
-	      -e 's/@bd_ant@/$(bd_ant)/g' \
 	      -e 's/@core_fonts@/$(core_fonts)/g' \
 	      -e 's/@cjk_fonts@/$(cjk_fonts)/g' \
 	      -e 's/@any_archs@/$(any_archs)/g' \
