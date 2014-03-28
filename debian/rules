@@ -942,7 +942,7 @@ control_vars += '-Vtzdata:Depends=$(pkg_tzdata)'
 pkg_jcommon = java-common (>= 0.28)
 control_vars += '-Vjcommon:Depends=$(pkg_jcommon)'
 
-debian/control: debian/control.in debian/rules
+debian/control: debian/templates/control.in debian/rules
 	@cp -p debian/control debian/control.old
 	sed \
 	      -e 's/@basename@/$(basename)/g' \
@@ -970,7 +970,7 @@ debian/control: debian/control.in debian/rules
 	      -e 's/@hotspot_archs@/$(hotspot_archs)/g' \
 	      -e 's/@altzero_archs@/$(altzero_archs)/g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
-	    debian/control.in \
+	    debian/templates/control.in \
 	    $(if $(cacao_archs), debian/control.cacao-jre) \
 	    $(if $(transitional_cacao_pkg), debian/control.cacao-trans) \
 	    $(if $(jamvm_archs), debian/control.jamvm-jre) \
@@ -987,9 +987,9 @@ debian/control: debian/control.in debian/rules
 	fi
 
 packaging-files:
-	for f in debian/*.in debian/patches/*.in; do \
-	  case "$$f" in debian/control.in) continue; esac; \
-	  f2=$$(echo $$f | sed 's/JB/$(basename)/;s/\.in$$//'); \
+	for f in debian/templates/*.in debian/patches/*.in; do \
+	  case "$$f" in debian/templates/control.in) continue; esac; \
+	  f2=$$(echo $$f | sed 's/\/templates//;s/JB/$(basename)/;s/\.in$$//'); \
 	  sed -e 's/@JRE@/$(p_jre)/g' \
 	      -e 's/@JDK@/$(p_jdk)/g' \
 	      -e 's/@vendor@/$(Vendor)/g' \
@@ -1431,8 +1431,8 @@ debian-clean:
 	dh_testdir
 	dh_testroot
 	dh_clean -k
-	for f in debian/*.in debian/patches/*.in; do \
-	  f2=$$(echo $$f | sed 's/JB/$(basename)/;s/\.in$$//'); \
+	for f in debian/templates/*.in debian/patches/*.in; do \
+	  f2=$$(echo $$f | sed 's/\/templates//;s/JB/$(basename)/;s/\.in$$//'); \
 	  case "$$f2" in debian/control) continue; esac; \
 	  rm -f $$f2; \
 	done
