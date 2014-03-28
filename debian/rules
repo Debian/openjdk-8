@@ -59,13 +59,13 @@ TOP		= usr/lib/jvm
 origin		= openjdk
 basename	= openjdk-$(shortver)
 ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
-  priority	= $(if $(filter yes, $(is_default)),1071,1051)
+  priority	= $(if $(filter yes, $(is_default)),1081,1061)
   vm_name	= Hotspot JIT
 else ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
-  priority	= $(if $(filter yes, $(is_default)),1065,1045)
+  priority	= $(if $(filter yes, $(is_default)),1075,1055)
   vm_name	= Hotspot Shark
 else
-  priority	= $(if $(filter yes, $(is_default)),1063,1043)
+  priority	= $(if $(filter yes, $(is_default)),1073,1053)
   vm_name	= Hotspot Zero
 endif
 p_lib_arch	= all
