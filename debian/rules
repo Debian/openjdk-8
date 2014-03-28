@@ -542,19 +542,6 @@ ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) ia64 powerpc powerpcspe ppc64
   CONFIGURE_ARGS += --with-alt-jar=/usr/bin/fastjar
 endif
 
-ifneq (,$(filter $(DEB_HOST_ARCH), hppa))
-  CONFIGURE_ARGS += \
-	--without-rhino
-else
-  ifneq (,$(strip $(foreach i, hardy intrepid jaunty,$(findstring $(i),$(PKGVERSION)))))
-    CONFIGURE_ARGS += \
-	--with-rhino=/usr/share/java/js-1.7R2.jar
-  else
-    CONFIGURE_ARGS += \
-	--with-rhino=/usr/share/java/js.jar
-  endif
-endif
-
 CONFIGURE_ARGS += \
 	--disable-downloading \
 	--with-openjdk-src-zip=$(CURDIR)/openjdk.tar.gz \
@@ -721,10 +708,7 @@ bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxaw7-dev, libxrender-dev, \
 	$(if $(filter $(distrel), etch hardy),libcupsys2-dev,libcups2-dev), \
 	libasound2-dev, liblcms$(lcms_version)-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, \
-	libxinerama-dev, xsltproc, librhino-java (>= 1.7R3~),
-ifeq (,$(filter $(distrel),lenny squeeze quantal precise oneiric natty maverick lucid karmic jaunty intrepid hardy gutsy feisty edgy dapper))
-  rhino_source := $(shell dpkg-query -f '$${source:Package} (= $${source:Version}), ' -W librhino-java)
-endif
+	libxinerama-dev, xsltproc,
 
 pkg_ffidev = $(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev)
 
@@ -958,10 +942,6 @@ control_vars += '-Vtzdata:Depends=$(pkg_tzdata)'
 pkg_jcommon = java-common (>= 0.28)
 control_vars += '-Vjcommon:Depends=$(pkg_jcommon)'
 
-ifneq (,$(rhino_source))
-  control_vars += "-Vrhino:Source=$(rhino_source)"
-endif
-
 debian/control: debian/control.in debian/rules
 	@cp -p debian/control debian/control.old
 	sed \
@@ -996,7 +976,6 @@ debian/control: debian/control.in debian/rules
 	    $(if $(jamvm_archs), debian/control.jamvm-jre) \
 	    $(if $(altzero_archs), debian/control.zero-jre) \
 	    $(if $(DEB_HOST_MULTIARCH),,| grep -v '^Multi-Arch') \
-	    $(if $(rhino_source),,| grep -v '^Built-Using') \
 		> debian/control
 	@if cmp -s debian/control debian/control.old; then \
 	  rm -f debian/control.old; \
