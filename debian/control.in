@@ -32,7 +32,6 @@ Depends: ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:
 Recommends: ${dlopenhl:Recommends}, ${jamvm:Recommends}
 Suggests: ${cacao:Recommends}, libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, java7-runtime-headless, ${defaultvm:Provides}, ${jvm:Provides}
-Replaces: @basename@-jre-lib (<< 7u45-2.4.3-1)
 Conflicts: ${multiarch:Conflicts}
 Breaks: icedtea-netx (<< 1.4-2)
 Built-Using: ${rhino:Source}
@@ -58,20 +57,6 @@ Description: OpenJDK Java runtime, using ${vm:Name}
  .
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
-
-Package: @basename@-jre-lib
-Architecture: @lib_arch@
-Multi-Arch: foreign
-Pre-Depends: ${dpkg:Depends}
-Depends: ${misc:Depends}
-Breaks: @basename@-jre-headless (<< 7u45-2.4.3-1)
-Description: OpenJDK Java runtime (architecture independent libraries)
- OpenJDK Java runtime, using ${vm:Name}.
- .
- The packages are built using the IcedTea build support and patches
- from the IcedTea project.
- .
- This is a transitional package. You can safely remove it.
 
 Package: @basename@-demo
 Architecture: @any_archs@

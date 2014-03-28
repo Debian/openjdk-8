@@ -1,2 +1,0 @@
-# no separate directory for image files
-@basename@-jre-lib binary: image-file-in-usr-lib
