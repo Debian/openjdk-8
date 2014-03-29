@@ -467,13 +467,8 @@ ifeq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid jaunty int
 	debian/patches/fontconfig-japanese.diff
 endif
 
-#	debian/patches/sparc-inline.diff \
-#	debian/patches/pkcs11-secmod-debug.diff \
-
   DISTRIBUTION_PATCHES += \
 	debian/patches/hotspot-libpath-$(hotspot_version).diff
-
-#	debian/patches/hotspot-warn-no-errformat.diff \
 
 ifeq ($(with_pulse),yes)
   # only in karmic and later the default
