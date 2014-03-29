@@ -439,7 +439,6 @@ ifeq (,$(filter $(DEB_HOST_ARCH),arm64))
 	debian/patches/no-pch-build.diff \
 	debian/patches/text-relocations.diff \
 	debian/patches/hotspot-sparc-arch.diff \
-	debian/patches/sparc-trapsfix.patch \
 	debian/patches/sparc-stubgenerator.diff \
 	debian/patches/hotspot-no-march-i586.diff \
 	debian/patches/zero-opt.diff \
