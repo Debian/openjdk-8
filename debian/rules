@@ -432,7 +432,6 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/zero-missing-headers.diff \
 	debian/patches/libpcsclite-dlopen.diff \
 	debian/patches/jni_md_h_JNIEXPORT_visibility.patch \
-	debian/patches/7130140-MouseEvent-systemout.diff \
 	debian/patches/dnd-files.patch \
 
 ifeq (,$(filter $(DEB_HOST_ARCH),arm64))
