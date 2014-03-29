@@ -197,11 +197,11 @@ ifeq (,$(filter noaltzero, $(DEB_BUILD_OPTIONS))$(filter noaltshark, $(DEB_BUILD
     endif
   endif
 endif
-ifeq (,$(filter noaltjamvm, $(DEB_BUILD_OPTIONS)))
-  ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
-    alternate_vms += jamvm
-  endif
-endif
+#ifeq (,$(filter noaltjamvm, $(DEB_BUILD_OPTIONS)))
+#  ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
+#    alternate_vms += jamvm
+#  endif
+#endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
   STAGE1_JAVA = gcj
@@ -569,10 +569,10 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
   endif
 endif
 
-ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
-  CONFIGURE_ARGS += \
-	--with-jamvm-src-zip=$(firstword $(wildcard $(CURDIR)/jamvm-*.tar.* /usr/src/jamvm-*.tar.*))
-endif
+#ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
+#  CONFIGURE_ARGS += \
+#	--with-jamvm-src-zip=$(firstword $(wildcard $(CURDIR)/jamvm-*.tar.* /usr/src/jamvm-*.tar.*))
+#endif
 
 ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
   CONFIGURE_ARGS += --enable-zero
@@ -770,9 +770,9 @@ ifeq ($(with_systemtap),yes)
   bd_systemtap = systemtap-sdt-dev,
 endif
 
-ifneq (,$(jamvm_archs))
-  bd_jamvm = libtool,
-endif
+#ifneq (,$(jamvm_archs))
+#  bd_jamvm = libtool,
+#endif
 
 dlopen_hl_depends = \
 	$(if $(filter $(distrel), etch),libcupsys2,libcups2), \

@@ -117,18 +117,18 @@ Description: Java runtime based on OpenJDK (debugging symbols)
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
 
-Package: icedtea-7-jre-jamvm
-Architecture: amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
-Multi-Arch: same
-Priority: extra
-Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-8-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
-Description: Alternative JVM for OpenJDK, using JamVM
- The package provides an alternative runtime using the JamVM.  This is a
- somewhat faster alternative than the Zero port on architectures like armel,
- mips, mipsel, powerpc.
- .
- The VM is started with the option `-jamvm'. See the README.Debian for details.
+#Package: icedtea-7-jre-jamvm
+#Architecture: amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
+#Multi-Arch: same
+#Priority: extra
+#Pre-Depends: ${dpkg:Depends}
+#Depends: openjdk-8-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+#Description: Alternative JVM for OpenJDK, using JamVM
+# The package provides an alternative runtime using the JamVM.  This is a
+# somewhat faster alternative than the Zero port on architectures like armel,
+# mips, mipsel, powerpc.
+# .
+# The VM is started with the option `-jamvm'. See the README.Debian for details.
 
 Package: openjdk-8-jre-zero
 Architecture: amd64 i386 arm64 lpia kfreebsd-amd64 kfreebsd-i386 
