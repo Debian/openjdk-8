@@ -31,12 +31,6 @@ ifeq ($(distrel),n/a)
 endif
 
 multiarch_dir = /$(DEB_HOST_MULTIARCH)
-ifneq (,$(DEB_HOST_MULTIARCH))
-  ifneq (,$(filter $(distrel),natty oneiric))
-    DEB_HOST_MULTIARCH =
-    multiarch_dir =
-  endif
-endif
 
 hotspot_archs	= amd64 i386 lpia sparc sparc64 kfreebsd-amd64 kfreebsd-i386
 hotspot_archs	= amd64 i386 arm64 lpia kfreebsd-amd64 kfreebsd-i386
@@ -44,7 +38,7 @@ shark_archs	= amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386
 # Shark build but just crash
 shark_archs	=
 
-ifneq (,$(filter $(distrel),karmic lucid maverick natty oneiric precise squeeze wheezy))
+ifneq (,$(filter $(distrel),lucid precise squeeze wheezy))
   is_default = no
 else
   is_default = yes
@@ -144,10 +138,10 @@ ifneq (,$(filter $(distrel),wheezy precise quantal))
   transitional_cacao_pkg = yes
 endif
 
-ifeq (,$(filter $(distrel),squeeze maverick lucid karmic))
+ifeq (,$(filter $(distrel),squeeze lucid))
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
 endif
-ifeq (,$(filter $(distrel),wheezy squeeze maverick natty maverick lucid karmic))
+ifeq (,$(filter $(distrel),wheezy squeeze lucid))
   jamvm_defaults =
 endif
 
@@ -257,14 +251,10 @@ export EXTRA_CXXFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get CXXFLAGS)
 export EXTRA_LDFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get LDFLAGS)
 
 # This section should be in sync with "bd_gcc" definition
-ifneq (,$(filter $(distrel),squeeze karmic lucid maverick))
+ifneq (,$(filter $(distrel),squeeze lucid))
   export CC = gcc-4.4
   export CXX = g++-4.4
   GCJ_SUFFIX = -4.4
-else ifneq (,$(filter $(distrel),natty))
-  export CC = gcc-4.5
-  export CXX = g++-4.5
-  GCJ_SUFFIX = -4.5
 else ifneq (,$(filter $(distrel),wheezy quantal raring))
   export CC = gcc-4.7
   export CXX = g++-4.7
@@ -276,7 +266,7 @@ else ifneq (,$(filter $(distrel),wheezy quantal raring))
   ifneq (,$(filter $(DEB_HOST_ARCH), m68k s390))
     GCJ_SUFFIX = -4.6
   endif
-else ifneq (,$(filter $(distrel),oneiric precise))
+else ifneq (,$(filter $(distrel),precise))
   export CC = gcc-4.6
   export CXX = g++-4.6
   GCJ_SUFFIX = -4.6
@@ -297,17 +287,14 @@ endif
 
 with_pulse = yes
 
-ifneq (,$(filter $(distrel),squeeze karmic lucid maverick natty oneiric))
+ifneq (,$(filter $(distrel),squeeze lucid))
   with_bridge = bridge
   with_jni_bridge = yes
 else
   with_bridge = atk
 endif
 
-ifeq (,$(filter $(distrel),karmic))
-  with_nss = yes
-endif
-
+with_nss = yes
 with_tzdata = yes
 
 on_buildd := $(shell [ -f /CurrentlyBuilding -o "$$LOGNAME" = buildd ] && echo yes)
@@ -325,7 +312,7 @@ else
   ifneq (,$(findstring twm, $(with_wm)))
     with_wm_args = -f $(CURDIR)/bin/jtreg.tmwrc
   endif
-  ifneq (,$(filter $(distrel),saucy raring quantal precise oneiric natty maverick lucid karmic))
+  ifneq (,$(filter $(distrel),saucy raring quantal precise lucid))
     bd_wm = metacity | twm, dbus-x11,
   else
     bd_wm = twm,
@@ -404,7 +391,7 @@ endif
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
 
-ifeq (,$(filter $(distrel),squeeze oneiric natty maverick lucid))
+ifeq (,$(filter $(distrel),squeeze lucid))
   DISTRIBUTION_PATCHES += \
 	debian/patches/fontconfig-korean-nanum.diff \
 	debian/patches/fontconfig-japanese.diff
@@ -545,7 +532,7 @@ ifneq (,$(bootjdk_gcj_archs))
 	ecj-gcj [$(strip $(foreach a,$(bootjdk_gcj_archs), $(a)))],
   bootjdk_gcj46_archs = m68k s390
   bootjdk_gcj_default_archs = $(filter-out $(bootjdk_gcj46_archs), $(bootjdk_gcj_archs))
-  ifneq (,$(filter $(distrel),squeeze wheezy karmic lucid maverick natty oneiric precise))
+  ifneq (,$(filter $(distrel),squeeze wheezy lucid precise))
     bd_bootstrap += \
 	gcj-jdk [$(strip $(foreach a,$(bootjdk_gcj_default_archs), $(a)))], \
 	gcj-4.6-jdk [$(strip $(foreach a,$(bootjdk_gcj46_archs), $(a)))], \
@@ -567,11 +554,9 @@ ifneq (,$(bootjdk_cacao_archs))
 endif
 
 # This section should be in sync with "CC/CXX" definition
-ifneq (,$(filter $(distrel),squeeze karmic lucid maverick))
+ifneq (,$(filter $(distrel),squeeze lucid))
   bd_gcc = g++-4.4 (>= 4.4.1),
-else ifneq (,$(filter $(distrel),natty))
-  bd_gcc = g++-4.5,
-else ifneq (,$(filter $(distrel), oneiric precise))
+else ifneq (,$(filter $(distrel), precise))
   bd_gcc = g++-4.6,
 else ifneq (,$(filter $(distrel), wheezy))
   bd_gcc = g++-4.7, g++-4.4 [mips mipsel],
@@ -581,7 +566,7 @@ else
   bd_gcc = g++-4.8,
 endif
 bd_syslibs = zlib1g-dev, libattr1-dev,
-ifneq (,$(filter $(distrel),squeeze oneiric natty maverick lucid karmic))
+ifneq (,$(filter $(distrel),squeeze lucid))
   bd_syslibs += libpng12-dev, libjpeg62-dev,
 else
   bd_syslibs += libpng-dev, libjpeg8-dev,
@@ -605,12 +590,10 @@ ifneq (,$(shark_archs))
   ifneq (,$(filter $(distrel),lucid))
     bd_shark = llvm-dev (>= 2.7) [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
     bd_shark += oprofile [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
-  else ifneq (,$(filter $(distrel),karmic))
-    bd_shark = llvm-dev (>= 2.6) [$(foreach a,$(shark_archs) $(altshark_archs),$(a))],
   else
-    ifneq (,$(filter $(distrel),squeeze maverick natty))
+    ifneq (,$(filter $(distrel),squeeze))
       llvm_suffix = -2.7
-    else ifneq (,$(filter $(distrel),oneirc precise))
+    else ifneq (,$(filter $(distrel),precise))
       llvm_suffix = -2.9
     else
       llvm_suffix = -3.0
@@ -635,7 +618,7 @@ ifeq ($(with_pulse),yes)
   bd_pulsejava = libpulse-dev (>= 0.9.12),
 endif
 ifeq ($(with_nss),yes)
-  ifneq (,$(filter $(distrel),squeeze natty maverick lucid karmic))
+  ifneq (,$(filter $(distrel),squeeze lucid))
     bd_nss = libnss3-dev (>= 3.12.3),
   else ifneq (,$(filter $(distrel),wheezy sid))
     bd_nss = libnss3-dev (>= 2:3.13.4),
@@ -655,7 +638,7 @@ dlopen_hl_depends = \
 	libcups2, liblcms2-2, \
 	$(if $(findstring jpeg8, $(bd_syslibs)),libjpeg8,libjpeg62)
 ifneq ($(with_nss),no)
-  ifneq (,$(filter $(distrel),squeeze natty maverick lucid karmic))
+  ifneq (,$(filter $(distrel),squeeze lucid))
     dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
   else ifneq (,$(filter $(distrel), wheezy sid))
     dlopen_hl_depends += , libnss3 (>= 2:3.13.4)
@@ -682,20 +665,16 @@ browser_plugin_dirs = mozilla
 java_launcher = /$(basedir)/bin/java
 java_launcher = /usr/bin/java
 ifeq ($(distribution),Ubuntu)
-  ifeq (,$(filter $(distrel),karmic))
-    java_launcher = cautious-launcher %f /$(basedir)/bin/java
-    java_launcher = cautious-launcher %f /usr/bin/java
-  endif
+  java_launcher = cautious-launcher %f /$(basedir)/bin/java
+  java_launcher = cautious-launcher %f /usr/bin/java
 endif
 
-ifneq (,$(filter $(distrel),karmic))
-  core_fonts = ttf-dejavu-core
-else ifneq (,$(filter $(distrel),squeeze wheezy lucid maverick natty oneiric precise quantal raring))
+ifneq (,$(filter $(distrel),squeeze wheezy lucid precise quantal raring))
   core_fonts = ttf-dejavu-extra
 else
   core_fonts = fonts-dejavu-extra
 endif
-ifneq (,$(filter $(distrel),squeeze oneiric natty maverick lucid))
+ifneq (,$(filter $(distrel),squeeze lucid))
   cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
   cjk_fonts += ttf-sazanami-gothic | ttf-kochi-gothic,
   cjk_fonts += ttf-sazanami-mincho | ttf-kochi-mincho,
