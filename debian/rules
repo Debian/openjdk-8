@@ -349,12 +349,6 @@ endif
 
 with_tzdata = yes
 
-ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic jaunty intrepid hardy))
-  lcms_version = 1
-else
-  lcms_version = 2
-endif
-
 on_buildd := $(shell [ -f /CurrentlyBuilding -o "$$LOGNAME" = buildd ] && echo yes)
 
 ifeq ($(distribution),Debian)
@@ -543,11 +537,7 @@ ifeq ($(with_pulse),yes)
   CONFIGURE_ARGS += --enable-pulse-java
 endif
 
-ifneq ($(lcms_version),2)
-  CONFIGURE_ARGS += --disable-system-lcms
-else
-  CONFIGURE_ARGS += --enable-system-lcms
-endif
+CONFIGURE_ARGS += --enable-system-lcms
 
 ifeq ($(with_nss),yes)
   CONFIGURE_ARGS += --enable-nss
@@ -650,7 +640,7 @@ bd_syslibs += \
 bd_openjdk = \
 	libxtst-dev, libxi-dev, libxt-dev, libxaw7-dev, libxrender-dev, \
 	$(if $(filter $(distrel), etch hardy),libcupsys2-dev,libcups2-dev), \
-	libasound2-dev, liblcms$(lcms_version)-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, \
+	libasound2-dev, liblcms2-dev, libfreetype6-dev (>= 2.2.1), libgtk2.0-dev, \
 	libxinerama-dev, xsltproc,
 
 pkg_ffidev = $(if $(filter $(distribution),Ubuntu),$(if $(filter $(distrel),hardy),libffi4-dev,libffi-dev),libffi-dev)
@@ -719,7 +709,7 @@ endif
 
 dlopen_hl_depends = \
 	$(if $(filter $(distrel), etch),libcupsys2,libcups2), \
-	liblcms$(if $(filter 1,$(lcms_version)),1,2-2), \
+	liblcms2-2, \
 	$(if $(findstring jpeg8, $(bd_syslibs)),libjpeg8,libjpeg62)
 ifneq ($(with_nss),no)
   ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic hardy))
