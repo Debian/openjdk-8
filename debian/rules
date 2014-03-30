@@ -276,7 +276,7 @@ endif
 export OPT_CFLAGS/cppInterpreter_arm.o
 endif
 
-with_pulse = yes
+with_pulse = no
 with_bridge = atk
 with_tzdata = yes
 
