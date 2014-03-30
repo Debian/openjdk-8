@@ -139,18 +139,18 @@ ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
 endif
 
 any_archs = alpha amd64 armel armhf arm64 i386 ia64 lpia mips mipsel powerpc powerpcspe ppc64 ppc64el m68k sh4 sparc sparc64 s390x x32 kfreebsd-i386 kfreebsd-amd64
-stage1_gcj_archs = amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 ppc64el m68k mips mipsel sh4 sparc sparc64 s390x x32 kfreebsd-i386 kfreebsd-amd64
-stage1_openjdk_archs = alpha arm64
-stage1_cacao_archs =
+bootjdk_gcj_archs = amd64 armel armhf hppa i386 ia64 lpia powerpc powerpcspe ppc64 ppc64el m68k mips mipsel sh4 sparc sparc64 s390x x32 kfreebsd-i386 kfreebsd-amd64
+bootjdk_openjdk_archs = alpha arm64
+bootjdk_cacao_archs =
 ifneq (,$(filter nobootstrap, $(DEB_BUILD_OPTIONS)))
-  stage1_openjdk_archs := $(stage1_openjdk_archs) $(stage1_gcj_archs)
-  stage1_gcj_archs :=
+  bootjdk_openjdk_archs := $(bootjdk_openjdk_archs) $(bootjdk_gcj_archs)
+  bootjdk_gcj_archs :=
 else ifneq (,$(filter $(distrel),hardy jaunty))
-  stage1_openjdk_archs := $(filter-out armel, $(stage1_openjdk_archs) $(stage1_gcj_archs))
-  stage1_gcj_archs := armel
+  bootjdk_openjdk_archs := $(filter-out armel, $(bootjdk_openjdk_archs) $(bootjdk_gcj_archs))
+  bootjdk_gcj_archs := armel
 else ifneq (,$(filter $(distrel),lenny))
-  stage1_gcj_archs := $(filter-out ia64, $(stage1_gcj_archs))
-  stage1_openjdk_archs := $(stage1_openjdk_archs) ia64
+  bootjdk_gcj_archs := $(filter-out ia64, $(bootjdk_gcj_archs))
+  bootjdk_openjdk_archs := $(bootjdk_openjdk_archs) ia64
 endif
 
 ifeq (,$(filter $(distrel),lenny intrepid hardy))
@@ -203,24 +203,24 @@ endif
 #  endif
 #endif
 
-ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_gcj_archs)))
-  STAGE1_JAVA = gcj
-  STAGE1_HOME = /usr/lib/jvm/java-gcj
+ifneq (,$(filter $(DEB_HOST_ARCH), $(bootjdk_gcj_archs)))
+  BOOTJDK_NAME = gcj
+  BOOTJDK_HOME = /usr/lib/jvm/java-gcj
   ifneq (,$(filter $(distrel), wheezy))
     ifneq (,$(filter $(DEB_HOST_ARCH), m68k s390))
-      STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.6
+      BOOTJDK_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.6
     endif
     ifneq (,$(filter $(DEB_HOST_ARCH), ia64))
-      STAGE1_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.7-ia64
+      BOOTJDK_HOME = /usr/lib/jvm/java-1.5.0-gcj-4.7-ia64
     endif
   endif
-else ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_openjdk_archs)))
-  STAGE1_JAVA = openjdk
-  STAGE1_HOME = $(firstword $(wildcard /usr/lib/jvm/java-6-openjdk-$(DEB_HOST_ARCH) /usr/lib/jvm/java-6-openjdk))
-  STAGE1_HOME = $(firstword $(wildcard /usr/lib/jvm/java-7-openjdk-$(DEB_HOST_ARCH) /usr/lib/jvm/java-7-openjdk))
-else ifneq (,$(filter $(DEB_HOST_ARCH), $(stage1_cacao_archs)))
-  STAGE1_JAVA = cacao
-  STAGE1_HOME = /usr/lib/jvm/java-6-cacao
+else ifneq (,$(filter $(DEB_HOST_ARCH), $(bootjdk_openjdk_archs)))
+  BOOTJDK_NAME = openjdk
+  BOOTJDK_HOME = $(firstword $(wildcard /usr/lib/jvm/java-6-openjdk-$(DEB_HOST_ARCH) /usr/lib/jvm/java-6-openjdk))
+  BOOTJDK_HOME = $(firstword $(wildcard /usr/lib/jvm/java-7-openjdk-$(DEB_HOST_ARCH) /usr/lib/jvm/java-7-openjdk))
+else ifneq (,$(filter $(DEB_HOST_ARCH), $(bootjdk_cacao_archs)))
+  BOOTJDK_NAME = cacao
+  BOOTJDK_HOME = /usr/lib/jvm/java-6-cacao
 else
   $(error unknown bootstrap method for architecture $(DEB_HOST_ARCH))
 endif
@@ -497,28 +497,7 @@ endif
 
 export DISTRIBUTION_PATCHES DISTRIBUTION_BOOT_PATCHES
 
-ifeq ($(STAGE1_JAVA),gcj)
-  CONFIGURE_ARGS = \
-	--with-jdk-home=$(STAGE1_HOME) \
-	--with-ecj-jar=$(STAGE1_HOME)/lib/ecj.jar \
-	--with-javac=$(STAGE1_HOME)/bin/javac \
-	--with-java=$(STAGE1_HOME)/bin/java \
-	--with-javah=$(STAGE1_HOME)/bin/javah \
-	--with-rmic=$(STAGE1_HOME)/bin/rmic
-  ifeq (,$(filter ia64, $(DEB_HOST_ARCH)))
-    CONFIGURE_ARGS += \
-	--with-jar=/usr/bin/fastjar
-  endif
-  build_target = #icedtea-against-icedtea
-else ifeq ($(STAGE1_JAVA),openjdk)
-  CONFIGURE_ARGS = \
-	--with-jdk-home=$(STAGE1_HOME) --disable-bootstrap
-  build_target = #icedtea-against-icedtea
-else ifeq ($(STAGE1_JAVA),cacao)
-  CONFIGURE_ARGS = \
-	--with-jdk-home=$(STAGE1_HOME)
-  build_target = #icedtea-against-icedtea
-endif
+CONFIGURE_ARGS = --with-jdk-home=$(BOOTJDK_HOME)
 
 # GNU/kFreeBSD don't support epoll syscall so don't try to check of it.
 ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
@@ -641,34 +620,34 @@ pkg_compress =
 bd_autotools = autoconf, automake, autotools-dev,
 # This section should be in sync with "GCJ_SUFFIX" definition
 bd_bootstrap =
-ifneq (,$(stage1_gcj_archs))
+ifneq (,$(bootjdk_gcj_archs))
   bd_bootstrap += \
-	ecj-gcj [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
-  stage1_gcj46_archs = m68k s390
-  stage1_gcj_default_archs = $(filter-out $(stage1_gcj46_archs), $(stage1_gcj_archs))
+	ecj-gcj [$(strip $(foreach a,$(bootjdk_gcj_archs), $(a)))],
+  bootjdk_gcj46_archs = m68k s390
+  bootjdk_gcj_default_archs = $(filter-out $(bootjdk_gcj46_archs), $(bootjdk_gcj_archs))
   ifneq (,$(filter $(distrel),lenny jaunty intrepid hardy))
     bd_bootstrap += \
-	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))], \
-	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(stage1_gcj_archs), $(a)))],
+	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(bootjdk_gcj_archs), $(a)))], \
+	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(bootjdk_gcj_archs), $(a)))],
   else ifneq (,$(filter $(distrel),squeeze wheezy karmic lucid maverick natty oneiric precise))
     bd_bootstrap += \
-	gcj-jdk [$(strip $(foreach a,$(stage1_gcj_default_archs), $(a)))], \
-	gcj-4.6-jdk [$(strip $(foreach a,$(stage1_gcj46_archs), $(a)))], \
+	gcj-jdk [$(strip $(foreach a,$(bootjdk_gcj_default_archs), $(a)))], \
+	gcj-4.6-jdk [$(strip $(foreach a,$(bootjdk_gcj46_archs), $(a)))], \
 	gcj-4.7-jdk [ia64],
   else
     bd_bootstrap += \
-	gcj-jdk [$(strip $(foreach a,$(stage1_gcj_default_archs), $(a)))],
+	gcj-jdk [$(strip $(foreach a,$(bootjdk_gcj_default_archs), $(a)))],
   endif
 endif
-ifneq (,$(stage1_openjdk_archs))
+ifneq (,$(bootjdk_openjdk_archs))
 #  bd_bootstrap += \
-#	openjdk-6-jdk (>= $(req_openjdk_bd_ver)) [$(strip $(foreach a,$(stage1_openjdk_archs), $(a)))],
+#	openjdk-6-jdk (>= $(req_openjdk_bd_ver)) [$(strip $(foreach a,$(bootjdk_openjdk_archs), $(a)))],
   bd_bootstrap += \
-	openjdk-7-jdk (>= $(req_openjdk_bd_ver)) [$(strip $(foreach a,$(stage1_openjdk_archs), $(a)))],
+	openjdk-7-jdk (>= $(req_openjdk_bd_ver)) [$(strip $(foreach a,$(bootjdk_openjdk_archs), $(a)))],
 endif
-ifneq (,$(stage1_cacao_archs))
+ifneq (,$(bootjdk_cacao_archs))
   bd_bootstrap += \
-	cacao-oj6-jdk [$(strip $(foreach a,$(stage1_cacao_archs), $(a)))],
+	cacao-oj6-jdk [$(strip $(foreach a,$(bootjdk_cacao_archs), $(a)))],
 endif
 
 # This section should be in sync with "CC/CXX" definition
@@ -1049,7 +1028,7 @@ stamps/unpack: stamps/icedtea-configure
 	$(MAKE) -f debian/rules packaging-files
 
 #	$(MAKE) -C build extract
-ifeq ($(STAGE1_JAVA),gcj)
+ifeq ($(BOOTJDK_NAME),gcj)
 #	$(MAKE) -C build stamps/extract-ecj.stamp
 endif
 	touch $@
@@ -1060,7 +1039,7 @@ dist-openjdk: $(OPENJDK_SRC_ZIP)
 
 patch: stamps/patch
 stamps/patch: stamps/unpack
-ifeq ($(STAGE1_JAVA),gcj)
+ifeq ($(BOOTJDK_NAME),gcj)
 #	$(MAKE) -C build patch-boot
 endif
 #	$(MAKE) -C build patch
