@@ -134,9 +134,6 @@ endif
 cacao_archs = alpha amd64 armel armhf i386 lpia powerpc powerpcspe m68k mips mipsel s390
 # TODO kfreebsd porting for cacao vm
 cacao_archs =
-ifneq (,$(filter $(distrel),wheezy precise quantal))
-  transitional_cacao_pkg = yes
-endif
 
 jamvm_archs = amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
 ifeq (,$(filter $(distrel),wheezy))
@@ -765,7 +762,6 @@ debian/control: debian/templates/control.in debian/rules
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/templates/control.in \
 	    $(if $(cacao_archs), debian/control.cacao-jre) \
-	    $(if $(transitional_cacao_pkg), debian/control.cacao-trans) \
 	    $(if $(jamvm_archs), debian/control.jamvm-jre) \
 	    $(if $(altzero_archs), debian/control.zero-jre) \
 	    $(if $(DEB_HOST_MULTIARCH),,| grep -v '^Multi-Arch') \
@@ -1698,10 +1694,6 @@ nojrec = $(if $(filter cacao, $(alternate_vms)),,-N$(p_jrec))
 nojrej = $(if $(filter jamvm, $(alternate_vms)),,-N$(p_jrej))
 nojrez = $(if $(filter shark zero, $(alternate_vms)),,-N$(p_jrez))
 
-ifeq ($(transitional_cacao_pkg),yes)
-  nojrec =
-endif
-
 # Build architecture independant packages
 binary-indep: build install
 	dh_testdir
@@ -1765,10 +1757,6 @@ ifneq (,$(filter cacao, $(alternate_vms)))
 	dh_installchangelogs -p$(p_jrec)
 	dh_installdocs -p$(p_jrec)
 	$(call install_test_results,cacao)
-endif
-ifeq ($(transitional_cacao_pkg),yes)
-	dh_installchangelogs -p$(p_jrec)
-	dh_installdocs -p$(p_jrec)
 endif
 ifneq (,$(filter jamvm, $(alternate_vms)))
 	dh_installchangelogs -p$(p_jrej)
