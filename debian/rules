@@ -40,14 +40,11 @@ endif
 
 hotspot_archs	= amd64 i386 lpia sparc sparc64 kfreebsd-amd64 kfreebsd-i386
 hotspot_archs	= amd64 i386 arm64 lpia kfreebsd-amd64 kfreebsd-i386
-# requires llvm; llvm in jaunty is recent enough, but in universe
-ifeq (,$(filter $(distrel),lenny))
-  shark_archs	= amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386
-  # Shark build but just crash
-  shark_archs   =
-endif
+shark_archs	= amd64 i386 lpia kfreebsd-amd64 kfreebsd-i386
+# Shark build but just crash
+shark_archs	=
 
-ifneq (,$(filter $(distrel),karmic lucid maverick natty oneiric precise lenny squeeze wheezy))
+ifneq (,$(filter $(distrel),karmic lucid maverick natty oneiric precise squeeze wheezy))
   is_default = no
 else
   is_default = yes
@@ -138,38 +135,27 @@ bootjdk_cacao_archs =
 ifneq (,$(filter nobootstrap, $(DEB_BUILD_OPTIONS)))
   bootjdk_openjdk_archs := $(bootjdk_openjdk_archs) $(bootjdk_gcj_archs)
   bootjdk_gcj_archs :=
-else ifneq (,$(filter $(distrel),lenny))
-  bootjdk_gcj_archs := $(filter-out ia64, $(bootjdk_gcj_archs))
-  bootjdk_openjdk_archs := $(bootjdk_openjdk_archs) ia64
 endif
 
-ifeq (,$(filter $(distrel),lenny))
-  cacao_archs = alpha amd64 armel armhf i386 lpia powerpc powerpcspe m68k mips mipsel s390
-  # TODO kfreebsd porting for cacao vm
-endif
+cacao_archs = alpha amd64 armel armhf i386 lpia powerpc powerpcspe m68k mips mipsel s390
+# TODO kfreebsd porting for cacao vm
 cacao_archs =
 ifneq (,$(filter $(distrel),wheezy precise quantal))
   transitional_cacao_pkg = yes
 endif
 
-ifeq (,$(filter $(distrel),squeeze lenny maverick lucid karmic))
+ifeq (,$(filter $(distrel),squeeze maverick lucid karmic))
   jamvm_archs = amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
 endif
-ifeq (,$(filter $(distrel),wheezy squeeze lenny maverick natty maverick lucid karmic))
+ifeq (,$(filter $(distrel),wheezy squeeze maverick natty maverick lucid karmic))
   jamvm_defaults =
 endif
 
-# requires patched llvm-2.6
-ifeq (,$(filter $(distrel),lenny))
-  altshark_archs = powerpc ppc64 ppc64el
-  # Shark build but just crash
-  altshark_archs   =
-endif
+altshark_archs = powerpc ppc64 ppc64el
+# Shark build but just crash
+altshark_archs =
+
 altzero_archs = $(filter-out sparc sparc64, $(hotspot_archs)) $(altshark_archs)
-ifneq (,$(filter $(distrel),lenny))
-  altzero_archs =
-  altshark_archs =
-endif
 
 ifeq (,$(filter noaltcacao, $(DEB_BUILD_OPTIONS)))
   ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
@@ -271,11 +257,7 @@ export EXTRA_CXXFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get CXXFLAGS)
 export EXTRA_LDFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get LDFLAGS)
 
 # This section should be in sync with "bd_gcc" definition
-ifneq (,$(filter $(distrel),lenny))
-  export CC = gcc-4.3
-  export CXX = g++-4.3
-  GCJ_SUFFIX = -4.3
-else ifneq (,$(filter $(distrel),squeeze karmic lucid maverick))
+ifneq (,$(filter $(distrel),squeeze karmic lucid maverick))
   export CC = gcc-4.4
   export CXX = g++-4.4
   GCJ_SUFFIX = -4.4
@@ -313,20 +295,16 @@ endif
 export OPT_CFLAGS/cppInterpreter_arm.o
 endif
 
-ifeq (,$(filter $(distrel),lenny))
-  with_pulse = yes
-endif
+with_pulse = yes
 
-ifneq (,$(filter $(distrel),lenny))
-  with_bridge =
-else ifneq (,$(filter $(distrel),squeeze karmic lucid maverick natty oneiric))
+ifneq (,$(filter $(distrel),squeeze karmic lucid maverick natty oneiric))
   with_bridge = bridge
   with_jni_bridge = yes
 else
   with_bridge = atk
 endif
 
-ifeq (,$(filter $(distrel),lenny karmic))
+ifeq (,$(filter $(distrel),karmic))
   with_nss = yes
 endif
 
@@ -357,9 +335,7 @@ ifeq ($(with_wm),metacity)
   with_wm_prefix = dbus-launch --exit-with-session
 endif
 
-#ifeq (,$(filter $(distrel),lenny))
-#  with_systemtap = yes
-#endif
+#with_systemtap = yes
 
 ifneq (,$(filter $(DEB_HOST_ARCH), sparc64))
   USE_PRECOMPILED_HEADER = 0
@@ -428,7 +404,7 @@ endif
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
 
-ifeq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid))
+ifeq (,$(filter $(distrel),squeeze oneiric natty maverick lucid))
   DISTRIBUTION_PATCHES += \
 	debian/patches/fontconfig-korean-nanum.diff \
 	debian/patches/fontconfig-japanese.diff
@@ -439,7 +415,7 @@ endif
 
 ifeq ($(with_pulse),yes)
   # only in karmic and later the default
-  ifeq (,$(filter $(distrel), lenny squeeze sid))
+  ifeq (,$(filter $(distrel), squeeze sid))
     DISTRIBUTION_PATCHES += \
 	debian/patches/jdk-pulseaudio.diff
   endif
@@ -569,11 +545,7 @@ ifneq (,$(bootjdk_gcj_archs))
 	ecj-gcj [$(strip $(foreach a,$(bootjdk_gcj_archs), $(a)))],
   bootjdk_gcj46_archs = m68k s390
   bootjdk_gcj_default_archs = $(filter-out $(bootjdk_gcj46_archs), $(bootjdk_gcj_archs))
-  ifneq (,$(filter $(distrel),lenny))
-    bd_bootstrap += \
-	gcj (>= 4:4.2.1) [$(strip $(foreach a,$(bootjdk_gcj_archs), $(a)))], \
-	java-gcj-compat-dev (>= 1.0.76-2ubuntu3) [$(strip $(foreach a,$(bootjdk_gcj_archs), $(a)))],
-  else ifneq (,$(filter $(distrel),squeeze wheezy karmic lucid maverick natty oneiric precise))
+  ifneq (,$(filter $(distrel),squeeze wheezy karmic lucid maverick natty oneiric precise))
     bd_bootstrap += \
 	gcj-jdk [$(strip $(foreach a,$(bootjdk_gcj_default_archs), $(a)))], \
 	gcj-4.6-jdk [$(strip $(foreach a,$(bootjdk_gcj46_archs), $(a)))], \
@@ -595,9 +567,7 @@ ifneq (,$(bootjdk_cacao_archs))
 endif
 
 # This section should be in sync with "CC/CXX" definition
-ifneq (,$(filter $(distrel),lenny))
-  bd_gcc = g++-4.3,
-else ifneq (,$(filter $(distrel),squeeze karmic lucid maverick))
+ifneq (,$(filter $(distrel),squeeze karmic lucid maverick))
   bd_gcc = g++-4.4 (>= 4.4.1),
 else ifneq (,$(filter $(distrel),natty))
   bd_gcc = g++-4.5,
@@ -611,7 +581,7 @@ else
   bd_gcc = g++-4.8,
 endif
 bd_syslibs = zlib1g-dev, libattr1-dev,
-ifneq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid karmic))
+ifneq (,$(filter $(distrel),squeeze oneiric natty maverick lucid karmic))
   bd_syslibs += libpng12-dev, libjpeg62-dev,
 else
   bd_syslibs += libpng-dev, libjpeg8-dev,
@@ -658,20 +628,14 @@ ifneq (,$(cacao_archs))
 endif
 
 bd_fastjar = fastjar (>= 2:0.96-0ubuntu2),
-ifneq (,$(filter $(distrel),lenny))
-  bd_fastjar = fastjar (>= 2:0.95-4),
-endif
 bd_compress = $(pkg_compress),
 bd_xvfb = xvfb, xauth, xfonts-base, libgl1-mesa-dri [!x32], $(bd_wm) x11-xkb-utils,
 bd_mauve = mauve,
-ifneq (,$(filter $(distrel),lenny))
-  bd_xvfb += xkb-data, xserver-xorg-core,
-endif
 ifeq ($(with_pulse),yes)
   bd_pulsejava = libpulse-dev (>= 0.9.12),
 endif
 ifeq ($(with_nss),yes)
-  ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic))
+  ifneq (,$(filter $(distrel),squeeze natty maverick lucid karmic))
     bd_nss = libnss3-dev (>= 3.12.3),
   else ifneq (,$(filter $(distrel),wheezy sid))
     bd_nss = libnss3-dev (>= 2:3.13.4),
@@ -691,7 +655,7 @@ dlopen_hl_depends = \
 	libcups2, liblcms2-2, \
 	$(if $(findstring jpeg8, $(bd_syslibs)),libjpeg8,libjpeg62)
 ifneq ($(with_nss),no)
-  ifneq (,$(filter $(distrel),lenny squeeze natty maverick lucid karmic))
+  ifneq (,$(filter $(distrel),squeeze natty maverick lucid karmic))
     dlopen_hl_depends += , libnss3-1d (>= 3.12.3)
   else ifneq (,$(filter $(distrel), wheezy sid))
     dlopen_hl_depends += , libnss3 (>= 2:3.13.4)
@@ -724,14 +688,14 @@ ifeq ($(distribution),Ubuntu)
   endif
 endif
 
-ifneq (,$(filter $(distrel),lenny karmic))
+ifneq (,$(filter $(distrel),karmic))
   core_fonts = ttf-dejavu-core
 else ifneq (,$(filter $(distrel),squeeze wheezy lucid maverick natty oneiric precise quantal raring))
   core_fonts = ttf-dejavu-extra
 else
   core_fonts = fonts-dejavu-extra
 endif
-ifneq (,$(filter $(distrel),lenny squeeze oneiric natty maverick lucid))
+ifneq (,$(filter $(distrel),squeeze oneiric natty maverick lucid))
   cjk_fonts = ttf-baekmuk | ttf-unfonts | ttf-unfonts-core,
   cjk_fonts += ttf-sazanami-gothic | ttf-kochi-gothic,
   cjk_fonts += ttf-sazanami-mincho | ttf-kochi-mincho,
@@ -742,7 +706,7 @@ else
   bd_openjdk += fonts-ipafont-mincho,
 endif
 cjk_fonts += $(if $(with_wgy_zenhai),ttf-wqy-microhei | ttf-wqy-zenhei,ttf-arphic-uming),
-ifneq (,$(filter $(distrel),lenny squeeze wheezy sid experimental))
+ifneq (,$(filter $(distrel),squeeze wheezy sid experimental))
   cjk_fonts += ttf-indic-fonts,
 else
   cjk_fonts += ttf-indic-fonts-core, ttf-telugu-fonts, ttf-oriya-fonts,
@@ -832,13 +796,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs) $(altshark_archs)))
   control_vars += '-Vzerovm:Provides=$(p_jre)-shark'
 endif
 
-ifneq (,$(filter $(distrel),lenny))
-  control_vars += '-Vjvm:Provides=java-virtual-machine'
-endif
-
-ifeq (,$(filter $(distrel), lenny))
-  pkg_certs = ca-certificates-java
-endif
+pkg_certs = ca-certificates-java
 control_vars += '-Vcacert:Depends=$(pkg_certs)'
 
 ifeq ($(with_tzdata),yes)
@@ -1046,14 +1004,12 @@ build_stamps = stamps/build
 build_stamps +=  stamps/mauve-check-default stamps/jtreg-check-default
 #build_stamps += $(if $(filter cacao, $(alternate_vms)),stamps/mauve-check-cacao stamps/jtreg-check-cacao)
 build_stamps += $(if $(filter jamvm, $(alternate_vms)),stamps/mauve-check-jamvm stamps/jtreg-check-jamvm)
-ifeq (,$(filter $(distrel),lenny))
-  build_stamps += $(if $(filter zero, $(alternate_vms)),stamps/mauve-check-zero stamps/jtreg-check-zero)
-  ifneq (,$(filter shark, $(alternate_vms)))
-    ifneq (,$(filter $(DEB_HOST_ARCH),$(altshark_archs)))
-      build_stamps += stamps/mauve-check-shark stamps/jtreg-check-shark
-    else
-      build_stamps += stamps/mauve-check-zero stamps/jtreg-check-zero
-    endif
+build_stamps += $(if $(filter zero, $(alternate_vms)),stamps/mauve-check-zero stamps/jtreg-check-zero)
+ifneq (,$(filter shark, $(alternate_vms)))
+  ifneq (,$(filter $(DEB_HOST_ARCH),$(altshark_archs)))
+    build_stamps += stamps/mauve-check-shark stamps/jtreg-check-shark
+  else
+    build_stamps += stamps/mauve-check-zero stamps/jtreg-check-zero
   endif
 endif
 
