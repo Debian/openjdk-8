@@ -505,25 +505,12 @@ ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) ia64 powerpc powerpcspe ppc64
   CONFIGURE_ARGS += --with-alt-jar=/usr/bin/fastjar
 endif
 
-CONFIGURE_ARGS += \
-	--disable-downloading \
-	--with-openjdk-src-zip=$(CURDIR)/openjdk.tar.gz \
-	--with-hotspot-src-zip=$(CURDIR)/$(if $(filter $(DEB_HOST_ARCH),arm64),29b33e434551.tar.gz,hotspot.tar.gz) \
-	--with-corba-src-zip=$(CURDIR)/corba.tar.gz \
-	--with-jaxp-src-zip=$(CURDIR)/jaxp.tar.gz \
-	--with-jaxws-src-zip=$(CURDIR)/jaxws.tar.gz \
-	--with-jdk-src-zip=$(CURDIR)/jdk.tar.gz \
-	--with-langtools-src-zip=$(CURDIR)/langtools.tar.gz
-
 ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
   CONFIGURE_ARGS += \
 	--with-hotspot-build=aarch64
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
-  CONFIGURE_ARGS += \
-	--with-cacao-src-zip=$(CURDIR)/cacao-a567bcb7f589.tar.gz
-	#--with-cacao-src-zip=$(firstword $(wildcard $(CURDIR)/cacao-*.tar.* /usr/src/cacao-*.tar.*))
   ifneq (,$(filter $(DEB_HOST_ARCH), armel))
     # TODO: test build done without --enable-softfloat
     EXTRA_BUILD_ENV += CACAO_CONFIGURE_ARGS='--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
@@ -531,11 +518,6 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
     EXTRA_BUILD_ENV += CACAO_CONFIGURE_ARGS='--host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)'
   endif
 endif
-
-#ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
-#  CONFIGURE_ARGS += \
-#	--with-jamvm-src-zip=$(firstword $(wildcard $(CURDIR)/jamvm-*.tar.* /usr/src/jamvm-*.tar.*))
-#endif
 
 ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
   CONFIGURE_ARGS += --enable-zero
