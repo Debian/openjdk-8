@@ -225,8 +225,6 @@ else
   $(error unknown bootstrap method for architecture $(DEB_HOST_ARCH))
 endif
 
-OPENJDK_VERSION = b130
-OPENJDK_SRC_ZIP = openjdk-7-ea-src-$(OPENJDK_VERSION)-25_mar_2010-dfsg.tar.gz
 # the version of the build dependency for non-bootstrap builds; only adjust if
 # the package is installable on all these architectures.
 req_openjdk_bd_ver = 6b18
@@ -1032,10 +1030,6 @@ ifeq ($(BOOTJDK_NAME),gcj)
 #	$(MAKE) -C build stamps/extract-ecj.stamp
 endif
 	touch $@
-
-dist-openjdk: $(OPENJDK_SRC_ZIP)
-	@echo "downloading openjdk source from hg to create zipfile: $(OPENJDK_SRC_ZIP)"
-	$(MAKE) -C build $@
 
 patch: stamps/patch
 stamps/patch: stamps/unpack
