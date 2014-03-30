@@ -491,13 +491,6 @@ all_jdk_tools	= $(filter-out javaws, $(notdir $(wildcard build/$(sdkimg)/bin/*))
 jdk_tools	= $(filter-out $(all_jre_tools), $(all_jdk_tools))
 jdk_tools_alt	= $(filter-out apt java-rmi.cgi, $(jdk_tools))
 
-ifeq ($(distribution),Ubuntu)
-  pkg_compress = lzma
-else
-  pkg_compress  = bzip2
-endif
-pkg_compress =
-
 # build dependencies
 bd_autotools = autoconf, automake, autotools-dev,
 # This section should be in sync with "GCJ_SUFFIX" definition
@@ -570,7 +563,6 @@ ifneq (,$(cacao_archs))
 endif
 
 bd_fastjar = fastjar (>= 2:0.96-0ubuntu2),
-bd_compress = $(pkg_compress),
 bd_xvfb = xvfb, xauth, xfonts-base, libgl1-mesa-dri [!x32], $(bd_wm) x11-xkb-utils,
 bd_mauve = mauve,
 ifeq ($(with_pulse),yes)
@@ -672,14 +664,6 @@ control_vars = \
 	'-Vpkg:pulseaudio=$(pkg_pulseaudio)' \
 	'-Vxulrunner:Depends=$(xulrunner_depends)' \
 
-ifeq ($(pkg_compress),lzma)
-  bd_options = -- -Zlzma
-  control_vars += '-Vdpkg:Depends=dpkg (>= 1.14.12ubuntu3)'
-else ifeq ($(pkg_compress),bzip2)
-  bd_options = -- -Zbzip2
-  control_vars += '-Vdpkg:Depends=dpkg (>= 1.10.24)'
-endif
-
 ifneq (,$(DEB_HOST_MULTIARCH))
   control_vars += \
 	'-Vmultiarch:Depends=multiarch-support' \
@@ -745,7 +729,6 @@ debian/control: debian/templates/control.in debian/rules
 	      -e 's/@bd_fastjar@/$(bd_fastjar)/g' \
 	      -e 's/@bd_mauve@/$(bd_mauve)/g' \
 	      -e 's/@bd_xvfb@/$(bd_xvfb)/g' \
-	      -e 's/@bd_compress@/$(pkg_compress)/g' \
 	      -e 's/@bd_cacao@/$(bd_cacao)/g' \
 	      -e 's/@bd_jamvm@/$(bd_jamvm)/g' \
 	      -e 's/@bd_pulsejava@/$(bd_pulsejava)/g' \
