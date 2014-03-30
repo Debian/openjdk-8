@@ -89,20 +89,12 @@ security	= $(etcdir)/security
 jreimg		= openjdk.build/j2re-image
 sdkimg		= openjdk.build/j2sdk-image
 
-# Support parallel=<n> in DEB_BUILD_OPTIONS (see #209008)
 COMMA=,
 SPACE = $(EMPTY) $(EMPTY)
-ifneq (,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
-  NJOBS = $(subst parallel=,,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
-  HOTSPOT_BUILD_JOBS = $(NJOBS)
-  ALT_PARALLEL_COMPILE_JOBS = $(NJOBS)
-  export HOTSPOT_BUILD_JOBS
-  export ALT_PARALLEL_COMPILE_JOBS
-endif
 
-# make the build log comparable
-#export HOTSPOT_BUILD_JOBS = 1
-#export ALT_PARALLEL_COMPILE_JOBS = 1
+# Number of processors for parallel building (set to 1 to make the build log comparable)
+NUM_PROC=`/usr/bin/getconf _NPROCESSORS_ONLN 2> /dev/null || :`
+NUM_PROC=${NUM_PROC:-1}
 
 # Extracting debug symbols done by dh_strip
 export ALT_OBJCOPY=fake
@@ -562,9 +554,7 @@ else
   CONFIGURE_ARGS += --disable-docs
 endif
 
-ifneq (,$(NJOBS))
-  CONFIGURE_ARGS += --with-parallel-jobs=$(NJOBS)
-endif
+CONFIGURE_ARGS += --with-num-cores=$(NUM_PROC)
 
 ifeq ($(with_pulse),yes)
   CONFIGURE_ARGS += --enable-pulse-java
