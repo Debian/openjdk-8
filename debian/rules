@@ -412,7 +412,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
 endif
 
 
-CONFIGURE_ARGS = --with-jdk-home=$(BOOTJDK_HOME)
+CONFIGURE_ARGS = --with-boot-jdk=$(BOOTJDK_HOME)
 
 # GNU/kFreeBSD don't support epoll syscall so don't try to check of it.
 ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
