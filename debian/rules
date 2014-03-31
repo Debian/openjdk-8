@@ -313,9 +313,9 @@ ifneq (,$(filter $(DEB_HOST_ARCH), sparc64))
 endif
 
 DISTRIBUTION_PATCHES += \
-	debian/patches/system-lcms.patch \
 	debian/patches/system-libjpeg.patch \
 	debian/patches/system-libpng.patch \
+	debian/patches/system-lcms.patch \
 	debian/patches/ld-symbolic-functions-$(hotspot_version).diff \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \
@@ -393,7 +393,7 @@ ifeq ($(with_pulse),yes)
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha))
-  DISTRIBUTION_BOOT_PATCHES += \
+  DISTRIBUTION_PATCHES += \
 	debian/patches/alpha-float-const.diff
 endif
 
@@ -410,7 +410,6 @@ ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
   endif    
 endif
 
-export DISTRIBUTION_PATCHES DISTRIBUTION_BOOT_PATCHES
 
 CONFIGURE_ARGS = --with-jdk-home=$(BOOTJDK_HOME)
 
@@ -799,8 +798,8 @@ ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
 	rm -f debian/$(p_jre)-i586.menu
 endif
 
-icedtea-configure: stamps/icedtea-configure
-stamps/icedtea-configure:
+icedtea-configure: patch stamps/icedtea-configure
+stamps/icedtea-configure: stamps/apply-patches.stamp
 	-cat /etc/hosts
 
 	mkdir -p bin
@@ -841,11 +840,30 @@ endif
 
 patch: stamps/patch
 stamps/patch: stamps/unpack
-ifeq ($(BOOTJDK_NAME),gcj)
-#	$(MAKE) -C build patch-boot
-endif
-#	$(MAKE) -C build patch
 	touch $@
+
+apply-patches: stamps/apply-patches.stamp
+stamps/apply-patches.stamp:
+	mkdir -p stamps;
+	
+	# Refresh debian/patches/series used by quilt
+	rm -f debian/patches/series
+	for p in $(DISTRIBUTION_PATCHES) ; \
+	do \
+	  f=$$(echo $$p | sed 's/debian\/patches\///'); \
+	  echo $$f >> debian/patches/series ; \
+	done ;
+	
+	# Apply the patches
+	quilt push -a
+	
+	touch $@
+
+unapply-patches:
+	# Revert the patches
+	quilt pop -a
+	
+	rm -f stamps/apply-patches.stamp
 
 ifeq ($(with_check),yes)
     ifneq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs) alpha ia64 mips mipsel powerpc powerpcspe ppc64 ppc64el s390 sh4))
@@ -1188,7 +1206,7 @@ else
 	echo "jtreg harness not run for this build" > jtreg_output-$(VMNAME)
 endif
 
-clean: debian-clean
+clean: debian-clean unapply-patches
 	dh_testdir
 	dh_testroot
 	rm -rf stamps build build-*
