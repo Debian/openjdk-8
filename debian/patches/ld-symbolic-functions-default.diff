@@ -1,33 +1,21 @@
---- openjdk/hotspot/agent/src/os/linux/Makefile.orig	2008-07-26 23:40:27.434474148 +0200
-+++ openjdk/hotspot/agent/src/os/linux/Makefile	2008-07-26 23:42:08.776002862 +0200
-@@ -62,7 +62,7 @@
+--- a/hotspot/agent/src/os/linux/Makefile
++++ b/hotspot/agent/src/os/linux/Makefile
+@@ -77,7 +77,7 @@
+ LFLAGS_LIBSA += $(LDFLAGS_HASH_STYLE)
  
- $(LIBSA): $(OBJS) mapfile
- 	if [ ! -d $(ARCH) ] ; then mkdir $(ARCH) ; fi
--	$(GCC) -shared $(LFLAGS_LIBSA) -o $(LIBSA) $(OBJS) $(LIBS)
-+	$(GCC) -shared -Wl,-Bsymbolic-functions $(LFLAGS_LIBSA) -o $(LIBSA) $(OBJS) $(LIBS)
+ $(LIBSA): $(ARCH) $(OBJS) mapfile
+-        $(GCC) -shared $(LFLAGS_LIBSA) -o $(LIBSA) $(OBJS) $(LIBS)
++        $(GCC) -shared -Wl,-Bsymbolic-functions $(LFLAGS_LIBSA) -o $(LIBSA) $(OBJS) $(LIBS)
  
  test.o: test.c
- 	$(GCC) -c -o test.o -g -D_GNU_SOURCE -D_$(ARCH)_ $(if $(filter $(ARCH),alpha),,-D$(ARCH)) $(INCLUDES) test.c
---- openjdk/hotspot/make/linux/makefiles/gcc.make.orig	2008-07-26 23:40:27.464474601 +0200
-+++ openjdk/hotspot/make/linux/makefiles/gcc.make	2008-07-26 23:42:08.776002862 +0200
-@@ -150,6 +150,7 @@
+ 	$(GCC) -c -o test.o -g -D_GNU_SOURCE -D$(ARCH) $(INCLUDES) test.c
+--- a/hotspot/make/linux/makefiles/gcc.make
++++ b/hotspot/make/linux/makefiles/gcc.make
+@@ -294,6 +294,7 @@
  
  # Enable linker optimization
  LFLAGS += -Xlinker -O1
 +LFLAGS += -Wl,-Bsymbolic-functions
  
- # If this is a --hash-style=gnu system, use --hash-style=both
- #   The gnu .hash section won't work on some Linux systems like SuSE 10.
-
---- openjdk/jdk/make/common/Defs-linux.gmk.orig	2008-07-26 23:40:27.444474299 +0200
-+++ openjdk/jdk/make/common/Defs-linux.gmk	2008-07-26 23:42:08.776002862 +0200
-@@ -215,7 +215,7 @@
- 
- EXTRA_LIBS += -lc
- 
--LDFLAGS_DEFS_OPTION  = -Xlinker -z -Xlinker defs
-+LDFLAGS_DEFS_OPTION  = -Xlinker -z -Xlinker defs -Wl,-Bsymbolic-functions
- LDFLAGS_COMMON  += $(LDFLAGS_DEFS_OPTION)
- 
- #
+ ifeq ($(USE_CLANG),)
+   # If this is a --hash-style=gnu system, use --hash-style=both
