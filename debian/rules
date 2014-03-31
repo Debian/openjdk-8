@@ -322,8 +322,8 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/default-jvm-cfg-$(hotspot_version).diff \
 	debian/patches/nonreparenting-wm.diff \
-	debian/patches/accessible-toolkit.patch \
-	debian/patches/fix_extra_flags-$(hotspot_version).diff
+	debian/patches/accessible-toolkit.patch
+#FIXME	debian/patches/fix_extra_flags-$(hotspot_version).diff
 
 ifeq ($(with_bridge),atk)
     DISTRIBUTION_PATCHES += \
@@ -350,17 +350,18 @@ DISTRIBUTION_PATCHES += \
 #FIXME	debian/patches/fontconfig-wqy-microhei.patch
 
 ifeq (,$(filter $(DEB_HOST_ARCH),arm64))
+#FIXME	debian/patches/no-pch-build.diff
+#FIXME	debian/patches/text-relocations.diff
   DISTRIBUTION_PATCHES += \
-	debian/patches/no-pch-build.diff \
-	debian/patches/text-relocations.diff \
 	debian/patches/hotspot-sparc-arch.diff \
 	debian/patches/sparc-stubgenerator.diff \
-	debian/patches/hotspot-no-march-i586.diff \
-	debian/patches/zero-opt.diff \
+	debian/patches/hotspot-no-march-i586.diff
+#FIXME	debian/patches/zero-opt.diff
+  DISTRIBUTION_PATCHES += \
 	debian/patches/hotspot-powerpcspe.diff \
-	debian/patches/hotspot-mips-align.diff \
-	debian/patches/zero-x32.diff \
-	debian/patches/zero-sparc.diff
+	debian/patches/hotspot-mips-align.diff
+#FIXME	debian/patches/zero-x32.diff
+#FIXME	debian/patches/zero-sparc.diff
 endif
 
 # FIXME CACAO update needed
@@ -380,8 +381,9 @@ endif
 #	debian/patches/fontconfig-korean-nanum.diff \
 #	debian/patches/fontconfig-japanese.diff
 
-  DISTRIBUTION_PATCHES += \
-	debian/patches/hotspot-libpath-$(hotspot_version).diff
+# FIXME to be updated for OpenJDK 8
+#  DISTRIBUTION_PATCHES += \
+#	debian/patches/hotspot-libpath-$(hotspot_version).diff
 
 ifeq ($(with_pulse),yes)
   # only in karmic and later the default
