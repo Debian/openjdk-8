@@ -419,7 +419,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
   CONFIGURE_ARGS += --disable-compile-against-syscalls
 endif
 
-CONFIGURE_ARGS += --with-pkgversion="$(PKGVERSION)"
+#CONFIGURE_ARGS += --with-pkgversion="$(PKGVERSION)"
 
 # there are problems --with-alt-jar=/usr/bin/fastjar,
 # see http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=217
@@ -477,9 +477,9 @@ ifeq ($(with_systemtap),yes)
   CONFIGURE_ARGS += --enable-systemtap --with-abs-install-dir=/$(basedir)
 endif
 
-ifneq (,$(alternate_vms))
-  CONFIGURE_ARGS += --with-additional-vms=$(subst $(SPACE),$(COMMA),$(alternate_vms))
-endif
+#ifneq (,$(alternate_vms))
+#  CONFIGURE_ARGS += --with-additional-vms=$(subst $(SPACE),$(COMMA),$(alternate_vms))
+#endif
 
 CONFIGURE_ARGS += --host=$(DEB_HOST_GNU_TYPE) --build=$(DEB_BUILD_GNU_TYPE)
 
