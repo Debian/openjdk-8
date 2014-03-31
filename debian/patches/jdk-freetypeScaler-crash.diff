@@ -24,18 +24,18 @@ Summary: NewGlobalRef/DeleteGlobalRef as needed.
 Reviewed-by:
 Contributed-by: yamauchi@google.com
 
---- openjdk/jdk/make/sun/font/mapfile-vers.openjdk.orig	2009-05-21 13:48:03.000000000 +0000
-+++ openjdk/jdk/make/sun/font/mapfile-vers.openjdk	2009-05-26 19:53:17.000000000 +0000
+--- a/jdk/make/mapfiles/libfontmanager/mapfile-vers.openjdk
++++ b/jdk/make/mapfiles/libfontmanager/mapfile-vers.openjdk
 @@ -29,6 +29,7 @@
  
  SUNWprivate_1.1 {
  	global:
 +                JNI_OnLoad;
                  getSunFontIDs;
-                 newLayoutTableCache; 
+                 newLayoutTableCache;
                  freeLayoutTableCache;
---- openjdk/jdk/src/share/native/sun/font/freetypeScaler.c.orig	2009-05-21 13:48:03.000000000 +0000
-+++ openjdk/jdk/src/share/native/sun/font/freetypeScaler.c	2009-05-26 19:53:17.000000000 +0000
+--- a/jdk/src/share/native/sun/font/freetypeScaler.c
++++ b/jdk/src/share/native/sun/font/freetypeScaler.c
 @@ -48,16 +48,6 @@
  #define  ROUND(x) ((int) (x+0.5))
  
@@ -67,7 +67,7 @@ Contributed-by: yamauchi@google.com
  /**************** Error handling utilities *****************/
  
  static jmethodID invalidateScalerMID;
-@@ -108,6 +105,10 @@
+@@ -120,6 +117,10 @@
      FT_Done_Face(scalerInfo->face);
      FT_Done_FreeType(scalerInfo->library);
  
@@ -78,7 +78,7 @@ Contributed-by: yamauchi@google.com
      if (scalerInfo->directBuffer != NULL) {
          (*env)->DeleteGlobalRef(env, scalerInfo->directBuffer);
      }
-@@ -131,10 +132,9 @@
+@@ -147,10 +148,9 @@
  
  #define FILEDATACACHESIZE 1024
  
@@ -90,7 +90,7 @@ Contributed-by: yamauchi@google.com
      jclass tmpClass = (*env)->FindClass(env, "sun/font/TrueTypeFont");
      jfieldID platNameField =
           (*env)->GetFieldID(env, tmpClass, "platName", "Ljava/lang/String;");
-@@ -150,8 +150,8 @@
+@@ -166,8 +166,8 @@
                                          unsigned char* destBuffer,
                                          unsigned long numBytes)
  {
@@ -100,7 +100,7 @@ Contributed-by: yamauchi@google.com
      jobject bBuffer;
      int bread = 0;
  
-@@ -245,8 +245,7 @@
+@@ -260,8 +260,7 @@
      if (scalerInfo == NULL)
          return 0;
  
@@ -110,7 +110,7 @@ Contributed-by: yamauchi@google.com
      scalerInfo->fontDataOffset = 0;
      scalerInfo->fontDataLength = 0;
      scalerInfo->fileSize = filesize;
-@@ -263,6 +262,7 @@
+@@ -278,6 +277,7 @@
      */
      error = FT_Init_FreeType(&scalerInfo->library);
      if (error) {
@@ -118,7 +118,7 @@ Contributed-by: yamauchi@google.com
          free(scalerInfo);
          return 0;
      }
-@@ -331,6 +331,7 @@
+@@ -348,6 +348,7 @@
          }
          if (scalerInfo->fontData != NULL)
              free(scalerInfo->fontData);
@@ -126,7 +126,7 @@ Contributed-by: yamauchi@google.com
          free(scalerInfo);
          return 0;
      }
-@@ -391,8 +392,10 @@
+@@ -408,8 +409,10 @@
                            FTScalerContext *context) {
      int errCode = 0;
  

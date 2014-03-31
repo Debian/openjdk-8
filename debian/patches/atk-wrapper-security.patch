@@ -1,6 +1,6 @@
---- openjdk/jdk/src/share/lib/security/java.security-linux
-+++ openjdk/jdk/src/share/lib/security/java.security-linux
-@@ -128,6 +128,7 @@
+--- a/jdk/src/share/lib/security/java.security-linux
++++ b/jdk/src/share/lib/security/java.security-linux
+@@ -177,6 +177,7 @@
  # corresponding RuntimePermission ("accessClassInPackage."+package) has
  # been granted.
  package.access=sun.,\

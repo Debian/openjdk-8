@@ -1,8 +1,8 @@
 http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4953367
 
---- openjdk/jdk/src/solaris/native/java/lang/java_props_md.c~	2012-07-25 19:24:09.000000000 +0200
-+++ openjdk/jdk/src/solaris/native/java/lang/java_props_md.c	2012-08-29 17:15:33.184491738 +0200
-@@ -560,6 +560,7 @@
+--- a/jdk/src/solaris/native/java/lang/java_props_md.c
++++ b/jdk/src/solaris/native/java/lang/java_props_md.c
+@@ -612,6 +612,7 @@
      sprops.path_separator = ":";
      sprops.line_separator = "\n";
  
@@ -10,7 +10,7 @@ http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=4953367
  #if !defined(_ALLBSD_SOURCE)
      /* Append CDE message and resource search path to NLSPATH and
       * XFILESEARCHPATH, in order to pick localized message for
-@@ -568,7 +569,7 @@
+@@ -620,7 +621,7 @@
      setPathEnvironment("NLSPATH=/usr/dt/lib/nls/msg/%L/%N.cat");
      setPathEnvironment("XFILESEARCHPATH=/usr/dt/app-defaults/%L/Dt");
  #endif

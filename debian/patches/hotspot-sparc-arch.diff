@@ -1,6 +1,6 @@
---- openjdk/hotspot/make/linux/makefiles/defs.make.orig	2011-07-13 09:00:57.000000000 +0200
-+++ openjdk/hotspot/make/linux/makefiles/defs.make	2011-07-13 08:58:01.000000000 +0200
-@@ -58,7 +58,7 @@
+--- a/hotspot/make/linux/makefiles/defs.make
++++ b/hotspot/make/linux/makefiles/defs.make
+@@ -64,7 +64,7 @@
  endif
  
  # sparc

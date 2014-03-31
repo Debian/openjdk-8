@@ -1,6 +1,6 @@
---- openjdk/hotspot/src/cpu/zero/vm/cppInterpreter_zero.cpp
-+++ openjdk/hotspot/src/cpu/zero/vm/cppInterpreter_zero.cpp
-@@ -322,7 +322,7 @@
+--- a/hotspot/src/cpu/zero/vm/cppInterpreter_zero.cpp
++++ b/hotspot/src/cpu/zero/vm/cppInterpreter_zero.cpp
+@@ -329,7 +329,7 @@
    ThreadStateTransition::transition_from_java(thread, _thread_in_native);
  
    // Make the call

@@ -1,9 +1,9 @@
 Author: Damien Raude-Morvan <drazzib@debian.org>
 Description: Fix FTBFS on sparc on stubGenerator_sparc.cpp by using explicit class typedef.
 
---- openjdk/hotspot/src/cpu/sparc/vm/stubGenerator_sparc.cpp.orig	2012-02-15 08:26:53.000000000 +0000
-+++ openjdk/hotspot/src/cpu/sparc/vm/stubGenerator_sparc.cpp	2012-02-26 10:26:11.000000000 +0000
-@@ -1126,7 +1126,7 @@
+--- a/hotspot/src/cpu/sparc/vm/stubGenerator_sparc.cpp
++++ b/hotspot/src/cpu/sparc/vm/stubGenerator_sparc.cpp
+@@ -1055,7 +1055,7 @@
                                                Label& L_loop, bool use_prefetch, bool use_bis);
  
    void disjoint_copy_core(Register from, Register to, Register count, int log2_elem_size,
@@ -12,7 +12,7 @@ Description: Fix FTBFS on sparc on stubGenerator_sparc.cpp by using explicit cla
      Label L_copy;
  
      assert(log2_elem_size <= 3, "the following code should be changed");
-@@ -1277,7 +1277,8 @@
+@@ -1206,7 +1206,8 @@
      __ inc(from, 8);
      __ sllx(O3, left_shift,  O3);
  
@@ -22,7 +22,7 @@ Description: Fix FTBFS on sparc on stubGenerator_sparc.cpp by using explicit cla
  
      __ inccc(count, count_dec>>1 ); // + 8 bytes
      __ brx(Assembler::negative, true, Assembler::pn, L_copy_last_bytes);
-@@ -2156,7 +2157,8 @@
+@@ -2085,7 +2086,8 @@
        __ dec(count, 4);   // The cmp at the beginning guaranty count >= 4
        __ sllx(O3, 32,  O3);
  
@@ -32,7 +32,7 @@ Description: Fix FTBFS on sparc on stubGenerator_sparc.cpp by using explicit cla
  
        __ br(Assembler::always, false, Assembler::pt, L_copy_4_bytes);
        __ delayed()->inc(count, 4); // restore 'count'
-@@ -2437,7 +2439,8 @@
+@@ -2366,7 +2368,8 @@
      // count >= 0 (original count - 8)
      __ mov(from, from64);
  

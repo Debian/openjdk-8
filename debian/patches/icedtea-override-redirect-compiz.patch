@@ -1,12 +1,10 @@
-Index: openjdk/jdk/src/solaris/classes/sun/awt/X11/XWindowPeer.java
-===================================================================
---- openjdk/jdk/src/solaris/classes/sun/awt/X11/XWindowPeer.java.orig
-+++ openjdk/jdk/src/solaris/classes/sun/awt/X11/XWindowPeer.java
-@@ -1143,6 +1143,7 @@
+--- a/jdk/src/solaris/classes/sun/awt/X11/XWindowPeer.java
++++ b/jdk/src/solaris/classes/sun/awt/X11/XWindowPeer.java
+@@ -1215,6 +1215,7 @@
+ 
      boolean isOverrideRedirect() {
          return XWM.getWMID() == XWM.OPENLOOK_WM ||
-             (XWM.getWMID() == XWM.METACITY_WM ? true : false) ||
 +            XWM.getWMID() == XWM.COMPIZ_WM ||
-             target.getName().equals("###overrideRedirect###") ||
              Window.Type.POPUP.equals(getWindowType());
      }
+ 
