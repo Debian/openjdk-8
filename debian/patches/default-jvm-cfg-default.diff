@@ -1,6 +1,6 @@
---- openjdk/jdk/src/share/bin/java.c.orig
-+++ openjdk/jdk/src/share/bin/java.c
-@@ -1580,7 +1580,7 @@
+--- a/jdk/src/share/bin/java.c
++++ b/jdk/src/share/bin/java.c
+@@ -1623,7 +1623,7 @@
  ReadKnownVMs(const char *jvmCfgName, jboolean speculative)
  {
      FILE *jvmCfg;
@@ -9,7 +9,7 @@
      int cnt = 0;
      int lineno = 0;
      jlong start, end;
-@@ -1595,6 +1595,10 @@
+@@ -1638,6 +1638,10 @@
  
      jvmCfg = fopen(jvmCfgName, "r");
      if (jvmCfg == NULL) {
@@ -20,25 +20,3 @@
        if (!speculative) {
          JLI_ReportErrorMessage(CFG_ERROR6, jvmCfgName);
          exit(1);
---- openjdk/hotspot/src/share/tools/launcher/java.c.orig
-+++ openjdk/hotspot/src/share/tools/launcher/java.c
-@@ -1863,7 +1863,7 @@
- ReadKnownVMs(const char *jrepath, char * arch, jboolean speculative)
- {
-     FILE *jvmCfg;
--    char jvmCfgName[MAXPATHLEN+20];
-+    char jvmCfgName[MAXPATHLEN+30];
-     char line[MAXPATHLEN+20];
-     int cnt = 0;
-     int lineno = 0;
-@@ -1884,6 +1884,10 @@
- 
-     jvmCfg = fopen(jvmCfgName, "r");
-     if (jvmCfg == NULL) {
-+      strcat(jvmCfgName, "-default");
-+      jvmCfg = fopen(jvmCfgName, "r");
-+    }
-+    if (jvmCfg == NULL) {
-       if (!speculative) {
-         ReportErrorMessage2("Error: could not open `%s'", jvmCfgName,
-                             JNI_TRUE);
