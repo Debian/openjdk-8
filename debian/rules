@@ -797,8 +797,8 @@ ifneq (,$(filter $(DEB_HOST_ARCH), i386 lpia))
 	rm -f debian/$(p_jre)-i586.menu
 endif
 
-icedtea-configure: patch stamps/icedtea-configure
-stamps/icedtea-configure: stamps/apply-patches.stamp
+openjdk-configure: stamps/openjdk-configure
+stamps/openjdk-configure: patch
 	-cat /etc/hosts
 
 	mkdir -p bin
@@ -828,23 +828,15 @@ endif
 	touch $@
 
 unpack: stamps/unpack
-stamps/unpack: stamps/icedtea-configure
+stamps/unpack:
+	mkdir -p stamps;
+	
 	$(MAKE) -f debian/rules packaging-files
-
-#	$(MAKE) -C build extract
-ifeq ($(BOOTJDK_NAME),gcj)
-#	$(MAKE) -C build stamps/extract-ecj.stamp
-endif
+	
 	touch $@
 
 patch: stamps/patch
 stamps/patch: stamps/unpack
-	touch $@
-
-apply-patches: stamps/apply-patches.stamp
-stamps/apply-patches.stamp:
-	mkdir -p stamps;
-	
 	# Refresh debian/patches/series used by quilt
 	rm -f debian/patches/series
 	for p in $(DISTRIBUTION_PATCHES) ; \
@@ -858,9 +850,9 @@ stamps/apply-patches.stamp:
 	
 	touch $@
 
-unapply-patches:
+unpatch:
 	# Revert the patches
-	quilt pop -a
+	-quilt pop -a
 	
 	rm -f stamps/apply-patches.stamp
 
@@ -957,7 +949,7 @@ build: pre-build $(build_stamps)
 	fi
 	rm -f buildwatch.pid
 
-stamps/build: stamps/patch
+stamps/build: openjdk-configure
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel armhf hppa arm64 ia64 m68k mips mipsel powerpc powerpcspe ppc64 ppc64el s390 s390x sparc sparc64))
 	sh -c 'sh debian/buildwatch.sh $(CURDIR)/build &'
 endif
@@ -1205,7 +1197,7 @@ else
 	echo "jtreg harness not run for this build" > jtreg_output-$(VMNAME)
 endif
 
-clean: debian-clean unapply-patches
+clean: debian-clean unpatch
 	dh_testdir
 	dh_testroot
 	rm -rf stamps build build-*
