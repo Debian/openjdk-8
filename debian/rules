@@ -320,7 +320,6 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \
 	debian/patches/jdk-freetypeScaler-crash.diff \
-	debian/patches/icedtea-pretend-memory.diff \
 	debian/patches/default-jvm-cfg-$(hotspot_version).diff \
 	debian/patches/nonreparenting-wm.diff \
 	debian/patches/accessible-toolkit.patch \
