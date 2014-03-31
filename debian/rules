@@ -342,12 +342,12 @@ endif
 DISTRIBUTION_PATCHES += \
 	debian/patches/icedtea-override-redirect-compiz.patch \
 	debian/patches/icedtea-4953367.patch \
-	debian/patches/fontconfig-wqy-microhei.patch \
 	debian/patches/icc_loading_with_symlink.diff \
 	debian/patches/zero-fpu-control-is-noop.diff \
 	debian/patches/zero-missing-headers.diff \
 	debian/patches/libpcsclite-dlopen.diff \
-	debian/patches/dnd-files.patch \
+	debian/patches/dnd-files.patch
+#FIXME	debian/patches/fontconfig-wqy-microhei.patch
 
 ifeq (,$(filter $(DEB_HOST_ARCH),arm64))
   DISTRIBUTION_PATCHES += \
@@ -375,9 +375,10 @@ endif
 # FIXME needs an update:
 #	$(if $(with_wgy_zenhai),,debian/patches/fontconfig-arphic-uming.diff) \
 
-  DISTRIBUTION_PATCHES += \
-	debian/patches/fontconfig-korean-nanum.diff \
-	debian/patches/fontconfig-japanese.diff
+# FIXME to be updated for OpenJDK 8
+#  DISTRIBUTION_PATCHES += \
+#	debian/patches/fontconfig-korean-nanum.diff \
+#	debian/patches/fontconfig-japanese.diff
 
   DISTRIBUTION_PATCHES += \
 	debian/patches/hotspot-libpath-$(hotspot_version).diff
