@@ -1662,12 +1662,7 @@ ifeq ($(with_systemtap),yes)
 	cp -p build/tapset/hotspot.stp $(d_jrehl)/usr/share/systemtap/tapset/
 endif
 
-	: # Install stuff to generate font config and timezone files.
 	mkdir -p $(d_lib)/$(commonbasedir)/jre/lib
-	cp -p build/openjdk.build/btjars/compilefontconfig.jar \
-		$(d_lib)/$(commonbasedir)/jre/lib/
-	cp -p build/openjdk.build/btjars/javazic.jar \
-		$(d_lib)/$(commonbasedir)/jre/lib/
 
 ifneq (,$(DEB_HOST_MULTIARCH))
   ifneq ($(p_jrehl),$(p_lib))
