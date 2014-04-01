@@ -967,11 +967,11 @@ endif
 
 ifeq ($(DEB_HOST_ARCH),arm64)
 	: # FIXME: move that to the upstream make files
-	if [ ! -d build/openjdk.build/j2sdk-image/jre/lib/aarch64/client ]; then \
-	  cp -a build/openjdk.build/j2sdk-image/jre/lib/aarch64/server \
-	    build/openjdk.build/j2sdk-image/jre/lib/aarch64/client; \
-	  cp -p build/openjdk.build/hotspot/outputdir/linux_aarch64_compiler1/product/libjvm.so \
-	    build/openjdk.build/j2sdk-image/jre/lib/aarch64/client/.; \
+	if [ ! -d build/$(sdkimg)/jre/lib/aarch64/client ]; then \
+	  cp -a build/$(sdkimg)/jre/lib/aarch64/server \
+	    build/$(sdkimg)/jre/lib/aarch64/client; \
+	  cp -p build/hotspot/linux_aarch64_compiler1/product/libjvm.so \
+	    build/$(sdkimg)/jre/lib/aarch64/client/.; \
 	fi
 endif
 
@@ -1696,7 +1696,7 @@ ifeq ($(with_docs),yes)
 	dh_installchangelogs -p$(p_doc)
 	dh_installdocs -p$(p_doc)
 	mkdir -p $(d_doc)/usr/share/doc/$(p_jrehl)
-	for i in build/openjdk.build/docs/*; do \
+	for i in build/docs/*; do \
 	  [ -e $$i ] || continue; \
 	  b=$$(basename $$i); \
 	  cp -a $$i $(d_doc)/usr/share/doc/$(p_jrehl)/; \
