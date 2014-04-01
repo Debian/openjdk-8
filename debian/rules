@@ -839,6 +839,16 @@ endif
 unpack: stamps/unpack
 stamps/unpack:
 	mkdir -p stamps;
+
+ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
+	echo "Extracting aarch64-port-jdk8-$(buildver).tar.xz..."
+	tar -xf aarch64-port-jdk8-$(buildver).tar.xz
+else
+	echo "Extracting jdk8-jdk8-$(buildver).tar.xz..."
+	tar -xf jdk8-jdk8-$(buildver).tar.xz
+endif
+	mv jdk8/* .
+	rm -Rf jdk8
 	
 	$(MAKE) -f debian/rules packaging-files
 	
@@ -1214,6 +1224,9 @@ clean: debian-clean unpatch
 	rm -rf bin
 	rm -f jtreg_output* xvfb-run.log
 	rm -f buildwatch.pid
+	rm -Rf ASSEMBLY_EXCEPTION LICENSE Makefile README README-builds.html \
+	       THIRD_PARTY_README bin build common configure corba get_source.sh \
+	       hotspot jaxp jaxws jdk jdk8 langtools make nashorn test .pc
 
 	dh_clean
 
