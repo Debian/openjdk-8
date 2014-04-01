@@ -1375,6 +1375,7 @@ endif
 	  echo '$(basedir)/jre/lib/jexec'; \
 	  echo '$(basedir)/jre/lib/rt.jar'; \
 	  echo '$(basedir)/jre/lib/security/*_policy.jar'; \
+	  echo '$(basedir)/jre/lib/security/blacklisted.certs'; \
 	  echo '$(basedir)/jre/man/ja'; \
 	  echo '$(basedir)/man/ja'; \
 	  echo '$(basedir)/bin/java-rmi.cgi'; \
