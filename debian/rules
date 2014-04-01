@@ -1537,7 +1537,7 @@ endif
 
 	: # install icons
 	for i in 16 24 32 48; do \
-	  install -D -m 644 -p build/openjdk/jdk/src/solaris/classes/sun/awt/X11/java-icon$${i}.png \
+	  install -D -m 644 -p jdk/src/solaris/classes/sun/awt/X11/java-icon$${i}.png \
 	    $(d_jre)/usr/share/icons/hicolor/$${i}x$${i}/apps/$(basename).png; \
 	done
 
