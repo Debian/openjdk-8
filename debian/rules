@@ -1806,4 +1806,8 @@ endif
 	dh_builddeb -s $(nodemo) $(nojrec) $(nojrej) $(nojrez) #$(bd_options)
 
 binary: binary-arch binary-indep
+
+get-orig-source:
+	./debian/orig-tar.sh
+
 .PHONY: build clean binary-indep binary-arch binary install packaging-files
