@@ -1342,8 +1342,9 @@ ifneq (,$(filter $(DEB_HOST_ARCH),$(jamvm_defaults)))
 endif
 	printf -- '-avian KNOWN\n' >> $(d)/$(etcdir)/jvm.cfg
 
-	mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.properties.src \
-		$(d)/$(etcdir)/fontconfig.properties
+	# FIXME
+	#mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.properties.src \
+	#	$(d)/$(etcdir)/fontconfig.properties
 
 	: # remove files which we do not want to distribute
 	rm -f $(d)/$(basedir)/jre/lib/fontconfig*.properties.src
