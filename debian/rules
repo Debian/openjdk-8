@@ -77,8 +77,8 @@ else
   etcdir	= etc/$(jdirname)
 endif
 security	= $(etcdir)/security
-jreimg		= openjdk.build/j2re-image
-sdkimg		= openjdk.build/j2sdk-image
+jreimg		= images/j2re-image
+sdkimg		= images/j2sdk-image
 
 COMMA=,
 SPACE = $(EMPTY) $(EMPTY)
