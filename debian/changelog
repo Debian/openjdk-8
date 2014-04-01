@@ -1,7 +1,9 @@
-openjdk-8 (8u0~b132-1) UNRELEASED; urgency=medium
+openjdk-8 (8~b132-1) UNRELEASED; urgency=medium
 
+  * Team upload
   * Initial OpenJDK 8 package derived from the OpenJDK 7 package
     (Closes: #742864)
+  * Changed to 3.0 (quilt) source format
 
  -- Emmanuel Bourg <ebourg@apache.org>  Fri, 28 Mar 2014 23:24:02 +0100
 
