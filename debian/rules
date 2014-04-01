@@ -1304,10 +1304,7 @@ ifneq (,$(pkg_certs))
 	rm -f $(d)/$(basedir)/jre/lib/security/cacerts
 endif
 
-	grep -v '^nssLibraryDirectory' $(d)/$(basedir)/jre/lib/security/nss.cfg \
-		> $(d)/$(basedir)/jre/lib/security/nss.cfg.new
-	mv -f $(d)/$(basedir)/jre/lib/security/nss.cfg.new \
-		$(d)/$(basedir)/jre/lib/security/nss.cfg
+	cp debian/nss.cfg $(d)/$(basedir)/jre/lib/security/nss.cfg
 
 	: # move config files to $(etcdir) and symlink them.
 	for i in \
