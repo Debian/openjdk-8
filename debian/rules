@@ -955,7 +955,7 @@ stamps/build: openjdk-configure
 ifneq (,$(filter $(DEB_HOST_ARCH), alpha arm armel armhf hppa arm64 ia64 m68k mips mipsel powerpc powerpcspe ppc64 ppc64el s390 s390x sparc sparc64))
 	sh -c 'sh debian/buildwatch.sh $(CURDIR)/build &'
 endif
-	if $(EXTRA_BUILD_ENV) $(MAKE) -C build $(build_target) $(EXTRA_MAKE_FLAGS); then \
+	if $(EXTRA_BUILD_ENV) $(MAKE) -C build all $(build_target) $(EXTRA_MAKE_FLAGS); then \
 	  : ; \
 	else \
 	  if [ -f buildwatch.pid ]; then \
