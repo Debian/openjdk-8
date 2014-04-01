@@ -472,7 +472,8 @@ CONFIGURE_ARGS += --with-zlib=system \
                   --with-libjpeg=system \
                   --with-giflib=system \
                   --with-libpng=system \
-                  --with-lcms=system
+                  --with-lcms=system \
+                  --enable-unlimited-crypto
 
 ifeq ($(with_systemtap),yes)
   CONFIGURE_ARGS += --enable-systemtap --with-abs-install-dir=/$(basedir)
