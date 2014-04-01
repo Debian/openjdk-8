@@ -316,6 +316,7 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/system-libjpeg.patch \
 	debian/patches/system-libpng.patch \
 	debian/patches/system-lcms.patch \
+	debian/patches/disable-doclint-by-default.patch \
 	debian/patches/ld-symbolic-functions-$(hotspot_version).diff \
 	debian/patches/shebang.diff \
 	debian/patches/jexec.diff \

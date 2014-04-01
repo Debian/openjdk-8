@@ -1,0 +1,26 @@
+Description: Disable doclint by default
+ OpenJDK 8 adds and enables doclint by default. This catches issues in
+ javadoc comments. It is too strict, breaks javadoc compilation and, in
+ general, breaks the build for old code known to build with previous
+ versions of OpenJDK.
+ .
+ See: http://blog.joda.org/2014/02/turning-off-doclint-in-jdk-8-javadoc.html
+ See: https://lists.fedoraproject.org/pipermail/java-devel/2014-February/005150.html
+Author: Andrew John Hughes <ahughes@redhat.com>
+Forwarded: no
+--- a/langtools/src/share/classes/com/sun/tools/javadoc/DocEnv.java
++++ b/langtools/src/share/classes/com/sun/tools/javadoc/DocEnv.java
+@@ -811,10 +811,9 @@
+             doclintOpts.add(opt == null ? DocLint.XMSGS_OPTION : DocLint.XMSGS_CUSTOM_PREFIX + opt);
+         }
+ 
+-        if (doclintOpts.isEmpty()) {
+-            doclintOpts.add(DocLint.XMSGS_OPTION);
+-        } else if (doclintOpts.size() == 1
+-                && doclintOpts.get(0).equals(DocLint.XMSGS_CUSTOM_PREFIX + "none")) {
++        if (doclintOpts.isEmpty() ||
++	    (doclintOpts.size() == 1
++	     && doclintOpts.get(0).equals(DocLint.XMSGS_CUSTOM_PREFIX + "none"))) {
+             return;
+         }
+ 
