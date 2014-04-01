@@ -62,6 +62,7 @@ endif
 p_lib_arch	= all
 jvmver		= 1.8.0
 shortver	= 8
+buildver	= $(shell echo $(PKGVERSION) | sed -n 's/.*\(b[0-9]\+\).*/\1/p')
 ifneq (,$(DEB_HOST_MULTIARCH))
   jdirname	= java-$(shortver)-$(origin)-$(DEB_HOST_ARCH)
   jdiralias	= java-$(jvmver)-$(origin)-$(DEB_HOST_ARCH)
@@ -421,6 +422,8 @@ ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
 endif
 
 #CONFIGURE_ARGS += --with-pkgversion="$(PKGVERSION)"
+
+CONFIGURE_ARGS += --with-build-number=$(buildver)
 
 # there are problems --with-alt-jar=/usr/bin/fastjar,
 # see http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=217
