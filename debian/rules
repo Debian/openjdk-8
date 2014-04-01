@@ -476,6 +476,7 @@ CONFIGURE_ARGS += --with-zlib=system \
                   --with-giflib=system \
                   --with-libpng=system \
                   --with-lcms=system \
+                  --with-stdc++lib=dynamic \
                   --enable-unlimited-crypto
 
 ifeq ($(with_systemtap),yes)
