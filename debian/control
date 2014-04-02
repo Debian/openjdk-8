@@ -29,7 +29,7 @@ Architecture: alpha amd64 armel armhf arm64 i386 ia64 lpia mips mipsel powerpc p
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}, ${multiarch:Depends}
 Depends: ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
-Recommends: ${dlopenhl:Recommends}, ${jamvm:Recommends}
+Recommends: ${dlopenhl:Recommends}
 Suggests: ${cacao:Recommends}, libnss-mdns, sun-java6-fonts, fonts-dejavu-extra, fonts-ipafont-gothic, fonts-ipafont-mincho, ttf-wqy-microhei | ttf-wqy-zenhei, ttf-indic-fonts,
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, java7-runtime-headless, java8-runtime-headless, ${defaultvm:Provides}, ${jvm:Provides}
 Breaks: icedtea-netx (<< 1.4-2)

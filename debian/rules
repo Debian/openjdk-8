@@ -677,14 +677,9 @@ ifneq (,$(DEB_HOST_MULTIARCH))
 	'-Vmultiarch:Depends=multiarch-support'
 endif
 
-ifneq (,$(filter-out $(hotspot_archs), $(cacao_archs)))
-  control_vars += '-Vcacao:Recommends=$(p_jrec) (= $${binary:Version})'
-endif
 ifneq (,$(filter-out $(hotspot_archs), $(jamvm_archs)))
   ifneq (,$(filter $(DEB_HOST_ARCH),$(jamvm_defaults)))
     control_vars += '-Vjredefault:Depends=$(p_jrej) (= $${binary:Version})'
-  else
-    control_vars += '-Vjamvm:Recommends=$(p_jrej) (= $${binary:Version})'
   endif
 endif
 

@@ -29,8 +29,8 @@ Architecture: @any_archs@
 Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}, ${multiarch:Depends}
 Depends: ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:Depends}, ${dlopenhl:Depends}, ${shlibs:Depends}, ${misc:Depends}
-Recommends: ${dlopenhl:Recommends}, ${jamvm:Recommends}
-Suggests: ${cacao:Recommends}, libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
+Recommends: ${dlopenhl:Recommends}
+Suggests: libnss-mdns, sun-java6-fonts, @core_fonts@, @cjk_fonts@
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, java7-runtime-headless, java8-runtime-headless, ${defaultvm:Provides}, ${jvm:Provides}
 Breaks: icedtea-netx (<< 1.4-2)
 Description: OpenJDK Java runtime, using ${vm:Name} (headless)
