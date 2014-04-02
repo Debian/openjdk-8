@@ -48,8 +48,6 @@ do
     mv "${subrepo}-${VERSION}" "${subrepo}"
 done
 
-rm -vr jdk/src/share/native/sun/security/ec/impl
-
 popd
 
 tar cJf ${REPO_NAME}-${VERSION}.tar.xz jdk8
