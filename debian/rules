@@ -673,8 +673,7 @@ control_vars = \
 
 ifneq (,$(DEB_HOST_MULTIARCH))
   control_vars += \
-	'-Vmultiarch:Depends=multiarch-support' \
-	'-Vmultiarch:Conflicts=icedtea-netx (<< 1.1.1-2~)'
+	'-Vmultiarch:Depends=multiarch-support'
 endif
 
 ifneq (,$(filter-out $(hotspot_archs), $(cacao_archs)))

@@ -32,7 +32,6 @@ Depends: ${jredefault:Depends}, ${cacert:Depends}, ${tzdata:Depends}, ${jcommon:
 Recommends: ${dlopenhl:Recommends}, ${jamvm:Recommends}
 Suggests: ${cacao:Recommends}, libnss-mdns, sun-java6-fonts, fonts-dejavu-extra, fonts-ipafont-gothic, fonts-ipafont-mincho, ttf-wqy-microhei | ttf-wqy-zenhei, ttf-indic-fonts,
 Provides: java-runtime-headless, java2-runtime-headless, java5-runtime-headless, java6-runtime-headless, java7-runtime-headless, java8-runtime-headless, ${defaultvm:Provides}, ${jvm:Provides}
-Conflicts: ${multiarch:Conflicts}
 Breaks: icedtea-netx (<< 1.4-2)
 Description: OpenJDK Java runtime, using ${vm:Name} (headless)
  Minimal Java runtime - needed for executing non GUI Java programs.
@@ -48,7 +47,6 @@ Pre-Depends: ${dpkg:Depends}
 Depends: openjdk-8-jre-headless (= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
 Recommends: ${dlopenjre:Recommends}, fonts-dejavu-extra
 Suggests: icedtea-7-plugin, ${pkg:pulseaudio}
-Conflicts: icedtea-gcjwebplugin (<< 1.0-1ubuntu4)
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime, java7-runtime, java8-runtime
 Description: OpenJDK Java runtime, using ${vm:Name}
  Full Java runtime environment - needed for executing Java GUI and Webstart
