@@ -93,7 +93,6 @@ export ALT_OBJCOPY=fake
 export ALT_STRIP_POLICY=no_strip
 
 with_check = $(if $(findstring nocheck, $(DEB_BUILD_OPTIONS)),,yes)
-with_check = no
 ifneq (,$(filter $(DEB_HOST_ARCH), armel))
   with_check = disabled running check on $(DEB_HOST_ARCH)
 endif
@@ -307,6 +306,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), sparc64))
 endif
 
 DISTRIBUTION_PATCHES += \
+        debian/patches/fix-jtreg-location.patch \
 	debian/patches/system-libjpeg.patch \
 	debian/patches/system-libpng.patch \
 	debian/patches/system-lcms.patch \
@@ -471,6 +471,7 @@ CONFIGURE_ARGS += --with-zlib=system \
                   --with-lcms=system \
                   --with-stdc++lib=dynamic \
                   --with-milestone="fcs" \
+                  --with-jtreg \
                   --enable-unlimited-crypto
 
 ifeq ($(with_systemtap),yes)

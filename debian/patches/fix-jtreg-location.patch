@@ -1,0 +1,14 @@
+Description: Fixes the path to jtreg on Debian
+Author: Emmanuel Bourg <ebourg@apache.org>
+Forwarded: no
+--- a/common/autoconf/generated-configure.sh
++++ b/common/autoconf/generated-configure.sh
+@@ -16645,7 +16645,7 @@
+ 
+ 
+       # jtreg win32 script works for everybody
+-      JTREGEXE="$JT_HOME/win32/bin/jtreg"
++      JTREGEXE="/usr/bin/jtreg"
+ 
+       if test ! -f "$JTREGEXE"; then
+         as_fn_error $? "JTReg executable does not exist: $JTREGEXE" "$LINENO" 5
