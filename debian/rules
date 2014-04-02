@@ -1724,7 +1724,7 @@ endif
 	-dh_icons -i $(nodocs) || dh_iconcache -i $(nodocs)
 #	dh_installdebconf -i $(nodocs)
 	dh_link -i $(nodocs)
-	dh_compress -i $(nodocs) -Xexamples -Xdemos -Xpackage-list
+	dh_compress -i $(nodocs) -Xexamples -Xdemo -Xpackage-list
 	dh_fixperms -i $(nodocs)
 	dh_installdeb -i $(nodocs)
 	dh_gencontrol -i $(nodocs) -- $(control_vars)
@@ -1800,7 +1800,7 @@ ifeq (,$(findstring nostrip, $(DEB_BUILD_OPTIONS)))
 	done
 endif
 
-	dh_compress -s $(nodemo) $(nojrec) $(nojrej) $(nojrez) -Xexamples -Xdemos -Xpackage-list
+	dh_compress -s $(nodemo) $(nojrec) $(nojrej) $(nojrez) -Xexamples -Xdemo -Xpackage-list
 	dh_fixperms -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)
 	dh_makeshlibs -p$(p_jrehl) -p$(p_jre)
 	dh_shlibdeps -s $(nodemo) $(nojrec) $(nojrej) $(nojrez) -L $(p_jrehl) \
