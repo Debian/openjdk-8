@@ -202,9 +202,9 @@ req_openjdk_ver = 7~b130~pre0
 dpkg_buildflags_hs = DEB_CFLAGS_MAINT_STRIP="-O2" DEB_CXXFLAGS_MAINT_STRIP="-O2"
 dpkg_buildflags_hs += dpkg-buildflags
 export EXTRA_CPPFLAGS_HS := $(shell $(dpkg_buildflags_hs) --get CPPFLAGS)
-export EXTRA_CFLAGS_HS := $(shell $(dpkg_buildflags_hs) --get CFLAGS) $(shell $(dpkg_buildflags_hs) --get CPPFLAGS)
+export EXTRA_CFLAGS_HS   := $(shell $(dpkg_buildflags_hs) --get CFLAGS) $(shell $(dpkg_buildflags_hs) --get CPPFLAGS)
 export EXTRA_CXXFLAGS_HS := $(shell $(dpkg_buildflags_hs) --get CXXFLAGS)
-export EXTRA_LDFLAGS_HS := $(shell $(dpkg_buildflags_hs) --get LDFLAGS)
+export EXTRA_LDFLAGS_HS  := $(shell $(dpkg_buildflags_hs) --get LDFLAGS)
 
 # for JDK: jdk/make/common/Defs.gmk
 # Don't overwrite JDK opt level :
@@ -213,16 +213,9 @@ export EXTRA_LDFLAGS_HS := $(shell $(dpkg_buildflags_hs) --get LDFLAGS)
 dpkg_buildflags_jdk = DEB_CFLAGS_MAINT_STRIP="-O2" DEB_CXXFLAGS_MAINT_STRIP="-O2"
 dpkg_buildflags_jdk += dpkg-buildflags
 export EXTRA_CPPFLAGS_JDK := $(shell $(dpkg_buildflags_jdk) --get CPPFLAGS)
-export EXTRA_CFLAGS_JDK := $(shell $(dpkg_buildflags_jdk) --get CFLAGS) $(shell $(dpkg_buildflags_jdk) --get CPPFLAGS)
+export EXTRA_CFLAGS_JDK   := $(shell $(dpkg_buildflags_jdk) --get CFLAGS) $(shell $(dpkg_buildflags_jdk) --get CPPFLAGS)
 export EXTRA_CXXFLAGS_JDK := $(shell $(dpkg_buildflags_jdk) --get CXXFLAGS)
-export EXTRA_LDFLAGS_JDK := $(shell $(dpkg_buildflags_jdk) --get LDFLAGS)
-
-#for Icedtea: Makefile.am
-dpkg_buildflags_it += dpkg-buildflags
-export EXTRA_CPPFLAGS_IT := $(shell $(dpkg_buildflags_it) --get CPPFLAGS)
-export EXTRA_CFLAGS_IT := $(shell $(dpkg_buildflags_it) --get CFLAGS)
-export EXTRA_CXXFLAGS_IT := $(shell $(dpkg_buildflags_it) --get CXXFLAGS)
-export EXTRA_LDFLAGS_IT := $(shell $(dpkg_buildflags_it) --get LDFLAGS)
+export EXTRA_LDFLAGS_JDK  := $(shell $(dpkg_buildflags_jdk) --get LDFLAGS)
 
 #for JamVM: Makefile.am
 ifeq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
@@ -231,9 +224,9 @@ dpkg_buildflags_jamvm += DEB_CFLAGS_MAINT_APPEND="-O3" DEB_CXXFLAGS_MAINT_APPEND
 endif
 dpkg_buildflags_jamvm += dpkg-buildflags
 export EXTRA_CPPFLAGS_JAMVM := $(shell $(dpkg_buildflags_jamvm) --get CPPFLAGS)
-export EXTRA_CFLAGS_JAMVM := $(shell $(dpkg_buildflags_jamvm) --get CFLAGS)
+export EXTRA_CFLAGS_JAMVM   := $(shell $(dpkg_buildflags_jamvm) --get CFLAGS)
 export EXTRA_CXXFLAGS_JAMVM := $(shell $(dpkg_buildflags_jamvm) --get CXXFLAGS)
-export EXTRA_LDFLAGS_JAMVM := $(shell $(dpkg_buildflags_jamvm) --get LDFLAGS)
+export EXTRA_LDFLAGS_JAMVM  := $(shell $(dpkg_buildflags_jamvm) --get LDFLAGS)
 
 #for CACAO: Makefile.am
 ifeq (,$(findstring noopt,$(DEB_BUILD_OPTIONS)))
@@ -242,9 +235,9 @@ dpkg_buildflags_cacao += DEB_CFLAGS_MAINT_APPEND="-O3" DEB_CXXFLAGS_MAINT_APPEND
 endif
 dpkg_buildflags_cacao += dpkg-buildflags
 export EXTRA_CPPFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get CPPFLAGS)
-export EXTRA_CFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get CFLAGS)
+export EXTRA_CFLAGS_CACAO   := $(shell $(dpkg_buildflags_cacao) --get CFLAGS)
 export EXTRA_CXXFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get CXXFLAGS)
-export EXTRA_LDFLAGS_CACAO := $(shell $(dpkg_buildflags_cacao) --get LDFLAGS)
+export EXTRA_LDFLAGS_CACAO  := $(shell $(dpkg_buildflags_cacao) --get LDFLAGS)
 
 # This section should be in sync with "bd_gcc" definition
 ifneq (,$(filter $(distrel),wheezy quantal raring))
