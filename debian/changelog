@@ -4,6 +4,7 @@ openjdk-8 (8~b132-1) UNRELEASED; urgency=medium
   * Initial OpenJDK 8 package derived from the OpenJDK 7 package
     (Closes: #742864)
   * Changed to 3.0 (quilt) source format
+  * Switch to debhelper level 9
 
  -- Emmanuel Bourg <ebourg@apache.org>  Fri, 28 Mar 2014 23:24:02 +0100
 

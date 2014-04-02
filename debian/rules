@@ -1227,7 +1227,7 @@ clean: debian-clean unpatch
 debian-clean:
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	for f in debian/templates/*.in debian/patches/*.in; do \
 	  f2=$$(echo $$f | sed 's/\/templates//;s/JB/$(basename)/;s/\.in$$//'); \
 	  case "$$f2" in debian/control) continue; esac; \
@@ -1245,7 +1245,7 @@ endif
 install: packaging-files
 	dh_testdir
 	dh_testroot
-	dh_clean -k
+	dh_prep
 	rm -f debian/*.install debian/*.links
 	dh_installdirs
 

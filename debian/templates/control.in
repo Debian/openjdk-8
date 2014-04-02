@@ -3,7 +3,7 @@ Section: java
 Priority: optional
 Maintainer: OpenJDK Team <openjdk@lists.launchpad.net>
 Uploaders: Matthias Klose <doko@ubuntu.com>, Damien Raude-Morvan <drazzib@debian.org>
-Build-Depends: debhelper (>= 5), quilt, binutils-dev [armel armhf], m4, lsb-release, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, wdiff, @bd_fastjar@ @bd_autotools@ @bd_cacao@ @bd_jamvm@ @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_shark@ @bd_syslibs@ @bd_pulsejava@ @bd_nss@ @bd_systemtap@ @bd_mauve@ @bd_xvfb@
+Build-Depends: debhelper (>= 9), quilt, binutils-dev [armel armhf], m4, lsb-release, zip, unzip, sharutils, gawk, cpio, pkg-config, procps, time, wdiff, @bd_fastjar@ @bd_autotools@ @bd_cacao@ @bd_jamvm@ @bd_gcc@ @bd_bootstrap@ @bd_openjdk@ @bd_zero@ @bd_shark@ @bd_syslibs@ @bd_pulsejava@ @bd_nss@ @bd_systemtap@ @bd_mauve@ @bd_xvfb@
 Standards-Version: 3.9.5
 Vcs-Git: git://anonscm.debian.org/pkg-java/openjdk-8.git
 Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-java/openjdk-8.git
