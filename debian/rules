@@ -84,9 +84,12 @@ sdkimg		= images/j2sdk-image
 COMMA=,
 SPACE = $(EMPTY) $(EMPTY)
 
-# Number of processors for parallel building (set to 1 to make the build log comparable)
-NUM_PROC=`/usr/bin/getconf _NPROCESSORS_ONLN 2> /dev/null || :`
-NUM_PROC=${NUM_PROC:-1}
+# Support parallel=<n> in DEB_BUILD_OPTIONS (see #209008)
+# Set NJOBS to 1 to make the build log comparable
+ifneq (,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
+  NJOBS = $(subst parallel=,,$(filter parallel=%,$(subst $(COMMA), ,$(DEB_BUILD_OPTIONS))))
+endif
+#NJOBS=1
 
 # Extracting debug symbols done by dh_strip
 export ALT_OBJCOPY=fake
@@ -458,7 +461,7 @@ else
   CONFIGURE_ARGS += --disable-docs
 endif
 
-CONFIGURE_ARGS += --with-num-cores=$(NUM_PROC)
+CONFIGURE_ARGS += --with-num-cores=$(NJOBS)
 
 ifeq ($(with_pulse),yes)
   CONFIGURE_ARGS += --enable-pulse-java

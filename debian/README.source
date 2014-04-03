@@ -39,6 +39,7 @@ contain several flags to change how a package is compiled and built.
   * nostrip:     debugging symbols should not be stripped from the
                  binary during installation
   * parallel=X:  package should be built using up to X parallel processes
+                 (capped to the number of cores)
   * nobootstrap: don't use gcj to bootstrap OpenJDK but use existing OpenJDK
                  installed on current machine.
   * noaltcacao:  don't build alternative Cacao VM.
