@@ -7,7 +7,7 @@
    integrated with your Debian GNU/Linux system.
 
 
-2. Selecting OpenJDK 7 as the default Java(TM) implementation
+2. Selecting OpenJDK 8 as the default Java(TM) implementation
 
    Please see README.alternatives for instructions on how
-   to make OpenJDK 7 executables and man pages the default on your system.
+   to make OpenJDK 8 executables and man pages the default on your system.

@@ -1,4 +1,4 @@
-openjdk-7 for Debian/Ubuntu
+openjdk-8 for Debian/Ubuntu
 ---------------------------
 
 The OpenJDK build is configured --with-additional-vms to build with
@@ -23,20 +23,20 @@ compiler); to use the zero build without shark support, use the `-Xint'
 option to operate in interpreted-only mode.
 
 On some architectures (currently armel and powerpc, when built against
-llvm-2.6) which use ther zero vm as the default, the openjdk-7-jre-zero
+llvm-2.6) which use ther zero vm as the default, the openjdk-8-jre-zero
 package contains the shark vm.
 
-To change the default permanently, edit /etc/java-7-openjdk/jvm.cfg.
+To change the default permanently, edit /etc/java-8-openjdk/jvm.cfg.
 
-The CACAO VM can be found in the icedtea-7-jre-cacao package, the Zero/Shark
-VM can be found in the openjdk-7-jre-zero package (on the architectures
+The CACAO VM can be found in the icedtea-8-jre-cacao package, the Zero/Shark
+VM can be found in the openjdk-8-jre-zero package (on the architectures
 where the Hotspot VM is available).
 
 Please look for further documentation in the directory
-/usr/share/doc/openjdk-7-jre/ .
+/usr/share/doc/openjdk-8-jre/ .
 
-The package openjdk-7-jre-headless ships a cgi script
-/usr/lib/jvm/java-7-openjdk/bin/java-rmi.cgi that you must integrate
+The package openjdk-8-jre-headless ships a cgi script
+/usr/lib/jvm/java-8-openjdk/bin/java-rmi.cgi that you must integrate
 into your webserver setup manually if you need it. It is not activated
 automatically.
 

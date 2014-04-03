@@ -1,7 +1,7 @@
 Content of the openjdk-8 source package
 ---------------------------------------
 
-openjdk8 is a composite source package. It consists in:
+openjdk-8 is a composite source package. It consists in:
 
 - Multiple tarballs containing the sources of the different VMs or ports
   supported.
@@ -47,9 +47,9 @@ contain several flags to change how a package is compiled and built.
   * noaltjamvm:  don't build alternative Jamvm VM.
 
 Sample usage:
-DEB_BUILD_OPTIONS="parallel=5 nocheck" debuild -i"(\.hg|\.bzr|\.git)"
+DEB_BUILD_OPTIONS="parallel=5 nocheck" debuild
 
  Build with 5 parallel processes and don't run mauve/jtreg test suites.
 
 This also work with cowbuilder/pbuilder:
-DEB_BUILD_OPTIONS="parallel=5 nocheck" pdebuild -i"(\.hg|\.bzr|\.git)" --logfile ../build.log --pbuilder cowbuilder
+DEB_BUILD_OPTIONS="parallel=5 nocheck" pdebuild --logfile ../build.log --pbuilder cowbuilder
