@@ -1,14 +1,38 @@
 Description: Fixes the path to jtreg on Debian
 Author: Emmanuel Bourg <ebourg@apache.org>
 Forwarded: no
---- a/common/autoconf/generated-configure.sh
-+++ b/common/autoconf/generated-configure.sh
-@@ -16645,7 +16645,7 @@
- 
+--- a/common/autoconf/toolchain.m4
++++ b/common/autoconf/toolchain.m4
+@@ -1117,7 +1117,7 @@
+       BASIC_FIXUP_PATH([JT_HOME])
  
        # jtreg win32 script works for everybody
 -      JTREGEXE="$JT_HOME/win32/bin/jtreg"
 +      JTREGEXE="/usr/bin/jtreg"
  
        if test ! -f "$JTREGEXE"; then
-         as_fn_error $? "JTReg executable does not exist: $JTREGEXE" "$LINENO" 5
+         AC_MSG_ERROR([JTReg executable does not exist: $JTREGEXE])
+--- a/hotspot/test/Makefile
++++ b/hotspot/test/Makefile
+@@ -176,7 +176,7 @@
+ endif
+ 
+ # Default JTREG to run (win32 script works for everybody)
+-JTREG = $(JT_HOME)/win32/bin/jtreg
++JTREG = /usr/bin/jtreg
+ 
+ # Option to tell jtreg to not run tests marked with "ignore"
+ ifeq ($(PLATFORM), windows)
+--- a/langtools/test/Makefile
++++ b/langtools/test/Makefile
+@@ -93,8 +93,8 @@
+ else
+   JTREG_HOME = $(SLASH_JAVA)/re/jtreg/4.1/promoted/latest/binaries/jtreg
+ endif
+-JTREG = $(JTREG_HOME)/$(JT_PLATFORM)/bin/jtreg
+-JTDIFF = $(JTREG_HOME)/$(JT_PLATFORM)/bin/jtdiff
++JTREG = /usr/bin/jtreg
++JTDIFF = /usr/bin/jtdiff
+ 
+ # Default JCK to run
+ ifdef JPRT_JCK_HOME
