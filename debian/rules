@@ -856,13 +856,13 @@ stamps/patch: stamps/unpack
 	done ;
 	
 	# Apply the patches
-	quilt push -a
+	QUILT_PATCHES=debian/patches quilt push -a
 	
 	touch $@
 
 unpatch:
 	# Revert the patches
-	-quilt pop -a
+	-QUILT_PATCHES=debian/patches quilt pop -a
 	
 	rm -f stamps/apply-patches.stamp
 
