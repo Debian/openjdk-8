@@ -1,61 +1,5 @@
---- openjdk/hotspot/src/os/posix/launcher/java_md.c.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/src/os/posix/launcher/java_md.c	2014-01-30 14:32:29.973605678 +0000
-@@ -41,7 +41,7 @@
- #include "version_comp.h"
- #endif
- 
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
- #include <pthread.h>
- #else
- #include <thread.h>
-@@ -96,7 +96,7 @@
-  *      A collection of useful strings. One should think of these as #define
-  *      entries, but actual strings can be more efficient (with many compilers).
-  */
--#ifdef __linux__
-+#if defined(__linux__) || defined(__GLIBC__)
- static const char *system_dir   = "/usr/java";
- static const char *user_dir     = "/java";
- #else /* Solaris */
-@@ -433,7 +433,7 @@
-       runpath = getenv(LD_LIBRARY_PATH);
- #endif /* __sun */
- 
--#if defined(__linux__)
-+#if defined(__linux__) || defined(__GLIBC__)
-       /*
-        * On linux, if a binary is running as sgid or suid, glibc sets
-        * LD_LIBRARY_PATH to the empty string for security purposes.  (In
-@@ -823,7 +823,7 @@
- jboolean
- GetApplicationHome(char *buf, jint bufsize)
- {
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
-     char *execname = GetExecname();
-     if (execname) {
-         strncpy(buf, execname, bufsize-1);
-@@ -992,7 +992,7 @@
-             }
-         }
-     }
--#elif defined(__linux__)
-+#elif defined(__linux__) || defined(__GLIBC__)
-     {
-         const char* self = "/proc/self/exe";
-         char buf[PATH_MAX+1];
-@@ -1887,7 +1887,7 @@
- int
- ContinueInNewThread(int (JNICALL *continuation)(void *), jlong stack_size, void * args) {
-     int rslt;
--#if defined(__linux__) || defined(_ALLBSD_SOURCE)
-+#if defined(__linux__) || defined(_ALLBSD_SOURCE) || defined(__GLIBC__)
-     pthread_t tid;
-     pthread_attr_t attr;
-     pthread_attr_init(&attr);
---- openjdk/hotspot/src/os/posix/vm/os_posix.cpp.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/src/os/posix/vm/os_posix.cpp	2014-01-30 14:32:29.973605678 +0000
+--- a/hotspot/src/os/posix/vm/os_posix.cpp	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/src/os/posix/vm/os_posix.cpp	2014-04-10 11:05:05.000000000 +0200
 @@ -22,6 +22,7 @@
  *
  */
@@ -64,8 +8,8 @@
  #include "prims/jvm.h"
  #include "runtime/frame.inline.hpp"
  #include "runtime/os.hpp"
---- openjdk/hotspot/src/os/linux/vm/decoder_linux.cpp.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/src/os/linux/vm/decoder_linux.cpp	2014-01-30 14:32:29.973605678 +0000
+--- a/hotspot/src/os/linux/vm/decoder_linux.cpp	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/src/os/linux/vm/decoder_linux.cpp	2014-04-10 11:05:05.000000000 +0200
 @@ -22,6 +22,7 @@
   *
   */
@@ -74,8 +18,8 @@
  #include "prims/jvm.h"
  #include "utilities/decoder_elf.hpp"
  
---- openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/src/os/linux/vm/attachListener_linux.cpp	2014-01-30 14:32:29.973605678 +0000
+--- a/hotspot/src/os/linux/vm/attachListener_linux.cpp	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/src/os/linux/vm/attachListener_linux.cpp	2014-04-10 11:05:05.000000000 +0200
 @@ -39,6 +39,10 @@
  #define UNIX_PATH_MAX   sizeof(((struct sockaddr_un *)0)->sun_path)
  #endif
@@ -87,7 +31,7 @@
  // The attach mechanism on Linux uses a UNIX domain socket. An attach listener
  // thread is created at startup or is created on-demand via a signal from
  // the client tool. The attach listener creates a socket and binds it to a file
-@@ -337,9 +341,15 @@
+@@ -337,16 +341,26 @@
  
      // get the credentials of the peer and check the effective uid/guid
      // - check with jeff on this.
@@ -100,10 +44,9 @@
      socklen_t optlen = sizeof(cred_info);
      if (::getsockopt(s, SOL_SOCKET, SO_PEERCRED, (void*)&cred_info, &optlen) == -1) {
 +#endif
-       int res;
-       RESTARTABLE(::close(s), res);
+       ::close(s);
        continue;
-@@ -347,10 +357,14 @@
+     }
      uid_t euid = geteuid();
      gid_t egid = getegid();
  
@@ -111,17 +54,12 @@
 +    if (cred_info.cr_uid != euid || cred_info.cr_gid != egid) {
 +#else
      if (cred_info.uid != euid || cred_info.gid != egid) {
--      int res;
-+#endif
-+      int res;   
-       RESTARTABLE(::close(s), res);
--      continue;
-+      continue;  
++#endif 
+       ::close(s);
+       continue;
      }
- 
-     // peer credential look okay so we read the request
---- openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/src/os/linux/vm/jvm_linux.cpp	2014-01-30 14:32:29.973605678 +0000
+--- a/hotspot/src/os/linux/vm/jvm_linux.cpp	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/src/os/linux/vm/jvm_linux.cpp	2014-04-10 11:05:05.000000000 +0200
 @@ -169,7 +169,9 @@
    "WINCH",      SIGWINCH,       /* Window size change (4.3 BSD, Sun).  */
    "POLL",       SIGPOLL,        /* Pollable event occurred (System V).  */
@@ -132,8 +70,8 @@
  #ifdef SIGSYS
    "SYS",        SIGSYS          /* Bad system call. Only on some Linuxen! */
  #endif
---- openjdk/hotspot/src/os/linux/vm/os_linux.cpp.orig	2014-01-30 14:17:55.127342943 +0000
-+++ openjdk/hotspot/src/os/linux/vm/os_linux.cpp	2014-01-30 14:32:29.977605513 +0000
+--- a/hotspot/src/os/linux/vm/os_linux.cpp	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/src/os/linux/vm/os_linux.cpp	2014-04-10 11:05:05.000000000 +0200
 @@ -22,6 +22,7 @@
   *
   */
@@ -142,7 +80,7 @@
  // no precompiled headers
  #include "classfile/classLoader.hpp"
  #include "classfile/systemDictionary.hpp"
-@@ -110,8 +111,16 @@
+@@ -91,8 +92,16 @@
  # include <semaphore.h>
  # include <fcntl.h>
  # include <string.h>
@@ -159,7 +97,7 @@
  # include <gnu/libc-version.h>
  # include <sys/ipc.h>
  # include <sys/shm.h>
-@@ -211,11 +220,22 @@
+@@ -193,11 +202,22 @@
  }
  
  julong os::Linux::available_memory() {
@@ -182,7 +120,7 @@
  }
  
  julong os::physical_memory() {
-@@ -2274,18 +2294,22 @@
+@@ -2234,18 +2254,22 @@
    st->print("Memory:");
    st->print(" %dk page", os::vm_page_size()>>10);
  
@@ -205,7 +143,7 @@
    st->cr();
  }
  
-@@ -5778,6 +5802,7 @@
+@@ -6009,6 +6033,7 @@
  int os::fork_and_exec(char* cmd) {
    const char * argv[4] = {"sh", "-c", cmd, NULL};
  
@@ -213,17 +151,17 @@
    // fork() in LinuxThreads/NPTL is not async-safe. It needs to run
    // pthread_atfork handlers and reset pthread library. All we need is a
    // separate process to execve. Make a direct syscall to fork process.
-@@ -5786,6 +5811,9 @@
-   pid_t pid = NOT_IA64(NOT_AARCH64(syscall(SYS_fork);))
+@@ -6016,6 +6041,9 @@
+   // the best...
+   pid_t pid = NOT_IA64(syscall(__NR_fork);)
                IA64_ONLY(fork();)
-               AARCH64_ONLY(vfork();)
 +#else
 +  pid_t pid = fork();
 +#endif
  
    if (pid < 0) {
      // fork failed
-@@ -5794,6 +5822,7 @@
+@@ -6024,6 +6052,7 @@
    } else if (pid == 0) {
      // child process
  
@@ -231,9 +169,9 @@
      // execve() in LinuxThreads will call pthread_kill_other_threads_np()
      // first to kill every thread on the thread list. Because this list is
      // not reset by fork() (see notes above), execve() will instead kill
-@@ -5803,6 +5832,9 @@
+@@ -6033,6 +6062,9 @@
      // above.
-     NOT_IA64(syscall(SYS_execve, "/bin/sh", argv, environ);)
+     NOT_IA64(syscall(__NR_execve, "/bin/sh", argv, environ);)
      IA64_ONLY(execve("/bin/sh", (char* const*)argv, environ);)
 +#else
 +    execve("/bin/sh", (char* const*)argv, environ);
@@ -241,27 +179,27 @@
  
      // execve failed
      _exit(-1);
---- openjdk/hotspot/src/os/linux/vm/osThread_linux.cpp.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/src/os/linux/vm/osThread_linux.cpp	2014-01-30 14:32:29.977605513 +0000
+--- a/hotspot/src/os/linux/vm/osThread_linux.cpp	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/src/os/linux/vm/osThread_linux.cpp	2014-04-10 11:05:05.000000000 +0200
 @@ -22,6 +22,7 @@
   *
   */
  
 +#include "utilities/globalDefinitions.hpp"
  // no precompiled headers
- #include "runtime/atomic.hpp"
- #include "runtime/handles.inline.hpp"
---- openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp	2014-01-30 14:32:29.977605513 +0000
+ #include "runtime/mutex.hpp"
+ #include "runtime/osThread.hpp"
+--- a/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/src/os_cpu/linux_x86/vm/os_linux_x86.cpp	2014-04-10 11:05:05.000000000 +0200
 @@ -22,6 +22,7 @@
   *
   */
  
 +#include "utilities/globalDefinitions.hpp"
  // no precompiled headers
- #include "assembler_x86.inline.hpp"
+ #include "asm/macroAssembler.hpp"
  #include "classfile/classLoader.hpp"
-@@ -75,6 +76,7 @@
+@@ -74,6 +75,7 @@
  # include <ucontext.h>
  # include <fpu_control.h>
  
@@ -269,7 +207,7 @@
  #ifdef AMD64
  #define REG_SP REG_RSP
  #define REG_PC REG_RIP
-@@ -88,6 +90,54 @@
+@@ -87,6 +89,54 @@
  #define SPELL_REG_SP "esp"
  #define SPELL_REG_FP "ebp"
  #endif // AMD64
@@ -324,7 +262,7 @@
  
  address os::current_stack_pointer() {
  #ifdef SPARC_WORKS
-@@ -113,15 +163,27 @@
+@@ -116,15 +166,27 @@
  }
  
  address os::Linux::ucontext_get_pc(ucontext_t * uc) {
@@ -352,28 +290,19 @@
  }
  
  // For Forte Analyzer AsyncGetCallTrace profiling support - thread
-@@ -277,12 +339,20 @@
+@@ -276,7 +338,11 @@
      pc = (address) os::Linux::ucontext_get_pc(uc);
  
-     if (pc == (address) Fetch32PFI) {
+     if (StubRoutines::is_safefetch_fault(pc)) {
 +#if defined(__FreeBSD_kernel__)
-+       uc->context_pc = intptr_t(Fetch32Resume) ;
++      uc->context_pc = intptr_t(StubRoutines::continuation_for_safefetch_fault(pc));
 +#else
-        uc->uc_mcontext.gregs[REG_PC] = intptr_t(Fetch32Resume) ;
+       uc->uc_mcontext.gregs[REG_PC] = intptr_t(StubRoutines::continuation_for_safefetch_fault(pc));
 +#endif
-        return 1 ;
+       return 1;
      }
- #ifdef AMD64
-     if (pc == (address) FetchNPFI) {
-+#if defined(__FreeBSD_kernel__)
-+       uc->context_pc = intptr_t (FetchNResume) ;
-+#else
-        uc->uc_mcontext.gregs[REG_PC] = intptr_t (FetchNResume) ;
-+#endif
-        return 1 ;
-     }
- #endif // AMD64
-@@ -433,7 +503,11 @@
+ 
+@@ -436,7 +502,11 @@
    // Furthermore, a false-positive should be harmless.
    if (UnguardOnExecutionViolation > 0 &&
        (sig == SIGSEGV || sig == SIGBUS) &&
@@ -385,7 +314,7 @@
      int page_size = os::vm_page_size();
      address addr = (address) info->si_addr;
      address pc = os::Linux::ucontext_get_pc(uc);
-@@ -503,7 +577,11 @@
+@@ -506,7 +576,11 @@
      // save all thread context in case we need to restore it
      if (thread != NULL) thread->set_saved_exception_pc(pc);
  
@@ -397,7 +326,7 @@
      return true;
    }
  
-@@ -755,6 +833,7 @@
+@@ -758,6 +832,7 @@
  
    ucontext_t *uc = (ucontext_t*)context;
    st->print_cr("Registers:");
@@ -405,7 +334,7 @@
  #ifdef AMD64
    st->print(  "RAX=" INTPTR_FORMAT, uc->uc_mcontext.gregs[REG_RAX]);
    st->print(", RBX=" INTPTR_FORMAT, uc->uc_mcontext.gregs[REG_RBX]);
-@@ -797,6 +876,48 @@
+@@ -800,6 +875,48 @@
    st->print(", EFLAGS=" INTPTR_FORMAT, uc->uc_mcontext.gregs[REG_EFL]);
    st->print(", CR2=" INTPTR_FORMAT, uc->uc_mcontext.cr2);
  #endif // AMD64
@@ -454,7 +383,7 @@
    st->cr();
    st->cr();
  
-@@ -827,6 +948,7 @@
+@@ -830,6 +947,7 @@
  
    // this is only for the "general purpose" registers
  
@@ -462,7 +391,7 @@
  #ifdef AMD64
    st->print("RAX="); print_location(st, uc->uc_mcontext.gregs[REG_RAX]);
    st->print("RBX="); print_location(st, uc->uc_mcontext.gregs[REG_RBX]);
-@@ -854,6 +976,35 @@
+@@ -857,6 +975,35 @@
    st->print("ESI="); print_location(st, uc->uc_mcontext.gregs[REG_ESI]);
    st->print("EDI="); print_location(st, uc->uc_mcontext.gregs[REG_EDI]);
  #endif // AMD64
@@ -498,8 +427,8 @@
  
    st->cr();
  }
---- openjdk/hotspot/src/share/vm/memory/allocation.hpp.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/memory/allocation.hpp	2014-01-30 14:32:29.977605513 +0000
+--- a/hotspot/src/share/vm/memory/allocation.hpp	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/src/share/vm/memory/allocation.hpp	2014-04-10 11:05:05.000000000 +0200
 @@ -25,8 +25,8 @@
  #ifndef SHARE_VM_MEMORY_ALLOCATION_HPP
  #define SHARE_VM_MEMORY_ALLOCATION_HPP
@@ -507,21 +436,21 @@
 -#include "runtime/globals.hpp"
  #include "utilities/globalDefinitions.hpp"
 +#include "runtime/globals.hpp"
+ #include "utilities/macros.hpp"
  #ifdef COMPILER1
  #include "c1/c1_globals.hpp"
- #endif
---- openjdk/hotspot/src/share/vm/ci/ciObject.hpp.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/src/share/vm/ci/ciObject.hpp	2014-01-30 14:32:29.977605513 +0000
+--- a/hotspot/src/share/vm/ci/ciObject.hpp	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/src/share/vm/ci/ciObject.hpp	2014-04-10 11:05:05.000000000 +0200
 @@ -25,6 +25,7 @@
  #ifndef SHARE_VM_CI_CIOBJECT_HPP
  #define SHARE_VM_CI_CIOBJECT_HPP
  
 +#include "utilities/globalDefinitions.hpp"
+ #include "ci/ciBaseObject.hpp"
  #include "ci/ciClassList.hpp"
  #include "memory/allocation.hpp"
- #include "runtime/handles.hpp"
---- openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp.orig	2014-01-30 14:17:55.095342711 +0000
-+++ openjdk/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp	2014-01-30 14:32:29.977605513 +0000
+--- a/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/src/share/vm/interpreter/bytecodeInterpreter.cpp	2014-04-10 11:05:05.000000000 +0200
 @@ -22,6 +22,7 @@
   *
   */
@@ -530,8 +459,8 @@
  // no precompiled headers
  #include "classfile/vmSymbols.hpp"
  #include "gc_interface/collectedHeap.hpp"
---- openjdk/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp.orig	2014-01-30 14:17:55.095342711 +0000
-+++ openjdk/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp	2014-01-30 14:32:29.977605513 +0000
+--- a/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/src/share/vm/utilities/globalDefinitions_gcc.hpp	2014-04-10 11:05:05.000000000 +0200
 @@ -76,7 +76,7 @@
  # include <sys/procfs.h>
  # endif
@@ -541,9 +470,9 @@
  #ifndef __STDC_LIMIT_MACROS
  #define __STDC_LIMIT_MACROS
  #endif // __STDC_LIMIT_MACROS
---- openjdk/hotspot/make/defs.make.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/make/defs.make	2014-01-30 14:32:29.981605347 +0000
-@@ -152,9 +152,6 @@
+--- a/hotspot/make/defs.make	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/make/defs.make	2014-04-10 11:05:05.000000000 +0200
+@@ -167,9 +167,6 @@
  # Windows should have OS predefined
  ifeq ($(OS),)
    OS   := $(shell uname -s)
@@ -553,7 +482,7 @@
    ifeq ($(OS), Darwin)
      OS=bsd
    endif
-@@ -176,6 +173,10 @@
+@@ -191,6 +188,10 @@
    OSNAME=linux
  endif
  
@@ -564,9 +493,9 @@
  # Determinations of default make arguments and platform specific settings
  MAKE_ARGS=
  
---- openjdk/hotspot/make/linux/Makefile.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/make/linux/Makefile	2014-01-30 14:32:29.981605347 +0000
-@@ -234,6 +234,9 @@
+--- a/hotspot/make/linux/Makefile	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/make/linux/Makefile	2014-04-10 11:05:05.000000000 +0200
+@@ -228,6 +228,9 @@
  SUPPORTED_OS_VERSION = 2.4% 2.5% 2.6% 3%
  OS_VERSION := $(shell uname -r)
  EMPTY_IF_NOT_SUPPORTED = $(filter $(SUPPORTED_OS_VERSION),$(OS_VERSION))
@@ -576,20 +505,20 @@
  
  check_os_version:
  ifeq ($(DISABLE_HOTSPOT_OS_VERSION_CHECK)$(EMPTY_IF_NOT_SUPPORTED),)
---- openjdk/hotspot/make/linux/makefiles/defs.make.orig	2014-01-30 14:17:54.935341561 +0000
-+++ openjdk/hotspot/make/linux/makefiles/defs.make	2014-01-30 14:32:29.981605347 +0000
-@@ -91,7 +91,7 @@
+--- a/hotspot/make/linux/makefiles/defs.make	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/make/linux/makefiles/defs.make	2014-04-10 11:05:05.000000000 +0200
+@@ -97,7 +97,7 @@
  endif
  
- # i686
--ifeq ($(ARCH), i686)
+ # i686/i586 ie 32-bit x86
+-ifneq (,$(findstring $(ARCH), i686 i586))
 +ifneq (,$(filter i686 i386, $(ARCH)))
    ARCH_DATA_MODEL  = 32
    PLATFORM         = linux-i586
    VM_PLATFORM      = linux_i486
---- openjdk/hotspot/agent/src/os/linux/ps_core.c.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/agent/src/os/linux/ps_core.c	2014-01-30 14:32:29.981605347 +0000
-@@ -539,11 +539,16 @@
+--- a/hotspot/agent/src/os/linux/ps_core.c	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/agent/src/os/linux/ps_core.c	2014-04-10 11:05:05.000000000 +0200
+@@ -551,11 +551,16 @@
        return false;
  
     // copy regs
@@ -606,7 +535,7 @@
        // print the regset
        print_debug("\teax = 0x%x\n", newthr->regs.eax);
        print_debug("\tebx = 0x%x\n", newthr->regs.ebx);
-@@ -554,9 +559,21 @@
+@@ -566,9 +571,21 @@
        print_debug("\tesi = 0x%x\n", newthr->regs.esi);
        print_debug("\tedi = 0x%x\n", newthr->regs.edi);
        print_debug("\teip = 0x%x\n", newthr->regs.eip);
@@ -628,7 +557,7 @@
        // print the regset
        print_debug("\tr15 = 0x%lx\n", newthr->regs.r15);
        print_debug("\tr14 = 0x%lx\n", newthr->regs.r14);
-@@ -585,6 +602,27 @@
+@@ -597,6 +614,27 @@
        print_debug("\tes = 0x%lx\n", newthr->regs.es);
        print_debug("\tfs = 0x%lx\n", newthr->regs.fs);
        print_debug("\tgs = 0x%lx\n", newthr->regs.gs);
@@ -656,9 +585,9 @@
  #endif
     }
  
---- openjdk/hotspot/agent/src/os/linux/ps_proc.c.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/agent/src/os/linux/ps_proc.c	2014-01-30 14:32:29.981605347 +0000
-@@ -38,6 +38,22 @@
+--- a/hotspot/agent/src/os/linux/ps_proc.c	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/agent/src/os/linux/ps_proc.c	2014-04-10 11:05:05.000000000 +0200
+@@ -40,6 +40,22 @@
  #define __WALL          0x40000000  // Copied from /usr/include/linux/wait.h
  #endif
  
@@ -681,7 +610,7 @@
  // This file has the libproc implementation specific to live process
  // For core files, refer to ps_core.c
  
-@@ -55,7 +67,11 @@
+@@ -57,7 +73,11 @@
  // before calling process_read_data.
  
  static bool process_read_data(struct ps_prochandle* ph, uintptr_t addr, char *buf, size_t size) {
@@ -693,7 +622,7 @@
    size_t i, words;
    uintptr_t end_addr = addr + size;
    uintptr_t aligned_addr = align(addr, sizeof(long));
-@@ -63,36 +79,62 @@
+@@ -65,36 +85,62 @@
    if (aligned_addr != addr) {
      char *ptr = (char *)&rslt;
      errno = 0;
@@ -756,7 +685,7 @@
      if (errno) {
        print_debug("ptrace(PTRACE_PEEKDATA, ..) failed for %d bytes @ %lx\n", size, addr);
        return false;
-@@ -131,7 +173,11 @@
+@@ -133,7 +179,11 @@
  #endif
  
  #ifdef PTRACE_GETREGS_REQ
@@ -768,7 +697,7 @@
     print_debug("ptrace(PTRACE_GETREGS, ...) failed for lwp %d\n", pid);
     return false;
   }
-@@ -203,7 +249,11 @@
+@@ -205,7 +255,11 @@
  
  // attach to a process/thread specified by "pid"
  static bool ptrace_attach(pid_t pid) {
@@ -780,7 +709,7 @@
      print_debug("ptrace(PTRACE_ATTACH, ..) failed for %d\n", pid);
      return false;
    } else {
-@@ -297,7 +347,11 @@
+@@ -299,7 +353,11 @@
  
  // detach a given pid
  static bool ptrace_detach(pid_t pid) {
@@ -792,8 +721,8 @@
      print_debug("ptrace(PTRACE_DETACH, ..) failed for %d\n", pid);
      return false;
    } else {
---- openjdk/hotspot/agent/src/os/linux/libproc.h.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/agent/src/os/linux/libproc.h	2014-01-30 14:32:29.981605347 +0000
+--- a/hotspot/agent/src/os/linux/libproc.h	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/agent/src/os/linux/libproc.h	2014-04-10 11:05:05.000000000 +0200
 @@ -28,6 +28,10 @@
  #include <jni.h>
  #include <unistd.h>
@@ -805,7 +734,7 @@
  #include "proc_service.h"
  
  #if defined(arm) || defined(ppc)
-@@ -117,6 +121,10 @@
+@@ -84,6 +88,10 @@
  #define user_regs_struct  pt_regs
  #endif
  
@@ -816,9 +745,9 @@
  // This C bool type must be int for compatibility with Linux calls and
  // it would be a mistake to equivalence it to C++ bool on many platforms
  
---- openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c.orig	2014-01-28 17:58:08.000000000 +0000
-+++ openjdk/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c	2014-01-30 14:32:29.981605347 +0000
-@@ -317,7 +317,7 @@
+--- a/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c	2014-04-10 11:05:06.000000000 +0200
++++ b/hotspot/agent/src/os/linux/LinuxDebuggerLocal.c	2014-04-10 11:05:05.000000000 +0200
+@@ -364,7 +364,7 @@
  
  #ifdef i386
  #define REG_INDEX(reg) sun_jvm_hotspot_debugger_x86_X86ThreadContext_##reg
@@ -827,7 +756,7 @@
    regs[REG_INDEX(GS)]  = (uintptr_t) gregs.xgs;
    regs[REG_INDEX(FS)]  = (uintptr_t) gregs.xfs;
    regs[REG_INDEX(ES)]  = (uintptr_t) gregs.xes;
-@@ -333,7 +333,23 @@
+@@ -380,12 +380,28 @@
    regs[REG_INDEX(PC)] = (uintptr_t) gregs.eip;
    regs[REG_INDEX(CS)]  = (uintptr_t) gregs.xcs;
    regs[REG_INDEX(SS)]  = (uintptr_t) gregs.xss;
@@ -851,9 +780,6 @@
 +#endif
  #endif /* i386 */
  
- #if ia64
-@@ -345,7 +361,7 @@
- 
  #ifdef amd64
  #define REG_INDEX(reg) sun_jvm_hotspot_debugger_amd64_AMD64ThreadContext_##reg
 -
@@ -861,7 +787,7 @@
    regs[REG_INDEX(R15)] = gregs.r15;
    regs[REG_INDEX(R14)] = gregs.r14;
    regs[REG_INDEX(R13)] = gregs.r13;
-@@ -371,7 +387,27 @@
+@@ -411,7 +427,27 @@
    regs[REG_INDEX(ES)] = gregs.es;
    regs[REG_INDEX(FS)] = gregs.fs;
    regs[REG_INDEX(GS)] = gregs.gs;
