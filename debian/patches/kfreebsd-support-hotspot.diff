@@ -120,6 +120,21 @@
  }
  
  julong os::physical_memory() {
+@@ -235,11 +255,11 @@
+ // i386: 224, ia64: 1105, amd64: 186, sparc 143
+ #ifdef __ia64__
+ #define SYS_gettid 1105
+-#elif __i386__
++#elif defined(__i386__)
+ #define SYS_gettid 224
+-#elif __amd64__
++#elif defined(__amd64__)
+ #define SYS_gettid 186
+-#elif __sparc__
++#elif defined(__sparc__)
+ #define SYS_gettid 143
+ #else
+ #error define gettid for the arch
 @@ -2234,18 +2254,22 @@
    st->print("Memory:");
    st->print(" %dk page", os::vm_page_size()>>10);

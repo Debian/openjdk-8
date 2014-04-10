@@ -412,9 +412,10 @@ endif
 CONFIGURE_ARGS = --with-boot-jdk=$(BOOTJDK_HOME)
 
 # GNU/kFreeBSD don't support epoll syscall so don't try to check of it.
-ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
-  CONFIGURE_ARGS += --disable-compile-against-syscalls
-endif
+# FIXME need to check the flag, configure complains about it
+#ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
+#  CONFIGURE_ARGS += --disable-compile-against-syscalls
+#endif
 
 #CONFIGURE_ARGS += --with-pkgversion="$(PKGVERSION)"
 
@@ -452,13 +453,14 @@ endif
 EXTRA_BUILD_ENV += LIBFFI_LIBS=-lffi_pic
 
 # assume we don't build binary indep packages on these architectures
-ifeq ($(with_docs),yes)
-  ifeq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
-    CONFIGURE_ARGS += --disable-docs
-  endif
-else
-  CONFIGURE_ARGS += --disable-docs
-endif
+# FIXME check is flags, configure compiles about it
+#ifeq ($(with_docs),yes)
+#  ifeq (,$(filter $(DEB_HOST_ARCH), amd64 i386 lpia))
+#    CONFIGURE_ARGS += --disable-docs
+#  endif
+#else
+#  CONFIGURE_ARGS += --disable-docs
+#endif
 
 CONFIGURE_ARGS += --with-num-cores=$(NJOBS)
 
