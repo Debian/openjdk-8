@@ -403,7 +403,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), kfreebsd-amd64 kfreebsd-i386))
         
   ifeq (,$(filter noaltjamvm, $(DEB_BUILD_OPTIONS)))
     ifneq (,$(filter $(DEB_HOST_ARCH), $(jamvm_archs)))
-      DISTRIBUTION_PATCHES += debian/patches/kfreebsd-support-jamvm.diff
+#FIXME      DISTRIBUTION_PATCHES += debian/patches/kfreebsd-support-jamvm.diff
     endif
   endif    
 endif
