@@ -63,6 +63,9 @@ p_lib_arch	= all
 jvmver		= 1.8.0
 shortver	= 8
 buildver	= $(shell echo $(PKGVERSION) | sed -n 's/.*\(b[0-9]\+\).*/\1/p')
+ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
+  buildver      = $(shell ls aarch64-port-jdk8* | sed -n 's/.*\(b[0-9]\+\).*/\1/p')
+endif
 ifneq (,$(DEB_HOST_MULTIARCH))
   jdirname	= java-$(shortver)-$(origin)-$(DEB_HOST_ARCH)
   jdiralias	= java-$(jvmver)-$(origin)-$(DEB_HOST_ARCH)
@@ -832,12 +835,11 @@ unpack: stamps/unpack
 stamps/unpack:
 	mkdir -p stamps;
 
+	echo "Extracting the sources..."
 ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
-	echo "Extracting aarch64-port-jdk8-$(buildver).tar.xz..."
-	tar -xf aarch64-port-jdk8-$(buildver).tar.xz
+	tar -xf aarch64-port-*.tar.xz
 else
-	echo "Extracting jdk8-jdk8-$(buildver).tar.xz..."
-	tar -xf jdk8-jdk8-$(buildver).tar.xz
+	tar -xf jdk8u-*.tar.xz
 endif
 	mv jdk8/* .
 	rm -Rf jdk8
