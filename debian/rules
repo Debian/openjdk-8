@@ -63,8 +63,10 @@ p_lib_arch	= all
 jvmver		= 1.8.0
 shortver	= 8
 buildver	= $(shell echo $(PKGVERSION) | sed -n 's/.*\(b[0-9]\+\).*/\1/p')
+update_version  = $(shell echo $(PKGVERSION) | sed -n 's/.*u\([0-9]\+\).*/\1/p')
 ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
   buildver      = $(shell ls aarch64-port-jdk8* | sed -n 's/.*\(b[0-9]\+\).*/\1/p')
+  update_version= $(shell ls aarch64-port-jdk8* | sed -n 's/.*u\([0-9]\+\).*/\1/p')
 endif
 ifneq (,$(DEB_HOST_MULTIARCH))
   jdirname	= java-$(shortver)-$(origin)-$(DEB_HOST_ARCH)
@@ -423,6 +425,10 @@ CONFIGURE_ARGS = --with-boot-jdk=$(BOOTJDK_HOME)
 #CONFIGURE_ARGS += --with-pkgversion="$(PKGVERSION)"
 
 CONFIGURE_ARGS += --with-build-number=$(buildver)
+
+ifneq (,$(update_version))
+  CONFIGURE_ARGS += --with-update-version=$(update_version)
+endif
 
 # there are problems --with-alt-jar=/usr/bin/fastjar,
 # see http://icedtea.classpath.org/bugzilla/show_bug.cgi?id=217
