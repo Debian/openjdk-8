@@ -1,4 +1,4 @@
-openjdk-8 (8~b132-1) UNRELEASED; urgency=medium
+openjdk-8 (8u5-b13-1) UNRELEASED; urgency=medium
 
   * Team upload
   * Initial OpenJDK 8 package derived from the OpenJDK 7 package
