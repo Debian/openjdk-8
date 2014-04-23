@@ -7,7 +7,7 @@ DIR=openjdk8
 # The aarch64 port isn't kept in sync with the main repo, the last version is hardcoded
 AARCH64_VERSION=8-b132
 
-rm $3
+rm -f $3
 
 debian/generate_source_tarball.sh jdk8u jdk8u jdk$VERSION
 debian/generate_source_tarball.sh aarch64-port jdk8 jdk$AARCH64_VERSION

@@ -1822,6 +1822,6 @@ endif
 binary: binary-arch binary-indep
 
 get-orig-source:
-	./debian/orig-tar.sh
+	uscan --download-current-version --rename
 
 .PHONY: build clean binary-indep binary-arch binary install packaging-files
