@@ -1,12 +1,18 @@
-openjdk-8 (8u5-b13-1) UNRELEASED; urgency=medium
+openjdk-8 (8u5-b13-1) experimental; urgency=medium
 
   * Team upload
   * Initial OpenJDK 8 package derived from the OpenJDK 7 package
     (Closes: #742864)
+  * Use the upstream build system instead of IcedTea
+  * Removed the build dependencies on Rhino and Ant
+  * Added a script to download the upstream tarball
+  * JamVM is no longer recommended on architectures supporting Hotspot
+  * Removed the transitional Cacao and openjdk-<n>-jre-lib packages
   * Changed to 3.0 (quilt) source format
   * Switch to debhelper level 9
+  * Added a watch file
 
- -- Emmanuel Bourg <ebourg@apache.org>  Fri, 28 Mar 2014 23:24:02 +0100
+ -- Emmanuel Bourg <ebourg@apache.org>  Fri, 02 May 2014 12:08:22 +0200
 
 openjdk-7 (7u51-2.4.5-3) UNRELEASED; urgency=medium
 
