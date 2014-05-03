@@ -278,7 +278,6 @@ export OPT_CFLAGS/cppInterpreter_arm.o
 endif
 
 with_pulse = no
-with_bridge = atk
 with_tzdata = yes
 
 on_buildd := $(shell [ -f /CurrentlyBuilding -o "$$LOGNAME" = buildd ] && echo yes)
@@ -325,16 +324,9 @@ DISTRIBUTION_PATCHES += \
 	debian/patches/jdk-freetypeScaler-crash.diff \
 	debian/patches/default-jvm-cfg-$(hotspot_version).diff \
 	debian/patches/nonreparenting-wm.diff \
+	debian/patches/atk-wrapper-security.patch \
 	debian/patches/accessible-toolkit.patch
 #FIXME	debian/patches/fix_extra_flags-$(hotspot_version).diff
-
-ifeq ($(with_bridge),atk)
-    DISTRIBUTION_PATCHES += \
-	debian/patches/atk-wrapper-security.patch
-else ifneq (,$(with_bridge))
-    DISTRIBUTION_PATCHES += \
-	debian/patches/java-access-bridge-security.patch
-endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), s390))
   DISTRIBUTION_PATCHES += \
@@ -684,6 +676,7 @@ control_vars = \
 	'-Vdlopenjre:Recommends=$(dlopen_jre_recommends)' \
 	'-Vpkg:pulseaudio=$(pkg_pulseaudio)' \
 	'-Vxulrunner:Depends=$(xulrunner_depends)' \
+	'-Vdep:bridge=libatk-wrapper-java-jni (>= 0.30.4-0ubuntu2)'
 
 ifneq (,$(DEB_HOST_MULTIARCH))
   control_vars += \
@@ -693,16 +686,6 @@ endif
 ifneq (,$(filter-out $(hotspot_archs), $(jamvm_archs)))
   ifneq (,$(filter $(DEB_HOST_ARCH),$(jamvm_defaults)))
     control_vars += '-Vjredefault:Depends=$(p_jrej) (= $${binary:Version})'
-  endif
-endif
-
-ifeq ($(with_bridge),atk)
-  control_vars += '-Vdep:bridge=libatk-wrapper-java-jni (>= 0.30.4-0ubuntu2)'
-else ifeq ($(with_bridge),yes)
-  ifneq (,$(DEB_HOST_MULTIARCH))
-    control_vars += '-Vdep:bridge=libaccess-bridge-java-jni (>= 1.26.2-6)'
-  else
-    control_vars += '-Vdep:bridge=libaccess-bridge-java'
   endif
 endif
 
@@ -1313,12 +1296,7 @@ endif
 	  mv $(d)/$(basedir)/jre/lib/$$i.template $(d)/$(etcdir)/$$i; \
 	done
 
-ifeq ($(with_bridge),atk)
-	cp -p debian/accessibility-atk.properties \
-		$(d)/$(basedir)/jre/lib/accessibility.properties
-else
-	cp -p debian/accessibility.properties $(d)/$(basedir)/jre/lib/
-endif
+	cp -p debian/accessibility.properties $(d)/$(basedir)/jre/lib/accessibility.properties
 	cp -p debian/swing.properties $(d)/$(basedir)/jre/lib/
 
 ifneq (,$(pkg_certs))
@@ -1608,17 +1586,11 @@ endif
 	  echo usr/share/doc/$(p_jrehl) usr/share/doc/$(p_dbg); \
 	) > $(d_dbg).links
 
-ifeq ($(with_bridge),atk)
 	: # create links for the atk wrapper
 	echo "usr/share/java/java-atk-wrapper.jar $(basedir)/jre/lib/ext/java-atk-wrapper.jar" \
 	    >> $(d_jre).links
 	echo "usr/lib$(multiarch_dir)/jni/libatk-wrapper.so $(basedir)/jre/lib/ext/libatk-wrapper.so" \
 	    >> $(d_jre).links
-else ifeq ($(with_bridge),yes)
-	: # create links for the gnome accessibility bridge
-	echo "usr/share/java/gnome-java-bridge.jar $(basedir)/jre/lib/ext/gnome-java-bridge.jar" \
-	    >> $(d_jre).links
-endif
 
 ifeq ($(with_tzdata),yes)
 	echo usr/share/javazi $(basedir)/jre/lib/zi \
