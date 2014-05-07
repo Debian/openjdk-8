@@ -433,7 +433,8 @@ endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
   CONFIGURE_ARGS += \
-	--with-hotspot-build=aarch64
+	--with-jvm-variants=client \
+	--disable-precompiled-headers
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
