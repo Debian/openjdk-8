@@ -433,7 +433,6 @@ endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
   CONFIGURE_ARGS += \
-	--with-jvm-variants=client \
 	--disable-precompiled-headers
 endif
 
@@ -446,11 +445,16 @@ ifneq (,$(filter $(DEB_HOST_ARCH), $(cacao_archs)))
   endif
 endif
 
-ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
-  CONFIGURE_ARGS += --enable-zero
-  ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
-    CONFIGURE_ARGS += --enable-shark
-  endif
+# Define the JVM variants to build
+ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
+  CONFIGURE_ARGS += --with-jvm-variants=client
+else ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
+  CONFIGURE_ARGS += --with-jvm-variants=zero,zeroshark
+else ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
+  CONFIGURE_ARGS += --with-jvm-variants=zero
+else
+  #FIXME zero doesn't build
+  #CONFIGURE_ARGS += --with-jvm-variants=server,zero
 endif
 
 EXTRA_BUILD_ENV += LIBFFI_LIBS=-lffi_pic
