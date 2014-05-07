@@ -11,6 +11,7 @@ openjdk-8 (8u5-b13-1) experimental; urgency=medium
   * Changed to 3.0 (quilt) source format
   * Switch to debhelper level 9
   * Added a watch file
+  * Added keywords to the .desktop files
 
  -- Emmanuel Bourg <ebourg@apache.org>  Fri, 02 May 2014 12:08:22 +0200
 
