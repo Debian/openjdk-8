@@ -1754,7 +1754,6 @@ endif
 ifneq (,$(filter zero, $(alternate_vms)))
 	$(call install_test_results,zero)
 endif
-	dh_desktop -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)
 # FIXME: desktop and menu files not ready for multiarch. #658321
 ifeq (,$(DEB_HOST_MULTIARCH))
 	dh_installmenu -s $(nodemo) $(nojrec) $(nojrej) $(nojrez)
