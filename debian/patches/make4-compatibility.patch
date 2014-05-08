@@ -24,7 +24,7 @@ Description: Fixes a bug in adjust-mflags.sh that breaks the hotspot build
  
  The fix consists in ignoring the concatenated options if '/' is found.
 Author: Emmanuel Bourg <ebourg@apache.org>
-Forwarded: no
+Bug: https://bugs.openjdk.java.net/browse/JDK-8028407
 --- a/hotspot/make/linux/makefiles/adjust-mflags.sh
 +++ b/hotspot/make/linux/makefiles/adjust-mflags.sh
 @@ -64,7 +64,7 @@
