@@ -449,13 +449,17 @@ endif
 ifneq (,$(filter $(DEB_HOST_ARCH),arm64))
   CONFIGURE_ARGS += --with-jvm-variants=client
 else ifneq (,$(filter $(DEB_HOST_ARCH), $(shark_archs)))
-  CONFIGURE_ARGS += --with-jvm-variants=zero,zeroshark
+  CONFIGURE_ARGS += --with-jvm-variants=zeroshark
 else ifeq (,$(filter $(DEB_HOST_ARCH), $(hotspot_archs)))
   CONFIGURE_ARGS += --with-jvm-variants=zero
 else
-  #FIXME zero doesn't build
+  #FIXME zero doesn't build with other variants
   #CONFIGURE_ARGS += --with-jvm-variants=server,zero
 endif
+
+EXTRA_BUILD_ENV += DEBUG_BINARIES=true \
+                   STRIP_POLICY=no_strip \
+                   POST_STRIP_CMD=""
 
 EXTRA_BUILD_ENV += LIBFFI_LIBS=-lffi_pic
 
