@@ -1745,9 +1745,6 @@ binary-arch: build install
 		debian/JAVA_HOME \
 		debian/README.alternatives \
 		debian/README.Debian
-	for i in AUTHORS NEWS README; do \
-	  cp -p $$i $(d_jrehl)/usr/share/doc/$(p_jrehl)/$$i.IcedTea; \
-	done
 	$(call install_test_results,$(default_vm))
 
 ifneq (,$(filter cacao, $(alternate_vms)))
