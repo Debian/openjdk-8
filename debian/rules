@@ -263,9 +263,9 @@ else ifneq (,$(filter $(distrel),precise))
   export CXX = g++-4.6
   GCJ_SUFFIX = -4.6
 else
-  export CC = gcc-4.8
-  export CXX = g++-4.8
-  GCJ_SUFFIX = -4.8
+  export CC = gcc-4.9
+  export CXX = g++-4.9
+  GCJ_SUFFIX = -4.9
 endif
 
 ifneq (,$(filter $(DEB_HOST_ARCH), armel armhf))
@@ -552,7 +552,7 @@ else ifneq (,$(filter $(distrel), wheezy))
 else ifneq (,$(filter $(distrel), quantal raring))
   bd_gcc = g++-4.7,
 else
-  bd_gcc = g++-4.8,
+  bd_gcc = g++-4.9,
 endif
 bd_syslibs = zlib1g-dev, libattr1-dev, libpng-dev, libjpeg8-dev, libgif-dev,
 bd_openjdk = \
