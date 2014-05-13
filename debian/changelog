@@ -5,6 +5,7 @@ openjdk-8 (8u5-b13-1) experimental; urgency=medium
     (Closes: #742864)
   * Use the upstream build system instead of IcedTea
   * Removed the build dependencies on Rhino and Ant
+  * Removed the suggested dependency on sun-java6-fonts
   * Added a script to download the upstream tarball
   * JamVM is no longer recommended on architectures supporting Hotspot
   * Removed the transitional Cacao and openjdk-<n>-jre-lib packages
