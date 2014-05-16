@@ -752,9 +752,9 @@ debian/control: debian/templates/control.in debian/rules
 	      -e 's/@altzero_archs@/$(altzero_archs)/g' \
 	      -e 's/@lib_arch@/$(p_lib_arch)/g' \
 	    debian/templates/control.in \
-	    $(if $(cacao_archs), debian/control.cacao-jre) \
-	    $(if $(jamvm_archs), debian/control.jamvm-jre) \
-	    $(if $(altzero_archs), debian/control.zero-jre) \
+	    $(if $(cacao_archs),   debian/templates/control.cacao-jre.in) \
+	    $(if $(jamvm_archs),   debian/templates/control.jamvm-jre.in) \
+	    $(if $(altzero_archs), debian/templates/control.zero-jre.in) \
 	    $(if $(DEB_HOST_MULTIARCH),,| grep -v '^Multi-Arch') \
 		> debian/control
 	@if cmp -s debian/control debian/control.old; then \
