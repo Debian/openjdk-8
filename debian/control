@@ -128,17 +128,17 @@ Description: Java runtime based on OpenJDK (debugging symbols)
 # .
 # The VM is started with the option `-jamvm'. See the README.Debian for details.
 
-Package: openjdk-8-jre-zero
-Architecture: amd64 i386 arm64 lpia kfreebsd-amd64 kfreebsd-i386 
-Multi-Arch: same
-Priority: extra
-Pre-Depends: ${dpkg:Depends}
-Depends: openjdk-8-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
-Provides: ${zerovm:Provides}
-Description: Alternative JVM for OpenJDK, using Zero/Shark
- The package provides an alternative runtime using the Zero VM and the 
- Shark Just In Time Compiler (JIT).  Built on architectures in addition
- to the Hotspot VM as a debugging aid for those architectures which don't
- have a Hotspot VM.
- .
- The VM is started with the option `-zero'. See the README.Debian for details.
+#Package: openjdk-8-jre-zero
+#Architecture: amd64 i386 arm64 lpia kfreebsd-amd64 kfreebsd-i386 
+#Multi-Arch: same
+#Priority: extra
+#Pre-Depends: ${dpkg:Depends}
+#Depends: openjdk-8-jre-headless (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+#Provides: ${zerovm:Provides}
+#Description: Alternative JVM for OpenJDK, using Zero/Shark
+# The package provides an alternative runtime using the Zero VM and the 
+# Shark Just In Time Compiler (JIT).  Built on architectures in addition
+# to the Hotspot VM as a debugging aid for those architectures which don't
+# have a Hotspot VM.
+# .
+# The VM is started with the option `-zero'. See the README.Debian for details.
