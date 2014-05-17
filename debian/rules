@@ -1349,7 +1349,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH),$(jamvm_defaults)))
 		>> $(d)/$(etcdir)/jvm.cfg.new
 	mv $(d)/$(etcdir)/jvm.cfg.new $(d)/$(etcdir)/jvm.cfg
 endif
-	printf -- '-avian KNOWN\n' >> $(d)/$(etcdir)/jvm.cfg
+	#printf -- '-avian KNOWN\n' >> $(d)/$(etcdir)/jvm.cfg
 
 	# FIXME
 	#mv $(d)/$(basedir)/jre/lib/fontconfig.Ubuntu.properties.src \
