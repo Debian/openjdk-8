@@ -21,8 +21,7 @@ Description: OpenJDK Development Kit (JDK)
  OpenJDK is a development environment for building applications,
  applets, and components using the Java programming language.
  .
- The packages are built using the IcedTea build support and patches
- from the IcedTea project.
+ The packages are built using the patches from the IcedTea project.
 
 Package: @basename@-jre-headless
 Architecture: @any_archs@
@@ -37,8 +36,7 @@ Description: OpenJDK Java runtime, using ${vm:Name} (headless)
  Minimal Java runtime - needed for executing non GUI Java programs.
  Using ${vm:Name}.
  .
- The packages are built using the IcedTea build support and patches
- from the IcedTea project.
+ The packages are built using the patches from the IcedTea project.
 
 Package: @basename@-jre
 Architecture: @any_archs@
@@ -52,8 +50,7 @@ Description: OpenJDK Java runtime, using ${vm:Name}
  Full Java runtime environment - needed for executing Java GUI and Webstart
  programs. Using ${vm:Name}.
  .
- The packages are built using the IcedTea build support and patches
- from the IcedTea project.
+ The packages are built using the patches from the IcedTea project.
 
 Package: @basename@-demo
 Architecture: @any_archs@
@@ -63,8 +60,7 @@ Depends: @basename@-jre (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends
 Description: Java runtime based on OpenJDK (demos and examples)
  OpenJDK Java runtime
  .
- The packages are built using the IcedTea build support and patches
- from the IcedTea project.
+ The packages are built using the patches from the IcedTea project.
 
 Package: @basename@-source
 Architecture: all
@@ -78,8 +74,7 @@ Description: OpenJDK Development Kit (JDK) source files
  This package contains the Java programming language source files
  (src.zip) for all classes that make up the Java core API.
  .
- The packages are built using the IcedTea build support and patches
- from the IcedTea project.
+ The packages are built using the patches from the IcedTea project.
 
 Package: @basename@-doc
 Section: doc
@@ -94,8 +89,7 @@ Description: OpenJDK Development Kit (JDK) documentation
  .
  This package contains the API documentation.
  .
- The packages are built using the IcedTea build support and patches
- from the IcedTea project.
+ The packages are built using the patches from the IcedTea project.
 
 Package: @basename@-dbg
 Architecture: @any_archs@
@@ -112,5 +106,4 @@ Description: Java runtime based on OpenJDK (debugging symbols)
  .
  This package contains the debugging symbols.
  .
- The packages are built using the IcedTea build support and patches
- from the IcedTea project.
+ The packages are built using the patches from the IcedTea project.
