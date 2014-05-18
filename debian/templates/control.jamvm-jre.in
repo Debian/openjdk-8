@@ -1,5 +1,5 @@
 
-#Package: icedtea-7-jre-jamvm
+#Package: openjdk-8-jre-jamvm
 #Architecture: @jamvm_archs@
 #Multi-Arch: same
 #Priority: extra

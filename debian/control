@@ -115,7 +115,7 @@ Description: Java runtime based on OpenJDK (debugging symbols)
  The packages are built using the IcedTea build support and patches
  from the IcedTea project.
 
-#Package: icedtea-7-jre-jamvm
+#Package: openjdk-7-jre-jamvm
 #Architecture: amd64 armel armhf i386 lpia mips mipsel powerpc kfreebsd-i386 kfreebsd-amd64
 #Multi-Arch: same
 #Priority: extra

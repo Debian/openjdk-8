@@ -654,8 +654,8 @@ endif
 
 p_jre	= $(basename)-jre
 p_jrehl	= $(basename)-jre-headless
-p_jrec	= icedtea-$(shortver)-jre-cacao
-p_jrej	= icedtea-$(shortver)-jre-jamvm
+p_jrec	= $(basename)-$(shortver)-jre-cacao
+p_jrej	= $(basename)-$(shortver)-jre-jamvm
 p_jrez	= $(basename)-jre-zero
 p_lib	= $(p_jrehl)
 p_jdk	= $(basename)-jdk

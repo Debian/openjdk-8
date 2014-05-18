@@ -1,5 +1,5 @@
 
-Package: icedtea-7-jre-cacao
+Package: openjdk-8-jre-cacao
 Architecture: @cacao_archs@
 Multi-Arch: same
 Priority: extra
