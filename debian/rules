@@ -313,6 +313,7 @@ ifneq (,$(filter $(DEB_HOST_ARCH), sparc64))
 endif
 
 DISTRIBUTION_PATCHES += \
+	debian/patches/include-all-srcs.patch \
 	debian/patches/make4-compatibility.patch \
         debian/patches/fix-jtreg-location.patch \
 	debian/patches/system-libjpeg.patch \
