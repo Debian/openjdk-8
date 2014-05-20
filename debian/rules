@@ -262,6 +262,10 @@ else ifneq (,$(filter $(distrel),precise))
   export CC = gcc-4.6
   export CXX = g++-4.6
   GCJ_SUFFIX = -4.6
+else ifneq (,$(filter $(distrel),saucy trusty))
+  export CC = gcc-4.8
+  export CXX = g++-4.8
+  GCJ_SUFFIX = -4.8
 else
   export CC = gcc-4.9
   export CXX = g++-4.9
@@ -552,6 +556,8 @@ else ifneq (,$(filter $(distrel), wheezy))
   bd_gcc = g++-4.7, g++-4.4 [mips mipsel],
 else ifneq (,$(filter $(distrel), quantal raring))
   bd_gcc = g++-4.7,
+else ifneq (,$(filter $(distrel), saucy trusty))
+  bd_gcc = g++-4.8,
 else
   bd_gcc = g++-4.9,
 endif
