@@ -474,13 +474,8 @@ EXTRA_BUILD_ENV += LIBFFI_LIBS=-lffi_pic
 #  CONFIGURE_ARGS += --disable-docs
 #endif
 
-CONFIGURE_ARGS += --with-num-cores=$(NJOBS)
-
-ifeq ($(with_pulse),yes)
-  CONFIGURE_ARGS += --enable-pulse-java
-endif
-
-CONFIGURE_ARGS += --with-zlib=system \
+CONFIGURE_ARGS += --with-num-cores=$(NJOBS) \
+                  --with-zlib=system \
                   --with-libjpeg=system \
                   --with-giflib=system \
                   --with-libpng=system \
