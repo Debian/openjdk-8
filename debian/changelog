@@ -9,6 +9,7 @@ openjdk-8 (8u5-b13-1) experimental; urgency=medium
   * Added a script to download the upstream tarball
   * JamVM is no longer recommended on architectures supporting Hotspot
   * Removed the transitional Cacao and openjdk-<n>-jre-lib packages
+  * Suggest fonts-indic instead of ttf-indic-fonts (See #747694)
   * Changed to 3.0 (quilt) source format
   * Switch to debhelper level 9
   * Added a watch file

@@ -646,11 +646,13 @@ cjk_fonts += fonts-ipafont-gothic, fonts-ipafont-mincho,
 # FIXME: find out why this b-d is needed, the fontconfig compiler fails without it
 bd_openjdk += fonts-ipafont-mincho,
 cjk_fonts += $(if $(with_wgy_zenhai),ttf-wqy-microhei | ttf-wqy-zenhei,ttf-arphic-uming),
-ifneq (,$(filter $(distrel),wheezy sid experimental))
+ifneq (,$(filter $(distrel),wheezy))
   cjk_fonts += ttf-indic-fonts,
-else
+else ifneq (,$(filter $(distrel), precise quantal raring saucy))
   cjk_fonts += ttf-indic-fonts-core, ttf-telugu-fonts, ttf-oriya-fonts,
   cjk_fonts += ttf-kannada-fonts, ttf-bengali-fonts,
+else
+  cjk_fonts += fonts-indic,
 endif
 
 p_jre	= $(basename)-jre
