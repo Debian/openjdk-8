@@ -44,7 +44,7 @@ Multi-Arch: same
 Pre-Depends: ${dpkg:Depends}
 Depends: @basename@-jre-headless (= ${binary:Version}), ${xandsound:Depends}, ${shlibs:Depends}, ${dlopenjre:Depends}, ${misc:Depends}, ${dep:bridge}
 Recommends: ${dlopenjre:Recommends}, @core_fonts@
-Suggests: icedtea-7-plugin, ${pkg:pulseaudio}
+Suggests: icedtea-8-plugin, ${pkg:pulseaudio}
 Provides: java-runtime, java2-runtime, java5-runtime, java6-runtime, java7-runtime, java8-runtime
 Description: OpenJDK Java runtime, using ${vm:Name}
  Full Java runtime environment - needed for executing Java GUI and Webstart

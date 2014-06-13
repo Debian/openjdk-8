@@ -10,6 +10,7 @@ openjdk-8 (8u5-b13-1) experimental; urgency=medium
   * JamVM is no longer recommended on architectures supporting Hotspot
   * Removed the transitional Cacao and openjdk-<n>-jre-lib packages
   * Suggest fonts-indic instead of ttf-indic-fonts (See #747694)
+  * Suggest icedtea-8-plugin instead of icedtea-7-plugin
   * Build using GCC 4.9 where available.
   * Changed to 3.0 (quilt) source format
   * Switch to debhelper level 9
