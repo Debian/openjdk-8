@@ -2,7 +2,7 @@
 
 VERSION=$2
 TAR=../openjdk-8_$VERSION.orig.tar.gz
-DIR=openjdk8
+DIR=openjdk-8
 
 # The aarch64 port isn't kept in sync with the main repo, the last version is hardcoded
 AARCH64_VERSION=8-b132
