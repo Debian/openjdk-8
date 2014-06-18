@@ -26,6 +26,12 @@ Building a new OpenJDK 8 Debian package
 
 3) Extract the upstream tarball in the current directory
 
+4) If you aren't building on Debian unstable or testing, the debian/control file
+   may have to be regenerated to use the right dependencies for your distribution:
+
+    touch debian/templates/control.in
+    ./debian/rules debian/control
+
 
 Support for DEB_BUILD_OPTIONS
 -----------------------------
