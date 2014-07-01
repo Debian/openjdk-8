@@ -1,3 +1,6 @@
+Description: Build against the system installed copy of liblcms2
+Author: Omair Majid <omajid@redhat.com>
+Forwarded: http://mail.openjdk.java.net/pipermail/build-dev/2014-February/011952.html
 --- a/common/autoconf/libraries.m4
 +++ b/common/autoconf/libraries.m4
 @@ -676,6 +676,46 @@

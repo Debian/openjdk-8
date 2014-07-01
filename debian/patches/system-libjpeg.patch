@@ -1,3 +1,6 @@
+Description: Build against the system installed copy of libjpeg
+Author: Omair Majid <omajid@redhat.com>
+Forwarded: http://mail.openjdk.java.net/pipermail/build-dev/2014-May/012631.html
 --- a/common/autoconf/libraries.m4
 +++ b/common/autoconf/libraries.m4
 @@ -601,12 +601,42 @@
