@@ -65,6 +65,9 @@ rm -vr jdk/src/share/native/sun/awt/libpng/*
 echo "Removing the embedded copy of libgif..."
 rm -vr jdk/src/share/native/sun/awt/giflib/*
 
+echo "Removing the embedded copy of zlib..."
+rm -vrf jdk/src/share/native/java/util/zip/zlib-*
+
 echo "Removing the embedded copy of liblcms2..."
 rm -vr jdk/src/share/native/sun/java2d/cmm/lcms/cms*
 rm -vr jdk/src/share/native/sun/java2d/cmm/lcms/lcms2*
