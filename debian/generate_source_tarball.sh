@@ -59,6 +59,16 @@ done
 echo "Removing the embedded copy of libjpeg..."
 find jdk/src/share/native/sun/awt/image/jpeg ! -name imageioJPEG.c ! -name jpegdecoder.c -type f -delete
 
+echo "Removing the embedded copy of libpng..."
+rm -vr jdk/src/share/native/sun/awt/libpng/*
+
+echo "Removing the embedded copy of libgif..."
+rm -vr jdk/src/share/native/sun/awt/giflib/*
+
+echo "Removing the embedded copy of liblcms2..."
+rm -vr jdk/src/share/native/sun/java2d/cmm/lcms/cms*
+rm -vr jdk/src/share/native/sun/java2d/cmm/lcms/lcms2*
+
 popd
 
 echo "Building tarball ${REPO_NAME}-${TAG}.tar.xz..."
