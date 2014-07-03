@@ -725,7 +725,9 @@ pkg_jcommon = java-common (>= 0.28)
 control_vars += '-Vjcommon:Depends=$(pkg_jcommon)'
 
 debian/control: debian/templates/control.in debian/rules
-	@cp -p debian/control debian/control.old
+	@if [ -e debian/control ]; then \
+	  cp -p debian/control debian/control.old; \
+	fi
 	sed \
 	      -e 's/@basename@/$(basename)/g' \
 	      -e 's/@bd_autotools@/$(bd_autotools)/g' \
